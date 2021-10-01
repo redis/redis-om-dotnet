@@ -1,0 +1,2685 @@
+[
+    {
+        "name": "zrem",
+        "arity": -3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "sinter",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "sort_for_script"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "zadd",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "pexpireat",
+        "arity": 3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "llen",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lrem",
+        "arity": 4,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "evalsha_ro",
+        "arity": -3,
+        "flags": [
+            "noscript",
+            "skip_monitor",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "persist",
+        "arity": 2,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "rpop",
+        "arity": -2,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zcount",
+        "arity": 4,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "hgetall",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zinterstore",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom",
+            "movablekeys"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zunionstore",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom",
+            "movablekeys"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "hkeys",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "sort_for_script"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zremrangebyscore",
+        "arity": 4,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "scard",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "asking",
+        "arity": 1,
+        "flags": [
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "echo",
+        "arity": 2,
+        "flags": [
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "bitop",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 2,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "geosearchstore",
+        "arity": -8,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "discard",
+        "arity": 1,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "geohash",
+        "arity": -2,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "script",
+        "arity": -2,
+        "flags": [
+            "noscript",
+            "may_replicate"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "hvals",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "sort_for_script"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xclaim",
+        "arity": -6,
+        "flags": [
+            "write",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "ping",
+        "arity": -1,
+        "flags": [
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "georadius_ro",
+        "arity": -6,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "replconf",
+        "arity": -1,
+        "flags": [
+            "admin",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "psync",
+        "arity": -3,
+        "flags": [
+            "admin",
+            "noscript"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "expiretime",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xack",
+        "arity": -4,
+        "flags": [
+            "write",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "client",
+        "arity": -2,
+        "flags": [
+            "admin",
+            "noscript",
+            "random",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "swapdb",
+        "arity": 3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "pttl",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zscan",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zremrangebylex",
+        "arity": 4,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "setbit",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "hexists",
+        "arity": 3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zlexcount",
+        "arity": 4,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "incr",
+        "arity": 2,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "graph.BULK",
+        "arity": -1,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "del",
+        "arity": -2,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "config",
+        "arity": -2,
+        "flags": [
+            "admin",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "restore-asking",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom",
+            "asking"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "expire",
+        "arity": 3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xgroup",
+        "arity": -2,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 2,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "renamenx",
+        "arity": 3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "hmset",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "select",
+        "arity": 2,
+        "flags": [
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zincrby",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lrange",
+        "arity": 4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "bitpos",
+        "arity": -3,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "hget",
+        "arity": 3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lset",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "graph.CONFIG",
+        "arity": -1,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "pfdebug",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom",
+            "admin"
+        ],
+        "first_key_pos": 2,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "hdel",
+        "arity": -3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "getdel",
+        "arity": 2,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "strlen",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xreadgroup",
+        "arity": -7,
+        "flags": [
+            "write",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "psetex",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "spop",
+        "arity": -2,
+        "flags": [
+            "write",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "geosearch",
+        "arity": -7,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "georadius",
+        "arity": -6,
+        "flags": [
+            "write",
+            "denyoom",
+            "movablekeys"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "save",
+        "arity": 1,
+        "flags": [
+            "admin",
+            "noscript"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "hello",
+        "arity": -1,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "fast",
+            "no_auth"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "mset",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 2
+    },
+    {
+        "name": "zpopmax",
+        "arity": -2,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "bzpopmax",
+        "arity": -3,
+        "flags": [
+            "write",
+            "noscript",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -2,
+        "step_count": 1
+    },
+    {
+        "name": "substr",
+        "arity": 4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zrevrange",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zrangestore",
+        "arity": -5,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "getex",
+        "arity": -2,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "geopos",
+        "arity": -2,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lpushx",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lpop",
+        "arity": -2,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "incrby",
+        "arity": 3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "dbsize",
+        "arity": 1,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zrange",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "multi",
+        "arity": 1,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "set",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "exists",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "flushall",
+        "arity": -1,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "cluster",
+        "arity": -2,
+        "flags": [
+            "admin",
+            "random",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zdiff",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "hlen",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "module",
+        "arity": -2,
+        "flags": [
+            "admin",
+            "noscript"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "hscan",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "bzpopmin",
+        "arity": -3,
+        "flags": [
+            "write",
+            "noscript",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -2,
+        "step_count": 1
+    },
+    {
+        "name": "xlen",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "slaveof",
+        "arity": 3,
+        "flags": [
+            "admin",
+            "noscript",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zscore",
+        "arity": 3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "expireat",
+        "arity": 3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "graph.QUERY",
+        "arity": -1,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "geodist",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "hset",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lolwut",
+        "arity": -1,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "readonly",
+        "arity": 1,
+        "flags": [
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "brpoplpush",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom",
+            "noscript"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "scan",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zinter",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "sort",
+        "arity": -2,
+        "flags": [
+            "write",
+            "denyoom",
+            "movablekeys"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xdel",
+        "arity": -3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lpush",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "move",
+        "arity": 3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "readwrite",
+        "arity": 1,
+        "flags": [
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "pfmerge",
+        "arity": -2,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "blmove",
+        "arity": 6,
+        "flags": [
+            "write",
+            "denyoom",
+            "noscript"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "shutdown",
+        "arity": -1,
+        "flags": [
+            "admin",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zrank",
+        "arity": 3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xadd",
+        "arity": -5,
+        "flags": [
+            "write",
+            "denyoom",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "monitor",
+        "arity": 1,
+        "flags": [
+            "admin",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "append",
+        "arity": 3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "sscan",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "blpop",
+        "arity": -3,
+        "flags": [
+            "write",
+            "noscript"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -2,
+        "step_count": 1
+    },
+    {
+        "name": "exec",
+        "arity": 1,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "skip_slowlog"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "getset",
+        "arity": 3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "linsert",
+        "arity": 5,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zpopmin",
+        "arity": -2,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "srandmember",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "rpushx",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xpending",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "bgsave",
+        "arity": -1,
+        "flags": [
+            "admin",
+            "noscript"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "post",
+        "arity": -1,
+        "flags": [
+            "readonly",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "restore",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "mget",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "unwatch",
+        "arity": 1,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "hstrlen",
+        "arity": 3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "unlink",
+        "arity": -2,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "randomkey",
+        "arity": 1,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "georadiusbymember",
+        "arity": -5,
+        "flags": [
+            "write",
+            "denyoom",
+            "movablekeys"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zremrangebyrank",
+        "arity": 4,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lastsave",
+        "arity": 1,
+        "flags": [
+            "random",
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "bitfield",
+        "arity": -2,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "subscribe",
+        "arity": -2,
+        "flags": [
+            "pubsub",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "rename",
+        "arity": 3,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "xrevrange",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "debug",
+        "arity": -2,
+        "flags": [
+            "admin",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "replicaof",
+        "arity": 3,
+        "flags": [
+            "admin",
+            "noscript",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "hincrbyfloat",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "hincrby",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "pfcount",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "may_replicate"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "punsubscribe",
+        "arity": -1,
+        "flags": [
+            "pubsub",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "sinterstore",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "sadd",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "stralgo",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "geoadd",
+        "arity": -5,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "sismember",
+        "arity": 3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "latency",
+        "arity": -2,
+        "flags": [
+            "admin",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zcard",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "setrange",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "auth",
+        "arity": -2,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "fast",
+            "no_auth"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "graph.PROFILE",
+        "arity": -1,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "bitcount",
+        "arity": -2,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "unsubscribe",
+        "arity": -1,
+        "flags": [
+            "pubsub",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "host:",
+        "arity": -1,
+        "flags": [
+            "readonly",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zunion",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "getrange",
+        "arity": 4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "ltrim",
+        "arity": 4,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "decrby",
+        "arity": 3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "graph.DELETE",
+        "arity": -1,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "smembers",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "sort_for_script"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "acl",
+        "arity": -2,
+        "flags": [
+            "admin",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "object",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 2,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "pfadd",
+        "arity": -2,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "hsetnx",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "publish",
+        "arity": 3,
+        "flags": [
+            "pubsub",
+            "loading",
+            "stale",
+            "fast",
+            "may_replicate"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "msetnx",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 2
+    },
+    {
+        "name": "xinfo",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 2,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "lpos",
+        "arity": -3,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "brpop",
+        "arity": -3,
+        "flags": [
+            "write",
+            "noscript"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -2,
+        "step_count": 1
+    },
+    {
+        "name": "pfselftest",
+        "arity": 1,
+        "flags": [
+            "admin"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "eval",
+        "arity": -3,
+        "flags": [
+            "noscript",
+            "skip_monitor",
+            "may_replicate",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "hmget",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "pubsub",
+        "arity": -2,
+        "flags": [
+            "pubsub",
+            "random",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "info",
+        "arity": -1,
+        "flags": [
+            "random",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "xread",
+        "arity": -4,
+        "flags": [
+            "readonly",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "rpoplpush",
+        "arity": 3,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "copy",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "sdiff",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "sort_for_script"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "command",
+        "arity": -1,
+        "flags": [
+            "random",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "evalsha",
+        "arity": -3,
+        "flags": [
+            "noscript",
+            "skip_monitor",
+            "may_replicate",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zdiffstore",
+        "arity": -4,
+        "flags": [
+            "write",
+            "denyoom",
+            "movablekeys"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xautoclaim",
+        "arity": -6,
+        "flags": [
+            "write",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "sunion",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "sort_for_script"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "zrevrangebylex",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "pexpire",
+        "arity": 3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zrangebyscore",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zrangebylex",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "slowlog",
+        "arity": -2,
+        "flags": [
+            "admin",
+            "random",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "time",
+        "arity": 1,
+        "flags": [
+            "random",
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zrevrangebyscore",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "sdiffstore",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "getbit",
+        "arity": 3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zrevrank",
+        "arity": 3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "hrandfield",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "incrbyfloat",
+        "arity": 3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "graph.RO_QUERY",
+        "arity": -1,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "failover",
+        "arity": -1,
+        "flags": [
+            "admin",
+            "noscript",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "zmscore",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "keys",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "sort_for_script"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "get",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "setnx",
+        "arity": 3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "ttl",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "dump",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "role",
+        "arity": 1,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "xsetid",
+        "arity": 3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "zrandmember",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "decr",
+        "arity": 2,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "type",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "graph.EXPLAIN",
+        "arity": -1,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xtrim",
+        "arity": -4,
+        "flags": [
+            "write",
+            "random"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "setex",
+        "arity": 4,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "lindex",
+        "arity": 3,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "bgrewriteaof",
+        "arity": 1,
+        "flags": [
+            "admin",
+            "noscript"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "graph.LIST",
+        "arity": -1,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "lmove",
+        "arity": 5,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "sync",
+        "arity": 1,
+        "flags": [
+            "admin",
+            "noscript"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "bitfield_ro",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "touch",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "georadiusbymember_ro",
+        "arity": -5,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "pexpiretime",
+        "arity": 2,
+        "flags": [
+            "readonly",
+            "random",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "sunionstore",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "smismember",
+        "arity": -3,
+        "flags": [
+            "readonly",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "eval_ro",
+        "arity": -3,
+        "flags": [
+            "noscript",
+            "skip_monitor",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "migrate",
+        "arity": -6,
+        "flags": [
+            "write",
+            "random",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "psubscribe",
+        "arity": -2,
+        "flags": [
+            "pubsub",
+            "noscript",
+            "loading",
+            "stale"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "flushdb",
+        "arity": -1,
+        "flags": [
+            "write"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "reset",
+        "arity": 1,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "srem",
+        "arity": -3,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "smove",
+        "arity": 4,
+        "flags": [
+            "write",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 2,
+        "step_count": 1
+    },
+    {
+        "name": "graph.SLOWLOG",
+        "arity": -1,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "wait",
+        "arity": 3,
+        "flags": [
+            "noscript"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "watch",
+        "arity": -2,
+        "flags": [
+            "noscript",
+            "loading",
+            "stale",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": -1,
+        "step_count": 1
+    },
+    {
+        "name": "memory",
+        "arity": -2,
+        "flags": [
+            "readonly",
+            "random",
+            "movablekeys"
+        ],
+        "first_key_pos": 0,
+        "last_key_pos": 0,
+        "step_count": 0
+    },
+    {
+        "name": "rpush",
+        "arity": -3,
+        "flags": [
+            "write",
+            "denyoom",
+            "fast"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    },
+    {
+        "name": "xrange",
+        "arity": -4,
+        "flags": [
+            "readonly"
+        ],
+        "first_key_pos": 1,
+        "last_key_pos": 1,
+        "step_count": 1
+    }
+]

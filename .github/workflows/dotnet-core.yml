@@ -1,0 +1,15 @@
+name: .NET Core
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest    
+    steps:
+      - uses: actions/checkout@v2
+      - name: execute
+        run: docker-compose -f ./docker/docker-compose.yaml run dotnet
