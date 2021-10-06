@@ -16,6 +16,7 @@ namespace NRedisPlus.Unit.Tests
             Console.WriteLine($"Current host info: {hostInfo}");
             var standaloneConnecitonString = $"redis://{hostInfo}";
             var provider = new RedisConnectionProvider(standaloneConnecitonString);
+            
             var connection = provider.Connection;
             connection.Execute("SET", "Foo", "Bar");
             var res = connection.Execute("GET", "Foo");

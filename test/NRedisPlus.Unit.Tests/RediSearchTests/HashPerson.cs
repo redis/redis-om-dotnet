@@ -15,10 +15,10 @@ namespace NRedisPlus.Unit.Tests.RediSearchTests
         [Searchable(Sortable = true)]        
         public string Name { get; set; }
 
-        [GeoIndex]
+        [Indexed]
         public GeoLoc? Home { get; set; }
 
-        [GeoIndex]
+        [Indexed]
         public GeoLoc? Work { get; set; }
 
         public Address Address { get; set; }
