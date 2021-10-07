@@ -6,9 +6,8 @@ using System.Text.Json;
 namespace NRedisPlus.RediSearch
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public abstract class SearchFieldAttribute : Attribute
+    public abstract class SearchFieldAttribute : RedisFieldAttribute
     {
-        public string PropertyName { get; private set; } = string.Empty;
         public abstract SearchFieldType SearchFieldType { get; }
         public bool Sortable { get; set; } = false;
         public bool Aggregatable { get; set; } = false;
