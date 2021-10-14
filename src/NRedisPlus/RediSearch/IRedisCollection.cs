@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace NRedisPlus.RediSearch
 {
-    public interface IRedisCollection<T> : IQueryable<T>, IOrderedQueryable<T>
+    public interface IRedisCollection<T> : IOrderedQueryable<T>
     {
         void Save();
-        void Insert(T item);
-        void AddRange(IEnumerable<T> items);
+        ValueTask SaveAsync();
+        string Insert(T item);
+        Task<string> InsertAsync(T item);
+        Task<T> FindByIdAsync(string id);
+        T FindById(string id);
     }
 }

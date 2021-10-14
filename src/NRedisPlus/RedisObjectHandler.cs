@@ -10,6 +10,12 @@ namespace NRedisPlus
 {
     public static class RedisObjectHandler
     {
+        private static JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
+
+        static RedisObjectHandler()
+        {
+            _jsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
+        }
         
         public static T FromHashSet<T>(IDictionary<string, string> hash)
             where T : notnull
@@ -31,7 +37,7 @@ namespace NRedisPlus
                 asJson = SendToJson(hash, typeof(T));
             }
             
-            return JsonSerializer.Deserialize<T>(asJson) ?? throw new Exception("Deserialization fail");
+            return JsonSerializer.Deserialize<T>(asJson, _jsonSerializerOptions) ?? throw new Exception("Deserialization fail");
         }
 
         public static object? FromHashSet(IDictionary<string,string> hash, Type type)
@@ -121,7 +127,7 @@ namespace NRedisPlus
                 var type = property.PropertyType;
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
-                if(type.IsPrimitive || type == typeof(decimal) || type == typeof(string))
+                if(type.IsPrimitive || type == typeof(decimal) || type == typeof(string) || type == typeof(GeoLoc))
                 {
                     var val = property.GetValue(obj);
                     if(val!=null)
