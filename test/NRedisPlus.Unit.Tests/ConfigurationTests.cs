@@ -31,7 +31,7 @@ namespace NRedisPlus.Unit.Tests
         [Fact]
         public void TestBasicConfigurationWithPassword()
         {
-            var options = RedisUriParser.ParseConfigFromUri("redis://password@localhost:6379");
+            var options = RedisUriParser.ParseConfigFromUri("redis://:password@localhost:6379");
 
             var endpoint = (DnsEndPoint)options.EndPoints.First();
             Assert.Equal("localhost", endpoint.Host);
@@ -50,6 +50,19 @@ namespace NRedisPlus.Unit.Tests
             Assert.Equal(6379, endpoint.Port);
             Assert.Equal("password", options.Password);
             Assert.Equal("username", options.User);
+            Assert.False(options.Ssl);
+        }
+        
+        [Fact]
+        public void TestBasicConfigurationWithEncodedUsernameAndPassword()
+        {
+            var options = RedisUriParser.ParseConfigFromUri("redis://foo%23bar:p%40ssword@localhost:6379");
+
+            var endpoint = (DnsEndPoint)options.EndPoints.First();
+            Assert.Equal("localhost", endpoint.Host);
+            Assert.Equal(6379, endpoint.Port);
+            Assert.Equal("p@ssword", options.Password);
+            Assert.Equal("foo#bar", options.User);
             Assert.False(options.Ssl);
         }
         

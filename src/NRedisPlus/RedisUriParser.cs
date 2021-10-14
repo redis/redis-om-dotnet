@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using StackExchange.Redis;
 namespace NRedisPlus
 {
@@ -49,12 +50,13 @@ namespace NRedisPlus
                 var userInfo = uri.UserInfo.Split(':');
                 if (userInfo.Length > 1)
                 {
-                    options.User = userInfo[0];
-                    options.Password = userInfo[1];
+                    options.User = Uri.UnescapeDataString(userInfo[0]);
+                    options.Password = Uri.UnescapeDataString(userInfo[1]);
                 }
                 else
                 {
-                    options.Password = userInfo[0];
+                    throw new FormatException(
+                        "Username and password must be in the form username:password - if there is no username use the format :password");
                 }
             }
         }

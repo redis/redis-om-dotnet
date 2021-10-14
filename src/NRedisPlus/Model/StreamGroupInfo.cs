@@ -10,13 +10,13 @@ namespace NRedisPlus
 {
     public class StreamGroupInfo
     {
-        [RedisField("name")]
+        [RedisField(PropertyName = "name")]
         public string Name { get; set; }
-        [RedisField("consumers")]
+        [RedisField(PropertyName = "consumers")]
         public int Consumers { get; set; }
-        [RedisField("pending")]
+        [RedisField(PropertyName = "pending")]
         public int Pending { get; set; }
-        [RedisField("last-delivered-id")]
+        [RedisField(PropertyName = "last-delivered-id")]
         [JsonPropertyName("last-delivered-id")]
         public string LastDeliveredId { get; set; }
 
