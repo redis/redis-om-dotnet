@@ -65,9 +65,9 @@ namespace NRedisPlus.RediSearch
             }
             else
             {
-                if (!searchField.Aggregatable && !searchField.Sortable && ! isSearch)
-                    throw new ArgumentException(
-                        "Indexed field must be explicitly marked as aggregateable in order to perform aggregaitons on it");
+                // if (!searchField.Aggregatable && !searchField.Sortable && ! isSearch)
+                //     throw new ArgumentException(
+                //         "Indexed field must be explicitly marked as aggregateable in order to perform aggregaitons on it");
                 var propertyName = string.IsNullOrEmpty(searchField.PropertyName) ? member.Member.Name : searchField.PropertyName;
                 return $"@{propertyName}";
             }
@@ -375,7 +375,7 @@ namespace NRedisPlus.RediSearch
 
         internal static RedisGeoFilter TranslateGeoFilter(MethodCallExpression exp)
         {            
-            var memberOperand = GetOperandString(exp.Arguments[1]);
+            var memberOperand = GetOperandString(exp.Arguments[1]).Substring(1);
             var longitude = (double)((ConstantExpression)exp.Arguments[2]).Value;
             var latitude = (double)((ConstantExpression)exp.Arguments[3]).Value;
             var radius = (double)((ConstantExpression)exp.Arguments[4]).Value;

@@ -181,43 +181,39 @@ We use the `Document` Attribute to decorate a whole class and define the top-lev
 |StorageType|Defines the underlying data structure used to store the object in Redis, options are `HASH` and `JSON`, Note JSON is only useable with the [RedisJson module](https://oss.redis.com/redisjson/)|HASH|true|
 |IndexName|The name of the index |`$"{ClassName.ToLower()}-idx}`|true|
 |Prefixes|The key prefixes for redis to build an index off of |`new string[]{$"{ClassName}:"}`|true|
-|UserDeclaredId|Whether or not the developer will declare their Ids for the items Redis Stores. If false, the user will be responsible for furnishing the ID to the client before sending them onto redis. Otherwise, the client will create an ID for the field decorated with the `RedisIdField` attribute, and the client will generate the key names as `ClassName:base64(UUID4)`|false|true|
+|IdGenerationStrategy|The strategy used to generate Ids for documents, if left blank it will use a [ULID](https://github.com/ulid/spec) generation strategy|UlidGenerationStrategy|true|
 |Language| Language to use for full-text search indexing|`null`|true|
 |LanguageField|The name of the field in which the document stores its Language|null|true|
 |Filter|The filter to use to determine whether a particular item is indexed, e.g. `@Age>=18` |null|true|
 
 #### Property Attributes
 
-In addition to the top-level `Document` attribute used to define the index, there are Property Level attributes used to determine how to structure the schema for the properties of your class. These types correspond to the four types of field indices from RediSearch, `Tag`, `Numeric` ,`Text`, `Geo`.
-
 ##### RedisIdField
 
-This Attribute tells the client which field to use as the Id for the record inserted. For example, if the `Document` attribute's `UserDeclaredId` is false, the default, the client populates this field during insertion.
+Every class indexed by Redis must contain an Id Field marked with the `RedisIdField` - where the Id is stored.
 
-##### Tag
+##### Indexed Fields
 
-* `TagIndex` - Appropriate for exact text matches on strings, e.g. `collection.Where(x=>x.Email == "foo@bar.com");`
+In addition to declaring an Id Field, you can also declare indexed fields, which will let you search for values within those fields afterward. There are two types of Field level attributes.
 
-|PropertyName|type|Description|Default|Optional|
-|------------|----|-----------|-------|--------|
-|PropertyName|`string`|The name of the property to be indexed|The name of the property being indexed|true|
-|Sortable|`bool`|Whether to index the item so it can be sorted on in queries, enables use of `OrderBy` & `OrderByDescending` -> `collection.OrderBy(x=>x.Email)`|`false`|true|
-|Normalize|`bool`|Determines whether the text in a field is normalized (sent to lower case) for purposes of sorting|`true`|true|
-|Separator|`char`|Character to use for separating tag field, allows the application of multiple tags fo the same item e.g. `article.Category = technology,parenting` is delineated by a `,`—which is the default—meaning that `collection.Where(x=>x.Category == "technology")` and `collection.Where(x=>x.Category == "parenting")` will both match the record|`,`|true|
-|CaseSensitive|`bool`|Determines whether case is considered when performing matches on tags|`false`|true|
+1. Indexed - This type of index is valid for fields that are of the type `string`, a Numeric type (double/int/float etc. . .), or can be decorated for fields that are of the type `GeoLoc`, the exact way that the indexed field is interpreted depends on the indexed type
+2. Searchable - This type is only valid for `string` fields, but this enables full-text search on the decorated fields.
 
-##### Numeric
+###### IndexedAttribute Properties
 
-* `NumericIndex` - Appropriate for indexing numeric fields, this sort of index supports exact numeric matches and range matches; they can be declared sortable.
+There are properties inside the `IndexedAttribute` that let you further customize how things are stored & queried.
 
 |PropertyName|type|Description|Default|Optional|
 |------------|----|-----------|-------|--------|
 |PropertyName|`string`|The name of the property to be indexed|The name of the property being indexed|true|
 |Sortable|`bool`|Whether to index the item so it can be sorted on in queries, enables use of `OrderBy` & `OrderByDescending` -> `collection.OrderBy(x=>x.Email)`|`false`|true|
+|Normalize|`bool`|Only applicable for `string` type fields Determines whether the text in a field is normalized (sent to lower case) for purposes of sorting|`true`|true|
+|Separator|`char`|Only applicable for `string` type fields Character to use for separating tag field, allows the application of multiple tags fo the same item e.g. `article.Category = technology,parenting` is delineated by a `,` means that `collection.Where(x=>x.Category == "technology")` and `collection.Where(x=>x.Category == "parenting")` will both match the record|`|`|true|
+|CaseSensitive|`bool`|Only applicable for `string` type fields - Determines whether case is considered when performing matches on tags|`false`|true|
 
-##### Text
+###### SearchableAttribute Properties
 
-* `TextIndex` - Appropriate for Full-Text search of strings, For Text indices, equality expressions indicate a match on the text field.
+There are properties for the `SearchableAttribute` that let you further customize how the full-text search determines matches
 
 |PropertyName|type|Description|Default|Optional|
 |------------|----|-----------|-------|--------|
@@ -227,55 +223,41 @@ This Attribute tells the client which field to use as the Id for the record inse
 |PhoneticMatcher|`string`|The phonetic matcher to use if you'd like the index to use (PhoneticMatching)[https://oss.redis.com/redisearch/Phonetic_Matching/] with the index|null|true|
 |Weight|`double`|determines the importance of the field for checking result accuracy|1.0|true|
 
-##### Geo
-
-* `GeoIndex` - Appropriate for indexing geo coordinates. Only useable with `GeoLoc` object
-
-|PropertyName|type|Description|Default|Optional|
-|------------|----|-----------|-------|--------|
-|PropertyName|`string`|The name of the property to be indexed|The name of the indexed property|true|
-
 #### Example Class
 
 ```csharp
-[Document(StorageType = StorageType.JSON, IndexName = "person-idx")]
+[Document]
 public partial class Person
 {
     [RedisIdField]
-    public string Id { get; set; }
+    public string Id { get; set; }    
 
-    [TextIndex(Sortable = true)]
+    [Searchable(Sortable = true)]        
     public string Name { get; set; }
-    
-    [GeoIndex]
+
+    [Indexed(Aggregatable = true)]
     public GeoLoc? Home { get; set; }
 
-    [GeoIndex]
+    [Indexed(Aggregatable = true)]
     public GeoLoc? Work { get; set; }
 
-    [NumericIndex(Sortable = true)]
-    public int Age { get; set; }
+    [Indexed(Sortable = true)]
+    public int? Age { get; set; }
 
-    [NumericIndex(Sortable = true)]
-    public double Height { get; set; }
+    [Indexed(Sortable = true)]
+    public int? DepartmentNumber { get; set; }
 
-    [TagIndex]        
-    public string TagField { get; set; }
+    [Indexed(Sortable = true)]
+    public double? Sales { get; set; }
 
-    [NumericIndex(Sortable = true)]
-    public int DepartmentNumber { get; set; }
+    [Indexed(Sortable = true)]
+    public double? SalesAdjustment { get; set; }
 
-    [NumericIndex(Sortable = true)]
-    public double Sales { get; set; }
-
-    [NumericIndex(Sortable = true)]
-    public double SalesAdjustment { get; set; }
-
-    [NumericIndex]
-    public long LastTimeOnline { get; set; }
-
-    [TextIndex]        
-    public string TimeString { get; set; }
+    [Indexed(Sortable = true)]
+    public long? LastTimeOnline { get; set; }
+    
+    [Indexed(Aggregatable = true)]
+    public string Email { get; set; }
 }
 ```
 

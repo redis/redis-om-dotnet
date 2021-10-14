@@ -71,7 +71,6 @@ namespace NRedisPlus.RediSearch
         public void Save()
         {
             var diff = StateManager.DetectDifferences();
-            var numOp = 0;
             foreach (var item in diff)
             {
                 if (item.Value.Any())
@@ -83,16 +82,13 @@ namespace NRedisPlus.RediSearch
                         args.AddRange(update.SerializeScriptArgs());
                     }
                     _connection.CreateAndEval(scriptName, new []{item.Key}, args.ToArray());
-                    numOp += 1;
                 }
             }
         }
         
         public async ValueTask SaveAsync()
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
             var diff = StateManager.DetectDifferences();
-            var timeToGenerateDiff = watch.ElapsedMilliseconds;
             Console.WriteLine(diff);
             var tasks = new List<Task<int?>>();
             foreach (var item in diff)
@@ -112,38 +108,21 @@ namespace NRedisPlus.RediSearch
                     tasks.Add(_connection.CreateAndEvalAsync(scriptName, new []{item.Key}, args.ToArray()));
                 }
             }
-
             await Task.WhenAll(tasks);
-            watch.Stop();
-            var elapsed = watch.ElapsedMilliseconds;
         }
 
-        public void Insert(T item)
+        public string Insert(T item)
         {
-            ((RedisQueryProvider)Provider).Connection.Set(item);
+            return ((RedisQueryProvider)Provider).Connection.Set(item);
+        }
+        
+        public async Task<string> InsertAsync(T item)
+        {
+            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item);
         }
 
-        public void AddRange(IEnumerable<T> items)
-        {
-            var dict = new Dictionary<string, IDictionary<string, string>>();
-            foreach (var item in items)
-            {
-                if (item == null) throw new ArgumentNullException("All items must not be null");
-                var id = item.SetId();
-                dict.Add(id, item.BuildHashSet());
-            }
-            ((RedisQueryProvider)Provider).Update(dict);
-        }
-
-        public R? FindById<R>(string id) where R : notnull, new()
-        {
-            var attr = typeof(R).GetCustomAttribute<DocumentAttribute>();
-            if (attr == null)
-                throw new ArgumentException("Can only look up object decorated with a DocumentAttribute");
-            if (_connection == null)
-                throw new ArgumentNullException("Connection to redis cannot be null");
-            return _connection.Get<R>(id);
-        }
+        public T? FindById(string id) => _connection.Get<T>(id);
+        public async Task<T?> FindByIdAsync(string id) => await _connection.GetAsync<T>(id);
 
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {

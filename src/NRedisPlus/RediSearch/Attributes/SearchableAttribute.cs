@@ -5,7 +5,7 @@ using System.Text;
 namespace NRedisPlus.RediSearch.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class SearchableAttribute : SearchFieldAttribute
+    public sealed class SearchableAttribute : SearchFieldAttribute
     {
         public override SearchFieldType SearchFieldType => SearchFieldType.TEXT;
         public bool NoStem { get; set; } = false;

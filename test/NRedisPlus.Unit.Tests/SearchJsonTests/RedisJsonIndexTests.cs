@@ -39,7 +39,7 @@ namespace NRedisPlus.Unit.Tests.SearchJsonTests
         {
             var expected = new[] { "person-idx",
                 "ON", "JSON", "PREFIX", "1", "NRedisPlus.Unit.Tests.SearchJsonTests.RedisJsonIndexTests+Person:", "SCHEMA",
-                "$.Name", "AS", "Name", "TEXT", "SORTABLE", "$.Tag", "AS","Tag","TAG","$.Age", "AS", "Age", 
+                "$.Name", "AS", "Name", "TEXT", "SORTABLE", "$.Tag", "AS","Tag","TAG", "SEPARATOR", "|","$.Age", "AS", "Age", 
                 "NUMERIC","SORTABLE", "$.Height", "AS", "Height", "NUMERIC", "SORTABLE" };
             var indexArr = typeof(Person).SerializeIndex();
 

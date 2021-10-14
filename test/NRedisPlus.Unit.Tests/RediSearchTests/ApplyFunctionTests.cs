@@ -1081,17 +1081,5 @@ namespace NRedisPlus.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
-
-        [Fact]
-        
-        public void TestUnaggrabatleField()
-        {
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
-            Assert.Throws<ArgumentException>(() =>
-            {
-                collection.Apply(
-                    x => x.RecordShell.UnaggrateableField.Contains("blah"), "fail").ToArray();
-            });
-        }
     }
 }

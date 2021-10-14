@@ -601,21 +601,42 @@ namespace NRedisPlus
             }
             return ret;
         }
+        
+        public static async Task<IDictionary<string,string>> HGetAllAsync(this IRedisConnection connection, string id)
+        {
+            var ret = new Dictionary<string, string>();
+            var res = (await connection.ExecuteAsync("HGETALL", id)).ToArray();            
+            for(var i = 0; i<res.Length; i+=2)
+            {
+                ret.Add(res[i], res[i + 1]);
+            }
+            return ret;
+        }
 
         public static T? Get<T>(this IRedisConnection connection, string id)
-            where T : notnull, new()
-        {                        
-            var obj = new T();
+            where T : notnull
+        {   
             var type = typeof(T);
             var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
             if(attr == null || attr.StorageType == StorageType.HASH)
             {
                 var dict = connection.HGetAll(id);
-                if (obj is IRedisHydrateable hydratable)
-                {
-                    hydratable.Hydrate(dict);
-                    return (T)hydratable;
-                }
+                return (T?)RedisObjectHandler.FromHashSet<T>(dict);
+            }
+            else
+            {
+                return connection.JsonGet<T>(id, ".");
+            }            
+        }
+        
+        public static async ValueTask<T?> GetAsync<T>(this IRedisConnection connection, string id)
+            where T : notnull
+        {   
+            var type = typeof(T);
+            var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
+            if(attr == null || attr.StorageType == StorageType.HASH)
+            {
+                var dict = await connection.HGetAllAsync(id);
                 return (T?)RedisObjectHandler.FromHashSet<T>(dict);
             }
             else

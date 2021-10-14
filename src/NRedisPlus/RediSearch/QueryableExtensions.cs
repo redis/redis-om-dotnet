@@ -86,13 +86,33 @@ namespace NRedisPlus.RediSearch
             return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager);
         }
 
-        public static RedisCollection<T> Select<T>(this RedisCollection<T> source, Expression<Func<T, bool>> expression) where T : notnull
+        public static RedisCollection<R> Select<T,R>(this RedisCollection<T> source, Expression<Func<T, R>> expression) where T : notnull
         {
             var exp = Expression.Call(
                    null,
                    GetMethodInfo(Select, source, expression),
                    new Expression[] { source.Expression, Expression.Quote(expression) }
                    );
+            return new RedisCollection<R>((RedisQueryProvider)source.Provider, exp, source.StateManager);
+        }
+        
+        public static RedisCollection<T> Skip<T>(this RedisCollection<T> source, int count) where T : notnull
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(Skip, source, count),
+                new Expression[] { source.Expression, Expression.Constant(count) }
+            );
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager);
+        }
+        
+        public static RedisCollection<T> Take<T>(this RedisCollection<T> source, int count) where T : notnull
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(Take, source, count),
+                new Expression[] { source.Expression, Expression.Constant(count) }
+            );
             return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager);
         }
 
