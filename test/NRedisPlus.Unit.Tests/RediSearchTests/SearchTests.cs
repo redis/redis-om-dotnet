@@ -3,6 +3,7 @@ using Moq.Language.Flow;
 using NRedisPlus.RediSearch;
 using System;
 using System.Linq;
+using NRedisPlus.Contracts;
 using Xunit;
 
 namespace NRedisPlus.Unit.Tests.RediSearchTests

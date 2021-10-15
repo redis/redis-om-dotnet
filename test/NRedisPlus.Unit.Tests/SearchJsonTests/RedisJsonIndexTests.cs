@@ -27,7 +27,7 @@ namespace NRedisPlus.Unit.Tests.SearchJsonTests
         private void Setup() 
         {
             var host = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
-            var conf = new RedisConnectionConnfiguration();
+            var conf = new RedisConnectionConfiguration();
             conf.Host = host;
             var connection = conf.Connect();
             connection.DropIndexAndAssociatedRecords(typeof(Person));

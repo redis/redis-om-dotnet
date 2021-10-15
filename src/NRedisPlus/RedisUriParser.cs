@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using StackExchange.Redis;
+
+[assembly: InternalsVisibleTo("NRedisPlus.Unit.Tests")]
 namespace NRedisPlus
 {
-    public static class RedisUriParser
+    internal static class RedisUriParser
     {
-        public static ConfigurationOptions ParseConfigFromUri(string url)
+        internal static ConfigurationOptions ParseConfigFromUri(string url)
         {
             var options = new ConfigurationOptions();
 

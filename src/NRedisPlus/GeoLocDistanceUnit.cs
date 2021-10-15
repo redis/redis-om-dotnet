@@ -1,14 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NRedisPlus
+﻿namespace NRedisPlus
 {
+    /// <summary>
+    /// A distance unit.
+    /// </summary>
     public enum GeoLocDistanceUnit
     {
-        Meters,
-        Kilometers,
-        Miles,
-        Feet
+        /// <summary>
+        /// meters.
+        /// </summary>
+        Meters = 0,
+
+        /// <summary>
+        /// kilometers.
+        /// </summary>
+        Kilometers = 1,
+
+        /// <summary>
+        /// miles.
+        /// </summary>
+        Miles = 2,
+
+        /// <summary>
+        /// feet.
+        /// </summary>
+        Feet = 3,
     }
 }

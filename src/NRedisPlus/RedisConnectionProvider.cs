@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NRedisPlus;
+using NRedisPlus.Contracts;
 using NRedisPlus.RediSearch;
 
 namespace NRedisPlus
@@ -17,7 +18,7 @@ namespace NRedisPlus
             _Mux = ConnectionMultiplexer.Connect(options);
         }
 
-        public RedisConnectionProvider(RedisConnectionConnfiguration connnection)
+        public RedisConnectionProvider(RedisConnectionConfiguration connnection)
         {
             _Mux = ConnectionMultiplexer.Connect(connnection.ToStackExchangeConnectionString());
         }

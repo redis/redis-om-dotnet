@@ -126,30 +126,6 @@ namespace NRedisPlus
         public static implicit operator string[](RedisReply v)=>v?.ToArray().Select(s=>(string)s).ToArray() ?? new string[0];
         public static implicit operator double[](RedisReply v)=>v?.ToArray().Select(d=>(double)d).ToArray() ?? new double[0];
 
-        public static implicit operator SortedSetEntry(RedisReply v)
-        {
-            var arr = v.ToArray();
-            return new SortedSetEntry
-            {
-                Member = arr[0],
-                Score = (double)arr[1]
-            };
-        }
-        public static implicit operator SortedSetEntry[](RedisReply v)
-        {
-            var arr = v.ToArray();
-            var response = new List<SortedSetEntry>();
-            for (var i = 0; i < arr.Length; i += 2)
-            {
-                response.Add(new SortedSetEntry
-                {
-                    Member = arr[i],
-                    Score = double.Parse(arr[i+1])
-                });
-            }
-            return response.ToArray();
-        }
-
         public override string ToString()
         {
             if (_internalDouble != null)

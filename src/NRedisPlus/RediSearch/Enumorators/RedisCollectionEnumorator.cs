@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Linq;
+using NRedisPlus.Contracts;
 
 namespace NRedisPlus.RediSearch.Enumorators
 {

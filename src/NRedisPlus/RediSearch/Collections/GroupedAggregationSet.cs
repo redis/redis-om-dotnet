@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using NRedisPlus.Contracts;
 
 namespace NRedisPlus.RediSearch
 {

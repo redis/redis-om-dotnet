@@ -27,6 +27,9 @@ namespace NRedisPlus.Test.ConsoleApp
             
             [Indexed(Aggregatable = true)]
             public string Department { get; set; }
+
+            [Indexed(Aggregatable = true)] public GeoLoc HomeLoc { get; set; }
+            [Indexed(Aggregatable = true)] public GeoLoc OfficeLoc { get; set; }
         }
         
         static async Task Main(string[] args)
@@ -35,6 +38,21 @@ namespace NRedisPlus.Test.ConsoleApp
 
             var connection = provider.Connection;
             var employeeAggregations = provider.AggregationSet<Employee>();
+
+            var averageAge = employeeAggregations.Average(x => x.RecordShell.Age);
+            var distanceFromOffice = employeeAggregations.Apply(
+                x => ApplyFunctions.GeoDistance(x.RecordShell.HomeLoc, x.RecordShell.OfficeLoc), "DistanceFromOffice");
+            foreach (var item in distanceFromOffice)
+            {
+                Console.WriteLine(item["DistanceFromOffice"].ToString());
+            }
+            
+            
+            
+            
+            
+            
+            
             var employees = provider.RedisCollection<Employee>();
             try
             {

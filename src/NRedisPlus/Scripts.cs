@@ -2,9 +2,9 @@
 
 namespace NRedisPlus
 {
-    public class Scripts
+    internal class Scripts
     {
-        public const string JSON_DIFF_RESOLUTION = @"local key = KEYS[1]
+        internal const string JSON_DIFF_RESOLUTION = @"local key = KEYS[1]
 local num_args = table.getn(ARGV)
 for i=1, num_args, 3 do
     if 'ARRREM' == ARGV[i] then
@@ -22,7 +22,7 @@ for i=1, num_args, 3 do
 end
 ";
 
-        public const string HASH_DIFF_RESOLUTION = @"
+        internal const string HASH_DIFF_RESOLUTION = @"
 local key = KEYS[1]
 local num_args = table.getn(ARGV)
 local num_fields_to_set = ARGV[1]
@@ -45,17 +45,17 @@ if end_index < num_args then
 end
 ";
 
-        public const string UNLINK = @"
+        internal const string UNLINK = @"
 return redis.call('UNLINK',KEYS[1])";
             
 
-        public static readonly Dictionary<string, string> ScriptCollection = new Dictionary<string, string>
+        internal static readonly Dictionary<string, string> ScriptCollection = new Dictionary<string, string>
         {
             {nameof(JSON_DIFF_RESOLUTION), JSON_DIFF_RESOLUTION},
             {nameof(HASH_DIFF_RESOLUTION), HASH_DIFF_RESOLUTION},
             {nameof(UNLINK), UNLINK}
         };
 
-        public static Dictionary<string, string> ShaCollection { get; set; } = new Dictionary<string, string>();
+        internal static Dictionary<string, string> ShaCollection { get; set; } = new Dictionary<string, string>();
     }
 }

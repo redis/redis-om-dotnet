@@ -2,6 +2,8 @@
 using NRedisPlus.RediSearch;
 using System.Linq;
 using System.Threading.Tasks;
+using NRedisPlus.Contracts;
+using NRedisPlus.Model;
 using Xunit;
 
 namespace NRedisPlus.Unit.Tests.RediSearchTests

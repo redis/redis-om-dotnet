@@ -12,7 +12,7 @@ namespace NRedisPlus.RediSearch
         ValueTask SaveAsync();
         string Insert(T item);
         Task<string> InsertAsync(T item);
-        Task<T> FindByIdAsync(string id);
-        T FindById(string id);
+        Task<T?> FindByIdAsync(string id);
+        T? FindById(string id);
     }
 }
