@@ -12,7 +12,8 @@
 <!--        <Rule Id="CS1723" Action="None" />-->
 <!--        <Rule Id="SA1600" Action="None" />-->
 <!--        <Rule Id="SA1611" Action="None" />-->
-<!--        <Rule Id="SA1615" Action="None" />-->
+<!--        <Rule Id="SA1615" Action="None" />-->        
+        <Rule Id="SA1200" Action="None" />
         <Rule Id="SA1633" Action="None" />
         <Rule Id="SA1101" Action="None"/>
         <Rule Id="SA1309" Action="None"/>

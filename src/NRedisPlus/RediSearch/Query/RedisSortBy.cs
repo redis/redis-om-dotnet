@@ -1,27 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using NRedisPlus.Model;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Query
 {
+    /// <summary>
+    /// a sort-by predicate for a search.
+    /// </summary>
     public class RedisSortBy : QueryOption
     {
+        /// <summary>
+        /// gets or sets the field to sort by.
+        /// </summary>
         public string Field { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the direction to sort by.
+        /// </summary>
         public SortDirection Direction { get; set; }
-        public override string[] QueryText { 
-            get 
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> QueryText
+        {
+            get
             {
                 var dir = Direction == SortDirection.Ascending ? "ASC" : "DESC";
-                return new string[] 
+                return new[]
                 {
                     "SORTBY",
                     Field,
-                    dir
-                };                
-            } 
+                    dir,
+                };
+            }
         }
     }
 }

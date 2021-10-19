@@ -3,12 +3,14 @@ using System;
 using StackExchange.Redis;
 using System.Linq;
 using System.IO;
+using NRedisPlus.Model;
+using NRedisPlus.Schema;
 
 namespace NRedisPlus.Unit.Tests
 {    
     public class CoreTests
     {
-        [Document(IndexName ="jsonexample-idx", StorageType = StorageType.JSON)]
+        [Document(IndexName ="jsonexample-idx", StorageType = StorageType.Json)]
         public class ModelExampleJson
         {
             public string Name { get; set; }

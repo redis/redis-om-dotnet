@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using NRedisPlus.Model;
+using NRedisPlus.Schema;
 
 namespace NRedisPlus.RediSearch
 {
@@ -25,8 +27,8 @@ namespace NRedisPlus.RediSearch
         /// <summary>
         /// Serialize the Index.
         /// </summary>
-        /// <param name="type">The type to be indexed</param>
-        /// <exception cref="InvalidOperationException">Thrown if type provided is not decorated with a RedisObjectDefinitionAttribute</exception>
+        /// <param name="type">The type to be indexed.</param>
+        /// <exception cref="InvalidOperationException">Thrown if type provided is not decorated with a RedisObjectDefinitionAttribute.</exception>
         /// <returns>An array of strings (the serialized args for redis).</returns>
         internal static string[] SerializeIndex(this Type type)
         {
@@ -52,7 +54,7 @@ namespace NRedisPlus.RediSearch
             args.Add("ON");
             args.Add(objAttribute.StorageType.ToString());
             args.Add("PREFIX");
-            if (objAttribute.Prefixes!= null && objAttribute.Prefixes.Length > 0)
+            if (objAttribute.Prefixes.Length > 0)
             {
                 args.Add(objAttribute.Prefixes.Length.ToString());
                 args.AddRange(objAttribute.Prefixes);
@@ -84,7 +86,7 @@ namespace NRedisPlus.RediSearch
             args.Add("SCHEMA");
             foreach (var property in type.GetProperties())
             {
-                args.AddRange(objAttribute.StorageType == StorageType.HASH
+                args.AddRange(objAttribute.StorageType == StorageType.Hash
                     ? property.SerializeArgs()
                     : property.SerializeArgsJson());
             }

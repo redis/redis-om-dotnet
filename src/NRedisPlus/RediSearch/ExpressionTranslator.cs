@@ -5,6 +5,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using NRedisPlus.Model;
+using NRedisPlus.RediSearch.AggregationPredicates;
+using NRedisPlus.RediSearch.Attributes;
+using NRedisPlus.RediSearch.Query;
 using NRedisPlus.Schema;
 
 namespace NRedisPlus.RediSearch
@@ -72,7 +75,7 @@ namespace NRedisPlus.RediSearch
                         }
                         else
                         {
-                            aggregation.Predicates.Push(new FilterPredict(lambda.Body));
+                            aggregation.Predicates.Push(new FilterPredicate(lambda.Body));
                         }
 
                         break;
@@ -146,7 +149,7 @@ namespace NRedisPlus.RediSearch
                         break;
                     case "Filter":
                         lambda = (LambdaExpression)((UnaryExpression)exp.Arguments[1]).Operand;
-                        aggregation.Predicates.Push(new FilterPredict(lambda.Body));
+                        aggregation.Predicates.Push(new FilterPredicate(lambda.Body));
                         break;
                     case "Quantile":
                     case "QuantileAsync":

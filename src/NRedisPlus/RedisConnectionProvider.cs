@@ -1,31 +1,54 @@
-﻿using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using NRedisPlus;
-using NRedisPlus.Contracts;
+﻿using NRedisPlus.Contracts;
 using NRedisPlus.RediSearch;
+using NRedisPlus.RediSearch.Collections;
+using StackExchange.Redis;
 
 namespace NRedisPlus
 {
+    /// <summary>
+    /// Provides a connection to redis.
+    /// </summary>
     public class RedisConnectionProvider
     {
-        public IRedisConnection Connection => new RedisConnection(_Mux.GetDatabase());
-        private ConnectionMultiplexer _Mux;
+        private readonly ConnectionMultiplexer _mux;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisConnectionProvider"/> class.
+        /// </summary>
+        /// <param name="connectionString">The string to use to connect to redis.</param>
         public RedisConnectionProvider(string connectionString)
         {
             var options = RedisUriParser.ParseConfigFromUri(connectionString);
-            _Mux = ConnectionMultiplexer.Connect(options);
+            _mux = ConnectionMultiplexer.Connect(options);
         }
 
-        public RedisConnectionProvider(RedisConnectionConfiguration connnection)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisConnectionProvider"/> class.
+        /// </summary>
+        /// <param name="connectionConfig">The configuration.</param>
+        public RedisConnectionProvider(RedisConnectionConfiguration connectionConfig)
         {
-            _Mux = ConnectionMultiplexer.Connect(connnection.ToStackExchangeConnectionString());
+            _mux = ConnectionMultiplexer.Connect(connectionConfig.ToStackExchangeConnectionString());
         }
-        
-        public RedisAggregationSet<T> AggregationSet<T> () => new RedisAggregationSet<T>(Connection);
-        public RedisCollection<T> RedisCollection<T>() where T: notnull => new RedisCollection<T>(Connection);
 
-        
+        /// <summary>
+        /// Gets a command level interface to redis.
+        /// </summary>
+        public IRedisConnection Connection => new RedisConnection(_mux.GetDatabase());
+
+        /// <summary>
+        /// Gets an aggregation set for redis.
+        /// </summary>
+        /// <typeparam name="T">The indexed type to run aggregations on.</typeparam>
+        /// <returns>the aggregation set.</returns>
+        public RedisAggregationSet<T> AggregationSet<T>() => new (Connection);
+
+        /// <summary>
+        /// Gets a redis collection.
+        /// </summary>
+        /// <typeparam name="T">The type the collection will be retrieving.</typeparam>
+        /// <returns>A RedisCollection.</returns>
+        public IRedisCollection<T> RedisCollection<T>()
+            where T : notnull => new RedisCollection<T>(Connection);
     }
 }

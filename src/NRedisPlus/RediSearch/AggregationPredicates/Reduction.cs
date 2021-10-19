@@ -1,14 +1,32 @@
-﻿namespace NRedisPlus.RediSearch
+﻿using System.Collections.Generic;
+
+namespace NRedisPlus.RediSearch.AggregationPredicates
 {
+    /// <summary>
+    /// A reduction.
+    /// </summary>
     public abstract class Reduction : IAggregationPredicate
     {
-        protected ReduceFunction _function;
-        public abstract string ResultName { get; }
-        public Reduction(ReduceFunction function)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Reduction"/> class.
+        /// </summary>
+        /// <param name="function">The function to reduce to.</param>
+        protected Reduction(ReduceFunction function)
         {
-            _function = function;
+            Function = function;
         }
 
-        public abstract string[] Serialize();
+        /// <summary>
+        /// Gets the alias of the result name when the reduction completes.
+        /// </summary>
+        public abstract string ResultName { get; }
+
+        /// <summary>
+        /// Gets The function to use for reduction.
+        /// </summary>
+        protected ReduceFunction Function { get; }
+
+        /// <inheritdoc/>
+        public abstract IEnumerable<string> Serialize();
     }
 }

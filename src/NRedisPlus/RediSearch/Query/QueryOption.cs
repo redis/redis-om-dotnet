@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Query
 {
+    /// <summary>
+    /// An option within a query.
+    /// </summary>
     public abstract class QueryOption
     {
-        public abstract string[] QueryText { get; }
+        /// <summary>
+        /// Gets a serialized array of strings for a query.
+        /// </summary>
+        public abstract IEnumerable<string> QueryText { get; }
     }
 }

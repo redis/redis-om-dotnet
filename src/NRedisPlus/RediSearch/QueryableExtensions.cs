@@ -4,6 +4,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using NRedisPlus.Model;
+using NRedisPlus.RediSearch.Collections;
+using NRedisPlus.RediSearch.Responses;
+using NRedisPlus.Schema;
 
 namespace NRedisPlus.RediSearch
 {
@@ -79,7 +82,7 @@ namespace NRedisPlus.RediSearch
         }
 
         /// <summary>
-        /// Initial query expression for the Redis Collection..
+        /// Initial query expression for the Redis Collection.
         /// </summary>
         /// <param name="source">The source.</param>
         /// <param name="expression">The filtration expression.</param>
@@ -127,8 +130,7 @@ namespace NRedisPlus.RediSearch
             var exp = Expression.Call(
                 null,
                 GetMethodInfo(Skip, source, count),
-                new Expression[] { source.Expression, Expression.Constant(count) }
-            );
+                new[] { source.Expression, Expression.Constant(count) });
             return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager);
         }
 

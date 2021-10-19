@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NRedisPlus.Model;
 using Xunit;
 using NRedisPlus.RediSearch;
 using NRedisPlus.RediSearch.Attributes;
+using NRedisPlus.Schema;
 
 namespace NRedisPlus.Unit.Tests
 {
     public class RedisIndexTests
     {        
 
-        [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.HASH)]
+        [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash)]
         public class TestPersonClassHappyPath
         {
             [Searchable(Sortable = true)]
@@ -23,7 +25,7 @@ namespace NRedisPlus.Unit.Tests
             public string[] NickNames { get; set; }
         }
         
-        [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.HASH, Prefixes = new []{"Person:"})]
+        [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash, Prefixes = new []{"Person:"})]
         public class TestPersonClassOverridenPrefix
         {
             [Searchable(Sortable = true)]
@@ -38,7 +40,7 @@ namespace NRedisPlus.Unit.Tests
         public void TestIndexSerializationHappyPath()
         {
             var expected = new[] { "TestPersonClassHappyPath-idx",
-                "ON", "HASH", "PREFIX", "1", "NRedisPlus.Unit.Tests.RedisIndexTests+TestPersonClassHappyPath:", "SCHEMA",
+                "ON", "Hash", "PREFIX", "1", "NRedisPlus.Unit.Tests.RedisIndexTests+TestPersonClassHappyPath:", "SCHEMA",
                 "Name", "TEXT", "SORTABLE", "Age", "NUMERIC", "SORTABLE" };
             var indexArr = typeof(TestPersonClassHappyPath).SerializeIndex();
 
@@ -49,7 +51,7 @@ namespace NRedisPlus.Unit.Tests
         public void TestIndexSerializationOverridenPrefix()
         {
             var expected = new[] { "TestPersonClassHappyPath-idx",
-                "ON", "HASH", "PREFIX", "1", "Person:", "SCHEMA",
+                "ON", "Hash", "PREFIX", "1", "Person:", "SCHEMA",
                 "Name", "TEXT", "SORTABLE", "Age", "NUMERIC", "SORTABLE" };
             var indexArr = typeof(TestPersonClassOverridenPrefix).SerializeIndex();
 

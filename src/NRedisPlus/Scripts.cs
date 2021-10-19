@@ -2,9 +2,15 @@
 
 namespace NRedisPlus
 {
+    /// <summary>
+    /// Holds the scripts.
+    /// </summary>
     internal class Scripts
     {
-        internal const string JSON_DIFF_RESOLUTION = @"local key = KEYS[1]
+        /// <summary>
+        /// resolves a difference in JSON.
+        /// </summary>
+        internal const string JsonDiffResolution = @"local key = KEYS[1]
 local num_args = table.getn(ARGV)
 for i=1, num_args, 3 do
     if 'ARRREM' == ARGV[i] then
@@ -22,7 +28,10 @@ for i=1, num_args, 3 do
 end
 ";
 
-        internal const string HASH_DIFF_RESOLUTION = @"
+        /// <summary>
+        /// resolves a difference in a hash.
+        /// </summary>
+        internal const string HashDiffResolution = @"
 local key = KEYS[1]
 local num_args = table.getn(ARGV)
 local num_fields_to_set = ARGV[1]
@@ -45,17 +54,25 @@ if end_index < num_args then
 end
 ";
 
-        internal const string UNLINK = @"
+        /// <summary>
+        /// unlinks a key.
+        /// </summary>
+        internal const string Unlink = @"
 return redis.call('UNLINK',KEYS[1])";
-            
 
-        internal static readonly Dictionary<string, string> ScriptCollection = new Dictionary<string, string>
+        /// <summary>
+        /// The scripts.
+        /// </summary>
+        internal static readonly Dictionary<string, string> ScriptCollection = new ()
         {
-            {nameof(JSON_DIFF_RESOLUTION), JSON_DIFF_RESOLUTION},
-            {nameof(HASH_DIFF_RESOLUTION), HASH_DIFF_RESOLUTION},
-            {nameof(UNLINK), UNLINK}
+            { nameof(JsonDiffResolution), JsonDiffResolution },
+            { nameof(HashDiffResolution), HashDiffResolution },
+            { nameof(Unlink), Unlink },
         };
 
-        internal static Dictionary<string, string> ShaCollection { get; set; } = new Dictionary<string, string>();
+        /// <summary>
+        /// Gets or sets collection of SHAs.
+        /// </summary>
+        internal static Dictionary<string, string> ShaCollection { get; set; } = new ();
     }
 }

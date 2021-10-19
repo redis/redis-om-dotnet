@@ -7,9 +7,10 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using NRedisPlus.Contracts;
-using NRedisPlus.RediSearch.Enumorators;
+using NRedisPlus.RediSearch.Enumerators;
+using NRedisPlus.Schema;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Collections
 {
     /// <summary>
     /// Collection of items in Redis, can be queried using it's fluent interface.
@@ -48,7 +49,6 @@ namespace NRedisPlus.RediSearch
         {
             StateManager = stateManager;
             _connection = provider.Connection;
-            DocumentAttribute rootAttribute = provider.DocumentAttribute;
             Initialize(provider, expression);
         }
 
@@ -62,7 +62,7 @@ namespace NRedisPlus.RediSearch
         public IQueryProvider Provider { get; private set; } = default!;
 
         /// <summary>
-        /// Gets manages the state of the items queried from Redis
+        /// Gets manages the state of the items queried from Redis.
         /// </summary>
         internal RedisCollectionStateManager StateManager { get; }
 
@@ -81,8 +81,7 @@ namespace NRedisPlus.RediSearch
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {
-            var provider = (RedisQueryProvider)Provider;
-            return new RedisCollectionEnumorator<T>(Expression, _connection, 100, StateManager);
+            return new RedisCollectionEnumerator<T>(Expression, _connection, 100, StateManager);
         }
 
         /// <inheritdoc/>
@@ -162,7 +161,7 @@ namespace NRedisPlus.RediSearch
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             var provider = (RedisQueryProvider)Provider;
-            return new RedisCollectionEnumorator<T>(Expression, provider.Connection, 100, StateManager);
+            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, 100, StateManager);
         }
 
         private void Initialize(RedisQueryProvider provider, Expression? expression)

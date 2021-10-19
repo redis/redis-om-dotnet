@@ -1,54 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace NRedisPlus.RediSearch
 {
+    /// <summary>
+    /// A boolean expression.
+    /// </summary>
     public abstract class BooleanExpression
     {
-        protected LambdaExpression _expression;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BooleanExpression"/> class.
+        /// </summary>
+        /// <param name="expression">the expression.</param>
         protected BooleanExpression(LambdaExpression expression)
         {
-            _expression = expression;
-        }        
-
-        protected abstract string GetOperatorSymbol(ExpressionType expressionType);
-        protected abstract void ValidateAndPushOperand(Expression expression, Stack<string> stack);
-
-        protected virtual void SplitBinaryExpression(BinaryExpression expression, Stack<string> stack)
-        {
-            if (expression.Right is BinaryExpression rightBinary)
-            {
-                SplitBinaryExpression(rightBinary, stack);
-            }
-            else
-            {
-                ValidateAndPushOperand(expression.Right, stack);
-            }
-            stack.Push(GetOperatorSymbol(expression.NodeType));
-            if (expression.Left is BinaryExpression leftBinary)
-            {
-                SplitBinaryExpression(leftBinary, stack);
-            }
-            else
-            {
-                ValidateAndPushOperand(expression.Left, stack);
-            }
+            Expression = expression;
         }
 
+        /// <summary>
+        /// Gets or sets the Lambda expression.
+        /// </summary>
+        protected LambdaExpression Expression { get; set; }
+
+        /// <summary>
+        /// Validates an operand and pushes it onto the stack.
+        /// </summary>
+        /// <param name="expression">the expression.</param>
+        /// <param name="stack">the stack.</param>
+        protected abstract void ValidateAndPushOperand(Expression expression, Stack<string> stack);
+
+        /// <summary>
+        /// Splits the binary expression into a usable query.
+        /// </summary>
+        /// <param name="expression">the expression.</param>
+        /// <param name="stack">the operand stack.</param>
+        protected abstract void SplitBinaryExpression(BinaryExpression expression, Stack<string> stack);
+
+        /// <summary>
+        /// splits the expression recursively.
+        /// </summary>
+        /// <returns>a stack of predicate strings.</returns>
         protected Stack<string> SplitExpression()
         {
             var ret = new Stack<string>();
-            
-            if (_expression.Body is BinaryExpression binExpression)
+            if (Expression.Body is BinaryExpression binExpression)
             {
                 SplitBinaryExpression(binExpression, ret);
             }
             else
             {
-                ValidateAndPushOperand(_expression.Body, ret);
+                ValidateAndPushOperand(Expression.Body, ret);
             }
+
             return ret;
         }
     }

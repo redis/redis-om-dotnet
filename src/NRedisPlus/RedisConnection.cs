@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 using NRedisPlus.Contracts;
+using NRedisPlus.Model;
 using StackExchange.Redis;
 
 namespace NRedisPlus
 {
+    /// <summary>
+    /// A connection to redis.
+    /// </summary>
     internal class RedisConnection : IRedisConnection
     {
         private readonly IDatabase _db;

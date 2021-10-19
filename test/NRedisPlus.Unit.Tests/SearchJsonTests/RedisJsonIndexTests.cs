@@ -2,6 +2,8 @@
 using NRedisPlus.RediSearch.Attributes;
 using System;
 using System.Linq;
+using NRedisPlus.Model;
+using NRedisPlus.Schema;
 using Xunit;
 
 namespace NRedisPlus.Unit.Tests.SearchJsonTests
@@ -9,7 +11,7 @@ namespace NRedisPlus.Unit.Tests.SearchJsonTests
     public class RedisJsonIndexTests
     {        
 
-        [Document(IndexName = "person-idx", StorageType = StorageType.JSON)]
+        [Document(IndexName = "person-idx", StorageType = StorageType.Json)]
         public class Person
         {
             [Searchable(Sortable = true)]
@@ -38,7 +40,7 @@ namespace NRedisPlus.Unit.Tests.SearchJsonTests
         public void TestIndexSerializationHappyPath()
         {
             var expected = new[] { "person-idx",
-                "ON", "JSON", "PREFIX", "1", "NRedisPlus.Unit.Tests.SearchJsonTests.RedisJsonIndexTests+Person:", "SCHEMA",
+                "ON", "Json", "PREFIX", "1", "NRedisPlus.Unit.Tests.SearchJsonTests.RedisJsonIndexTests+Person:", "SCHEMA",
                 "$.Name", "AS", "Name", "TEXT", "SORTABLE", "$.Tag", "AS","Tag","TAG", "SEPARATOR", "|","$.Age", "AS", "Age", 
                 "NUMERIC","SORTABLE", "$.Height", "AS", "Height", "NUMERIC", "SORTABLE" };
             var indexArr = typeof(Person).SerializeIndex();

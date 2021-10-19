@@ -1,28 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Query
 {
+    /// <summary>
+    /// Predicate denoting the fields that will be returned from redis.
+    /// </summary>
     public class ReturnFields : QueryOption
     {
-        public IEnumerable<string> Fields { get; }
+        /// <summary>
+        /// The fields to bring back.
+        /// </summary>
+        private readonly IEnumerable<string> _fields;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReturnFields"/> class.
+        /// </summary>
+        /// <param name="fields">the fields to return.</param>
         public ReturnFields(IEnumerable<string> fields)
         {
-            Fields = fields;
+            _fields = fields;
         }
-        public override string[] QueryText 
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> QueryText
         {
-            get 
+            get
             {
-                var ret = new List<string> { "RETURN", Fields.Count().ToString() };
-                foreach(var field in Fields)
+                var ret = new List<string> { "RETURN", _fields.Count().ToString() };
+                foreach (var field in _fields)
                 {
                     ret.Add($"{field}");
                 }
+
                 return ret.ToArray();
             }
         }

@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using NRedisPlus.Model;
 using NRedisPlus.RediSearch.Attributes;
 using NRedisPlus.RediSearch;
+using NRedisPlus.Schema;
 
 namespace NRedisPlus.Unit.Tests.RediSearchTests
 {
-    [Document(StorageType = StorageType.HASH, IndexName = "hash-person-idx")]
+    [Document(StorageType = StorageType.Hash, IndexName = "hash-person-idx")]
     public class HashPerson
     {
         [RedisIdField]

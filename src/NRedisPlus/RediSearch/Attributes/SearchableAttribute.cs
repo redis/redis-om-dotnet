@@ -1,15 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using NRedisPlus.Schema;
 
 namespace NRedisPlus.RediSearch.Attributes
 {
+    /// <summary>
+    /// Marks a field as searchable within a Redis Document.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class SearchableAttribute : SearchFieldAttribute
     {
-        public override SearchFieldType SearchFieldType => SearchFieldType.TEXT;
+        /// <summary>
+        /// Gets or sets a value indicating whether whether or not to index with stemming.
+        /// </summary>
         public bool NoStem { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicting which phonetic matcher to use.
+        /// </summary>
         public string PhoneticMatcher { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the weight of a given field.
+        /// </summary>
         public double Weight { get; set; } = 1;
+
+        /// <inheritdoc/>
+        internal override SearchFieldType SearchFieldType => SearchFieldType.TEXT;
     }
 }

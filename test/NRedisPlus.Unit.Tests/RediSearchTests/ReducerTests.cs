@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NRedisPlus.Contracts;
 using NRedisPlus.Model;
+using NRedisPlus.RediSearch.Collections;
 using Xunit;
 
 namespace NRedisPlus.Unit.Tests.RediSearchTests

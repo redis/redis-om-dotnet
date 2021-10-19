@@ -1,26 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Query
 {
+    /// <summary>
+    /// Filter to use when querying.
+    /// </summary>
     public class RedisFilter : QueryOption
     {
-        public string FieldName { get; set; } = string.Empty;
-        public int Min { get; set; }
-        public int Max { get; set; }
+        /// <summary>
+        /// Gets or sets field filter on.
+        /// </summary>
+        private string _fieldName;
 
-        public override string[] QueryText
+        /// <summary>
+        /// Gets or sets the min.
+        /// </summary>
+        private int _min;
+
+        /// <summary>
+        /// Gets or sets the max.
+        /// </summary>
+        private int _max;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisFilter"/> class.
+        /// </summary>
+        /// <param name="fieldName">the field name.</param>
+        /// <param name="min">the min value.</param>
+        /// <param name="max">the max value.</param>
+        public RedisFilter(string fieldName, int min = int.MinValue, int max = int.MaxValue)
         {
-            get 
+            _fieldName = fieldName;
+            _min = min;
+            _max = max;
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> QueryText
+        {
+            get
             {
                 var ret = new List<string>();
                 ret.Add("FILTER");
-                ret.Add(FieldName);
-                ret.Add(Min.ToString());
-                ret.Add(Max.ToString());
+                ret.Add(_fieldName);
+                ret.Add(_min.ToString());
+                ret.Add(_max.ToString());
                 return ret.ToArray();
             }
         }

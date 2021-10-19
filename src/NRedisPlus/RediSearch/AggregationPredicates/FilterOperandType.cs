@@ -1,13 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NRedisPlus.RediSearch
+﻿namespace NRedisPlus.RediSearch.AggregationPredicates
 {
-    public enum FilterOperandType
+    /// <summary>
+    /// The type of operand you are looking at when parsing expressions.
+    /// </summary>
+    internal enum FilterOperandType
     {
-        Identifier,
-        Numeric,
-        String
+        /// <summary>
+        /// The item is an identifier.
+        /// </summary>
+        Identifier = 0,
+
+        /// <summary>
+        /// The item is a literal numeric.
+        /// </summary>
+        Numeric = 1,
+
+        /// <summary>
+        /// The item is a string literal.
+        /// </summary>
+        String = 2,
     }
 }

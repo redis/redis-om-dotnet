@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using NRedisPlus.Contracts;
+using NRedisPlus.Model;
+using NRedisPlus.Schema;
 
 namespace NRedisPlus
 {
@@ -16,7 +18,7 @@ namespace NRedisPlus
         };
         static RedisCommands()
         {
-            _options.Converters.Add(new RediSearch.GeoLocJsonConverter());
+            _options.Converters.Add(new GeoLocJsonConverter());
         }
         public static string Ping(this IRedisConnection connection) => connection.Execute("PING");
 
@@ -527,7 +529,7 @@ namespace NRedisPlus
         {   
             var type = typeof(T);
             var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
-            if(attr == null || attr.StorageType == StorageType.HASH)
+            if(attr == null || attr.StorageType == StorageType.Hash)
             {
                 var dict = connection.HGetAll(id);
                 return (T?)RedisObjectHandler.FromHashSet<T>(dict);
@@ -543,7 +545,7 @@ namespace NRedisPlus
         {   
             var type = typeof(T);
             var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
-            if(attr == null || attr.StorageType == StorageType.HASH)
+            if(attr == null || attr.StorageType == StorageType.Hash)
             {
                 var dict = await connection.HGetAllAsync(id);
                 return (T?)RedisObjectHandler.FromHashSet<T>(dict);

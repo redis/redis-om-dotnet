@@ -5,7 +5,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using NRedisPlus.Contracts;
+using NRedisPlus.Model;
 using NRedisPlus.RediSearch;
+using NRedisPlus.Schema;
 
 [assembly: InternalsVisibleTo("NRedisPlus.POC")]
 
@@ -42,7 +44,7 @@ namespace NRedisPlus
 
             var attr = Attribute.GetCustomAttribute(typeof(T), typeof(DocumentAttribute)) as DocumentAttribute;
             string asJson;
-            if (attr != null && attr.StorageType == StorageType.JSON)
+            if (attr != null && attr.StorageType == StorageType.Json)
             {
                 asJson = hash["$"];
             }

@@ -1,34 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.AggregationPredicates
 {
-    public class FilterPredict : Apply, IAggregationPredicate
+    /// <summary>
+    /// predicate for filtering results from an aggregation.
+    /// </summary>
+    public class FilterPredicate : Apply, IAggregationPredicate
     {
-
-
-        public FilterPredict(Expression expression) : base(expression, string.Empty)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FilterPredicate"/> class.
+        /// </summary>
+        /// <param name="expression">The expression to use for filtering.</param>
+        public FilterPredicate(Expression expression)
+            : base(expression, string.Empty)
         {
-            
-        }       
+        }
 
-        public new string[] Serialize()
+        /// <inheritdoc/>
+        public new IEnumerable<string> Serialize()
         {
-            var list = new List<string> { "FILTER" };            
-            if (_expression is BinaryExpression rootBinExpression)
+            var list = new List<string> { "FILTER" };
+            switch (Expression)
             {
-                list.Add(ExpressionParserUtilities.ParseBinaryExpression(rootBinExpression));
+                case BinaryExpression rootBinExpression:
+                    list.Add(ExpressionParserUtilities.ParseBinaryExpression(rootBinExpression));
+                    break;
+                case MethodCallExpression method:
+                    list.Add(ExpressionParserUtilities.GetOperandString(method));
+                    break;
+                default:
+                    list.Add(ExpressionParserUtilities.GetOperandString(Expression));
+                    break;
             }
-            else if (_expression is MethodCallExpression method)
-            {
-                list.Add(ExpressionParserUtilities.GetOperandString(method));
-            }
-            else
-            {
-                list.Add(ExpressionParserUtilities.GetOperandString(_expression));
-            }
+
             return list.ToArray();
         }
     }

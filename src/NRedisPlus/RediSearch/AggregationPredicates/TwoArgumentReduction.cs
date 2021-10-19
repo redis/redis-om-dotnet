@@ -1,28 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.AggregationPredicates
 {
+    /// <summary>
+    /// A reduction with two arguments.
+    /// </summary>
     public class TwoArgumentReduction : Reduction
-    {        
+    {
         private string _arg1;
         private string _arg2;
 
-        public TwoArgumentReduction(ReduceFunction func, MethodCallExpression expression) : base(func)
-        {            
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TwoArgumentReduction"/> class.
+        /// </summary>
+        /// <param name="func">The reduction function.</param>
+        /// <param name="expression">The expression.</param>
+        public TwoArgumentReduction(ReduceFunction func, MethodCallExpression expression)
+            : base(func)
+        {
             _arg1 = ExpressionParserUtilities.GetOperandString(expression.Arguments[1]);
-            _arg2 = ExpressionParserUtilities.GetOperandString(expression.Arguments[2]);            
+            _arg2 = ExpressionParserUtilities.GetOperandString(expression.Arguments[2]);
         }
 
-        public override string ResultName => $"{_arg1.Substring(1)}_{_function}_{_arg2}";
+        /// <summary>
+        /// Gets the name of the result.
+        /// </summary>
+        public override string ResultName => $"{_arg1.Substring(1)}_{Function}_{_arg2}";
 
-        public override string[] Serialize()
+        /// <summary>
+        /// Sends the reduction to an array of strings for redis.
+        /// </summary>
+        /// <returns>an array of strings.</returns>
+        public override IEnumerable<string> Serialize()
         {
             var ret = new List<string>();
             ret.Add("REDUCE");
-            ret.Add(_function.ToString());
+            ret.Add(Function.ToString());
             ret.Add("2");
             ret.Add(_arg1);
             ret.Add(_arg2);
