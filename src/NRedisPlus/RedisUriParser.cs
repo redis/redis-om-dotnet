@@ -1,26 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Web;
 using StackExchange.Redis;
+
+[assembly: InternalsVisibleTo("NRedisPlus.Unit.Tests")]
+
 namespace NRedisPlus
 {
-    public static class RedisUriParser
+    /// <summary>
+    /// URI parsing utility.
+    /// </summary>
+    internal static class RedisUriParser
     {
-        public static ConfigurationOptions ParseConfigFromUri(string url)
+        /// <summary>
+        /// Parses a Config options for StackExchange Redis from the URI.
+        /// </summary>
+        /// <param name="uriString">The URI.</param>
+        /// <returns>A configuration options result for SE.Redis.</returns>
+        internal static ConfigurationOptions ParseConfigFromUri(string uriString)
         {
             var options = new ConfigurationOptions();
 
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(uriString))
             {
                 options.EndPoints.Add("localhost:6379");
                 return options;
             }
-                
-            var uri = new Uri(url);
+
+            var uri = new Uri(uriString);
             ParseHost(options, uri);
             ParseUserInfo(options, uri);
             ParseQueryArguments(options, uri);
@@ -32,16 +41,22 @@ namespace NRedisPlus
 
         private static void ParseDefaultDatabase(ConfigurationOptions options, Uri uri)
         {
-            if (string.IsNullOrEmpty(uri.AbsolutePath)) return;
-            var dbNumStr = Regex.Match(uri.AbsolutePath,"[0-9]+").Value;
+            if (string.IsNullOrEmpty(uri.AbsolutePath))
+            {
+                return;
+            }
+
+            var dbNumStr = Regex.Match(uri.AbsolutePath, "[0-9]+").Value;
             int dbNum;
             if (int.TryParse(dbNumStr, out dbNum))
+            {
                 options.DefaultDatabase = dbNum;
+            }
         }
-        
+
         private static IList<KeyValuePair<string, string>> ParseQuery(string query) =>
-            query.Split('&').Select(x => 
-                new KeyValuePair<string,string>(x.Split('=').First(), x.Split('=').Last())).ToList();
+            query.Split('&').Select(x =>
+                new KeyValuePair<string, string>(x.Split('=').First(), x.Split('=').Last())).ToList();
 
         private static void ParseUserInfo(ConfigurationOptions options, Uri uri)
         {
@@ -73,31 +88,28 @@ namespace NRedisPlus
             if (!string.IsNullOrEmpty(uri.Query))
             {
                 var queryArgs = ParseQuery(uri.Query.Substring(1));
-                if (queryArgs.Any(x=>x.Key == "timeout"))
+                if (queryArgs.Any(x => x.Key == "timeout"))
                 {
-                    var timeout = int.Parse(queryArgs.First(x=>x.Key == "timeout").Value);
+                    var timeout = int.Parse(queryArgs.First(x => x.Key == "timeout").Value);
                     options.AsyncTimeout = timeout;
                     options.SyncTimeout = timeout;
                     options.ConnectTimeout = timeout;
                 }
 
-                if (queryArgs.Any(x=>x.Key.ToLower() == "clientname"))
+                if (queryArgs.Any(x => x.Key.ToLower() == "clientname"))
                 {
-                    options.ClientName = queryArgs.First(x=>x.Key.ToLower() == "clientname").Value;
+                    options.ClientName = queryArgs.First(x => x.Key.ToLower() == "clientname").Value;
                 }
 
                 if (queryArgs.Any(x => x.Key.ToLower() == "sentinel_primary_name"))
                 {
                     options.ServiceName = queryArgs.First(x => x.Key.ToLower() == "sentinel_primary_name").Value;
                 }
-                    
 
                 foreach (var endpoint in queryArgs.Where(x => x.Key == "endpoint").Select(x => x.Value))
                 {
                     options.EndPoints.Add(endpoint);
                 }
-                
-                
             }
         }
     }

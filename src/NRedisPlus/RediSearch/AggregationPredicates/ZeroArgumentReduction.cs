@@ -1,19 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.AggregationPredicates
 {
+    /// <summary>
+    /// A reduction that takes no arguments.
+    /// </summary>
     public class ZeroArgumentReduction : Reduction
     {
-        public override string ResultName => $"{_function}";
-        public ZeroArgumentReduction(ReduceFunction function) : base(function) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZeroArgumentReduction"/> class.
+        /// </summary>
+        /// <param name="function">the reduction function.</param>
+        public ZeroArgumentReduction(ReduceFunction function)
+            : base(function)
+        {
+        }
 
-        public override string[] Serialize()
+        /// <inheritdoc/>
+        public override string ResultName => $"{Function}";
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> Serialize()
         {
             var ret = new List<string>();
             ret.Add("REDUCE");
-            ret.Add(_function.ToString());
+            ret.Add(Function.ToString());
             ret.Add("0");
             ret.Add("AS");
             ret.Add(ResultName);

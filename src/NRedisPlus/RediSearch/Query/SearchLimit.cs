@@ -1,24 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Query
 {
+    /// <summary>
+    /// Limits the search results.
+    /// </summary>
     public class SearchLimit : QueryOption
     {
-        public int Offset { get; set; } = 0;
+        /// <summary>
+        /// Gets or sets the offset into the result to start at.
+        /// </summary>
+        public int Offset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of items to return.
+        /// </summary>
         public int Number { get; set; } = 10;
-        public override string[] QueryText { 
-            get {
-                return new string[]
+
+        /// <inheritdoc/>
+        internal override IEnumerable<string> SerializeArgs
+        {
+            get
+            {
+                return new[]
                 {
                     "LIMIT",
                     Offset.ToString(),
-                    Number.ToString()
-                };                
-            } 
+                    Number.ToString(),
+                };
+            }
         }
     }
 }

@@ -1,14 +1,19 @@
 ﻿using System;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Collections
 {
-    public class DelDiff : IObjectDiff
+    /// <summary>
+    /// A diff that will delete the property.
+    /// </summary>
+    internal class DelDiff : IObjectDiff
     {
+        /// <inheritdoc/>
+        public string Script => nameof(Scripts.Unlink);
+
+        /// <inheritdoc/>
         public string[] SerializeScriptArgs()
         {
             return Array.Empty<string>();
         }
-
-        public string Script =>nameof(Scripts.UNLINK);
     }
 }

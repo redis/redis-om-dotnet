@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NRedisPlus.RediSearch
+﻿namespace NRedisPlus.RediSearch
 {
+    /// <summary>
+    /// An aggregation result.
+    /// </summary>
     public interface IAggregationResult
     {
     }

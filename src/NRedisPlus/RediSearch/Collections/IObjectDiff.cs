@@ -1,8 +1,19 @@
-﻿namespace NRedisPlus.RediSearch
+﻿namespace NRedisPlus.RediSearch.Collections
 {
+    /// <summary>
+    /// Handles resolving the difference between a snapshot and a current iteration of an object.
+    /// </summary>
     internal interface IObjectDiff
     {
-        string[] SerializeScriptArgs();
+        /// <summary>
+        /// Gets the name of the script to use.
+        /// </summary>
         string Script { get; }
+
+        /// <summary>
+        /// Arguments for the script serialized.
+        /// </summary>
+        /// <returns>The args.</returns>
+        string[] SerializeScriptArgs();
     }
 }

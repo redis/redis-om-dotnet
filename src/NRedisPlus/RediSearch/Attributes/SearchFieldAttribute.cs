@@ -1,16 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
+using NRedisPlus.Schema;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Attributes
 {
+    /// <summary>
+    /// Decorates a field that you want to index.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public abstract class SearchFieldAttribute : RedisFieldAttribute
     {
-        public abstract SearchFieldType SearchFieldType { get; }
-        public bool Sortable { get; set; } = false;
-        public bool Aggregatable { get; set; } = false;
-        public bool Normalize { get; set; } = true;        
+        /// <summary>
+        /// Gets or sets a value indicating whether the field will be sortable.
+        /// </summary>
+        public bool Sortable { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the field will be aggregatable.
+        /// </summary>
+        public bool Aggregatable { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether text will be normalized when indexed
+        /// (sent to lower case with no diacritics). Defaults to true.
+        /// </summary>
+        public bool Normalize { get; set; } = true;
+
+        /// <summary>
+        /// Gets the type of index.
+        /// </summary>
+        internal abstract SearchFieldType SearchFieldType { get; }
     }
 }

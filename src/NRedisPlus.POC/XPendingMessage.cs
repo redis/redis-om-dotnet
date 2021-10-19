@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NRedisPlus.Model;
 using StackExchange.Redis;
 
 namespace NRedisPlus

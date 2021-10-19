@@ -1,22 +1,20 @@
 ﻿using System.Linq.Expressions;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Collections
 {
+    /// <summary>
+    /// An aggregation set that represents a grouped set of items.
+    /// </summary>
+    /// <typeparam name="T">The type being aggregated.</typeparam>
     public class GroupedAggregationSet<T> : RedisAggregationSet<T>
     {
-        public GroupedAggregationSet(IRedisConnection connection, bool useCursor = false) : base(connection, useCursor)
-        {            
-        }
-
-        internal GroupedAggregationSet(RedisQueryProvider provider, bool useCursor = false) : base(provider, useCursor)
-        {            
-        }
-
-        //internal GroupedAggregationSet(RedisQueryProvider provider, Expression expression, bool useCursor = false) : base(provider, expression, useCursor)
-        //{            
-        //}
-
-        internal GroupedAggregationSet(RedisAggregationSet<T> source, Expression expression) : base(source, expression)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GroupedAggregationSet{T}"/> class.
+        /// </summary>
+        /// <param name="source">The previous aggregation set.</param>
+        /// <param name="expression">the expression.</param>
+        internal GroupedAggregationSet(RedisAggregationSet<T> source, Expression expression)
+            : base(source, expression)
         {
         }
     }

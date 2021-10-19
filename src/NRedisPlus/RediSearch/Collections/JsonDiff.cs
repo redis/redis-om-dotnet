@@ -1,27 +1,38 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Collections
 {
+    /// <summary>
+    /// builds a diff for a json object.
+    /// </summary>
     internal class JsonDiff : IObjectDiff
     {
-        internal string Operation { get; }
-        internal string Path { get; }
-        internal JToken Value { get; }
+        private readonly string _operation;
+        private readonly string _path;
+        private readonly JToken _value;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonDiff"/> class.
+        /// </summary>
+        /// <param name="operation">the operation to perform.</param>
+        /// <param name="path">the path to the item in the json.</param>
+        /// <param name="value">the value to set.</param>
         internal JsonDiff(string operation, string path, JToken value)
         {
-            Operation = operation;
-            Path = path;
-            Value = value;
+            _operation = operation;
+            _path = path;
+            _value = value;
         }
 
+        /// <inheritdoc/>
+        public string Script => nameof(Scripts.JsonDiffResolution);
+
+        /// <inheritdoc/>
         public string[] SerializeScriptArgs()
         {
-            if (Value.Type == JTokenType.String)
-                return new[] {Operation, Path, $"\"{Value.ToString()}\""};
-            return new[] {Operation, Path, Value.ToString()};
+            return _value.Type == JTokenType.String
+                ? new[] { _operation, _path, $"\"{_value}\"" }
+                : new[] { _operation, _path, _value.ToString() };
         }
-
-        public string Script => nameof(Scripts.JSON_DIFF_RESOLUTION);
     }
 }
