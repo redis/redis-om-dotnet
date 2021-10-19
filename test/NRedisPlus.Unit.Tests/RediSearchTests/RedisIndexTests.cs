@@ -7,6 +7,7 @@ using NRedisPlus.Model;
 using Xunit;
 using NRedisPlus.RediSearch;
 using NRedisPlus.RediSearch.Attributes;
+using NRedisPlus.RediSearch.Indexing;
 using NRedisPlus.Schema;
 
 namespace NRedisPlus.Unit.Tests

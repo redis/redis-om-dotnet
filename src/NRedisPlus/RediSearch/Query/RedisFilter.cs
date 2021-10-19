@@ -10,17 +10,17 @@ namespace NRedisPlus.RediSearch.Query
         /// <summary>
         /// Gets or sets field filter on.
         /// </summary>
-        private string _fieldName;
+        private readonly string _fieldName;
 
         /// <summary>
         /// Gets or sets the min.
         /// </summary>
-        private int _min;
+        private readonly int _min;
 
         /// <summary>
         /// Gets or sets the max.
         /// </summary>
-        private int _max;
+        private readonly int _max;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisFilter"/> class.
@@ -36,7 +36,7 @@ namespace NRedisPlus.RediSearch.Query
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<string> QueryText
+        internal override IEnumerable<string> SerializeArgs
         {
             get
             {

@@ -19,7 +19,7 @@ namespace NRedisPlus.RediSearch.Query
         public SortDirection Direction { get; set; }
 
         /// <inheritdoc/>
-        public override IEnumerable<string> QueryText
+        internal override IEnumerable<string> SerializeArgs
         {
             get
             {

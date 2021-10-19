@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NRedisPlus.Contracts;
 using NRedisPlus.Model;
+using NRedisPlus.RediSearch.Indexing;
 using NRedisPlus.RediSearch.Query;
 using NRedisPlus.RediSearch.Responses;
 

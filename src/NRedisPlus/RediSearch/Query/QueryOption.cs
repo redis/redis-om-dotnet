@@ -10,6 +10,6 @@ namespace NRedisPlus.RediSearch.Query
         /// <summary>
         /// Gets a serialized array of strings for a query.
         /// </summary>
-        public abstract IEnumerable<string> QueryText { get; }
+        internal abstract IEnumerable<string> SerializeArgs { get; }
     }
 }

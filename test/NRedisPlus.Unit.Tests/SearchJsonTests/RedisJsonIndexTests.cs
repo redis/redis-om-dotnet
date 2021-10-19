@@ -3,6 +3,7 @@ using NRedisPlus.RediSearch.Attributes;
 using System;
 using System.Linq;
 using NRedisPlus.Model;
+using NRedisPlus.RediSearch.Indexing;
 using NRedisPlus.Schema;
 using Xunit;
 

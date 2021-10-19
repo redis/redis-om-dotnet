@@ -13,7 +13,7 @@ namespace NRedisPlus.RediSearch
     /// <summary>
     /// Extensions of the Queryable Type for RedisCollections.
     /// </summary>
-    public static class QueryableExtensions
+    public static class SearchExtensions
     {
         /// <summary>
         /// Apply the provided expression to data in Redis.

@@ -23,7 +23,7 @@ namespace NRedisPlus.RediSearch.Query
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<string> QueryText
+        internal override IEnumerable<string> SerializeArgs
         {
             get
             {

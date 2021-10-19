@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 using NRedisPlus.Model;
 using NRedisPlus.Schema;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.Indexing
 {
     /// <summary>
     /// A utility class for serializing objects into Redis Indices.

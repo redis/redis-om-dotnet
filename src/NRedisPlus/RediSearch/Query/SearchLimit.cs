@@ -18,7 +18,7 @@ namespace NRedisPlus.RediSearch.Query
         public int Number { get; set; } = 10;
 
         /// <inheritdoc/>
-        public override IEnumerable<string> QueryText
+        internal override IEnumerable<string> SerializeArgs
         {
             get
             {

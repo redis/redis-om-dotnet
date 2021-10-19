@@ -12,7 +12,7 @@ namespace NRedisPlus.RediSearch
         /// Initializes a new instance of the <see cref="BooleanExpression"/> class.
         /// </summary>
         /// <param name="expression">the expression.</param>
-        protected BooleanExpression(LambdaExpression expression)
+        internal BooleanExpression(LambdaExpression expression)
         {
             Expression = expression;
         }

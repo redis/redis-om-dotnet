@@ -14,7 +14,7 @@ namespace NRedisPlus.RediSearch.Enumerators
     /// the enumerator for an aggregation.
     /// </summary>
     /// <typeparam name="T">The type.</typeparam>
-    public class AggregationEnumerator<T> : IEnumerator<AggregationResult<T>>, IAsyncEnumerator<AggregationResult<T>>
+    internal class AggregationEnumerator<T> : IEnumerator<AggregationResult<T>>, IAsyncEnumerator<AggregationResult<T>>
     {
         private readonly IRedisConnection _connection;
         private readonly RedisAggregation _aggregation;

@@ -8,8 +8,8 @@ namespace NRedisPlus.RediSearch.AggregationPredicates
     /// </summary>
     public class TwoArgumentReduction : Reduction
     {
-        private string _arg1;
-        private string _arg2;
+        private readonly string _arg1;
+        private readonly string _arg2;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TwoArgumentReduction"/> class.

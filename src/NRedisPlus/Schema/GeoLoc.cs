@@ -5,7 +5,7 @@ namespace NRedisPlus.Schema
     /// <summary>
     /// A structure representing a point on the globe by it's longitude and latitude.
     /// </summary>
-    public struct GeoLoc
+    public readonly struct GeoLoc
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GeoLoc"/> struct.

@@ -6,7 +6,7 @@ namespace NRedisPlus.RediSearch.Query
     /// <summary>
     /// A query to redis.
     /// </summary>
-    public class RedisQuery
+    public sealed class RedisQuery
     {
         /// <summary>
         /// Gets or sets the flags for the query options.
@@ -53,7 +53,7 @@ namespace NRedisPlus.RediSearch.Query
         /// </summary>
         /// <returns>the serialized arguments.</returns>
         /// <exception cref="ArgumentException">thrown if the index is null.</exception>
-        public string[] SerializeQuery()
+        internal string[] SerializeQuery()
         {
             var ret = new List<string>();
             if (string.IsNullOrEmpty(Index))
@@ -73,27 +73,27 @@ namespace NRedisPlus.RediSearch.Query
 
             if (Limit != null)
             {
-                ret.AddRange(Limit.QueryText);
+                ret.AddRange(Limit.SerializeArgs);
             }
 
             if (Filter != null)
             {
-                ret.AddRange(Filter.QueryText);
+                ret.AddRange(Filter.SerializeArgs);
             }
 
             if (Return != null)
             {
-                ret.AddRange(Return.QueryText);
+                ret.AddRange(Return.SerializeArgs);
             }
 
             if (GeoFilter != null)
             {
-                ret.AddRange(GeoFilter.QueryText);
+                ret.AddRange(GeoFilter.SerializeArgs);
             }
 
             if (SortBy != null)
             {
-                ret.AddRange(SortBy.QueryText);
+                ret.AddRange(SortBy.SerializeArgs);
             }
 
             return ret.ToArray();
