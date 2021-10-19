@@ -1,10 +1,12 @@
 ﻿using NRedisPlus.RediSearch;
 using NRedisPlus.RediSearch.Attributes;
 using System.Collections.Generic;
+using NRedisPlus.Model;
+using NRedisPlus.Schema;
 
 namespace NRedisPlus.Unit.Tests.RediSearchTests
 {
-    [Document(StorageType = StorageType.JSON, IndexName = "person-idx")]
+    [Document(StorageType = StorageType.Json, IndexName = "person-idx")]
     public partial class Person
     {
         [RedisIdField]

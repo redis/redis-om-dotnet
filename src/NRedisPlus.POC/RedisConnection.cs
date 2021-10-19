@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.IO.Pipelines;
 using NRedisPlus.RediSearch;
 using Newtonsoft.Json;
+using NRedisPlus.Contracts;
+using NRedisPlus.Model;
 
 namespace NRedisPlus
 {

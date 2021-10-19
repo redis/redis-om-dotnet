@@ -1,26 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace NRedisPlus.RediSearch
+namespace NRedisPlus.RediSearch.AggregationPredicates
 {
+    /// <summary>
+    /// A reduction with one argument.
+    /// </summary>
     public class SingleArgumentReduction : Reduction
-    {        
-        private string _arg { get; set; }
+    {
+        private readonly string _arg;
 
-        public override string ResultName => $"{_arg}_{_function}";
-
-        public SingleArgumentReduction(ReduceFunction function, string arg) : base(function)
-        {            
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SingleArgumentReduction"/> class.
+        /// </summary>
+        /// <param name="function">The reduction function.</param>
+        /// <param name="arg">The name of the argument.</param>
+        public SingleArgumentReduction(ReduceFunction function, string arg)
+            : base(function)
+        {
             _arg = arg;
         }
 
-        public override string[] Serialize()
+        /// <summary>
+        /// Gets the name of the result.
+        /// </summary>
+        public override string ResultName => $"{_arg}_{Function}";
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> Serialize()
         {
             var ret = new List<string>();
             ret.Add("REDUCE");
-            ret.Add(_function.ToString());
+            ret.Add(Function.ToString());
             ret.Add("1");
             ret.Add($"@{_arg}");
             ret.Add("AS");

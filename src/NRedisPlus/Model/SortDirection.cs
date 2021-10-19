@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NRedisPlus
+﻿namespace NRedisPlus.Model
 {
+    /// <summary>
+    /// The direction to sort.
+    /// </summary>
     public enum SortDirection
     {
+        /// <summary>
+        /// Ascending.
+        /// </summary>
         Ascending,
-        Descending
+
+        /// <summary>
+        /// Descending
+        /// </summary>
+        Descending,
     }
 }
