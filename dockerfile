@@ -5,6 +5,6 @@ WORKDIR /app
 ADD . /app
 
 RUN ls /app
-RUN dotnet restore /app/NRedisPlus.sln
+RUN dotnet restore /app/Redis.OM.sln
 
 ENTRYPOINT ["dotnet","test"]
