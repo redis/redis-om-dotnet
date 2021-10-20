@@ -7,11 +7,8 @@
 
 ---
 
-<<<<<<< HEAD
 [![License][license-image]][license-url]
 [![Build Status][ci-svg]][ci-url]
-=======
->>>>>>> main
 
 Welcome to Redis OM .NET, a library that helps you use Redis in .NET Applications.
 
@@ -60,19 +57,11 @@ dotnet add package Redis.OM
 ```
 
 ## 🏁 Getting started
-<<<<<<< HEAD
 
 ### Starting Redis
 
 Before writing any code you should probably have an instance of Redis to connect to! Starting Redis is easy with Docker!
 
-=======
-
-### Starting Redis
-
-Before writing any code you should probably have an instance of Redis to connect to! Starting Redis is easy with Docker!
-
->>>>>>> main
 ```sh
 docker run -p 6379:6379 redislabs/redismod:preview
 ```
@@ -100,7 +89,6 @@ connection.CreateIndex(typeof(Customer));
 ```
 
 With this done you can now:
-<<<<<<< HEAD
 
 * Insert Customer objects into Redis
 * Get a Customer object by ID frm Redis
@@ -109,16 +97,6 @@ With this done you can now:
 
 ### 🔎 Querying 
 
-=======
-
-* Insert Customer objects into Redis
-* Get a Customer object by ID frm Redis
-* Query Customers from Redis
-* Run aggregations on Customers in Redis
-
-### 🔎 Querying 
-
->>>>>>> main
 After an index is declared and created, querying can be done using expressions in LINQ:
 
 ```csharp
@@ -134,7 +112,6 @@ customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
 ```
 
 ### 🖩 Aggregations
-<<<<<<< HEAD
 
 With the customer index created you can easily run aggregations on the customer object using expressions in LINQ:
 
@@ -218,70 +195,3 @@ You can also **contribute documentation** -- or just let us know if something ne
 [redis-json-url]: https://oss.redis.com/redisjson/
 [pydantic-url]: https://github.com/samuelcolvin/pydantic
 [ulid-url]: https://github.com/ulid/spec
-=======
-
-With the customer index created you can easily run aggregations on the customer object using expressions in LINQ:
-
-```csharp
-// Get Average Age
-customerAggregations.Average(x => x.RecordShell.Age);
-
-// Format Customer Full Names
-customerAggregations.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
-      "FullName");
-
-// Get Customer Distance from Mall of America.
-customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -93.241786, 44.853816),
-      "DistanceToMall");
-```
-
-## 📚 Documentation
-
-Documentation is available [here](docs/README.md).
-
-## ⛏️ Troubleshooting
-
-If you run into trouble or have any questions, we're here to help! 
-
-First, check the [FAQ](docs/faq.md). If you don't find the answer there,
-hit us up on the [Redis Discord Server](http://discord.gg/redis).
-
-## ✨ RediSearch and RedisJSON
-
-Redis OM relies on core features from two source available Redis modules: **RediSearch** and **RedisJSON**.
-
-These modules are the "magic" behind the scenes:
-
-* RediSearch adds querying, indexing, and full-text search to Redis
-* RedisJSON adds the JSON data type to Redis
-
-### Why this is important
-
-Without RediSearch or RedisJSON installed, you can still use Redis OM to create declarative models backed by Redis.
-
-We'll store your model data in Redis as Hashes, and you can retrieve models using their primary keys.
-
-So, what won't work without these modules?
-
-1. Without RedisJSON, you won't be able to nest models inside each other, like we did with the example model of a `Customer` model.
-2. Without RediSearch, you won't be able to use our expressive queries to find models -- just primary keys.
-
-### So how do you get RediSearch and RedisJSON?
-
-You can use RediSearch and RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary versions of the modules in their Quick Start Guides:
-
-- [RedisJSON Quick Start - Running Binaries](https://oss.redis.com/redisjson/#download-and-running-binaries)
-- [RediSearch Quick Start - Running Binaries](https://oss.redis.com/redisearch/Quick_Start/#download_and_running_binaries)
-
-**NOTE**: Both Quick Start Guides also have instructions on how to run these modules in Redis with Docker.
-
-Don't want to run Redis yourself? RediSearch and RedisJSON are also available on Redis Cloud. [Get started here.](https://redis.com/try-free/)
-
-## ❤️ Contributing
-
-We'd love your contributions!
-
-**Bug reports** are especially helpful at this stage of the project. [You can open a bug report on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new).
-
-You can also **contribute documentation** -- or just let us know if something needs more detail. [Open an issue on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new) to get started.
->>>>>>> main
