@@ -7,6 +7,8 @@
 
 ---
 
+[![License][license-image]][license-url]
+[![Build Status][ci-svg]][ci-url]
 
 Welcome to Redis OM .NET, a library that helps you use Redis in .NET Applications.
 
@@ -175,3 +177,21 @@ We'd love your contributions!
 **Bug reports** are especially helpful at this stage of the project. [You can open a bug report on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new).
 
 You can also **contribute documentation** -- or just let us know if something needs more detail. [Open an issue on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new) to get started.
+
+<!-- Badges -->
+
+[ci-svg]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml/badge.svg
+[ci-url]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml
+[license-image]: http://img.shields.io/badge/license-MIT-green.svg?style=flat-square
+[license-url]: LICENSE
+
+<!-- Links -->
+
+[redis-developer-website]: https://developer.redis.com
+[redis-om-js]: https://github.com/redis-developer/redis-om-js
+[redis-om-dotnet]: https://github.com/redis-developer/redis-om-dotnet
+[redis-om-spring]: https://github.com/redis-developer/redis-om-spring
+[redisearch-url]: https://oss.redis.com/redisearch/
+[redis-json-url]: https://oss.redis.com/redisjson/
+[pydantic-url]: https://github.com/samuelcolvin/pydantic
+[ulid-url]: https://github.com/ulid/spec
