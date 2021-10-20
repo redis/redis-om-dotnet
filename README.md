@@ -182,11 +182,7 @@ You can also **contribute documentation** -- or just let us know if something ne
 
 [ci-svg]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml/badge.svg
 [ci-url]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml
-<<<<<<< HEAD
 [license-image]: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
-=======
-[license-image]: http://img.shields.io/badge/license-MIT-green.svg?style=flat-square
->>>>>>> main
 [license-url]: LICENSE
 
 <!-- Links -->
