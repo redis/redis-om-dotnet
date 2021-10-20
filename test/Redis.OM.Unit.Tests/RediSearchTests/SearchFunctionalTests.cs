@@ -101,7 +101,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var collection = new RedisCollection<Person>(_connection);
             var ages = collection.Select(x => x.Age).ToList();
-            Assert.True(ages.Count >= 500);
+            foreach (var age in ages)
+            {
+                Assert.True(age >= 0);
+            }
         }
 
         [Fact]
