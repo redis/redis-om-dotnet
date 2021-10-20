@@ -61,7 +61,7 @@ dotnet add package Redis.OM
 
 ### Starting Redis
 
-Before writing any code you'll a Redis instance with the appropriate Redis modules! The quickest way to get this is with Docker:
+Before writing any code you'll need a Redis instance with the appropriate Redis modules! The quickest way to get this is with Docker:
 
 ```sh
 docker run -p 6379:6379 redislabs/redismod:preview
