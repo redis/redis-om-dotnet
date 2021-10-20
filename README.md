@@ -20,19 +20,18 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
-- [➡ Why Redis OM?](#-why-redis-om)
+- [💡 Why Redis OM?](#-why-redis-om)
 - [💻 Installation](#-installation)
 - [🏁 Getting started](#-getting-started)
-  * [Starting Redis](#starting-redis)
-  * [📇 Creating an Index](#-creating-an-index)
-  * [🔎 Querying](#-querying)
-  * [🖩 Aggregations](#-aggregations)
+  - [Starting Redis](#starting-redis)
+  - [📇 Modeling your domain (and indexing it!)](#-modeling-your-domain-and-indexing-it)
+  - [🔎 Querying](#-querying)
+  - [🖩 Aggregations](#%F0%9F%96%A9-aggregations)
 - [📚 Documentation](#-documentation)
 - [⛏️ Troubleshooting](#-troubleshooting)
 - [✨ RediSearch and RedisJSON](#-redisearch-and-redisjson)
-  * [Why this is important](#why-this-is-important)
-  * [So how do you get RediSearch and RedisJSON?](#so-how-do-you-get-redisearch-and-redisjson-)
+  - [Why this is important](#why-this-is-important)
+  - [So how do you get RediSearch and RedisJSON?](#so-how-do-you-get-redisearch-and-redisjson)
 - [❤️ Contributing](#-contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
