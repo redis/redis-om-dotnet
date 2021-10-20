@@ -19,19 +19,19 @@ Welcome to Redis OM .NET, a library that helps you use Redis in .NET Application
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [➡ Why Redis OM?](#➡-why-redis-om)
-- [💻 Installation](#💻-installation)
-- [🏁 Getting started](#🏁-getting-started)
+- [➡ Why Redis OM?](#-why-redis-om)
+- [💻 Installation](#-installation)
+- [🏁 Getting started](#-getting-started)
   * [Starting Redis](#starting-redis)
-  * [📇 Creating an Index](#📇-creating-an-index)
-  * [🔎 Querying](#🔎-querying)
-  * [🖩 Aggregations](#🖩-aggregations)
-- [📚 Documentation](#📚-documentation)
-- [⛏️ Troubleshooting](#⛏️-troubleshooting)
-- [✨ RediSearch and RedisJSON](#✨-redisearch-and-redisjson)
+  * [📇 Creating an Index](#-creating-an-index)
+  * [🔎 Querying](#-querying)
+  * [🖩 Aggregations](#-aggregations)
+- [📚 Documentation](#-documentation)
+- [⛏️ Troubleshooting](#-troubleshooting)
+- [✨ RediSearch and RedisJSON](#-redisearch-and-redisjson)
   * [Why this is important](#why-this-is-important)
   * [So how do you get RediSearch and RedisJSON?](#so-how-do-you-get-redisearch-and-redisjson-)
-- [❤️ Contributing](#❤️-contributing)
+- [❤️ Contributing](#-contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
