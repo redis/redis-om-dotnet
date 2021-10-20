@@ -1,7 +1,7 @@
 <h1 align="center">Redis OM</h1>
 <p align="center">
     <p align="center">
-        Objecting mapping and more, for Redis.
+        Objecting mapping, and more, for Redis.
     </p>
 </p>
 
@@ -10,9 +10,9 @@
 [![License][license-image]][license-url]
 [![Build Status][ci-svg]][ci-url]
 
-Welcome to Redis OM .NET, a library that helps you use Redis in .NET Applications.
+Redis OM .NET makes it easy to model Redis data from you .NET Applications.
 
-**Redis OM .NET** | [Redis OM Node.js][redis-om-js] | [Redis OM Spring][redis-om-spring] | [Redis OM Python][redis-om-python]
+**Redis OM .NET** | [Redis OM Node.js](redis-om-js) | [Redis OM Spring](redis-om-spring) | [Redis OM Python](redis-om-python)
 
 <details>
   <summary><strong>Table of contents</strong></summary>
@@ -39,18 +39,20 @@ Welcome to Redis OM .NET, a library that helps you use Redis in .NET Application
 
 </details>
 
-## ➡ Why Redis OM?
+## 💡 Why Redis OM?
 
-Redis OM is a high-level library for using Redis in .NET this **preview** release contains the following features:
+Redis OM provides high-level abstractions for using Redis in .NET; it makes it easy to model and query your Redis domain objects.
 
-* A Declarative Object Mapper for Redis Objects.
-* A Declarative secondary-index generation tool for Redis.
-* A fluent API for searching for objects in Redis
-* A fluent API for performing Aggregations in Redis.
+This **preview** release contains the following features:
+
+* Declarative object mapping for Redis objects
+* Declarative secondary-index generation
+* Fluent API for querying Redis
+* Fluent API for performing Redis aggregations
 
 ## 💻 Installation
 
-Installation is simple with the dotnet cli just run:
+Using the dotnet cli, run:
 
 ```text
 dotnet add package Redis.OM
@@ -60,15 +62,15 @@ dotnet add package Redis.OM
 
 ### Starting Redis
 
-Before writing any code you should probably have an instance of Redis to connect to! Starting Redis is easy with Docker!
+Before writing any code you'll a Redis instance with the appropriate Redis modules! The quickest way to get this is with Docker:
 
 ```sh
 docker run -p 6379:6379 redislabs/redismod:preview
 ```
 
-### 📇 Creating an Index
+### 📇 Modeling your domain (and indexing it!)
 
-With Redis OM you can model your data and declare indices with minimal code:
+With Redis OM, you can model your data and declare indexes with minimal code. For example, here's how we might model a customer object:
 
 ```csharp
 [Document(StorageType = StorageType.Json)]
@@ -81,67 +83,72 @@ public class Customer
 }
 ```
 
-After an index is declared on a type, creating the index is as easy as connecting to redis, and calling `CreateIndex` on an `IRedisConnection`
+Notice that we've applied the `Document` attribute to this class. We've also specified that certain fields should be `Indexed`.
+
+Now we need to create the Redis index. So we'll connect to Redis and then call `CreateIndex` on an `IRedisConnection`:
+
 
 ```csharp
 var provider = new RedisConnectionProvider("redis://localhost:6379");
 connection.CreateIndex(typeof(Customer));
 ```
 
-With this done you can now:
+Once the index is created, we can:
 
 * Insert Customer objects into Redis
-* Get a Customer object by ID frm Redis
+* Get a Customer object by ID from Redis
 * Query Customers from Redis
 * Run aggregations on Customers in Redis
 
-### 🔎 Querying 
+Let's see how!
 
-After an index is declared and created, querying can be done using expressions in LINQ:
+### 🔎 Querying
+
+We can query our domain using expressions in LINQ, like so:
 
 ```csharp
 var customers = provider.RedisCollection<Customer>();
-// Find all customers who's last name is "Bond"
+// Find all customers whose last name is "Bond"
 customers.Where(x => x.LastName == "Bond");
 
-// Find all customers who's last name is Bond OR who's age is greater than 65
+// Find all customers whose last name is Bond OR whose age is greater than 65
 customers.Where(x => x.LastName == "Bond" || x.Age > 65);
 
-// Find all customer's who's last name is Bond AND who's first name is James
+// Find all customers whose last name is Bond AND whose first name is James
 customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
 ```
 
 ### 🖩 Aggregations
 
-With the customer index created you can easily run aggregations on the customer object using expressions in LINQ:
+We can also run aggregations on the customer object, again using expressions in LINQ:
 
 ```csharp
-// Get Average Age
+// Get our average customer age
 customerAggregations.Average(x => x.RecordShell.Age);
 
-// Format Customer Full Names
+// Format customer full names
 customerAggregations.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
       "FullName");
 
-// Get Customer Distance from Mall of America.
+// Get each customer's distance from the Mall of America
 customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -93.241786, 44.853816),
       "DistanceToMall");
 ```
 
 ## 📚 Documentation
 
-Documentation is available [here](docs/README.md).
+This README just scratches the surface. You can find complete documentation in the [REDIS OM .NET docs folder](docs/README.md).
 
 ## ⛏️ Troubleshooting
 
-If you run into trouble or have any questions, we're here to help! 
+If you run into trouble or have any questions, we're here to help!
 
 First, check the [FAQ](docs/faq.md). If you don't find the answer there,
 hit us up on the [Redis Discord Server](http://discord.gg/redis).
 
 ## ✨ RediSearch and RedisJSON
 
-Redis OM relies on core features from two source available Redis modules: **RediSearch** and **RedisJSON**.
+Redis OM relies on core features from two source-available Redis modules: **RediSearch** and **RedisJSON**.
 
 These modules are the "magic" behind the scenes:
 
@@ -150,14 +157,14 @@ These modules are the "magic" behind the scenes:
 
 ### Why this is important
 
-Without RediSearch or RedisJSON installed, you can still use Redis OM to create declarative models backed by Redis.
+Without RediSearch or RedisJSON, you can still use Redis OM to create declarative models backed by Redis.
 
 We'll store your model data in Redis as Hashes, and you can retrieve models using their primary keys.
 
 So, what won't work without these modules?
 
-1. Without RedisJSON, you won't be able to nest models inside each other, like we did with the example model of a `Customer` model.
-2. Without RediSearch, you won't be able to use our expressive queries to find models -- just primary keys.
+1. Without RedisJSON, you won't be able to nest models inside each other.
+2. Without RediSearch, you won't be able to use our expressive queries to find object -- you'll only be able to query by primary key.
 
 ### So how do you get RediSearch and RedisJSON?
 
@@ -166,9 +173,9 @@ You can use RediSearch and RedisJSON with your self-hosted Redis deployment. Jus
 - [RedisJSON Quick Start - Running Binaries](https://oss.redis.com/redisjson/#download-and-running-binaries)
 - [RediSearch Quick Start - Running Binaries](https://oss.redis.com/redisearch/Quick_Start/#download_and_running_binaries)
 
-**NOTE**: Both Quick Start Guides also have instructions on how to run these modules in Redis with Docker.
+**NOTE**: Both quick start guides also have instructions on how to run these modules in Redis with Docker.
 
-Don't want to run Redis yourself? RediSearch and RedisJSON are also available on Redis Cloud. [Get started here.](https://redis.com/try-free/)
+Don't want to run Redis yourself? RediSearch and RedisJSON are also available on Redis Cloud. [Get started here](https://redis.com/try-free/).
 
 ## ❤️ Contributing
 
