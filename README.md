@@ -10,7 +10,7 @@
 [![License][license-image]][license-url]
 [![Build Status][ci-svg]][ci-url]
 
-Redis OM .NET makes it easy to model Redis data from you .NET Applications.
+**Redis OM .NET** makes it easy to model Redis data in your .NET Applications.
 
 **Redis OM .NET** | [Redis OM Node.js](redis-om-js) | [Redis OM Spring](redis-om-spring) | [Redis OM Python](redis-om-python)
 
@@ -41,14 +41,14 @@ Redis OM .NET makes it easy to model Redis data from you .NET Applications.
 
 ## 💡 Why Redis OM?
 
-Redis OM provides high-level abstractions for using Redis in .NET; it makes it easy to model and query your Redis domain objects.
+Redis OM provides high-level abstractions for using Redis in .NET, making it easy to model and query your Redis domain objects.
 
 This **preview** release contains the following features:
 
 * Declarative object mapping for Redis objects
 * Declarative secondary-index generation
-* Fluent API for querying Redis
-* Fluent API for performing Redis aggregations
+* Fluent APIs for querying Redis
+* Fluent APIs for performing Redis aggregations
 
 ## 💻 Installation
 
