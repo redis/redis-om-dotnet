@@ -235,7 +235,7 @@ namespace Redis.OM
             var args = new List<string> { key };
             args.AddRange(paths);
             var res = connection.Execute("JSON.GET", args.ToArray());
-            return JsonSerializer.Deserialize<T>(res);
+            return JsonSerializer.Deserialize<T>(res, Options);
         }
 
         /// <summary>
