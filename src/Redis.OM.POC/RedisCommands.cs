@@ -523,22 +523,6 @@ namespace Redis.OM
             args.AddRange(argv);
             return connection.Execute("EVALSHA", args.ToArray());
         }
-
-        public static T? Get<T>(this IRedisConnection connection, string id)
-            where T : notnull
-        {   
-            var type = typeof(T);
-            var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
-            if(attr == null || attr.StorageType == StorageType.Hash)
-            {
-                var dict = connection.HGetAll(id);
-                return (T?)RedisObjectHandler.FromHashSet<T>(dict);
-            }
-            else
-            {
-                return connection.JsonGet<T>(id, ".");
-            }            
-        }
         
         public static async ValueTask<T?> GetAsync<T>(this IRedisConnection connection, string id)
             where T : notnull
