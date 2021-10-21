@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 using Redis.OM.Contracts;
 using Redis.OM.RediSearch.Collections;
+using Redis.OM.Schema;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -240,6 +242,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 Assert.Equal(maryNicknames.ToArray(), mary.NickNames);
             }
             
+        }
+
+        [Fact]
+        public void TestSetGetWithLoc()
+        {
+            var testP = new Person {Name = "Steve", Home = new GeoLoc(1.0, 1.0)};
+            var id =_connection.Set(testP);
+            var reconstituded = _connection.Get<Person>(id);
+            Assert.Equal("Steve", reconstituded.Name);
+            Assert.Equal(new GeoLoc(1.0,1.0), reconstituded.Home);
         }
     }
 }

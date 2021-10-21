@@ -6,6 +6,16 @@
     <RootNamespace>Redis.OM</RootNamespace>
     <Nullable>enable</Nullable>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Title>Redis OM</Title>
+    <Authors>Steve Lorello</Authors>
+    <Copyright>Redis Inc</Copyright>
+    <PackageProjectUrl>https://github.com/redis-developer/redis-om-dotnet</PackageProjectUrl>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/redis-developer/redis-om-dotnet</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>redis redisearch indexing databases</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +23,7 @@
     <PackageReference Include="StackExchange.Redis" Version="2.2.50" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
     <PackageReference Include="Ulid" Version="1.2.6" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
