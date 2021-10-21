@@ -26,7 +26,7 @@
   - [Starting Redis](#starting-redis)
   - [📇 Modeling your domain (and indexing it!)](#-modeling-your-domain-and-indexing-it)
   - [🔎 Querying](#-querying)
-  - [🖩 Aggregations](#%F0%9F%96%A9-aggregations)
+  - [🖩 Aggregations](#-aggregations)
 - [📚 Documentation](#-documentation)
 - [⛏️ Troubleshooting](#-troubleshooting)
 - [✨ RediSearch and RedisJSON](#-redisearch-and-redisjson)
