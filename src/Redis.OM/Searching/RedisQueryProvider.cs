@@ -8,9 +8,7 @@ using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Common;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
 using Redis.OM.Modeling;
-using Redis.OM.RediSearch;
 
 namespace Redis.OM.Searching
 {

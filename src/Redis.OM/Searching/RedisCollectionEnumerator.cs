@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 using Redis.OM;
 using Redis.OM.Common;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
 using Redis.OM.Modeling;
-using Redis.OM.RediSearch;
 using Redis.OM.Searching.Query;
 
 namespace Redis.OM.Searching

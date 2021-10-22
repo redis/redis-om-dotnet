@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Redis.OM.Model;
+using Redis.OM;
 using Redis.OM.Modeling;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Redis.OM.Model;
+using Redis.OM;
 
 namespace Redis.OM
 {

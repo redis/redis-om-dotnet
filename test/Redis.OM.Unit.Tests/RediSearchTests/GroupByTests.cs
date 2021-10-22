@@ -1,5 +1,4 @@
 ﻿using Moq;
-using Redis.OM.RediSearch;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
+using Redis.OM;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests

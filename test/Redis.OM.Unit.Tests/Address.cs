@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Redis.OM.Model;
+using Redis.OM;
 using Redis.OM.Modeling;
 
 namespace Redis.OM.Unit.Tests

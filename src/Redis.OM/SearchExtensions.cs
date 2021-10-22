@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Redis.OM.Aggregation;
-using Redis.OM.Model;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
 

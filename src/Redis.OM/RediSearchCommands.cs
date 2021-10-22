@@ -2,12 +2,11 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
 using Redis.OM.Searching.Query;
 
-namespace Redis.OM.RediSearch
+namespace Redis.OM
 {
     /// <summary>
     /// extension methods for redisearch.
