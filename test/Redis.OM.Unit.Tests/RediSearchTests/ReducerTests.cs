@@ -2,9 +2,10 @@
 using Redis.OM.RediSearch;
 using System.Linq;
 using System.Threading.Tasks;
+using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Model;
-using Redis.OM.RediSearch.Collections;
+using Redis.OM.Searching;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Model;
-using Redis.OM.RediSearch.AggregationPredicates;
-using Redis.OM.RediSearch.Attributes;
-using Redis.OM.Schema;
+using Redis.OM.Modeling;
 
 namespace Redis.OM.Test.ConsoleApp
 {
