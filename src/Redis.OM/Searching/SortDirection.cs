@@ -1,4 +1,4 @@
-﻿namespace Redis.OM.Model
+﻿namespace Redis.OM.Searching
 {
     /// <summary>
     /// The direction to sort.

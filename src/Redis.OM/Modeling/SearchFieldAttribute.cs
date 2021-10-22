@@ -1,7 +1,7 @@
 ﻿using System;
 using Redis.OM.Modeling;
 
-namespace Redis.OM.RediSearch.Attributes
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// Decorates a field that you want to index.

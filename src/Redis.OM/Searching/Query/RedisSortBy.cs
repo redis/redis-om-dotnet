@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Redis.OM.Model;
 
-namespace Redis.OM.RediSearch.Query
+namespace Redis.OM.Searching.Query
 {
     /// <summary>
     /// a sort-by predicate for a search.

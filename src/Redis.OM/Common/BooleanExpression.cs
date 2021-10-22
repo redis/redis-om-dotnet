@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace Redis.OM.RediSearch
+namespace Redis.OM.Common
 {
     /// <summary>
     /// A boolean expression.

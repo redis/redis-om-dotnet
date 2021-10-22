@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Model;
-using Redis.OM.RediSearch.Responses;
 
 namespace Redis.OM.Aggregation
 {

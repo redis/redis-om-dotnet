@@ -3,12 +3,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Redis.OM.Aggregation;
 using Redis.OM.Model;
-using Redis.OM.RediSearch.Collections;
-using Redis.OM.RediSearch.Responses;
 using Redis.OM.Modeling;
+using Redis.OM.Searching;
 
-namespace Redis.OM.RediSearch
+namespace Redis.OM
 {
     /// <summary>
     /// Extensions of the Queryable Type for RedisCollections.

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Redis.OM.RediSearch.Query
+namespace Redis.OM.Searching.Query
 {
     /// <summary>
     /// A query to redis.

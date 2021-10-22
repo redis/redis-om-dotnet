@@ -1,4 +1,4 @@
-﻿namespace Redis.OM.RediSearch.Query
+﻿namespace Redis.OM.Searching.Query
 {
     /// <summary>
     /// Flags to indicate the options of a query.

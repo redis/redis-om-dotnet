@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Redis.OM.RediSearch.Collections
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// A diff that will delete the property.

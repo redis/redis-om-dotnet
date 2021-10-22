@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Redis.OM.RediSearch.Collections;
+using Redis.OM.Modeling;
 
-namespace Redis.OM.RediSearch
+namespace Redis.OM.Searching
 {
     /// <summary>
     /// A collection of items in redis that you can use to look up items in redis, or perform queries on indexed documents.

@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Redis.OM.Schema
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// Json Converter for converting <see cref="GeoLoc"/> to and from JSON.

@@ -8,7 +8,7 @@ using Redis.OM.Model;
 using Redis.OM.Modeling;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
-namespace Redis.OM.RediSearch.Collections
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// Manages the state of the Redis Collection.

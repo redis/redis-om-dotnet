@@ -1,4 +1,4 @@
-﻿namespace Redis.OM.RediSearch.Collections
+﻿namespace Redis.OM.Modeling
 {
     /// <summary>
     /// Handles resolving the difference between a snapshot and a current iteration of an object.

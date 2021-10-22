@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Redis.OM.RediSearch.Query
+namespace Redis.OM.Searching.Query
 {
     /// <summary>
     /// Filter to use when querying.

@@ -1,11 +1,9 @@
 ﻿using Redis.OM.RediSearch;
-using Redis.OM.RediSearch.Attributes;
 using System;
 using System.Linq;
 using Redis.OM;
 using Redis.OM.Model;
-using Redis.OM.RediSearch.Indexing;
-using Redis.OM.Schema;
+using Redis.OM.Modeling;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.SearchJsonTests

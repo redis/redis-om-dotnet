@@ -1,6 +1,6 @@
-﻿using Redis.OM.Contracts;
-using Redis.OM.RediSearch;
-using Redis.OM.RediSearch.Collections;
+﻿using Redis.OM.Aggregation;
+using Redis.OM.Contracts;
+using Redis.OM.Searching;
 using StackExchange.Redis;
 
 namespace Redis.OM

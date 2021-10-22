@@ -1,7 +1,7 @@
 ﻿using System;
 using Redis.OM.Modeling;
 
-namespace Redis.OM.RediSearch.Attributes
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// Marks a field as searchable within a Redis Document.

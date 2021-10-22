@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Redis.OM.Model;
+using Redis.OM.Searching;
 
-namespace Redis.OM.Aggregating.AggregationPredicates
+namespace Redis.OM.Aggregation.AggregationPredicates
 {
     /// <summary>
     /// Sort by predicate for an aggregation.

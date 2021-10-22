@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Redis.OM.Common;
 using Redis.OM.Model;
+using Redis.OM.Searching;
 
 namespace Redis.OM.Aggregation.AggregationPredicates
 {

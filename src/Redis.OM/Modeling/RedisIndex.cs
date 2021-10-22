@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Redis.OM.Model;
 using Redis.OM.Modeling;
 
-namespace Redis.OM.RediSearch.Indexing
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// A utility class for serializing objects into Redis Indices.

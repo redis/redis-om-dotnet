@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq.Expressions;
+using Redis.OM.Common;
 
 namespace Redis.OM.Aggregation.AggregationPredicates
 {

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Redis.OM.Common;
 using Redis.OM.Modeling;
-using Redis.OM.RediSearch.Attributes;
 
 namespace Redis.OM.Aggregation.AggregationPredicates
 {

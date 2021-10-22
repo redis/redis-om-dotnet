@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Redis.OM.RediSearch.Collections
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// A diff for a hash type object.

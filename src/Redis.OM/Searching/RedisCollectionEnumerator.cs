@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Redis.OM;
+using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Model;
-using Redis.OM.RediSearch.Collections;
-using Redis.OM.RediSearch.Query;
-using Redis.OM.RediSearch.Responses;
 using Redis.OM.Modeling;
+using Redis.OM.RediSearch;
+using Redis.OM.Searching.Query;
 
-namespace Redis.OM.RediSearch.Enumerators
+namespace Redis.OM.Searching
 {
     /// <summary>
     /// Enumerator for collection.

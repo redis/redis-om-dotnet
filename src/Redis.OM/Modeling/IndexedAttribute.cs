@@ -1,6 +1,6 @@
 ﻿using Redis.OM.Modeling;
 
-namespace Redis.OM.RediSearch.Attributes
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// Decorate a numeric string or geo field to add an index to it.

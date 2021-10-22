@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Redis.OM.RediSearch.Query
+namespace Redis.OM.Searching.Query
 {
     /// <summary>
     /// Predicate denoting the fields that will be returned from redis.

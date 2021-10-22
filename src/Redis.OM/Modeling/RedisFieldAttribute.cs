@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Redis.OM.RediSearch
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// An attribute representing a particular field to be stored in redis.

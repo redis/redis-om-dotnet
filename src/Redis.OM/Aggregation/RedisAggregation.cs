@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Redis.OM.RediSearch.AggregationPredicates;
+using Redis.OM.Aggregation.AggregationPredicates;
 
 namespace Redis.OM.Aggregation
 {

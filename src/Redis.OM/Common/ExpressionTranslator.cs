@@ -4,13 +4,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using Redis.OM.Model;
-using Redis.OM.RediSearch.AggregationPredicates;
-using Redis.OM.RediSearch.Attributes;
-using Redis.OM.RediSearch.Query;
+using Redis.OM.Aggregation;
+using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Modeling;
+using Redis.OM.Searching;
+using Redis.OM.Searching.Query;
 
-namespace Redis.OM.RediSearch
+namespace Redis.OM.Common
 {
     /// <summary>
     /// Translates expressions into usable queries and aggregations.

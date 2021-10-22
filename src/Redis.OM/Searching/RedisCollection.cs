@@ -7,10 +7,9 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
-using Redis.OM.RediSearch.Enumerators;
 using Redis.OM.Modeling;
 
-namespace Redis.OM.RediSearch.Collections
+namespace Redis.OM.Searching
 {
     /// <summary>
     /// Collection of items in Redis, can be queried using it's fluent interface.

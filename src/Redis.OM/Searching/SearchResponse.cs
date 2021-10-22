@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Redis.OM.Model;
 
-namespace Redis.OM.RediSearch.Responses
+namespace Redis.OM.Searching
 {
     /// <summary>
     /// The result from a search.

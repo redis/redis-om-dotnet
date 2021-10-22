@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace Redis.OM.RediSearch.Collections
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// builds a diff for a json object.

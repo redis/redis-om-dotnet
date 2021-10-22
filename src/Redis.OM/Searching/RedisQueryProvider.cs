@@ -4,14 +4,15 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Redis.OM.Aggregation;
+using Redis.OM.Aggregation.AggregationPredicates;
+using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Model;
-using Redis.OM.RediSearch.AggregationPredicates;
-using Redis.OM.RediSearch.Collections;
-using Redis.OM.RediSearch.Responses;
 using Redis.OM.Modeling;
+using Redis.OM.RediSearch;
 
-namespace Redis.OM.RediSearch
+namespace Redis.OM.Searching
 {
     /// <summary>
     /// Query provider.

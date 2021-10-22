@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Redis.OM.RediSearch.Query
+namespace Redis.OM.Searching.Query
 {
     /// <summary>
     /// A geographic filter.

@@ -8,10 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
-using Redis.OM.RediSearch.Enumerators;
-using Redis.OM.RediSearch.Responses;
+using Redis.OM.Searching;
 
-namespace Redis.OM.Aggregating
+namespace Redis.OM.Aggregation
 {
     /// <summary>
     /// A collection that you can use to run aggregations in redis.

@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using Redis.OM.RediSearch.Attributes;
-using Redis.OM.Modeling;
 
-namespace Redis.OM.RediSearch
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// utility methods for serializing schema fields.

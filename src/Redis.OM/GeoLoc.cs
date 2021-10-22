@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Redis.OM.Schema
+namespace Redis.OM.Modeling
 {
     /// <summary>
     /// A structure representing a point on the globe by it's longitude and latitude.

@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
 using Redis.OM.Contracts;
-using Redis.OM.RediSearch.Collections;
-using Redis.OM.Schema;
+using Redis.OM.Modeling;
+using Redis.OM.Searching;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests

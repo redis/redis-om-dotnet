@@ -1,4 +1,4 @@
-﻿namespace Redis.OM.Model
+﻿namespace Redis.OM.Modeling
 {
     /// <summary>
     /// Determine how the item will be stored in Redis.
