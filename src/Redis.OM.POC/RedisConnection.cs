@@ -6,10 +6,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO.Pipelines;
-using Redis.OM.RediSearch;
 using Newtonsoft.Json;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
+using Redis.OM;
 
 namespace Redis.OM
 {

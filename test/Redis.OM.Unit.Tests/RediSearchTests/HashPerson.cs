@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using Redis.OM;
-using Redis.OM.Model;
-using Redis.OM.RediSearch;
 using Redis.OM.Modeling;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests

@@ -1,8 +1,6 @@
-﻿using Redis.OM.RediSearch;
-using System;
+﻿using System;
 using System.Linq;
 using Redis.OM;
-using Redis.OM.Model;
 using Redis.OM.Modeling;
 using Xunit;
 

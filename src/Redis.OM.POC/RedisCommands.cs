@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
+using Redis.OM;
 using Redis.OM.Modeling;
 
 namespace Redis.OM

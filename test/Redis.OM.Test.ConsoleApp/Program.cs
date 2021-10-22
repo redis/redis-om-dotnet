@@ -1,11 +1,10 @@
-﻿using Redis.OM.RediSearch;
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Redis.OM.Aggregation.AggregationPredicates;
-using Redis.OM.Model;
+using Redis.OM;
 using Redis.OM.Modeling;
 
 namespace Redis.OM.Test.ConsoleApp

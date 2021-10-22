@@ -1,11 +1,10 @@
 ﻿using Moq;
-using Redis.OM.RediSearch;
 using System;
 using System.Linq;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
+using Redis.OM;
 using Redis.OM.Modeling;
 using Xunit;
 
