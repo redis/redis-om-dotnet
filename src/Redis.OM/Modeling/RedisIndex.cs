@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Redis.OM.Model;
+using Redis.OM;
 using Redis.OM.Modeling;
 
 namespace Redis.OM.Modeling

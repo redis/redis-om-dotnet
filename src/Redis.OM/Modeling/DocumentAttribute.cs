@@ -1,5 +1,5 @@
 ﻿using System;
-using Redis.OM.Model;
+using Redis.OM;
 
 namespace Redis.OM.Modeling
 {

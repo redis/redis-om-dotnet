@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Redis.OM.Common;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
 
 namespace Redis.OM.Aggregation
 {

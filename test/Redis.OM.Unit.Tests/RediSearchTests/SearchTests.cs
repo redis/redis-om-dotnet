@@ -1,11 +1,9 @@
 ﻿using Moq;
 using Moq.Language.Flow;
-using Redis.OM.RediSearch;
 using System;
 using System.Linq;
 using Redis.OM;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
 using Redis.OM.Searching;
 using Xunit;
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Redis.OM.RediSearch;
 
 namespace Redis.OM.Modeling
 {

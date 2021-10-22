@@ -2,7 +2,7 @@
 using System.Linq;
 using StackExchange.Redis;
 
-namespace Redis.OM.Model
+namespace Redis.OM
 {
     /// <summary>
     /// A generic reply from redis which can be explicitly used as an appropriate type.

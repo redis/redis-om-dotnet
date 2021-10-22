@@ -4,7 +4,6 @@ using StackExchange.Redis;
 using System.Linq;
 using System.IO;
 using Redis.OM;
-using Redis.OM.Model;
 using Redis.OM.Modeling;
 
 namespace Redis.OM.Unit.Tests

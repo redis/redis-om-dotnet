@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
 using StackExchange.Redis;
 
 namespace Redis.OM

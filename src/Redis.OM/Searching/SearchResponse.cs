@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Redis.OM.Model;
+using Redis.OM;
 
 namespace Redis.OM.Searching
 {

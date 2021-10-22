@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Redis.OM.Contracts;
-using Redis.OM.Model;
 using Redis.OM.Modeling;
 
 [assembly: InternalsVisibleTo("Redis.OM.POC")]
