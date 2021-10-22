@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Redis.OM.Schema;
+using Redis.OM.Modeling;
 
 namespace Redis.OM.Generators
 {

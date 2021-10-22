@@ -6,7 +6,7 @@ using System.Linq;
 using Redis.OM;
 using Redis.OM.Contracts;
 using Redis.OM.Model;
-using Redis.OM.RediSearch.Collections;
+using Redis.OM.Searching;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
