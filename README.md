@@ -1,4 +1,4 @@
-<h1 align="center">Redis ŌM</h1>
+![Redis OM logo][Logo]
 <p align="center">
     <p align="center">
         Objecting mapping, and more, for Redis.
@@ -9,6 +9,8 @@
 
 [![License][license-image]][license-url]
 [![Build Status][ci-svg]][ci-url]
+
+
 
 **Redis ŌM .NET** makes it easy to model Redis data in your .NET Applications.
 
@@ -183,6 +185,9 @@ We'd love your contributions!
 **Bug reports** are especially helpful at this stage of the project. [You can open a bug report on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new).
 
 You can also **contribute documentation** -- or just let us know if something needs more detail. [Open an issue on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new) to get started.
+
+<!-- Logo -->
+[Logo]: images/logo.svg
 
 <!-- Badges -->
 
