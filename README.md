@@ -1,4 +1,4 @@
-<h1 align="center">Redis OM</h1>
+![Redis OM logo][Logo]
 <p align="center">
     <p align="center">
         Objecting mapping, and more, for Redis.
@@ -10,9 +10,11 @@
 [![License][license-image]][license-url]
 [![Build Status][ci-svg]][ci-url]
 
-**Redis OM .NET** makes it easy to model Redis data in your .NET Applications.
 
-**Redis OM .NET** | [Redis OM Node.js](redis-om-js) | [Redis OM Spring](redis-om-spring) | [Redis OM Python](redis-om-python)
+
+**Redis ŌM .NET** makes it easy to model Redis data in your .NET Applications.
+
+**Redis ŌM .NET** | [Redis ŌM Node.js](redis-om-js) | [Redis ŌM Spring](redis-om-spring) | [Redis ŌM Python](redis-om-python)
 
 <details>
   <summary><strong>Table of contents</strong></summary>
@@ -20,7 +22,7 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [💡 Why Redis OM?](#-why-redis-om)
+- [💡 Why Redis ŌM?](#-why-redis-om)
 - [💻 Installation](#-installation)
 - [🏁 Getting started](#-getting-started)
   - [Starting Redis](#starting-redis)
@@ -38,9 +40,9 @@
 
 </details>
 
-## 💡 Why Redis OM?
+## 💡 Why Redis ŌM?
 
-Redis OM provides high-level abstractions for using Redis in .NET, making it easy to model and query your Redis domain objects.
+Redis ŌM provides high-level abstractions for using Redis in .NET, making it easy to model and query your Redis domain objects.
 
 This **preview** release contains the following features:
 
@@ -69,7 +71,7 @@ docker run -p 6379:6379 redislabs/redismod:preview
 
 ### 📇 Modeling your domain (and indexing it!)
 
-With Redis OM, you can model your data and declare indexes with minimal code. For example, here's how we might model a customer object:
+With Redis ŌM, you can model your data and declare indexes with minimal code. For example, here's how we might model a customer object:
 
 ```csharp
 [Document(StorageType = StorageType.Json)]
@@ -136,7 +138,7 @@ customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -
 
 ## 📚 Documentation
 
-This README just scratches the surface. You can find complete documentation in the [REDIS OM .NET docs folder](docs/README.md).
+This README just scratches the surface. You can find complete documentation in the [REDIS ŌM .NET docs folder](docs/README.md).
 
 ## ⛏️ Troubleshooting
 
@@ -183,6 +185,9 @@ We'd love your contributions!
 **Bug reports** are especially helpful at this stage of the project. [You can open a bug report on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new).
 
 You can also **contribute documentation** -- or just let us know if something needs more detail. [Open an issue on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new) to get started.
+
+<!-- Logo -->
+[Logo]: images/logo.svg
 
 <!-- Badges -->
 
