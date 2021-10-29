@@ -302,6 +302,26 @@ namespace Redis.OM
         /// <inheritdoc/>
         public TypeCode GetTypeCode()
         {
+            if (_internalDouble != null)
+            {
+                return TypeCode.Double;
+            }
+
+            if (_internalInt != null)
+            {
+                return TypeCode.Int32;
+            }
+
+            if (_internalLong != null)
+            {
+                return TypeCode.Int64;
+            }
+
+            if (_internalString != null)
+            {
+                return TypeCode.String;
+            }
+
             throw new NotImplementedException();
         }
 
@@ -314,25 +334,48 @@ namespace Redis.OM
         /// <inheritdoc/>
         public byte ToByte(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            var asDouble = (double)this;
+            if (asDouble is >= byte.MinValue and <= byte.MaxValue)
+            {
+                return (byte)asDouble;
+            }
+
+            throw new InvalidCastException();
         }
 
         /// <inheritdoc/>
         public char ToChar(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            return ToString().Length == 1
+                ? ToString().First()
+                : throw new InvalidCastException();
         }
 
         /// <inheritdoc/>
         public DateTime ToDateTime(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            throw new InvalidCastException();
         }
 
         /// <inheritdoc/>
         public decimal ToDecimal(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            if (_internalDouble != null)
+            {
+                return (decimal)_internalDouble;
+            }
+
+            if (_internalInt != null)
+            {
+                return (decimal)_internalInt;
+            }
+
+            if (_internalLong != null)
+            {
+                return (decimal)_internalLong;
+            }
+
+            throw new InvalidCastException();
         }
 
         /// <inheritdoc/>
@@ -344,7 +387,13 @@ namespace Redis.OM
         /// <inheritdoc/>
         public short ToInt16(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            var asDouble = (double)this;
+            if (asDouble is <= short.MaxValue and >= short.MinValue)
+            {
+                return (short)asDouble;
+            }
+
+            throw new InvalidCastException();
         }
 
         /// <inheritdoc/>
@@ -356,13 +405,19 @@ namespace Redis.OM
         /// <inheritdoc/>
         public sbyte ToSByte(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            var asDouble = (double)this;
+            if (asDouble is <= sbyte.MaxValue and >= sbyte.MinValue)
+            {
+                return (sbyte)asDouble;
+            }
+
+            throw new InvalidCastException();
         }
 
         /// <inheritdoc/>
         public float ToSingle(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            return (float)((double)this);
         }
 
         /// <inheritdoc/>
@@ -396,19 +451,37 @@ namespace Redis.OM
         /// <inheritdoc/>
         public ushort ToUInt16(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            var asLong = (long)this;
+            if (asLong is >= ushort.MinValue and <= ushort.MaxValue)
+            {
+                return (ushort)asLong;
+            }
+
+            throw new InvalidCastException();
         }
 
         /// <inheritdoc/>
         public uint ToUInt32(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            var asLong = (long)this;
+            if (asLong is >= uint.MinValue and <= uint.MaxValue)
+            {
+                return (uint)asLong;
+            }
+
+            throw new InvalidCastException();
         }
 
         /// <inheritdoc/>
         public ulong ToUInt64(IFormatProvider provider)
         {
-            throw new NotImplementedException();
+            var asLong = (long)this;
+            if (asLong is >= 0)
+            {
+                return (ulong)asLong;
+            }
+
+            throw new InvalidCastException();
         }
     }
 }
