@@ -1,7 +1,14 @@
-![Redis OM logo][Logo]
+<div align="center">
+  <br/>
+  <br/>
+  <img width="360" src="images/logo.svg" alt="Redis OM" />
+  <br/>
+  <br/>
+</div>
+
 <p align="center">
     <p align="center">
-        Objecting mapping, and more, for Redis.
+        Object mapping, and more, for Redis and .NET
     </p>
 </p>
 
