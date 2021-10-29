@@ -12,9 +12,9 @@
 
 
 
-**Redis ŌM .NET** makes it easy to model Redis data in your .NET Applications.
+**Redis OM .NET** makes it easy to model Redis data in your .NET Applications.
 
-**Redis ŌM .NET** | [Redis ŌM Node.js](redis-om-js) | [Redis ŌM Spring](redis-om-spring) | [Redis ŌM Python](redis-om-python)
+**Redis OM .NET** | [Redis OM Node.js][redis-om-js] | [Redis OM Spring][redis-om-spring] | [Redis OM Python][redis-om-python]
 
 <details>
   <summary><strong>Table of contents</strong></summary>
@@ -22,7 +22,7 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [💡 Why Redis ŌM?](#-why-redis-om)
+- [💡 Why Redis OM?](#-why-redis-om)
 - [💻 Installation](#-installation)
 - [🏁 Getting started](#-getting-started)
   - [Starting Redis](#starting-redis)
@@ -40,9 +40,9 @@
 
 </details>
 
-## 💡 Why Redis ŌM?
+## 💡 Why Redis OM?
 
-Redis ŌM provides high-level abstractions for using Redis in .NET, making it easy to model and query your Redis domain objects.
+Redis OM provides high-level abstractions for using Redis in .NET, making it easy to model and query your Redis domain objects.
 
 This **preview** release contains the following features:
 
@@ -71,7 +71,7 @@ docker run -p 6379:6379 redislabs/redismod:preview
 
 ### 📇 Modeling your domain (and indexing it!)
 
-With Redis ŌM, you can model your data and declare indexes with minimal code. For example, here's how we might model a customer object:
+With Redis OM, you can model your data and declare indexes with minimal code. For example, here's how we might model a customer object:
 
 ```csharp
 [Document(StorageType = StorageType.Json)]
@@ -138,7 +138,7 @@ customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -
 
 ## 📚 Documentation
 
-This README just scratches the surface. You can find complete documentation in the [REDIS ŌM .NET docs folder](docs/README.md).
+This README just scratches the surface. You can find complete documentation in the [Redis OM .NET docs site](https://redis-developer.github.io/redis-om-dotnet).
 
 ## ⛏️ Troubleshooting
 
@@ -147,36 +147,28 @@ If you run into trouble or have any questions, we're here to help!
 First, check the [FAQ](docs/faq.md). If you don't find the answer there,
 hit us up on the [Redis Discord Server](http://discord.gg/redis).
 
-## ✨ RediSearch and RedisJSON
+## ✨ RedisJSON
 
-Redis OM relies on core features from two source-available Redis modules: **RediSearch** and **RedisJSON**.
-
-These modules are the "magic" behind the scenes:
-
-* RediSearch adds querying, indexing, and full-text search to Redis
-* RedisJSON adds the JSON data type to Redis
+Redis OM can be used with regular Redis for Object mapping and getting objects by their IDs. For more advanced features like indexing, querying, and aggregation, Redis OM is dependeant on the [Source Available](https://redis.com/wp-content/uploads/2019/09/redis-source-available-license.pdf) [**RedisJSON**](https://oss.redis.com/redisjson/) module.
 
 ### Why this is important
 
-Without RediSearch or RedisJSON, you can still use Redis OM to create declarative models backed by Redis.
+Without RedisJSON, you can still use Redis OM to create declarative models backed by Redis.
 
 We'll store your model data in Redis as Hashes, and you can retrieve models using their primary keys.
 
 So, what won't work without these modules?
 
-1. Without RedisJSON, you won't be able to nest models inside each other.
-2. Without RediSearch, you won't be able to use our expressive queries to find object -- you'll only be able to query by primary key.
+1. You won't be able to nest models inside each other.
+2. You won't be able to use our expressive queries to find object -- you'll only be able to query by primary key.
 
-### So how do you get RediSearch and RedisJSON?
+### So how do you get RedisJSON?
 
-You can use RediSearch and RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary versions of the modules in their Quick Start Guides:
+You can use RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary version of the module in its [Quick Start Guides](https://oss.redis.com/redisjson/#download-and-running-binaries)
 
-- [RedisJSON Quick Start - Running Binaries](https://oss.redis.com/redisjson/#download-and-running-binaries)
-- [RediSearch Quick Start - Running Binaries](https://oss.redis.com/redisearch/Quick_Start/#download_and_running_binaries)
+> NOTE: The quick start guide has instructions on how to run the module in Redis with Docker.
 
-**NOTE**: Both quick start guides also have instructions on how to run these modules in Redis with Docker.
-
-Don't want to run Redis yourself? RediSearch and RedisJSON are also available on Redis Cloud. [Get started here](https://redis.com/try-free/).
+Don't want to run Redis yourself? RedisJSON is also available on Redis Cloud. [Get started here](https://redis.com/try-free/).
 
 ## ❤️ Contributing
 
@@ -199,8 +191,8 @@ You can also **contribute documentation** -- or just let us know if something ne
 <!-- Links -->
 
 [redis-developer-website]: https://developer.redis.com
-[redis-om-js]: https://github.com/redis-developer/redis-om-js
-[redis-om-dotnet]: https://github.com/redis-developer/redis-om-dotnet
+[redis-om-js]: https://github.com/redis-developer/redis-om-node
+[redis-om-python]: https://github.com/redis-developer/redis-om-python
 [redis-om-spring]: https://github.com/redis-developer/redis-om-spring
 [redisearch-url]: https://oss.redis.com/redisearch/
 [redis-json-url]: https://oss.redis.com/redisjson/
