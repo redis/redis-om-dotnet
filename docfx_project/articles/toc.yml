@@ -1,0 +1,23 @@
+- name: Getting Started
+  href: intro.md
+- name: Add and Retrieve Objects
+  href: add-and-retrieve-objects/add-and-retrieve-objects.md
+- name: Search
+  items:
+    - name: Creating an Index
+      href: creating-an-index/creating-an-index.md
+    - name: Simple Text Queries
+      href: searching/simple-text-queries/simple-text-queries.md
+    - name: Numeric Queries
+      href: searching/numeric-queries/numeric-queries.md
+    - name: Geo Filters
+      href: searching/numeric-queries/numeric-queries.md
+- name: Aggregation
+  href: aggregations/intro/intro.md
+  items:
+    - name: Intro
+      href: aggregations/intro/intro.md
+    - name: Apply Functions
+      href: aggregations/apply-functions/apply-functions.md
+    - name: Groups
+      href: aggregations/groups/groups.md

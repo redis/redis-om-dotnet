@@ -14,7 +14,7 @@
 
 **Redis OM .NET** makes it easy to model Redis data in your .NET Applications.
 
-**Redis OM .NET** | [Redis OM Node.js](redis-om-js) | [Redis OM Spring](redis-om-spring) | [Redis OM Python](redis-om-python)
+[**Redis OM .NET**][redis-om-dotnet] | [Redis OM Node.js][redis-om-js] | [Redis OM Spring][redis-om-spring] | [Redis OM Python][redis-om-python]
 
 <details>
   <summary><strong>Table of contents</strong></summary>
@@ -136,10 +136,6 @@ customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -
       "DistanceToMall");
 ```
 
-## 📚 Documentation
-
-This README just scratches the surface. You can find complete documentation in the [REDIS OM .NET docs folder](docs/README.md).
-
 ## ⛏️ Troubleshooting
 
 If you run into trouble or have any questions, we're here to help!
@@ -187,19 +183,21 @@ We'd love your contributions!
 You can also **contribute documentation** -- or just let us know if something needs more detail. [Open an issue on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new) to get started.
 
 <!-- Logo -->
-[Logo]: images/logo.svg
+[Logo]: images/red.svg
 
 <!-- Badges -->
 
 [ci-svg]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml/badge.svg
 [ci-url]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml
 [license-image]: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
-[license-url]: LICENSE
+[license-url]: https://github.com/redis-developer/redis-om-dotnet/blob/main/LICENSE
 
 <!-- Links -->
 
 [redis-developer-website]: https://developer.redis.com
+[redis-om-dotnet]: https://github.com/redis-developer/redis-om-dotnet
 [redis-om-js]: https://github.com/redis-developer/redis-om-js
+[redis-om-python]: https://github.com/redis-developer/redis-om-python
 [redis-om-dotnet]: https://github.com/redis-developer/redis-om-dotnet
 [redis-om-spring]: https://github.com/redis-developer/redis-om-spring
 [redisearch-url]: https://oss.redis.com/redisearch/
