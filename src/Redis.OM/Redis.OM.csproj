@@ -6,12 +6,12 @@
     <RootNamespace>Redis.OM</RootNamespace>
     <Nullable>enable</Nullable>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <PackageVersion>0.0.1</PackageVersion>
+    <PackageVersion>0.0.2</PackageVersion>
     <Title>Redis OM</Title>
     <Authors>Steve Lorello</Authors>
     <Copyright>Redis Inc</Copyright>
     <PackageProjectUrl>https://github.com/redis-developer/redis-om-dotnet</PackageProjectUrl>
-    <PackageIcon>icon.png</PackageIcon>
+    <PackageIcon>icon-square.png</PackageIcon>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/redis-developer/redis-om-dotnet</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../../images/icon.png" Pack="true" PackagePath="\"/>
+    <None Include="../../images/icon-square.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
