@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Aggregations Intro </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Aggregations Intro ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../../../favicon.ico">
+    <link rel="stylesheet" href="../../../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../../../styles/docfx.css">
+    <link rel="stylesheet" href="../../../styles/main.css">
+    <meta property="docfx:navrel" content="../../../toc.html">
+    <meta property="docfx:tocrel" content="../../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../../../index.html">
+                <img id="logo" class="svg" src="../../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="aggregations-intro">Aggregations Intro</h1>
+
+<p><a href="https://oss.redis.com/redisearch/Aggregations/">Aggregations</a> are a method of grouping documents together and run processing on them on the server to transform them into data that you need in your application, without having to perform the computation client-side.</p>
+<h2 id="anatomy-of-a-pipeline">Anatomy of a Pipeline</h2>
+<p>Aggregations in Redis are build around an aggregation pipeline, you will start off with a <code>RedisAggregationSet&lt;T&gt;</code> of objects that you have indexed in Redis. From there you can</p>
+<ul>
+<li>Query to filter down the results you want</li>
+<li>Apply functions to them to combine functions to them</li>
+<li>Group like features together</li>
+<li>Run reductions on groups</li>
+<li>Sort records</li>
+<li>Further filter down records</li>
+</ul>
+<h2 id="setting-up-for-aggregations">Setting up for Aggregations</h2>
+<p>Redis OM .NET provides an <code>RedisAggregationSet&lt;T&gt;</code> class that will let you perform aggregations on employees, let's start off with a trivial aggregation. Let's start off by defining a model:</p>
+<pre><code class="lang-csharp">[Document]
+public class Employee
+{
+    [Indexed]
+    public string Name { get; set; }
+    
+    [Indexed]
+    public GeoLoc? HomeLoc { get; set; }
+
+    [Indexed(Aggregatable = true)]
+    public int Age { get; set; }
+
+    [Indexed(Aggregatable = true)]
+    public double Sales { get; set; }
+    
+    [Indexed(Aggregatable = true)]
+    public double SalesAdjustment { get; set; }
+
+    [Searchable(Aggregatable = true)]
+    public string Department { get; set; }
+}
+</code></pre>
+<p>We'll then create the index for that model, pull out a <code>RedisAggregationSet&lt;T&gt;</code> from our provider, and initialize the index, and seed some data into our database</p>
+<pre><code class="lang-csharp">var provider = new RedisConnectionProvider(&quot;redis://localhost:6379&quot;);
+await provider.Connection.CreateIndexAsync(typeof(Restaurant));
+var employees = provider.RedisCollection&lt;Employee&gt;();
+var employeeAggregations = provider.AggregationSet&lt;Employee&gt;();
+var e1 = new Employee {Name = &quot;Bob&quot;, Age = 35, Sales = 100000, SalesAdjustment = 1.5,  Department = &quot;EMEA Sales&quot;};
+var e2 = new Employee {Name = &quot;Alice&quot;, Age = 52, Sales = 300000, SalesAdjustment = 1.02, Department = &quot;Partner Sales&quot;};
+var e3 = new Employee {Name = &quot;Marcus&quot;, Age = 42, Sales = 250000, SalesAdjustment = 1.1, Department = &quot;NA Sales&quot;};
+var e4 = new Employee {Name = &quot;Susan&quot;, Age = 27, Sales = 200000, SalesAdjustment = .95, Department = &quot;EMEA Sales&quot;};
+var e5 = new Employee {Name = &quot;John&quot;, Age = 38, Sales = 275000, SalesAdjustment = .9, Department = &quot;APAC Sales&quot;};
+var e6 = new Employee {Name = &quot;Theresa&quot;, Age = 30, Department = &quot;EMEA Ops&quot;};
+employees.Insert(e1);
+employees.Insert(e2);
+employees.Insert(e3);
+employees.Insert(e4);
+employees.Insert(e5);
+employees.Insert(e6);
+</code></pre>
+<h2 id="the-aggregationresult">The AggregationResult</h2>
+<p>The Aggregations pipeline Is all built around the <code>RedisAggregationSet&lt;T&gt;</code> this Set is generic, so you can provide the model that you want to build your aggregations around (an Indexed type), but you will notice that the return type from queries to the <code>RedisAggregationSet</code> is the generic type passed into it. Rather it is an <code>AggregationResult&lt;T&gt;</code> where <code>T</code> is the generic type you passed into it. This is a really important concept, when results are returned from aggregations, they are not hydrated into an object like they are with queries. That's because Aggregations aren't meant to pull out your model data from the database, rather they are meant to pull out aggregated results. The AggregationResult has a <code>RecordShell</code> field, which is ALWAYS null outside of the pipeline. It can be used to build expressions for querying objects in Redis, but when the AggregationResult lands, it will not contain a hydrated record, rather it will contain a dictionary of Aggregations built by the Aggregation pipeline. This means that you can access the results of your aggregations by indexing into the AggregationResult.</p>
+<h2 id="simple-aggregations">Simple Aggregations</h2>
+<p>Let's try running an aggregation where we find the Sum of the sales for all our employees in EMEA. So the Aggregations Pipeline will use the <code>RecordShell</code> object, which is a reference to the generic type of the aggregation set, for something as simple as a group-less SUM, you will simply get back a numeric type from the aggregation.</p>
+<pre><code class="lang-csharp">var sumOfSalesEmea = employeeAggregations.Where(x =&gt; x.RecordShell.Department == &quot;EMEA&quot;)
+    .Sum(x =&gt; x.RecordShell.Sales);
+Console.WriteLine($&quot;EMEA sold:{sumOfSalesEmea}&quot;);
+</code></pre>
+<p>The <code>Where</code> expression tells the aggregation pipeline which records to consider, and subsequently the <code>SUM</code> expression indicates which field to sum. Aggregations are a rich feature and this only scratches the surface of it, these pipelines are remarkably flexible and provide you the ability to do all sorts of neat operations on your Data in Redis.</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/articles/aggregations/intro/intro.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../../../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../../styles/main.js"></script>
+  </body>
+</html>

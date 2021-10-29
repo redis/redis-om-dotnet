@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Add and Retrieve Objects </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Add and Retrieve Objects ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../../styles/docfx.css">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <meta property="docfx:navrel" content="../../toc.html">
+    <meta property="docfx:tocrel" content="../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../../index.html">
+                <img id="logo" class="svg" src="../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="add-and-retrieve-objects">Add and Retrieve Objects</h1>
+
+<p>The Redis OM library supports declarative storage and retrieval of objects out of Redis. Without the RediSearch and RedisJson modules, this is limited to using hashes, and id lookups of objects in Redis. You will still use the <code>Document</code> Attribute to decorate a class you'd like to store in Redis. From there, all you need to do is either call <code>Insert</code> or <code>InsertAsync</code> on the <code>RedisCollection</code> or <code>Set</code> or <code>SetAsync</code> on the RedisConnection, passing in the object you want to set in Redis. You can then retrieve those objects with <code>Get&lt;T&gt;</code> or <code>GetAsync&lt;T&gt;</code> with the <code>RedisConnection</code> or with <code>FindById</code> or <code>FindByIdAsync</code> in the RedisCollection.</p>
+<pre><code class="lang-csharp">public class Program
+{
+    [Document(Prefixes = new []{&quot;Employee&quot;})]
+    public class Employee
+    {
+        [RedisIdField]
+        public string Id{ get; set; }
+
+        public string Name { get; set; }
+
+        public int Age { get; set; }
+
+        public double Sales { get; set; }    
+
+        public string Department { get; set; }
+    }
+    
+    static async Task Main(string[] args)
+    {
+        var provider = new RedisConnectionProvider(&quot;redis://localhost:6379&quot;);
+        var connection = provider.Connection;
+        var employees = provider.RedisCollection&lt;Employee&gt;();
+        var employee1 = new Employee{Name=&quot;Bob&quot;, Age=32, Sales = 100000, Department=&quot;Partner Sales&quot;};
+        var employee2 = new Employee{Name=&quot;Alice&quot;, Age=45, Sales = 200000, Department=&quot;EMEA Sales&quot;};
+        var idp1 = await connection.SetAsync(employee1);
+        var idp2 = await employees.InsertAsync(employee2);
+
+        var reconstitutedE1 = await connection.GetAsync&lt;Employee&gt;(idp1);
+        var reconstitutedE2 = await employees.FindByIdAsync(idp2);
+        Console.WriteLine($&quot;First Employee's name is {reconstitutedE1.Name}, they are {reconstitutedE1.Age} years old, &quot; +
+                          $&quot;they work in the {reconstitutedE1.Department} department and have sold {reconstitutedE1.Sales}, &quot; +
+                          $&quot;their ID is: {reconstitutedE1.Id}&quot;);
+        Console.WriteLine($&quot;Second Employee's name is {reconstitutedE2.Name}, they are {reconstitutedE2.Age} years old, &quot; +
+                        $&quot;they work in the {reconstitutedE2.Department} department and have sold {reconstitutedE2.Sales}, &quot; +
+                        $&quot;their ID is: {reconstitutedE2.Id}&quot;);
+    }
+}
+</code></pre>
+<p>The Code above will declare an <code>Employee</code> class, and allow you to add employees to Redis, and then retrieve Employees from Redis the output from this method will look like this:</p>
+<pre><code class="lang-text">First Employee's name is Bob, they are 32 years old, they work in the Partner Sales department and have sold 100000, their ID is: 01FHDFE115DKRWZW0XNF17V2RK
+Second Employee's name is Alice, they are 45 years old, they work in the EMEA Sales department and have sold 200000, their ID is: 01FHDFE11T23K6FCJQNHVEF92F
+</code></pre>
+<p>If you wanted to find them in Redis directly you could run <code>HGETALL Employee:01FHDFE115DKRWZW0XNF17V2RK</code> and that will retrieve the Employee object as a Hash from Redis. If you do not specify a prefix, the prefix will be the fully-qualified class name.</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/articles/add-and-retrieve-objects/add-and-retrieve-objects.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../styles/main.js"></script>
+  </body>
+</html>

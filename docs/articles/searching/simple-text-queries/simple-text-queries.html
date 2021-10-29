@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Simple Text Queries </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Simple Text Queries ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../../../favicon.ico">
+    <link rel="stylesheet" href="../../../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../../../styles/docfx.css">
+    <link rel="stylesheet" href="../../../styles/main.css">
+    <meta property="docfx:navrel" content="../../../toc.html">
+    <meta property="docfx:tocrel" content="../../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../../../index.html">
+                <img id="logo" class="svg" src="../../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="simple-text-queries">Simple Text Queries</h1>
+
+<p>The <code>RedisCollection</code> provides a fluent interface for querying objects stored in redis. This means that if you store an object in Redis with the Redis OM library, and you have <a href="https://oss.redis.com/redisearch/">RediSearch</a> enabled, you can query objects stored in Redis with ease using the LINQ syntax you're used to.</p>
+<h2 id="define-the-model">Define the Model</h2>
+<p>Let's start off by defining a model that we will be using for querying, we will use a <code>Employee</code> Class which will have some basic stuff we may want to query in it</p>
+<pre><code class="lang-csharp">[Document]
+public class Employee
+{
+    [Indexed]
+    public string Name { get; set; }
+
+    [Indexed(Aggregatable = true)]
+    public int Age { get; set; }
+    
+    [Indexed(Aggregatable = true)]
+    public double Sales { get; set; }    
+    
+    [Searchable(Aggregatable = true)]
+    public string Department { get; set; }
+}
+</code></pre>
+<h2 id="connect-to-redis">Connect to Redis</h2>
+<p>Now we will initialize a RedisConnectionProvider, and grab a handle to a RedisCollection for Employee</p>
+<pre><code class="lang-csharp">static async Task Main(string[] args)
+{
+    var provider = new RedisConnectionProvider(&quot;redis://localhost:6379&quot;);
+    var connection = provider.Connection;
+    var employees = prover.RedisCollection&lt;Employee&gt;();
+    await connection.CreateIndexAsync(typeof(Employee));
+}
+</code></pre>
+<h2 id="create-our-index">Create our Index</h2>
+<p>Next we'll create the index, so next in our <code>Main</code> method, let's take our type and condense it into an index</p>
+<h2 id="seed-some-data">Seed some Data</h2>
+<p>Next we'll seed a few piece of data in our database to play around with:</p>
+<pre><code class="lang-csharp">var e1 = new Employee {Name = &quot;Bob&quot;, Age = 35, Sales = 100000, Department = &quot;EMEA Sales&quot;};
+var e2 = new Employee {Name = &quot;Alice&quot;, Age = 52, Sales = 300000, Department = &quot;Partner Sales&quot;};
+var e3 = new Employee {Name = &quot;Marcus&quot;, Age = 42, Sales = 250000, Department = &quot;NA Sales&quot;};
+var e4 = new Employee {Name = &quot;Susan&quot;, Age = 27, Sales = 200000, Department = &quot;EMEA Sales&quot;};
+var e5 = new Employee {Name = &quot;John&quot;, Age = 38, Sales = 275000, Department = &quot;APAC Sales&quot;};
+var e6 = new Employee {Name = &quot;Theresa&quot;, Age = 30, Department = &quot;EMEA Ops&quot;};
+var insertTasks = new []
+    {
+        employees.InsertAsync(e1),
+        employees.InsertAsync(e2),
+        employees.InsertAsync(e3),
+        employees.InsertAsync(e4),
+        employees.InsertAsync(e5)
+        employees.InsertAsync(e6)
+    };
+await Task.WhenAll(insertTasks);
+</code></pre>
+<h2 id="simple-text-query-of-an-indexed-field">Simple Text Query of an Indexed Field</h2>
+<p>With these data inserted into our database, we can now go ahead and begin querying. Let's start out by trying to query people by name. We can search for all employees named <code>Susan</code> with a simple Where predicate:</p>
+<pre><code class="lang-csharp">var susans = employees.Where(x =&gt; x.Name == &quot;Susan&quot;);
+await foreach (var susan in susans)
+{
+    Console.WriteLine($&quot;Susan is {susan.Age} years old and works in the {susan.Department} department &quot;);
+}
+</code></pre>
+<p>The <code>Where</code> Predicates also support <code>and</code>/<code>or</code> operators, e.g. to find all employees named <code>Alice</code> or <code>Bob</code> you can use:</p>
+<pre><code class="lang-csharp">var AliceOrBobs = employees.Where(x =&gt; x.Name == &quot;Alice&quot; || x.Name == &quot;Bob&quot;);
+await foreach (var employee in AliceOrBobs)
+{
+    Console.WriteLine($&quot;{employee.Name} is {employee.Age} years old and works in the {employee.Department} Department&quot;);
+}
+</code></pre>
+<h3 id="limiting-result-object-fields">Limiting Result Object Fields</h3>
+<p>When you are querying larger Documents in Redis, you may not want to have to drag back the entire object over the network, in that case you can limit the results to only what you want using a <code>Select</code> predicate. E.g. if you only wanted to find out the ages of employees, all you would need to do is select the age of employees:</p>
+<pre><code class="lang-csharp">var employeeAges = employees.Select(x =&gt; x.Age);
+await foreach (var age in employeeAges)
+{
+    Console.WriteLine($&quot;age: {age}&quot;);
+}
+</code></pre>
+<p>Or if you want to select more than one field you can create a new anonymous object:</p>
+<pre><code class="lang-csharp">var employeeAges = employees.Select(x =&gt; new {x.Name, x.Age});
+await foreach (var e in employeeAges)
+{
+    Console.WriteLine($&quot;{e.Name} is age: {e.Age} years old&quot;);
+}
+</code></pre>
+<h3 id="limiting-returned-objects">Limiting Returned Objects</h3>
+<p>You can limit the size of your result (in the number of objects returned) with <code>Skip</code> &amp; <code>Take</code> predicates. <code>Skip</code> will skip over the specified number of records, and <code>Take</code> will take only the number of records provided (at most);</p>
+<pre><code class="lang-csharp">var people = employees.Skip(1).Take(2);
+await foreach (var e in people)
+{
+    Console.WriteLine($&quot;{e.Name} is age: {e.Age} years old&quot;);
+}
+</code></pre>
+<h2 id="full-text-search">Full Text Search</h2>
+<p>There are two types of attributes that can decorate strings, <code>Indexed</code>, which we've gone over and <code>Searchable</code> which we've yet to discuss. The <code>Searchable</code> attribute considers equality slightly differently than Indexed, it operates off a full-text search. In expressions involving Searchable fields, equality—<code>==</code>— means a match. A match in the context of a searchable field is not necessarily a full exact match but rather that the string contains the search text. Let's look at some examples.</p>
+<h3 id="find-employees-in-sales">Find Employee's in Sales</h3>
+<p>So we have a <code>Department</code> string which is marked as <code>Searchable</code> in our Employee class. Notice how we've named our departments. They contain a region and a department type. If we wanted only to find all employee's in <code>Sales</code> we could do so with:</p>
+<pre><code class="lang-csharp">var salesPeople = employees.Where(x =&gt; x.Department == &quot;Sales&quot;);
+await foreach (var employee in salesPeople)
+{
+    Console.WriteLine($&quot;{employee.Name} is in the {employee.Department} department&quot;);
+}
+</code></pre>
+<p>This will produce:</p>
+<pre><code class="lang-text">Bob is in the EMEA Sales department
+Alice is in the Partner Sales department
+Marcus is in the NA Sales department
+Susan is in the EMEA Sales department
+John is in the APAC Sales department
+</code></pre>
+<p>Because they are all folks in departments called <code>sales</code></p>
+<p>If you wanted to search for everyone in a department in <code>EMEA</code> you could search with:</p>
+<pre><code class="lang-csharp">var emeaFolks = employees.Where(x =&gt; x.Department == &quot;EMEA&quot;);
+await foreach (var employee in emeaFolks)
+{
+    Console.WriteLine($&quot;{employee.Name} is in the {employee.Department} department&quot;);
+}
+</code></pre>
+<p>Which of course would produce:</p>
+<pre><code class="lang-text">Bob is in the EMEA Sales department
+Susan is in the EMEA Sales department
+Theresa is in the EMEA Ops department
+</code></pre>
+<h2 id="sorting">Sorting</h2>
+<p>If a <code>Searchable</code> or <code>Indexed</code> field is marked as <code>Sortable</code>, or <code>Aggregatable</code>, you can order by that field using <code>OrderBy</code> predicates.</p>
+<pre><code class="lang-csharp">var employeesBySales = employees.OrderBy(x=&gt;x.Name);
+var employeesBySalesDescending = employees.OrderByDescending(x=&gt;x.Name);
+</code></pre>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/articles/searching/simple-text-queries/simple-text-queries.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../../../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../../styles/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,372 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Apply Functions </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Apply Functions ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../../../favicon.ico">
+    <link rel="stylesheet" href="../../../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../../../styles/docfx.css">
+    <link rel="stylesheet" href="../../../styles/main.css">
+    <meta property="docfx:navrel" content="../../../toc.html">
+    <meta property="docfx:tocrel" content="../../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../../../index.html">
+                <img id="logo" class="svg" src="../../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="apply-functions">Apply Functions</h1>
+
+<p>Apply functions are functions that you can define as expressions to apply to your data in Redis. In essence, they allow you to combine your data together, and extract the information you want.</p>
+<h2 id="data-model">Data Model</h2>
+<p>For the remainder of this article we will be using this data model:</p>
+<pre><code class="lang-csharp">[Document]
+public class Employee
+{
+    [Indexed(Aggregatable = true)]
+    public string Name { get; set; }
+    
+    [Indexed]
+    public GeoLoc? HomeLoc { get; set; }
+
+    [Indexed(Aggregatable = true)]
+    public int Age { get; set; }
+
+    [Indexed(Aggregatable = true)]
+    public double Sales { get; set; }
+    
+    [Indexed(Aggregatable = true)]
+    public double SalesAdjustment { get; set; }
+
+    [Searchable(Aggregatable = true)]
+    public string Department { get; set; }
+
+    [Indexed(Aggregatable = true)] 
+    public long LastOnline { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+}
+</code></pre>
+<h2 id="anatomy-of-an-apply-function">Anatomy of an Apply Function</h2>
+<p><code>Apply</code> is a method on the <code>RedisAggregationSet&lt;T&gt;</code> class which takes two arguments, each of which is a component of the apply function.</p>
+<p>First it takes the expression that you want Redis to execute on every record in the pipeline, this expression takes a single parameter, an <code>AggregationResult&lt;T&gt;</code>, where <code>T</code> is the generic type of your <code>RedisAggregationSet</code>. This AggregationResult has two things we should think about, first it contains a <code>RecordShell</code> which is a placeholder for the generic type, and secondly it has an <code>Aggregations</code> property - which is a dictionary containing the results from your pipeline. Both of these can be used in apply functions.</p>
+<p>The second component is the alias, that's the name the result of the function is stored in when the pipeline executes.</p>
+<h3 id="adjusted-sales">Adjusted Sales</h3>
+<p>Our data model has two properties related to sales, <code>Sales</code>, how much the employee has sold, and <code>SalesAdjustment</code>, a figure used to adjust sales based off various factors, perhaps territory covered, experience, etc. . . The idea being that perhaps a fair way to analyze an employee's performance is a combination of these two fields rather than each individually. So let's say we wanted to find what everyone's adjusted sales were, we could do that by creating an apply function to calculate it.</p>
+<pre><code class="lang-csharp">var adjustedSales = employeeAggregations.Apply(x =&gt; x.RecordShell.SalesAdjustment * x.RecordShell.Sales,
+    &quot;ADJUSTED_SALES&quot;);
+foreach (var result in adjustedSales)
+{
+    Console.WriteLine($&quot;Adjusted Sales were: {result[&quot;ADJUSTED_SALES&quot;]}&quot;);
+}
+</code></pre>
+<h2 id="arithmetic-apply-functions">Arithmetic Apply Functions</h2>
+<p>Functions that use arithmetic and math can use the mathematical operators <code>+</code> for addition, <code>-</code> for subtraction, <code>*</code> for multiplication, <code>/</code> for division, and <code>%</code> for modular division, also the <code>^</code> operator, which is typically used for bitiwise exclusive-or operations, has been reserved for power functions. Additionally, you can use many <code>System.Math</code> library operations within Apply functions, and those will be translated to the appropriate methods for use by Redis.</p>
+<h3 id="available-math-functions">Available Math Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Log10</td>
+<td>Math</td>
+<td>yields the 10 base log for the number</td>
+<td><code>Math.Log10(x[&quot;AdjustedSales&quot;])</code></td>
+</tr>
+<tr>
+<td>Abs</td>
+<td>Math</td>
+<td>yields the absolute value of the provided number</td>
+<td><code>Math.Abs(x[&quot;AdjustedSales&quot;])</code></td>
+</tr>
+<tr>
+<td>Ceil</td>
+<td>Math</td>
+<td>yields the smallest integer not less than the provided number</td>
+<td><code>Math.Ceil(x[&quot;AdjustedSales&quot;])</code></td>
+</tr>
+<tr>
+<td>Floor</td>
+<td>Math</td>
+<td>yields the smallest integer not greater than the provided number</td>
+<td><code>Math.Floor(x[&quot;AdjustedSales&quot;])</code></td>
+</tr>
+<tr>
+<td>Log</td>
+<td>Math</td>
+<td>yields the Log base 2 for the provided number</td>
+<td><code>Math.Log(x[&quot;AdjustedSales&quot;])</code></td>
+</tr>
+<tr>
+<td>Exp</td>
+<td>Math</td>
+<td>yields the natural exponent for the provided number (e^y)</td>
+<td><code>Math.Exp(x[&quot;AdjustedSales&quot;])</code></td>
+</tr>
+<tr>
+<td>Sqrt</td>
+<td>Math</td>
+<td>yields the Square root for the provided number</td>
+<td><code>Math.Sqrt(x[&quot;AdjustedSales&quot;])</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="string-functions">String Functions</h2>
+<p>You can also apply multiple string functions to your data, if for example you wanted to create a birthday message for each employee you could do so by calling <code>String.Format</code> on your records:</p>
+<pre><code class="lang-csharp">var birthdayMessages = employeeAggregations.Apply(x =&gt;
+    string.Format(&quot;Congratulations {0} you are {1} years old!&quot;, x.RecordShell.Name, x.RecordShell.Age), &quot;message&quot;);
+await foreach (var message in birthdayMessages)
+{
+    Console.WriteLine(message[&quot;message&quot;].ToString());
+}
+</code></pre>
+<h3 id="list-of-string-functions">List of String Functions:</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ToUpper</td>
+<td>String</td>
+<td>yields the provided string to upper case</td>
+<td><code>x.RecordShell.Name.ToUpper()</code></td>
+</tr>
+<tr>
+<td>ToLower</td>
+<td>String</td>
+<td>yields the provided string to lower case</td>
+<td><code>x.RecordShell.Name.ToLower()</code></td>
+</tr>
+<tr>
+<td>StartsWith</td>
+<td>String</td>
+<td>Boolean expression - yields 1 if the string starts with the argument</td>
+<td><code>x.RecordShell.Name.StartsWith(&quot;bob&quot;)</code></td>
+</tr>
+<tr>
+<td>Contains</td>
+<td>String</td>
+<td>Boolean expression - yields 1 if the string contains the argument</td>
+<td><code>x.RecordShell.Name.Contains(&quot;bob&quot;)</code></td>
+</tr>
+<tr>
+<td>Substring</td>
+<td>String</td>
+<td>yields the substring starting at the given 0 based index, the length of the second argument, if the second argument is not provided, it will simply return the balance of the string</td>
+<td><code>x.RecordShell.Name.Substring(4, 10)</code></td>
+</tr>
+<tr>
+<td>Format</td>
+<td>string</td>
+<td>Formats the string based off the provided pattern</td>
+<td><code>string.Format(&quot;Hello {0} You are {1} years old&quot;, x.RecordShell.Name, x.RecordShell.Age)</code></td>
+</tr>
+<tr>
+<td>Split</td>
+<td>string</td>
+<td>Split's the string with the provided string - unfortunately if you are only passing in a single splitter, because of how expressions work, you'll need to provide string split options so that no optional parameters exist when building the expression, just pass <code>StringSplitOptions.None</code></td>
+<td><code>x.RecordShell.Name.Split(&quot;,&quot;, StringSplitOptions.None)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="time-functions">Time Functions</h2>
+<p>You can also perform functions on time data in Redis. If you have a timestamp stored in a useable format, a unix timestamp or a timestamp string that can be translated from <a href="http://strftime.org/">strftime</a>, you can operate on them. For example if you wanted to translate a unix timestamp to YYYY-MM-DDTHH:MM::SSZ you can do so by just calling <code>ApplyFunctions.FormatTimestamp</code> on the record inside of your apply function. E.g.</p>
+<pre><code class="lang-csharp">var lastOnline = employeeAggregations.Apply(x =&gt; ApplyFunctions.FormatTimestamp(x.RecordShell.LastOnline),
+    &quot;LAST_ONLINE_STRING&quot;);
+
+foreach (var employee in lastOnline)
+{
+    Console.WriteLine(employee[&quot;LAST_ONLINE_STRING&quot;].ToString());
+}
+</code></pre>
+<h3 id="time-functions-available">Time Functions Available</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ApplyFunctions.FormatTimestamp</td>
+<td>time</td>
+<td>transforms a unix timestamp to a formatted time string based off <a href="http://strftime.org/">strftime</a> conventions</td>
+<td><code>ApplyFunctions.FormatTimestamp(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.ParseTime</td>
+<td>time</td>
+<td>Parsers the provided formatted timestamp to a unix timestamp</td>
+<td><code>ApplyFunctions.ParseTime(x.RecordShell.TimeString, &quot;%FT%ZT&quot;)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.Day</td>
+<td>time</td>
+<td>Rounds a unix timestamp to the beginning of the day</td>
+<td><code>ApplyFunctions.Day(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.Hour</td>
+<td>time</td>
+<td>Rounds a unix timestamp to the beginning of current hour</td>
+<td><code>ApplyFunctions.Hour(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.Minute</td>
+<td>time</td>
+<td>Round a unix timestamp to the beginning of the current minute</td>
+<td><code>ApplyFunctions.Minute(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.Month</td>
+<td>time</td>
+<td>Rounds a unix timestamp to the beginning of the current month</td>
+<td><code>ApplyFunctions.Month(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.DayOfWeek</td>
+<td>time</td>
+<td>Converts the unix timestamp to the day number with Sunday being 0</td>
+<td><code>ApplyFunctions.DayOfWeek(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.DayOfMonth</td>
+<td>time</td>
+<td>Converts the unix timestamp to the current day of the month (1..31)</td>
+<td><code>ApplyFunctions.DayOfMonth(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.DayOfYear</td>
+<td>time</td>
+<td>Converts the unix timestamp to the current day of the year (1..31)</td>
+<td><code>ApplyFunctions.DayOfYear(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.Year</td>
+<td>time</td>
+<td>Converts the unix timestamp to the current year</td>
+<td><code>ApplyFunctions.Year(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+<tr>
+<td>ApplyFunctions.MonthOfYear</td>
+<td>time</td>
+<td>Converts the unix timestamp to the current month (0..11)</td>
+<td><code>ApplyFunctions.MonthOfYear(x.RecordShell.LastTimeOnline)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="geo-distance">Geo Distance</h2>
+<p>Another useful function is the <code>GeoDistance</code> function, which allows you computer the distance between two points, e.g. if you wanted to see how far away from the office each employee was you could use the <code>ApplyFunctions.GeoDistance</code> function inside your pipeline:</p>
+<pre><code class="lang-csharp">var officeLoc = new GeoLoc(-122.064181, 37.377207);
+var distanceFromWork =
+    employeeAggregations.Apply(x =&gt; ApplyFunctions.GeoDistance(x.RecordShell.HomeLoc, officeLoc), &quot;DistanceToWork&quot;);
+await foreach (var element in distancesFromWork)
+{
+    Console.WriteLine(element[&quot;DistanceToWork&quot;].ToString());
+}
+</code></pre>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/articles/aggregations/apply-functions/apply-functions.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../../../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../../styles/main.js"></script>
+  </body>
+</html>

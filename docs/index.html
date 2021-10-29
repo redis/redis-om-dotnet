@@ -1,0 +1,242 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>&#128161; Why Redis OM? </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="&#128161; Why Redis OM? ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles/docfx.vendor.css">
+    <link rel="stylesheet" href="styles/docfx.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <meta property="docfx:navrel" content="toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="index.html">
+                <img id="logo" class="svg" src="logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+
+<p><img src="images/red.svg" alt="Redis OM logo"></p>
+<p align="center">
+    <p align="center">
+        Objecting mapping, and more, for Redis.
+    </p>
+</p>
+<hr>
+<p><a href="https://github.com/redis-developer/redis-om-dotnet/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" alt="License"></a>
+<a href="https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml"><img src="https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml/badge.svg" alt="Build Status"></a></p>
+<p><strong>Redis OM .NET</strong> makes it easy to model Redis data in your .NET Applications.</p>
+<p><a href="https://github.com/redis-developer/redis-om-dotnet"><strong>Redis OM .NET</strong></a> | <a href="https://github.com/redis-developer/redis-om-js">Redis OM Node.js</a> | <a href="https://github.com/redis-developer/redis-om-spring">Redis OM Spring</a> | <a href="https://github.com/redis-developer/redis-om-python">Redis OM Python</a></p>
+<details>
+  <summary><strong>Table of contents</strong></summary>
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<ul>
+<li><a href="#-why-redis-om">💡 Why Redis OM?</a></li>
+<li><a href="#-installation">💻 Installation</a></li>
+<li><a href="#-getting-started">🏁 Getting started</a>
+<ul>
+<li><a href="#starting-redis">Starting Redis</a></li>
+<li><a href="#-modeling-your-domain-and-indexing-it">📇 Modeling your domain (and indexing it!)</a></li>
+<li><a href="#-querying">🔎 Querying</a></li>
+<li><a href="#-aggregations">🖩 Aggregations</a></li>
+</ul>
+</li>
+<li><a href="#-documentation">📚 Documentation</a></li>
+<li><a href="#-troubleshooting">⛏️ Troubleshooting</a></li>
+<li><a href="#-redisearch-and-redisjson">✨ RediSearch and RedisJSON</a>
+<ul>
+<li><a href="#why-this-is-important">Why this is important</a></li>
+<li><a href="#so-how-do-you-get-redisearch-and-redisjson">So how do you get RediSearch and RedisJSON?</a></li>
+</ul>
+</li>
+<li><a href="#-contributing">❤️ Contributing</a></li>
+</ul>
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+</details>
+<h2 id="-why-redis-om">💡 Why Redis OM?</h2>
+<p>Redis OM provides high-level abstractions for using Redis in .NET, making it easy to model and query your Redis domain objects.</p>
+<p>This <strong>preview</strong> release contains the following features:</p>
+<ul>
+<li>Declarative object mapping for Redis objects</li>
+<li>Declarative secondary-index generation</li>
+<li>Fluent APIs for querying Redis</li>
+<li>Fluent APIs for performing Redis aggregations</li>
+</ul>
+<h2 id="-installation">💻 Installation</h2>
+<p>Using the dotnet cli, run:</p>
+<pre><code class="lang-text">dotnet add package Redis.OM
+</code></pre>
+<h2 id="-getting-started">🏁 Getting started</h2>
+<h3 id="starting-redis">Starting Redis</h3>
+<p>Before writing any code you'll need a Redis instance with the appropriate Redis modules! The quickest way to get this is with Docker:</p>
+<pre><code class="lang-sh">docker run -p 6379:6379 redislabs/redismod:preview
+</code></pre>
+<h3 id="-modeling-your-domain-and-indexing-it">📇 Modeling your domain (and indexing it!)</h3>
+<p>With Redis OM, you can model your data and declare indexes with minimal code. For example, here's how we might model a customer object:</p>
+<pre><code class="lang-csharp">[Document(StorageType = StorageType.Json)]
+public class Customer
+{
+   [Indexed] public string FirstName { get; set; }
+   [Indexed] public string LastName { get; set; }
+   [Indexed] public string Email { get; set; }
+   [Indexed(Sortable = true)] public int Age { get; set; }
+}
+</code></pre>
+<p>Notice that we've applied the <code>Document</code> attribute to this class. We've also specified that certain fields should be <code>Indexed</code>.</p>
+<p>Now we need to create the Redis index. So we'll connect to Redis and then call <code>CreateIndex</code> on an <code>IRedisConnection</code>:</p>
+<pre><code class="lang-csharp">var provider = new RedisConnectionProvider(&quot;redis://localhost:6379&quot;);
+connection.CreateIndex(typeof(Customer));
+</code></pre>
+<p>Once the index is created, we can:</p>
+<ul>
+<li>Insert Customer objects into Redis</li>
+<li>Get a Customer object by ID from Redis</li>
+<li>Query Customers from Redis</li>
+<li>Run aggregations on Customers in Redis</li>
+</ul>
+<p>Let's see how!</p>
+<h3 id="-querying">🔎 Querying</h3>
+<p>We can query our domain using expressions in LINQ, like so:</p>
+<pre><code class="lang-csharp">var customers = provider.RedisCollection&lt;Customer&gt;();
+// Find all customers whose last name is &quot;Bond&quot;
+customers.Where(x =&gt; x.LastName == &quot;Bond&quot;);
+
+// Find all customers whose last name is Bond OR whose age is greater than 65
+customers.Where(x =&gt; x.LastName == &quot;Bond&quot; || x.Age &gt; 65);
+
+// Find all customers whose last name is Bond AND whose first name is James
+customers.Where(x =&gt; x.LastName == &quot;Bond&quot; &amp;&amp; x.FirstName == &quot;James&quot;);
+</code></pre>
+<h3 id="-aggregations">🖩 Aggregations</h3>
+<p>We can also run aggregations on the customer object, again using expressions in LINQ:</p>
+<pre><code class="lang-csharp">// Get our average customer age
+customerAggregations.Average(x =&gt; x.RecordShell.Age);
+
+// Format customer full names
+customerAggregations.Apply(x =&gt; string.Format(&quot;{0} {1}&quot;, x.RecordShell.FirstName, x.RecordShell.LastName),
+      &quot;FullName&quot;);
+
+// Get each customer's distance from the Mall of America
+customerAggregations.Apply(x =&gt; ApplyFunctions.GeoDistance(x.RecordShell.Home, -93.241786, 44.853816),
+      &quot;DistanceToMall&quot;);
+</code></pre>
+<h2 id="-troubleshooting">⛏️ Troubleshooting</h2>
+<p>If you run into trouble or have any questions, we're here to help!</p>
+<p>First, check the <a href="docs/faq.md">FAQ</a>. If you don't find the answer there,
+hit us up on the <a href="http://discord.gg/redis">Redis Discord Server</a>.</p>
+<h2 id="-redisearch-and-redisjson">✨ RediSearch and RedisJSON</h2>
+<p>Redis OM relies on core features from two source-available Redis modules: <strong>RediSearch</strong> and <strong>RedisJSON</strong>.</p>
+<p>These modules are the &quot;magic&quot; behind the scenes:</p>
+<ul>
+<li>RediSearch adds querying, indexing, and full-text search to Redis</li>
+<li>RedisJSON adds the JSON data type to Redis</li>
+</ul>
+<h3 id="why-this-is-important">Why this is important</h3>
+<p>Without RediSearch or RedisJSON, you can still use Redis OM to create declarative models backed by Redis.</p>
+<p>We'll store your model data in Redis as Hashes, and you can retrieve models using their primary keys.</p>
+<p>So, what won't work without these modules?</p>
+<ol>
+<li>Without RedisJSON, you won't be able to nest models inside each other.</li>
+<li>Without RediSearch, you won't be able to use our expressive queries to find object -- you'll only be able to query by primary key.</li>
+</ol>
+<h3 id="so-how-do-you-get-redisearch-and-redisjson">So how do you get RediSearch and RedisJSON?</h3>
+<p>You can use RediSearch and RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary versions of the modules in their Quick Start Guides:</p>
+<ul>
+<li><a href="https://oss.redis.com/redisjson/#download-and-running-binaries">RedisJSON Quick Start - Running Binaries</a></li>
+<li><a href="https://oss.redis.com/redisearch/Quick_Start/#download_and_running_binaries">RediSearch Quick Start - Running Binaries</a></li>
+</ul>
+<p><strong>NOTE</strong>: Both quick start guides also have instructions on how to run these modules in Redis with Docker.</p>
+<p>Don't want to run Redis yourself? RediSearch and RedisJSON are also available on Redis Cloud. <a href="https://redis.com/try-free/">Get started here</a>.</p>
+<h2 id="-contributing">❤️ Contributing</h2>
+<p>We'd love your contributions!</p>
+<p><strong>Bug reports</strong> are especially helpful at this stage of the project. <a href="https://github.com/redis-developer/redis-developer-dotnet/issues/new">You can open a bug report on GitHub</a>.</p>
+<p>You can also <strong>contribute documentation</strong> -- or just let us know if something needs more detail. <a href="https://github.com/redis-developer/redis-developer-dotnet/issues/new">Open an issue on GitHub</a> to get started.</p>
+<!-- Logo -->
+<!-- Badges -->
+<!-- Links -->
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/index.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="styles/docfx.js"></script>
+    <script type="text/javascript" src="styles/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,660 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class RedisAggregationSet&lt;T&gt;
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class RedisAggregationSet&lt;T&gt;
+   ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1">
+  
+  
+  <h1 id="Redis_OM_Aggregation_RedisAggregationSet_1" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1" class="text-break">Class RedisAggregationSet&lt;T&gt;
+  </h1>
+  <div class="markdown level0 summary"><p>A collection that you can use to run aggregations in redis.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">RedisAggregationSet&lt;T&gt;</span></div>
+      <div class="level2"><a class="xref" href="Redis.OM.Aggregation.GroupedAggregationSet-1.html">GroupedAggregationSet&lt;T&gt;</a></div>
+  </div>
+  <div classs="implements">
+    <h5>Implements</h5>
+    <div><span class="xref">System.Linq.IQueryable</span>&lt;<a class="xref" href="Redis.OM.Aggregation.AggregationResult-1.html">AggregationResult</a>&lt;T&gt;&gt;</div>
+    <div><span class="xref">System.Collections.Generic.IEnumerable</span>&lt;<a class="xref" href="Redis.OM.Aggregation.AggregationResult-1.html">AggregationResult</a>&lt;T&gt;&gt;</div>
+    <div><span class="xref">System.Linq.IQueryable</span></div>
+    <div><span class="xref">System.Collections.IEnumerable</span></div>
+    <div><span class="xref">System.Collections.Generic.IAsyncEnumerable</span>&lt;<a class="xref" href="Redis.OM.Aggregation.AggregationResult-1.html">AggregationResult</a>&lt;T&gt;&gt;</div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Redis.OM.Aggregation.html">Redis.OM.Aggregation</a></h6>
+  <h6><strong>Assembly</strong>: Redis.OM.dll</h6>
+  <h5 id="Redis_OM_Aggregation_RedisAggregationSet_1_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class RedisAggregationSet&lt;T&gt; : IQueryable&lt;AggregationResult&lt;T&gt;&gt;, IEnumerable&lt;AggregationResult&lt;T&gt;&gt;, IQueryable, IEnumerable, IAsyncEnumerable&lt;AggregationResult&lt;T&gt;&gt;</code></pre>
+  </div>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">T</span></td>
+        <td><p>The type of the record shell in the aggregation result.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="constructors">Constructors
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Boolean_.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.%23ctor(Redis.OM.Contracts.IRedisConnection%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L28">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1__ctor_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.#ctor*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Boolean_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Boolean)">RedisAggregationSet(IRedisConnection, Boolean)</h4>
+  <div class="markdown level1 summary"><p>Initializes a new instance of the <a class="xref" href="Redis.OM.Aggregation.RedisAggregationSet-1.html">RedisAggregationSet&lt;T&gt;</a> class.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public RedisAggregationSet(IRedisConnection connection, bool useCursor = false)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection to use.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">useCursor</span></td>
+        <td><p>whether or not to use a cursor.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ElementType.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ElementType%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L61">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1_ElementType_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ElementType*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_ElementType" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ElementType">ElementType</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Type ElementType { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Type</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_Expression.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.Expression%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L64">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1_Expression_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.Expression*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_Expression" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.Expression">Expression</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Expression Expression { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Linq.Expressions.Expression</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_Provider.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.Provider%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L67">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1_Provider_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.Provider*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_Provider" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.Provider">Provider</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IQueryProvider Provider { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Linq.IQueryProvider</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_GetAsyncEnumerator_System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.GetAsyncEnumerator(System.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L84">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1_GetAsyncEnumerator_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.GetAsyncEnumerator*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_GetAsyncEnumerator_System_Threading_CancellationToken_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.GetAsyncEnumerator(System.Threading.CancellationToken)">GetAsyncEnumerator(CancellationToken)</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IAsyncEnumerator&lt;AggregationResult&lt;T&gt;&gt; GetAsyncEnumerator(CancellationToken cancellationToken = default(CancellationToken))</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.CancellationToken</span></td>
+        <td><span class="parametername">cancellationToken</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IAsyncEnumerator</span>&lt;<a class="xref" href="Redis.OM.Aggregation.AggregationResult-1.html">AggregationResult</a>&lt;T&gt;&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L70">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1_GetEnumerator_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.GetEnumerator*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_GetEnumerator" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.GetEnumerator">GetEnumerator()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IEnumerator&lt;AggregationResult&lt;T&gt;&gt; GetEnumerator()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IEnumerator</span>&lt;<a class="xref" href="Redis.OM.Aggregation.AggregationResult-1.html">AggregationResult</a>&lt;T&gt;&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ToArrayAsync.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ToArrayAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L109">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1_ToArrayAsync_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ToArrayAsync*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_ToArrayAsync" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ToArrayAsync">ToArrayAsync()</h4>
+  <div class="markdown level1 summary"><p>Materializes the set as an array asynchronously.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public async ValueTask&lt;AggregationResult&lt;T&gt;[]&gt; ToArrayAsync()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.ValueTask</span>&lt;<a class="xref" href="Redis.OM.Aggregation.AggregationResult-1.html">AggregationResult</a>&lt;T&gt;[]&gt;</td>
+        <td><p>a task that will resolve when the array is enumerated.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ToListAsync.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ToListAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L94">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1_ToListAsync_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ToListAsync*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_ToListAsync" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ToListAsync">ToListAsync()</h4>
+  <div class="markdown level1 summary"><p>Materializes the set as a list asynchronously.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public async ValueTask&lt;List&lt;AggregationResult&lt;T&gt;&gt;&gt; ToListAsync()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.ValueTask</span>&lt;<span class="xref">System.Collections.Generic.List</span>&lt;<a class="xref" href="Redis.OM.Aggregation.AggregationResult-1.html">AggregationResult</a>&lt;T&gt;&gt;&gt;</td>
+        <td><p>a task that will resolve when the list is enumerated.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="eii">Explicit Interface Implementations
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_System_Collections_IEnumerable_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.System%23Collections%23IEnumerable%23GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L77">View Source</a>
+  </span>
+  <a id="Redis_OM_Aggregation_RedisAggregationSet_1_System_Collections_IEnumerable_GetEnumerator_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.System#Collections#IEnumerable#GetEnumerator*"></a>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_System_Collections_IEnumerable_GetEnumerator" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.System#Collections#IEnumerable#GetEnumerator">IEnumerable.GetEnumerator()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IEnumerator IEnumerable.GetEnumerator()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.IEnumerator</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="implements">Implements</h3>
+  <div>
+      <span class="xref">System.Linq.IQueryable&lt;T&gt;</span>
+  </div>
+  <div>
+      <span class="xref">System.Collections.Generic.IEnumerable&lt;T&gt;</span>
+  </div>
+  <div>
+      <span class="xref">System.Linq.IQueryable</span>
+  </div>
+  <div>
+      <span class="xref">System.Collections.IEnumerable</span>
+  </div>
+  <div>
+      <span class="xref">System.Collections.Generic.IAsyncEnumerable&lt;T&gt;</span>
+  </div>
+  <h3 id="extensionmethods">Extension Methods</h3>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_Apply__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___System_String_">SearchExtensions.Apply&lt;T, TR&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TR&gt;&gt;, String)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_Filter__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Boolean___">SearchExtensions.Filter&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Boolean&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_Count__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Boolean___">SearchExtensions.Count&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Boolean&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_Where__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Boolean___">SearchExtensions.Where&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Boolean&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_CountDistinct__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.CountDistinct&lt;T, TCount&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TCount&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_CountDistinctAsync__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.CountDistinctAsync&lt;T, TCount&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TCount&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_StandardDeviation__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.StandardDeviation&lt;T, TReduce&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TReduce&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_StandardDeviationAsync__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.StandardDeviationAsync&lt;T, TReduce&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TReduce&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_Distinct__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.Distinct&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstValue__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.FirstValue&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstValueAsync__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.FirstValueAsync&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstValue__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___System_String_Redis_OM_Searching_SortDirection_">SearchExtensions.FirstValue&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;, String, SortDirection)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstValue__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___System_String_">SearchExtensions.FirstValue&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;, String)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstValueAsync__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___System_String_Redis_OM_Searching_SortDirection_">SearchExtensions.FirstValueAsync&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;, String, SortDirection)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstValueAsync__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___System_String_">SearchExtensions.FirstValueAsync&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;, String)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_RandomSample__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___System_Int64_">SearchExtensions.RandomSample&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;, Int64)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_Quantile__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___System_Double_">SearchExtensions.Quantile&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;, Double)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_QuantileAsync__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___System_Double_">SearchExtensions.QuantileAsync&lt;T, TResult&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TResult&gt;&gt;, Double)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_CountDistinctish__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.CountDistinctish&lt;T, TField&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TField&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_CountDistinctishAsync__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.CountDistinctishAsync&lt;T, TField&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TField&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_GroupBy__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.GroupBy&lt;T, TGroupType&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TGroupType&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_OrderBy__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.OrderBy&lt;T, TField&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TField&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_OrderByDescending__2_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0____1___">SearchExtensions.OrderByDescending&lt;T, TField&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, TField&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstOrDefault__1_Redis_OM_Aggregation_RedisAggregationSet___0__">SearchExtensions.FirstOrDefault&lt;T&gt;(RedisAggregationSet&lt;T&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstOrDefaultAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__">SearchExtensions.FirstOrDefaultAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_FirstAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__">SearchExtensions.FirstAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_First__1_Redis_OM_Aggregation_RedisAggregationSet___0__">SearchExtensions.First&lt;T&gt;(RedisAggregationSet&lt;T&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_Skip__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Int32_">SearchExtensions.Skip&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Int32)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_Take__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Int32_">SearchExtensions.Take&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Int32)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Double___">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Double&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Int32___">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Int32&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Int64___">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Int64&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Single___">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Single&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Decimal___">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Decimal&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Double____">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Double&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Int32____">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Int32&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Int64____">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Int64&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Single____">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Single&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_SumAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Decimal____">SearchExtensions.SumAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Decimal&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Double___">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Double&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Int32___">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Int32&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Int64___">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Int64&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Single___">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Single&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Decimal___">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Decimal&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Double____">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Double&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Int32____">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Int32&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Int64____">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Int64&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Single____">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Single&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_AverageAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__System_Nullable_System_Decimal____">SearchExtensions.AverageAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, Nullable&lt;Decimal&gt;&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_MaxAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__Redis_OM_RedisReply___">SearchExtensions.MaxAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, RedisReply&gt;&gt;)</a>
+  </div>
+  <div>
+      <a class="xref" href="Redis.OM.SearchExtensions.html#Redis_OM_SearchExtensions_MinAsync__1_Redis_OM_Aggregation_RedisAggregationSet___0__System_Linq_Expressions_Expression_System_Func_Redis_OM_Aggregation_AggregationResult___0__Redis_OM_RedisReply___">SearchExtensions.MinAsync&lt;T&gt;(RedisAggregationSet&lt;T&gt;, Expression&lt;Func&lt;AggregationResult&lt;T&gt;, RedisReply&gt;&gt;)</a>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L19" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

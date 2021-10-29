@@ -1,0 +1,1236 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class RedisCommands
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class RedisCommands
+   ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Redis.OM.RedisCommands">
+  
+  
+  <h1 id="Redis_OM_RedisCommands" data-uid="Redis.OM.RedisCommands" class="text-break">Class RedisCommands
+  </h1>
+  <div class="markdown level0 summary"><p>Extension methods for redis commands.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">RedisCommands</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Redis.OM.html">Redis.OM</a></h6>
+  <h6><strong>Assembly</strong>: Redis.OM.dll</h6>
+  <h5 id="Redis_OM_RedisCommands_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static class RedisCommands</code></pre>
+  </div>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_CreateAndEval_Redis_OM_Contracts_IRedisConnection_System_String_System_String___System_String___System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.CreateAndEval(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.String%5B%5D%2CSystem.String%5B%5D%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L327">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_CreateAndEval_" data-uid="Redis.OM.RedisCommands.CreateAndEval*"></a>
+  <h4 id="Redis_OM_RedisCommands_CreateAndEval_Redis_OM_Contracts_IRedisConnection_System_String_System_String___System_String___System_String_" data-uid="Redis.OM.RedisCommands.CreateAndEval(Redis.OM.Contracts.IRedisConnection,System.String,System.String[],System.String[],System.String)">CreateAndEval(IRedisConnection, String, String[], String[], String)</h4>
+  <div class="markdown level1 summary"><p>Creates an evaluates a script.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static int? CreateAndEval(this IRedisConnection connection, string scriptName, string[] keys, string[] argv, string fullScript = &quot;&quot;)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">scriptName</span></td>
+        <td><p>the script's name.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td><span class="parametername">keys</span></td>
+        <td><p>the keys to use.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td><span class="parametername">argv</span></td>
+        <td><p>the arguments to use.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">fullScript</span></td>
+        <td><p>the full script.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Nullable</span>&lt;<span class="xref">System.Int32</span>&gt;</td>
+        <td><p>the result.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.ArgumentException</span></td>
+        <td><p>Thrown if the script cannot be resolved either the script is empty or the script name has not been encountered.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_CreateAndEvalAsync_Redis_OM_Contracts_IRedisConnection_System_String_System_String___System_String___System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.CreateAndEvalAsync(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.String%5B%5D%2CSystem.String%5B%5D%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L286">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_CreateAndEvalAsync_" data-uid="Redis.OM.RedisCommands.CreateAndEvalAsync*"></a>
+  <h4 id="Redis_OM_RedisCommands_CreateAndEvalAsync_Redis_OM_Contracts_IRedisConnection_System_String_System_String___System_String___System_String_" data-uid="Redis.OM.RedisCommands.CreateAndEvalAsync(Redis.OM.Contracts.IRedisConnection,System.String,System.String[],System.String[],System.String)">CreateAndEvalAsync(IRedisConnection, String, String[], String[], String)</h4>
+  <div class="markdown level1 summary"><p>Creates an evaluates a script.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static async Task&lt;int?&gt; CreateAndEvalAsync(this IRedisConnection connection, string scriptName, string[] keys, string[] argv, string fullScript = &quot;&quot;)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">scriptName</span></td>
+        <td><p>the script's name.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td><span class="parametername">keys</span></td>
+        <td><p>the keys to use.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td><span class="parametername">argv</span></td>
+        <td><p>the arguments to use.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">fullScript</span></td>
+        <td><p>the full script.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.Nullable</span>&lt;<span class="xref">System.Int32</span>&gt;&gt;</td>
+        <td><p>the result.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.ArgumentException</span></td>
+        <td><p>Thrown if the script cannot be resolved either the script is empty or the script name has not been encountered.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_Get__1_Redis_OM_Contracts_IRedisConnection_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.Get%60%601(Redis.OM.Contracts.IRedisConnection%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L189">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_Get_" data-uid="Redis.OM.RedisCommands.Get*"></a>
+  <h4 id="Redis_OM_RedisCommands_Get__1_Redis_OM_Contracts_IRedisConnection_System_String_" data-uid="Redis.OM.RedisCommands.Get``1(Redis.OM.Contracts.IRedisConnection,System.String)">Get&lt;T&gt;(IRedisConnection, String)</h4>
+  <div class="markdown level1 summary"><p>Gets an object of the provided type from redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static T Get&lt;T&gt;(this IRedisConnection connection, string keyName)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">keyName</span></td>
+        <td><p>the key.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">T</span></td>
+        <td><p>the object out of redis.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">T</span></td>
+        <td><p>The type to parse the result out to.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_GetAsync__1_Redis_OM_Contracts_IRedisConnection_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.GetAsync%60%601(Redis.OM.Contracts.IRedisConnection%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L210">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_GetAsync_" data-uid="Redis.OM.RedisCommands.GetAsync*"></a>
+  <h4 id="Redis_OM_RedisCommands_GetAsync__1_Redis_OM_Contracts_IRedisConnection_System_String_" data-uid="Redis.OM.RedisCommands.GetAsync``1(Redis.OM.Contracts.IRedisConnection,System.String)">GetAsync&lt;T&gt;(IRedisConnection, String)</h4>
+  <div class="markdown level1 summary"><p>Gets an object of the provided type from redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static async ValueTask&lt;T&gt; GetAsync&lt;T&gt;(this IRedisConnection connection, string keyName)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">keyName</span></td>
+        <td><p>the key.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.ValueTask</span>&lt;T&gt;</td>
+        <td><p>the object out of redis.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">T</span></td>
+        <td><p>The type to parse the result out to.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_HGetAll_Redis_OM_Contracts_IRedisConnection_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.HGetAll(Redis.OM.Contracts.IRedisConnection%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L246">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_HGetAll_" data-uid="Redis.OM.RedisCommands.HGetAll*"></a>
+  <h4 id="Redis_OM_RedisCommands_HGetAll_Redis_OM_Contracts_IRedisConnection_System_String_" data-uid="Redis.OM.RedisCommands.HGetAll(Redis.OM.Contracts.IRedisConnection,System.String)">HGetAll(IRedisConnection, String)</h4>
+  <div class="markdown level1 summary"><p>retrieves an object out of redis and puts it into a dictionary.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static IDictionary&lt;string, string&gt; HGetAll(this IRedisConnection connection, string keyName)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">keyName</span></td>
+        <td><p>the key name.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IDictionary</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.String</span>&gt;</td>
+        <td><p>the object serialized into a dictionary.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_HGetAllAsync_Redis_OM_Contracts_IRedisConnection_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.HGetAllAsync(Redis.OM.Contracts.IRedisConnection%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L264">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_HGetAllAsync_" data-uid="Redis.OM.RedisCommands.HGetAllAsync*"></a>
+  <h4 id="Redis_OM_RedisCommands_HGetAllAsync_Redis_OM_Contracts_IRedisConnection_System_String_" data-uid="Redis.OM.RedisCommands.HGetAllAsync(Redis.OM.Contracts.IRedisConnection,System.String)">HGetAllAsync(IRedisConnection, String)</h4>
+  <div class="markdown level1 summary"><p>retrieves an object out of redis and puts it into a dictionary.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static async Task&lt;IDictionary&lt;string, string&gt;&gt; HGetAllAsync(this IRedisConnection connection, string keyName)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">keyName</span></td>
+        <td><p>the key name.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.Collections.Generic.IDictionary</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.String</span>&gt;&gt;</td>
+        <td><p>the object serialized into a dictionary.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_HSet_Redis_OM_Contracts_IRedisConnection_System_String_System_Collections_Generic_KeyValuePair_System_String_System_String____.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.HSet(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.Collections.Generic.KeyValuePair%7BSystem.String%2CSystem.String%7D%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L112">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_HSet_" data-uid="Redis.OM.RedisCommands.HSet*"></a>
+  <h4 id="Redis_OM_RedisCommands_HSet_Redis_OM_Contracts_IRedisConnection_System_String_System_Collections_Generic_KeyValuePair_System_String_System_String____" data-uid="Redis.OM.RedisCommands.HSet(Redis.OM.Contracts.IRedisConnection,System.String,System.Collections.Generic.KeyValuePair{System.String,System.String}[])">HSet(IRedisConnection, String, KeyValuePair&lt;String, String&gt;[])</h4>
+  <div class="markdown level1 summary"><p>Set's values in a hash.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static int HSet(this IRedisConnection connection, string key, params KeyValuePair&lt;string, string&gt;[] fieldValues)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">key</span></td>
+        <td><p>the key.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.KeyValuePair</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.String</span>&gt;[]</td>
+        <td><span class="parametername">fieldValues</span></td>
+        <td><p>the field value pairs to set.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><p>How many new fields were created.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_HSetAsync_Redis_OM_Contracts_IRedisConnection_System_String_System_Collections_Generic_KeyValuePair_System_String_System_String____.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.HSetAsync(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.Collections.Generic.KeyValuePair%7BSystem.String%2CSystem.String%7D%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L64">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_HSetAsync_" data-uid="Redis.OM.RedisCommands.HSetAsync*"></a>
+  <h4 id="Redis_OM_RedisCommands_HSetAsync_Redis_OM_Contracts_IRedisConnection_System_String_System_Collections_Generic_KeyValuePair_System_String_System_String____" data-uid="Redis.OM.RedisCommands.HSetAsync(Redis.OM.Contracts.IRedisConnection,System.String,System.Collections.Generic.KeyValuePair{System.String,System.String}[])">HSetAsync(IRedisConnection, String, KeyValuePair&lt;String, String&gt;[])</h4>
+  <div class="markdown level1 summary"><p>Set's values in a hash.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static async Task&lt;int&gt; HSetAsync(this IRedisConnection connection, string key, params KeyValuePair&lt;string, string&gt;[] fieldValues)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">key</span></td>
+        <td><p>the key.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.KeyValuePair</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.String</span>&gt;[]</td>
+        <td><span class="parametername">fieldValues</span></td>
+        <td><p>the field value pairs to set.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.Int32</span>&gt;</td>
+        <td><p>How many new fields were created.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_JsonGet__1_Redis_OM_Contracts_IRedisConnection_System_String_System_String___.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.JsonGet%60%601(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.String%5B%5D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L232">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_JsonGet_" data-uid="Redis.OM.RedisCommands.JsonGet*"></a>
+  <h4 id="Redis_OM_RedisCommands_JsonGet__1_Redis_OM_Contracts_IRedisConnection_System_String_System_String___" data-uid="Redis.OM.RedisCommands.JsonGet``1(Redis.OM.Contracts.IRedisConnection,System.String,System.String[])">JsonGet&lt;T&gt;(IRedisConnection, String, String[])</h4>
+  <div class="markdown level1 summary"><p>Get's an object out of redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static T JsonGet&lt;T&gt;(this IRedisConnection connection, string key, params string[] paths)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">key</span></td>
+        <td><p>the key.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span>[]</td>
+        <td><span class="parametername">paths</span></td>
+        <td><p>the paths to retrieve.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">T</span></td>
+        <td><p>the object pulled out of redis.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="typeParameters">Type Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="parametername">T</span></td>
+        <td><p>the type to deserialize into.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_JsonSet_Redis_OM_Contracts_IRedisConnection_System_String_System_String_System_Object_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.JsonSet(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.String%2CSystem.Object)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L146">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_JsonSet_" data-uid="Redis.OM.RedisCommands.JsonSet*"></a>
+  <h4 id="Redis_OM_RedisCommands_JsonSet_Redis_OM_Contracts_IRedisConnection_System_String_System_String_System_Object_" data-uid="Redis.OM.RedisCommands.JsonSet(Redis.OM.Contracts.IRedisConnection,System.String,System.String,System.Object)">JsonSet(IRedisConnection, String, String, Object)</h4>
+  <div class="markdown level1 summary"><p>Sets a value as JSON in redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">key</span></td>
+        <td><p>the key for the object.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">path</span></td>
+        <td><p>the path within the json to set.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Object</span></td>
+        <td><span class="parametername">obj</span></td>
+        <td><p>the object to serialize to json.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>whether the operation succeeded.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_JsonSet_Redis_OM_Contracts_IRedisConnection_System_String_System_String_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.JsonSet(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.String%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L132">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_JsonSet_" data-uid="Redis.OM.RedisCommands.JsonSet*"></a>
+  <h4 id="Redis_OM_RedisCommands_JsonSet_Redis_OM_Contracts_IRedisConnection_System_String_System_String_System_String_" data-uid="Redis.OM.RedisCommands.JsonSet(Redis.OM.Contracts.IRedisConnection,System.String,System.String,System.String)">JsonSet(IRedisConnection, String, String, String)</h4>
+  <div class="markdown level1 summary"><p>Sets a value as JSON in redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static bool JsonSet(this IRedisConnection connection, string key, string path, string json)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">key</span></td>
+        <td><p>the key for the object.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">path</span></td>
+        <td><p>the path within the json to set.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">json</span></td>
+        <td><p>the json.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>whether the operation succeeded.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_JsonSetAsync_Redis_OM_Contracts_IRedisConnection_System_String_System_String_System_Object_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.JsonSetAsync(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.String%2CSystem.Object)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L98">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_JsonSetAsync_" data-uid="Redis.OM.RedisCommands.JsonSetAsync*"></a>
+  <h4 id="Redis_OM_RedisCommands_JsonSetAsync_Redis_OM_Contracts_IRedisConnection_System_String_System_String_System_Object_" data-uid="Redis.OM.RedisCommands.JsonSetAsync(Redis.OM.Contracts.IRedisConnection,System.String,System.String,System.Object)">JsonSetAsync(IRedisConnection, String, String, Object)</h4>
+  <div class="markdown level1 summary"><p>Sets a value as JSON in redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static async Task&lt;bool&gt; JsonSetAsync(this IRedisConnection connection, string key, string path, object obj)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">key</span></td>
+        <td><p>the key for the object.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">path</span></td>
+        <td><p>the path within the json to set.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Object</span></td>
+        <td><span class="parametername">obj</span></td>
+        <td><p>the object to be converted to json.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.Boolean</span>&gt;</td>
+        <td><p>whether the operation succeeded.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_JsonSetAsync_Redis_OM_Contracts_IRedisConnection_System_String_System_String_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.JsonSetAsync(Redis.OM.Contracts.IRedisConnection%2CSystem.String%2CSystem.String%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L84">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_JsonSetAsync_" data-uid="Redis.OM.RedisCommands.JsonSetAsync*"></a>
+  <h4 id="Redis_OM_RedisCommands_JsonSetAsync_Redis_OM_Contracts_IRedisConnection_System_String_System_String_System_String_" data-uid="Redis.OM.RedisCommands.JsonSetAsync(Redis.OM.Contracts.IRedisConnection,System.String,System.String,System.String)">JsonSetAsync(IRedisConnection, String, String, String)</h4>
+  <div class="markdown level1 summary"><p>Sets a value as JSON in redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static async Task&lt;bool&gt; JsonSetAsync(this IRedisConnection connection, string key, string path, string json)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">key</span></td>
+        <td><p>the key for the object.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">path</span></td>
+        <td><p>the path within the json to set.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">json</span></td>
+        <td><p>the json.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.Boolean</span>&gt;</td>
+        <td><p>whether the operation succeeded.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_Set_Redis_OM_Contracts_IRedisConnection_System_Object_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.Set(Redis.OM.Contracts.IRedisConnection%2CSystem.Object)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L159">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_Set_" data-uid="Redis.OM.RedisCommands.Set*"></a>
+  <h4 id="Redis_OM_RedisCommands_Set_Redis_OM_Contracts_IRedisConnection_System_Object_" data-uid="Redis.OM.RedisCommands.Set(Redis.OM.Contracts.IRedisConnection,System.Object)">Set(IRedisConnection, Object)</h4>
+  <div class="markdown level1 summary"><p>Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static string Set(this IRedisConnection connection, object obj)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>connection to redis.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Object</span></td>
+        <td><span class="parametername">obj</span></td>
+        <td><p>the object to save.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><p>the key for the object.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_SetAsync_Redis_OM_Contracts_IRedisConnection_System_Object_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.SetAsync(Redis.OM.Contracts.IRedisConnection%2CSystem.Object)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L33">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_SetAsync_" data-uid="Redis.OM.RedisCommands.SetAsync*"></a>
+  <h4 id="Redis_OM_RedisCommands_SetAsync_Redis_OM_Contracts_IRedisConnection_System_Object_" data-uid="Redis.OM.RedisCommands.SetAsync(Redis.OM.Contracts.IRedisConnection,System.Object)">SetAsync(IRedisConnection, Object)</h4>
+  <div class="markdown level1 summary"><p>Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static async Task&lt;string&gt; SetAsync(this IRedisConnection connection, object obj)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>connection to redis.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Object</span></td>
+        <td><span class="parametername">obj</span></td>
+        <td><p>the object to save.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span>&lt;<span class="xref">System.String</span>&gt;</td>
+        <td><p>the key for the object.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands_Unlink_Redis_OM_Contracts_IRedisConnection_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands.Unlink(Redis.OM.Contracts.IRedisConnection%2CSystem.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L364">View Source</a>
+  </span>
+  <a id="Redis_OM_RedisCommands_Unlink_" data-uid="Redis.OM.RedisCommands.Unlink*"></a>
+  <h4 id="Redis_OM_RedisCommands_Unlink_Redis_OM_Contracts_IRedisConnection_System_String_" data-uid="Redis.OM.RedisCommands.Unlink(Redis.OM.Contracts.IRedisConnection,System.String)">Unlink(IRedisConnection, String)</h4>
+  <div class="markdown level1 summary"><p>Unlinks a key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static string Unlink(this IRedisConnection connection, string key)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Redis.OM.Contracts.IRedisConnection.html">IRedisConnection</a></td>
+        <td><span class="parametername">connection</span></td>
+        <td><p>the connection.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">key</span></td>
+        <td><p>the key to unlink.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><p>the status.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_RedisCommands.md&amp;value=---%0Auid%3A%20Redis.OM.RedisCommands%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/RedisCommands.cs/#L15" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

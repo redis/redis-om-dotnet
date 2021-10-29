@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Geo Filters </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Geo Filters ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../../../favicon.ico">
+    <link rel="stylesheet" href="../../../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../../../styles/docfx.css">
+    <link rel="stylesheet" href="../../../styles/main.css">
+    <meta property="docfx:navrel" content="../../../toc.html">
+    <meta property="docfx:tocrel" content="../../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../../../index.html">
+                <img id="logo" class="svg" src="../../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="geo-filters">Geo Filters</h1>
+
+<p>A really nifty bit of indexing you can do with Redis OM is geo-indexing. To GeoIndex, all you need to do is to mark a <code>GeoLoc</code> field in your model as <code>Indexed</code> and create the index</p>
+<pre><code class="lang-csharp">[Document]
+public class Restaurant
+{
+    [Indexed]
+    public string Name { get; set; }
+
+    [Indexed]
+    public GeoLoc Location{get; set;}
+
+    [Indexed(Aggregatable = true)]
+    public double CostPerPerson{get;set;}
+}
+</code></pre>
+<p>So let's create the index and seed some data.</p>
+<pre><code class="lang-csharp">// connect
+var provider = new RedisConnectionProvider(&quot;redis://localhost:6379&quot;);
+
+// get connection
+var connection = provider.Connection;
+
+// get collection
+var restaurants = provider.RedisCollection&lt;Restaurant&gt;();
+
+// Create index
+await connection.CreateIndexAsync(typeof(Restaurant));
+
+// seed with dummy data
+ var r1 = new Restaurant {Name = &quot;Tony's Pizza &amp; Pasta&quot;, CostPerPerson = 12.00, Location = new (-122.076751,37.369929)};
+var r2 = new Restaurant {Name = &quot;Nizi Sushi&quot;, CostPerPerson = 16.00, Location = new (-122.057360,37.371207)};
+var r3 = new Restaurant {Name = &quot;Thai Thai&quot;, CostPerPerson = 11.50, Location = new (-122.04382,37.38)};
+var r4 = new Restaurant {Name = &quot;Chipotles&quot;, CostPerPerson = 8.50, Location = new (-122.0524,37.359719 )};
+restaurants.Insert(r1);
+restaurants.Insert(r2);
+restaurants.Insert(r3);
+restaurants.Insert(r4);
+</code></pre>
+<h2 id="querying-based-off-location">Querying Based off Location</h2>
+<p>With our data seeded, we can now run geo-filters on our restaurants data, let's say we had an office (e.g. Redis's offices in Mountain View at <code>-122.064224,37.377266</code>) and we wanted to find nearby restaurants, we could do so by using a <code>GeoFilter</code> query restaurants within a certain radius, say 1 mile we can:</p>
+<pre><code class="lang-csharp">var nearbyRestaurants = restaurants.GeoFilter(x =&gt; x.Location, -122.064224, 37.377266, 5, GeoLocDistanceUnit.Miles);
+foreach (var restaurant in nearbyRestaurants)
+{
+    Console.WriteLine($&quot;{restaurant.Name} is within 1 mile of work&quot;);
+}
+</code></pre>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/articles/searching/geo-filters/geo-filter.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../../../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../../styles/main.js"></script>
+  </body>
+</html>

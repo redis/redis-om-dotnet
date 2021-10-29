@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Grouping and Reduction </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Grouping and Reduction ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../../../favicon.ico">
+    <link rel="stylesheet" href="../../../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../../../styles/docfx.css">
+    <link rel="stylesheet" href="../../../styles/main.css">
+    <meta property="docfx:navrel" content="../../../toc.html">
+    <meta property="docfx:tocrel" content="../../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../../../index.html">
+                <img id="logo" class="svg" src="../../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="grouping-and-reduction">Grouping and Reduction</h1>
+
+<p>Grouping and reducing operations using aggregations can be extremely powerful.</p>
+<h2 id="what-is-a-group">What Is a Group</h2>
+<p>A group is simply a group of like records in Redis.</p>
+<p>e.g.</p>
+<pre><code class="lang-json">{
+    &quot;Name&quot;:&quot;Susan&quot;,
+    &quot;Department&quot;:&quot;Sales&quot;,
+    &quot;Sales&quot;:600000
+}
+
+{
+    &quot;Name&quot;:&quot;Tom&quot;,
+    &quot;Department&quot;:&quot;Sales&quot;,
+    &quot;Sales&quot;:500000
+}
+</code></pre>
+<p>If grouped together by <code>Department</code> would be one group. When grouped by <code>Name</code>, they would be two groups.</p>
+<h2 id="reductions">Reductions</h2>
+<p>What makes groups so useful in Redis Aggregations is that you can run reductions on them to aggregate items within the group. For example, you can calculate summary statistics on numeric fields, retrieve random samples, distinct counts, approximate distinct counts of any aggregatable field in the set.</p>
+<h2 id="using-groups-and-reductions-with-redis-om-net">Using Groups and Reductions with Redis OM .NET</h2>
+<p>You can run reductions against an <code>RedisAggregationSet</code> either with or without a group. If you run a reduction without a group, the result of the reduction will materialize immediately as the desired type. If you run a reduction against a group, the results will materialize when they are enumerated.</p>
+<h3 id="reductions-without-a-group">Reductions without a Group</h3>
+<p>If you wanted to calculate a reduction on all the records indexed by Redis in the collection, you would simply call the reduction on the <code>RedisAggregationSet</code></p>
+<pre><code class="lang-csharp">var sumSales = employeeAggregations.Sum(x=&gt;x.RecordShell.Sales);
+Console.WriteLine($&quot;The sum of sales for all employees was {sumSales}&quot;);
+</code></pre>
+<h3 id="reductions-with-a-group">Reductions with a Group</h3>
+<p>If you want to build a group to run reductions on, e.g. you wanted to calculate the average sales in a department, you would use a <code>GroupBy</code> predicate to specify which field or fields to group by. If you want to group by 1 field, your lambda function for the group by will yield just the field you want to group by. If you want to group by multiple fields, <code>new</code> up an anonymous type in line:</p>
+<pre><code class="lang-csharp">var oneFieldGroup = employeeAggregations.GroupBy(x=&gt;x.RecordShell.Department);
+
+var multiFieldGroup = employeeAggregations.GroupBy(x=&gt;new {x.RecordShell.Department, x.RecordShell.WorkLoc});
+</code></pre>
+<p>From here you can run reductions on your groups. To run a Reduction, execute a reduction function. When the collection materializes the <code>AggregationResult&lt;T&gt;</code> will have the reduction stored in a formatted string which is the <code>PropertyName_COMMAND_POSTFIX</code>, see supported operations table below for postfixes. If you wanted to calculate the sum of the sales of all the departments you could:</p>
+<pre><code class="lang-csharp">var departments = employeeAggregations.GroupBy(x=&gt;x.RecordShell.Department).Sum(x=&gt;x.RecordShell.Sales);
+foreach(var department in departments)
+{
+    Console.WriteLine($&quot;The {department[nameof(Employee.Department)]} department sold {department[&quot;Sales_SUM&quot;]}&quot;);
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Command Name</th>
+<th>Command Postfix</th>
+<th>Description</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count</td>
+<td>COUNT</td>
+<td>number of records meeting the query, or in the group</td>
+<td></td>
+</tr>
+<tr>
+<td>CountDistinct</td>
+<td>COUNT_DISTINCT</td>
+<td>Counts the distinct occurrences of a given property in a group</td>
+<td></td>
+</tr>
+<tr>
+<td>CountDistinctish</td>
+<td>COUNT_DISTINCTISH</td>
+<td>Provides an approximate count of distinct occurrences of a given property in each group - less expensive computationally but does have a small 3% error rate</td>
+<td></td>
+</tr>
+<tr>
+<td>Sum</td>
+<td>SUM</td>
+<td>The sum of all occurrences of the provided field in each group</td>
+<td>b</td>
+</tr>
+<tr>
+<td>Min</td>
+<td>MIN</td>
+<td>Minimum occurrence for the provided field in each group</td>
+<td></td>
+</tr>
+<tr>
+<td>Max</td>
+<td>MAX</td>
+<td>Maximum occurrence for the provided field in each group</td>
+<td></td>
+</tr>
+<tr>
+<td>Average</td>
+<td>Avg</td>
+<td>Arithmetic mean of all the occurrences for the provided field in a group</td>
+<td></td>
+</tr>
+<tr>
+<td>StandardDeviation</td>
+<td>STDDEV</td>
+<td>Standard deviation from the arithmetic mean of all the occurrences for the provided field in each group</td>
+<td></td>
+</tr>
+<tr>
+<td>Quantile</td>
+<td>QUANTLE</td>
+<td>The value of a record at the provided quantile for a field in each group, e.g., the Median of the field would be sitting at quantile .5</td>
+<td></td>
+</tr>
+<tr>
+<td>Distinct</td>
+<td>TOLIST</td>
+<td>Enumerates all the distinct values of a given field in each group</td>
+<td></td>
+</tr>
+<tr>
+<td>FirstValue</td>
+<td>FIRST_VALUE</td>
+<td>Retrieves the first occurrence of a given field in each group</td>
+<td></td>
+</tr>
+<tr>
+<td>RandomSample</td>
+<td>RANDOM_SAMPLE_{NumRecords}</td>
+<td>Random sample of the given field in each group</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="closing-groups">Closing Groups</h2>
+<p>When you invoke a <code>GroupBy</code> the type of return type changes from <code>RedisAggregationSet</code> to a <code>GroupedAggregationSet</code>. In some instances you may need to close a group out and use its results further down the pipeline. To do this, all you need to do is call <code>CloseGroup</code> on the <code>GroupedAggregationSet</code> - that will end the group predicates and allow you to use the results further down the pipeline.</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/articles/aggregations/groups/groups.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../../../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../../styles/main.js"></script>
+  </body>
+</html>

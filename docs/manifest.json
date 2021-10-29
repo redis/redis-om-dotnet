@@ -1,0 +1,1010 @@
+{
+  "homepages": [],
+  "source_base_path": "C:/Users/slore/projects/redis/redis-om/docfx_project",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.AggregateSortBy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.AggregateSortBy.html",
+          "hash": "vbs1hN5qPWsU6/fMet5DhU+GGjc5dXSkeO5b2aWaSiY="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.Apply.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.Apply.html",
+          "hash": "s72vJCJnXAY8m8KLUbzcxNSe4OTLx1xP3wuZR+rPAQA="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ApplyFunctions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ApplyFunctions.html",
+          "hash": "c5aOHlNjVc3oQ1YsKLtmvb/c7JDQqxTyxLEMCGO6p+E="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.FilterPredicate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.FilterPredicate.html",
+          "hash": "I5PNEpIoBjEY36yX9o5pB2vobx4gak0bANELe6NJlxM="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.FirstValueReduction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.FirstValueReduction.html",
+          "hash": "B3qlxyduiu7CCJukTWNOoL2yWSCTU9YCnbMTSZRE6G0="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.GroupBy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.GroupBy.html",
+          "hash": "oTRWZAvTNpo1IK6Au0o2Jq4Yvc1Pc2hvgg7THkuZXn4="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.IAggregationPredicate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.IAggregationPredicate.html",
+          "hash": "q8OdX84FhWWhUvp8M4jlvqub70MF0gMpB5ph63D8iHc="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.LimitPredicate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.LimitPredicate.html",
+          "hash": "TSuUvcPYcxwtfmfdP/sMnqHdsZuV+BRaXf178trbLjg="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.QueryPredicate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.QueryPredicate.html",
+          "hash": "Zh1xGZGBQbt15ahGrICgxExubDTs1Uw2gdiaGuloV/Q="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ReduceFunction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ReduceFunction.html",
+          "hash": "1f0yMkvxQkuqizA4CFUvjKo4B/8IedEyZ1+5k05hHcA="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.Reduction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.Reduction.html",
+          "hash": "0ZlJquB7irCUunse0aDWTM8PJVcOFJ3cK0UQXXuFnIg="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.SingleArgumentReduction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.SingleArgumentReduction.html",
+          "hash": "5JxVW3uEkfspqCIwQxMkB6brDV0SJicNmPrsZPyHAf4="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.TwoArgumentReduction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.TwoArgumentReduction.html",
+          "hash": "CAmwyovXNnklYXD6XX+ZuKlsGSByueRCrqqk9l9wfQY="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ZeroArgumentReduction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ZeroArgumentReduction.html",
+          "hash": "40YsGPgWJ2notT55BexKRID+NH1BTrVjWHgskyocjzw="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.html",
+          "hash": "bTajTlAA7qU4Z4r1zkzKOsZKKTX0sVWA/GaN9aWHX60="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.AggregationResult-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.AggregationResult-1.html",
+          "hash": "eU0qf4QOrqEfwJzojyAX3cAOwuIInoa2K2IHS4qXAtQ="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.GroupedAggregationSet-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.GroupedAggregationSet-1.html",
+          "hash": "feBGuz2N3A+U/6I8oadvs0JXcCq2A/sZzd5YM9t+s0Y="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.IAggregationResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.IAggregationResult.html",
+          "hash": "TdBbDfoMdEcrCcBcCsOmGiz9n3f9R/XY0/zUe7BXUWs="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.RedisAggregation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.RedisAggregation.html",
+          "hash": "WCfm0JvUySSMmmPLUo0+GxRSXrc89hr1edL7HntQ+kw="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.RedisAggregationSet-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.RedisAggregationSet-1.html",
+          "hash": "0MmjVebj0Tl/JakkvIBGcdcFTqUr5a+nUP4YONH+GdQ="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Aggregation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Aggregation.html",
+          "hash": "g4foiD3J9T1XxclGCpKmUf19CoxN1PbQBvYb+48HI1M="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Common.BooleanExpression.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Common.BooleanExpression.html",
+          "hash": "9oqqGkN1m37th6fI0Q7uw963PxuQoYJRkoPZhJ/QrUM="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Common.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Common.html",
+          "hash": "ywD6yPxwLjGD0fU1Uu8M71ZgxvRo6Pn8QND2qps5AVw="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Contracts.IRedisConnection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Contracts.IRedisConnection.html",
+          "hash": "u+S6jVLicUACBUDmtxcNOpmVKcoZS3Bw8F6yJAxW4t4="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Contracts.IRedisHydrateable.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Contracts.IRedisHydrateable.html",
+          "hash": "uoeMETwKCFEVwN9nc/PakDguvwRGwTWaicVmTtwbMjU="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Contracts.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Contracts.html",
+          "hash": "EVRqJQtCVhLM+SH8IsBBTHMftApoeE8lOLljOSA454g="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.GeoLocDistanceUnit.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.GeoLocDistanceUnit.html",
+          "hash": "fn5QU3lQMKb9x0toWXDRu2TwqlnVaLHkw/4Q9dhJhKk="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.IIdGenerationStrategy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.IIdGenerationStrategy.html",
+          "hash": "+0rC2ZUHcSPWT4hP3d9Fs8y+iWFzd5m+rVjxD1nKlW0="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.DocumentAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.DocumentAttribute.html",
+          "hash": "KK3YsidGa3ov8yrz5xmAPkv1rVLcDqBzCpka0NgLYo0="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.GeoLoc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.GeoLoc.html",
+          "hash": "dhP6TMmRMrqXcdMhAMimZdT2hogyX34aHDMHYgWXAZw="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.GeoLocJsonConverter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.GeoLocJsonConverter.html",
+          "hash": "GGWzOR0gV3DNlWcz1GfNK8LCYAxQ0+rq3DlU2WoupFE="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.IndexedAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.IndexedAttribute.html",
+          "hash": "j2p+seoK33mAb77jilwVL/3xE7Is8fqp0BgPz9smk7A="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.RedisCollectionStateManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.RedisCollectionStateManager.html",
+          "hash": "NgOFth4vY8y1WIyKL/hjy9asN2rar+WbOxKLGJjXqes="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.RedisFieldAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.RedisFieldAttribute.html",
+          "hash": "HrgIDCsdiGxaSZyesQ7/0OytWSYh1Qag4j3kZ1V3EDA="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.RedisIdFieldAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.RedisIdFieldAttribute.html",
+          "hash": "6ZmDG7RsNlTU6jWqVfqgq9o5/AHdygG8Nz51IqYnDhI="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.SearchFieldAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.SearchFieldAttribute.html",
+          "hash": "LWjmnMTKD02QZ5x4/NZDn3njc35xryblaxrAIhz6vfg="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.SearchableAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.SearchableAttribute.html",
+          "hash": "lGWP0fCcmBSKktafVzqg0D5uWeP1P3pF0jzp0reYQMw="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.StorageType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.StorageType.html",
+          "hash": "Y3XFcjG+mAnTXJ6GxWYiZmyb70kZzzXziymY1xFp5Wo="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.html",
+          "hash": "81V03xe62F6ehY6FRAvxasH1Co8+NVJKHY+ytrQ57pg="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.RediSearchCommands.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.RediSearchCommands.html",
+          "hash": "B8VDWaZfKU2revSPUZ6oYkJI0cRHLRwNfRIX4SVUb30="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.RedisCommands.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.RedisCommands.html",
+          "hash": "sCcDXUj33tNS56IaH8xA6WzzBtWhkNVKdgzaYzc9A9k="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.RedisConnectionConfiguration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.RedisConnectionConfiguration.html",
+          "hash": "mO3HxPpDBP2e6I4tMlgpQTmIKPOMYqKIvC52DEDQoMY="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.RedisConnectionProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.RedisConnectionProvider.html",
+          "hash": "ZJgU+1dEnpgiPMMOJIiUG8qQ7BiuLDtuZ/NEDV7sVE4="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.RedisReply.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.RedisReply.html",
+          "hash": "g9sQoDPuls9tDrXT/hABkt0g/OQAUaTMR5oy48RQ0oY="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.SearchExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.SearchExtensions.html",
+          "hash": "EpLD6TbmqCC0kpjSH3niS/pRKtyURZRU1KHiXNziJjA="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.IRedisCollection-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.IRedisCollection-1.html",
+          "hash": "g3x4KWTP3ONyN5aI2U5b1i/nVULmhmpD+FatnFIlZXk="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.QueryFlags.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.QueryFlags.html",
+          "hash": "Hkrl1RuRA6eUdGChKSs3T5Mtx3IxmGmANBoxjaz4ERI="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.QueryOption.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.QueryOption.html",
+          "hash": "SeFZ6rBoxoshZYPUWzH0y+Q1HVraFlezRikvScP4KIs="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.RedisFilter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.RedisFilter.html",
+          "hash": "156qPUrTxV0FHnhUxANSAeeIbm8sdayH/GsVyxVe3ug="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.RedisGeoFilter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.RedisGeoFilter.html",
+          "hash": "Pmux1jpHuWietkMUnM9mGMAoUoNjdGquHIsKoIYRdYI="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.RedisQuery.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.RedisQuery.html",
+          "hash": "TZPx+XK3cV17gD2fPciY8jttqKdAYv40itD72fRrwD8="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.RedisSortBy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.RedisSortBy.html",
+          "hash": "GqUj9blvaD/EkphPL47Wgp3JPYgQMz2A3Qa7hRZSYfU="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.ReturnFields.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.ReturnFields.html",
+          "hash": "y4JNarYm8tc4m16oLoREpjH0KYs+fnqhPSXcrtToChY="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.SearchLimit.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.SearchLimit.html",
+          "hash": "IdTD4J+E+iywQjPswZ2M3V8249nUVaSr3vUIHMTQDQs="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.Query.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.Query.html",
+          "hash": "VrUFYhkUE0BnOpJ5Tv1SZ433+lErP+775LTQcSK/kuM="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.RedisCollection-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.RedisCollection-1.html",
+          "hash": "zgGKnXN6MmQZcGtXGmzvzldEbfH2eMOG2ZHcPH2sSmE="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.SearchResponse-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.SearchResponse-1.html",
+          "hash": "2bY1N9MP8cILXNuawAfs7psyP3wdpKz/0KxztjTMosI="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.SearchResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.SearchResponse.html",
+          "hash": "vWunCiXrltFvNJT/z0b+K6Sx8c5h5YTX95o+jAJli5Q="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.SortDirection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.SortDirection.html",
+          "hash": "ltzPwpMm3g5ZQdQUBU7VCsuQGz4xW8bkubLTLwivkjQ="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Searching.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Searching.html",
+          "hash": "3SK1Ya6OSMQY2vJFwknfnnV0DaA5MQTjCE5TPjRsbjs="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.UlidGenerationStrategy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.UlidGenerationStrategy.html",
+          "hash": "RLWcr/10rrikvzCe+kjcqh8tfDRfYJ0T4cVXrPDfEQI="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Uuid4IdGenerationStrategy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Uuid4IdGenerationStrategy.html",
+          "hash": "bs+nV94cUy7zX3WU4rbD+P3lOqNLoKqUO2YzgN6g4NA="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.html",
+          "hash": "fXhdF7eS05/LgCrj8zpAuJbyyU+QKSXbCj20eal4Okc="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html",
+          "hash": "U2Bzz435qufWgi89mdnA//MlSOdVdpqChFNDXF5/7ok="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "BjkedgZ2r4AM8PyqcX8xIMS/5zdnGs/HZci0OHttif4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/add-and-retrieve-objects/add-and-retrieve-objects.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/add-and-retrieve-objects/add-and-retrieve-objects.html",
+          "hash": "BVz2gM5REIZPX2vP4HkCDtbuiSZ/KfaV0Op7T1y6EWY="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/aggregations/apply-functions/apply-functions.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/aggregations/apply-functions/apply-functions.html",
+          "hash": "0HbLgsN2NI7uFJLH+M+B1BvkTpAmkA0iI1S9AkGHzcs="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/aggregations/groups/groups.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/aggregations/groups/groups.html",
+          "hash": "xfNRk6mWirfC9fsfBDKhs+asgPHYA9wacPinJ+NZQVQ="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/aggregations/intro/intro.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/aggregations/intro/intro.html",
+          "hash": "hTpZDBnAPSCRIuUNpj8fx2yIJQM7gec3KMnBzlhxcmM="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/creating-an-index/creating-an-index.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/creating-an-index/creating-an-index.html",
+          "hash": "KplOA6vntaBOyq6uAOiyZ2GB8vCIh5cU9V/3e5uH8wY="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/intro.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/intro.html",
+          "hash": "rdPwKWTxikTdV6VmGLMKdRLDKoPbNvP5bAyfg/6t1rc="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/searching/geo-filters/geo-filter.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/searching/geo-filters/geo-filter.html",
+          "hash": "OanlnYvw61NC+ejUBkV0sqVQrhGEoDFVYZ4Va1+xlYM="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/searching/numeric-queries/numeric-queries.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/searching/numeric-queries/numeric-queries.html",
+          "hash": "D3g0eUo/QOJ+6GiIYPkQg1Qu89pTlNAnJyugm+OrOu8="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/searching/simple-text-queries/simple-text-queries.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/searching/simple-text-queries/simple-text-queries.html",
+          "hash": "nQz/6XsLAnwz85nSxHVYZaKtcJeepqe1IGWTMMKlDdA="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html",
+          "hash": "tgESLkuaeUGuSU39AyX2vRQPXbmt5vBUdUQPjX34ibM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "images/red.svg",
+      "output": {
+        "resource": {
+          "relative_path": "images/red.svg"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "images/square.svg",
+      "output": {
+        "resource": {
+          "relative_path": "images/square.svg"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "log_codes": [
+        "InvalidFileLink"
+      ],
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "GYnRCp0HwiboqfRJX1WVXqrMnepfANj2XluCa6j7aOg="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "Si1vxZ0U9xrBQ2tpvoGpd7QuKqF7VFDqZ3UMg5wP9kI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": true,
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": true,
+          "incrementalPhase": "build",
+          "total_file_count": 11,
+          "skipped_file_count": 11
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": true,
+          "incrementalPhase": "build",
+          "total_file_count": 63,
+          "skipped_file_count": 63
+        },
+        "ResourceDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor ResourceDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": true,
+        "details": "Can support incremental post processing.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

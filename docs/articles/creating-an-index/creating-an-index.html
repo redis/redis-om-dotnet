@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Creating an Index </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Creating an Index ">
+    <meta name="generator" content="docfx 2.58.5.0">
+    
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../../styles/docfx.css">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <meta property="docfx:navrel" content="../../toc.html">
+    <meta property="docfx:tocrel" content="../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../../index.html">
+                <img id="logo" class="svg" src="../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="creating-an-index">Creating an Index</h1>
+
+<p>To unlock some of the nicest functionality of Redis OM, e.g., running searches, matches, aggregations, reductions, mappings, etc... You will need to tell Redis how you want data to be stored and how you want it indexed. One of the features the Redis OM library provides is creating indices that map directly to your objects by declaring the indices as attributes on your class.</p>
+<p>Let's start with an example class.</p>
+<pre><code class="lang-csharp">[Document]
+public partial class Person
+{
+    [RedisIdField]
+    public string Id { get; set; }    
+
+    [Searchable(Sortable = true)]        
+    public string Name { get; set; }
+
+    [Indexed(Aggregatable = true)]
+    public GeoLoc? Home { get; set; }
+
+    [Indexed(Aggregatable = true)]
+    public GeoLoc? Work { get; set; }
+
+    [Indexed(Sortable = true)]
+    public int? Age { get; set; }
+
+    [Indexed(Sortable = true)]
+    public int? DepartmentNumber { get; set; }
+
+    [Indexed(Sortable = true)]
+    public double? Sales { get; set; }
+
+    [Indexed(Sortable = true)]
+    public double? SalesAdjustment { get; set; }
+
+    [Indexed(Sortable = true)]
+    public long? LastTimeOnline { get; set; }
+    
+    [Indexed(Aggregatable = true)]
+    public string Email { get; set; }
+}
+</code></pre>
+<p>As shown above, you can declare a class as being indexed with the <code>Document</code> Attribute. In the <code>Document</code> attribute, you can set a few fields to help build the index:</p>
+<table>
+<thead>
+<tr>
+<th>Property Name</th>
+<th>Description</th>
+<th>Default</th>
+<th>Optional</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>StorageType</td>
+<td>Defines the underlying data structure used to store the object in Redis, options are <code>HASH</code> and <code>JSON</code>, Note JSON is only useable with the <a href="https://oss.redis.com/redisjson/">RedisJson module</a></td>
+<td>HASH</td>
+<td>true</td>
+</tr>
+<tr>
+<td>IndexName</td>
+<td>The name of the index</td>
+<td><code>$&quot;{SimpleClassName.ToLower()}-idx}</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>Prefixes</td>
+<td>The key prefixes for redis to build an index off of</td>
+<td><code>new string[]{$&quot;{FullyQualifiedClassName}:&quot;}</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>Language</td>
+<td>Language to use for full-text search indexing</td>
+<td><code>null</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>LanguageField</td>
+<td>The name of the field in which the document stores its Language</td>
+<td>null</td>
+<td>true</td>
+</tr>
+<tr>
+<td>Filter</td>
+<td>The filter to use to determine whether a particular item is indexed, e.g. <code>@Age&gt;=18</code></td>
+<td>null</td>
+<td>true</td>
+</tr>
+<tr>
+<td>IdGenerationStrategy</td>
+<td>The strategy used to generate Ids for documents, if left blank it will use a <a href="https://github.com/ulid/spec">ULID</a> generation strategy</td>
+<td>UlidGenerationStrategy</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<h2 id="field-level-declarations">Field Level Declarations</h2>
+<h3 id="id-fields">Id Fields</h3>
+<p>Every class indexed by Redis must contain an Id Field marked with the <code>RedisIdField</code>.</p>
+<h3 id="indexed-fields">Indexed Fields</h3>
+<p>In addition to declaring an Id Field, you can also declare indexed fields, which will let you search for values within those fields afterward. There are two types of Field level attributes.</p>
+<ol>
+<li>Indexed - This type of index is valid for fields that are of the type <code>string</code>, a Numeric type (double/int/float etc. . .), or can be decorated for fields that are of the type <code>GeoLoc</code>, the exact way that the indexed field is interpreted depends on the indexed type</li>
+<li>Searchable - This type is only valid for <code>string</code> fields, but this enables full-text search on the decorated fields.</li>
+</ol>
+<h4 id="indexedattribute-properties">IndexedAttribute Properties</h4>
+<p>There are properties inside the <code>IndexedAttribute</code> that let you further customize how things are stored &amp; queried.</p>
+<table>
+<thead>
+<tr>
+<th>PropertyName</th>
+<th>type</th>
+<th>Description</th>
+<th>Default</th>
+<th>Optional</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PropertyName</td>
+<td><code>string</code></td>
+<td>The name of the property to be indexed</td>
+<td>The name of the property being indexed</td>
+<td>true</td>
+</tr>
+<tr>
+<td>Sortable</td>
+<td><code>bool</code></td>
+<td>Whether to index the item so it can be sorted on in queries, enables use of <code>OrderBy</code> &amp; <code>OrderByDescending</code> -&gt; <code>collection.OrderBy(x=&gt;x.Email)</code></td>
+<td><code>false</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>Normalize</td>
+<td><code>bool</code></td>
+<td>Only applicable for <code>string</code> type fields Determines whether the text in a field is normalized (sent to lower case) for purposes of sorting</td>
+<td><code>true</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>Separator</td>
+<td><code>char</code></td>
+<td>Only applicable for <code>string</code> type fields Character to use for separating tag field, allows the application of multiple tags fo the same item e.g. <code>article.Category = technology,parenting</code> is delineated by a <code>,</code> means that <code>collection.Where(x=&gt;x.Category == &quot;technology&quot;)</code> and <code>collection.Where(x=&gt;x.Category == &quot;parenting&quot;)</code> will both match the record</td>
+<td><code>|</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>CaseSensitive</td>
+<td><code>bool</code></td>
+<td>Only applicable for <code>string</code> type fields - Determines whether case is considered when performing matches on tags</td>
+<td><code>false</code></td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<h4 id="searchableattribute-properties">SearchableAttribute Properties</h4>
+<p>There are properties for the <code>SearchableAttribute</code> that let you further customize how the full-text search determines matches</p>
+<table>
+<thead>
+<tr>
+<th>PropertyName</th>
+<th>type</th>
+<th>Description</th>
+<th>Default</th>
+<th>Optional</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PropertyName</td>
+<td><code>string</code></td>
+<td>The name of the property to be indexed</td>
+<td>The name of the indexed property</td>
+<td>true</td>
+</tr>
+<tr>
+<td>Sortable</td>
+<td><code>bool</code></td>
+<td>Whether to index the item so it can be sorted on in queries, enables use of <code>OrderBy</code> &amp; <code>OrderByDescending</code> -&gt; <code>collection.OrderBy(x=&gt;x.Email)</code></td>
+<td><code>false</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>NoStem</td>
+<td><code>bool</code></td>
+<td>Determines whether to use <a href="https://oss.redis.com/redisearch/Stemming/">stemming</a>, in other words adding the stem of the word to the index, setting to true will stop the Redis from indexing the stems of words</td>
+<td><code>false</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>PhoneticMatcher</td>
+<td><code>string</code></td>
+<td>The phonetic matcher to use if you'd like the index to use (PhoneticMatching)[https://oss.redis.com/redisearch/Phonetic_Matching/] with the index</td>
+<td>null</td>
+<td>true</td>
+</tr>
+<tr>
+<td>Weight</td>
+<td><code>double</code></td>
+<td>determines the importance of the field for checking result accuracy</td>
+<td>1.0</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<h2 id="creating-the-index">Creating The Index</h2>
+<p>After declaring the index, the creation of the index is pretty straightforward. All you have to do is call <code>CreateIndex</code> for the decorated type. The library will take care of serializing the provided type into a searchable index. The library does not try to be particularly clever, so if the index already exists it will the creation request will be rejected, and you will have to drop and re-add the index (migrations is a feature that may be added in the future)</p>
+<pre><code class="lang-csharp">var connection = provider.Connection;
+connection.CreateIndex(typeof(Person));
+</code></pre>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/articles/creating-an-index/creating-an-index.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../styles/main.js"></script>
+  </body>
+</html>
