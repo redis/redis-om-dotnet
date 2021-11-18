@@ -104,7 +104,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var ages = collection.Select(x => x.Age).ToList();
             foreach (var age in ages)
             {
-                Assert.True(age >= 0);
+                Assert.True(age >= 0 || age == null);               
             }
         }
 
@@ -204,21 +204,29 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestSaveArray()
         {
-            var maryNicknames = new List<string> {"Mary", "Mae", "Mimi", "Mitzi"};
-            var maria = new Person {Name = "Maria", NickNames = maryNicknames};
-            _connection.Set(maria);
-            maryNicknames.RemoveAt(1);
-            maryNicknames.RemoveAt(1);
-            var collection = new RedisCollection<Person>(_connection);
-            foreach (var mary in collection.Where(x => x.Name == "Maria"))
+            try
             {
-                mary.NickNames = maryNicknames;
+                var maryNicknames = new List<string> { "Mary", "Mae", "Mimi", "Mitzi" };
+                var maria = new Person { Name = "Maria", NickNames = maryNicknames };
+                _connection.Set(maria);
+                maryNicknames.RemoveAt(1);
+                maryNicknames.RemoveAt(1);
+                var collection = new RedisCollection<Person>(_connection);
+                foreach (var mary in collection.Where(x => x.Name == "Maria"))
+                {
+                    mary.NickNames = maryNicknames;
+                }
+                collection.Save();
+                foreach (var mary in collection.Where(x => x.Name == "Maria"))
+                {
+                    Assert.Equal(maryNicknames.ToArray(), mary.NickNames);
+                }
             }
-            collection.Save();
-            foreach (var mary in collection.Where(x => x.Name == "Maria"))
+            catch(Exception)
             {
-                Assert.Equal(maryNicknames.ToArray(), mary.NickNames);
+                throw;
             }
+            
             
         }
         

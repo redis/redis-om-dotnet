@@ -14,7 +14,7 @@ namespace Redis.OM
 local num_args = table.getn(ARGV)
 for i=1, num_args, 3 do
     if 'ARRREM' == ARGV[i] then
-        local index = redis.call('JSON.ARRINDEX', key, ARGV[i+1], ARGV[i+2])
+        local index = redis.call('JSON.ARRINDEX', key, ARGV[i+1], ARGV[i+2])[1]
         if index>=0 then
             redis.call('JSON.ARRPOP', key, ARGV[i+1], index)
         end
