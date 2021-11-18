@@ -148,8 +148,8 @@ namespace Redis.OM.Searching
             for (var i = 1; i < arr.Count(); i += 2)
             {
                 var docId = (string)arr[i];
-                var primitive = (T)Convert.ChangeType(arr[i + 1].ToArray()[1], typeof(T));
-                response.Documents.Add(docId, primitive);
+                T? primitive = arr[i + 1].ToArray().Length > 1 ? (T)Convert.ChangeType(arr[i + 1].ToArray()[1], typeof(T)) : default;
+                response.Documents.Add(docId, primitive!);
             }
 
             return response;

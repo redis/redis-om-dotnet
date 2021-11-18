@@ -12,7 +12,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
         public Person Mother { get; set; }
 
-        [Searchable(Sortable = true)]        
+        [Searchable]        
         public string Name { get; set; }
 
         [Indexed(Aggregatable = true)]
@@ -34,7 +34,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [ListType]
         public List<string> NickNames { get; set; }
 
-        [Indexed(Sortable = true)]        
+        [Indexed]        
         public string TagField { get; set; }
 
         [Indexed(Sortable = true)]
@@ -52,7 +52,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Searchable(Aggregatable = true)]        
         public string TimeString { get; set; }
         
-        [Indexed(Aggregatable = true)]
+        [Indexed]
         public string Email { get; set; }
         
         [Indexed(Aggregatable =false)]

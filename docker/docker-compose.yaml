@@ -11,7 +11,7 @@ networks:
 
 services:  
   redis-standalone:
-    image: "redislabs/redismod:preview"    
+    image: "redislabs/redismod:preview"
     container_name: redis-standalone
     ports:
       - "6379"
@@ -19,9 +19,8 @@ services:
       cluster-network:
         ipv4_address: 192.168.57.17
   redis-master:
-    image: "redislabs/redismod:preview"    
-    container_name: redis-master    
-    command: --port 6379 --loadmodule /usr/lib/redis/modules/redisai.so --loadmodule /usr/lib/redis/modules/redisearch.so --loadmodule /usr/lib/redis/modules/redisgraph.so --loadmodule /usr/lib/redis/modules/redistimeseries.so --loadmodule /usr/lib/redis/modules/rejson.so --loadmodule /usr/lib/redis/modules/redisbloom.so --loadmodule /var/opt/redislabs/lib/modules/redisgears.so Plugin /var/opt/redislabs/modules/rg/plugin/gears_python.so        
+    image: "redislabs/rejson"
+    container_name: redis-master
     ports:
       - "6379"
     networks:
@@ -38,6 +37,8 @@ services:
       context: ./sentinel
     links:
       - redis-master
+    depends_on:
+      - redis-master
     ports:
       - "26379"
     networks:
@@ -48,6 +49,8 @@ services:
       context: ./sentinel
     links:
       - redis-master
+    depends_on:
+      - redis-master
     ports:
       - "26379"
     networks:
@@ -57,6 +60,8 @@ services:
     build:
       context: ./sentinel
     links:
+      - redis-master
+    depends_on:
       - redis-master
     ports:
       - "26379" 
