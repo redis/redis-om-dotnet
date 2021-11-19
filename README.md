@@ -171,7 +171,7 @@ So, what won't work without these modules?
 
 ### So how do you get RedisJSON?
 
-You can use RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary version of the module in its [Quick Start Guides](https://oss.redis.com/redisjson/#download-and-running-binaries)
+You can use RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary version of the module in its [Quick Start Guides](https://oss.redis.com/redisjson/#download-and-running-binaries).
 
 > NOTE: The quick start guide has instructions on how to run the module in Redis with Docker.
 
