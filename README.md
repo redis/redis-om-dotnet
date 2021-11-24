@@ -14,6 +14,7 @@
 
 ---
 
+[![NuGet](http://img.shields.io/nuget/v/Redis.OM.svg?style=flat-square)](https://www.nuget.org/packages/Redis.OM/)
 [![License][license-image]][license-url]
 [![Build Status][ci-svg]][ci-url]
 
@@ -81,11 +82,11 @@ docker run -p 6379:6379 redislabs/redismod:preview
 With Redis OM, you can model your data and declare indexes with minimal code. For example, here's how we might model a customer object:
 
 ```csharp
-[Document(StorageType = StorageType.Json)]
+[Document]
 public class Customer
 {
-   [Indexed] public string FirstName { get; set; }
-   [Indexed] public string LastName { get; set; }
+   [Indexed(Sortable = true)] public string FirstName { get; set; }
+   [Indexed(Sortable = true)] public string LastName { get; set; }
    [Indexed] public string Email { get; set; }
    [Indexed(Sortable = true)] public int Age { get; set; }
 }
