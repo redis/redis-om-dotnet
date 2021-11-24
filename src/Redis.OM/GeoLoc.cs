@@ -5,7 +5,7 @@ namespace Redis.OM.Modeling
     /// <summary>
     /// A structure representing a point on the globe by it's longitude and latitude.
     /// </summary>
-    public readonly struct GeoLoc
+    public struct GeoLoc
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GeoLoc"/> struct.
@@ -19,14 +19,14 @@ namespace Redis.OM.Modeling
         }
 
         /// <summary>
-        /// Gets the longitude.
+        /// Gets or sets the longitude.
         /// </summary>
-        public double Longitude { get; }
+        public double Longitude { get; set; }
 
         /// <summary>
-        /// Gets the latitude.
+        /// Gets or sets the latitude.
         /// </summary>
-        public double Latitude { get; }
+        public double Latitude { get; set; }
 
         /// <summary>
         /// Parses a Geolocation from a string.
