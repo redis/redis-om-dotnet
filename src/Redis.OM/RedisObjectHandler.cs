@@ -253,7 +253,7 @@ namespace Redis.OM
                 {
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
-                else if (type == typeof(string))
+                else if (type == typeof(string) || type == typeof(GeoLoc))
                 {
                     ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
                 }
