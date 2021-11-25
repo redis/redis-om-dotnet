@@ -16,14 +16,14 @@ namespace Redis.OM.Modeling
     /// </summary>
     public class RedisCollectionStateManager
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };
 
-        private readonly Func<object, object> snapshotValueFn;
+        private readonly Func<object, object> _snapshotValueFn;
 
-        private readonly Func<bool, object, object, IList<IObjectDiff>> detectDifferenceFn;
+        private readonly Func<bool, object, object, IList<IObjectDiff>> _detectDifferenceFn;
 
         static RedisCollectionStateManager()
         {
@@ -40,14 +40,15 @@ namespace Redis.OM.Modeling
             {
                 case StorageType.Json:
                     {
-                        this.detectDifferenceFn = DetectDifferenceHash;
-                        this.snapshotValueFn = SnapshotValueHash;
+                        this._detectDifferenceFn = DetectDifferenceHash;
+                        this._snapshotValueFn = SnapshotValueHash;
                         break;
                     }
+
                 default:
                     {
-                        this.detectDifferenceFn = DetectDifferenceJson;
-                        this.snapshotValueFn = SnapshotValueJson;
+                        this._detectDifferenceFn = DetectDifferenceJson;
+                        this._snapshotValueFn = SnapshotValueJson;
                         break;
                     }
             }
@@ -75,7 +76,7 @@ namespace Redis.OM.Modeling
                 return;
             }
 
-            var snapshotPiece = this.snapshotValueFn(value);
+            var snapshotPiece = this._snapshotValueFn(value);
             Snapshot.Add(key, snapshotPiece);
         }
 
@@ -89,9 +90,9 @@ namespace Redis.OM.Modeling
             foreach (var key in Snapshot.Keys)
             {
                 var found = Data.ContainsKey(key);
-                var value = Data[key]!;
+                var value = Data[key] !;
                 var snapshot = Snapshot[key];
-                var diff = this.detectDifferenceFn(found, value, snapshot);
+                var diff = this._detectDifferenceFn(found, value, snapshot);
                 res.Add(key, diff);
             }
 
@@ -105,14 +106,14 @@ namespace Redis.OM.Modeling
             {
                 if (diff["+"] is JArray arr)
                 {
-                    var minusArr = (JArray)diff["-"]!;
+                    var minusArr = (JArray)diff["-"] !;
                     ret.AddRange(arr.Select(item => new JsonDiff("ARRAPPEND", currentPath, item)));
 
                     ret.AddRange(minusArr.Select(item => new JsonDiff("ARRREM", currentPath, item)));
                 }
                 else
                 {
-                    ret.Add(new JsonDiff("SET", currentPath, diff["+"]!));
+                    ret.Add(new JsonDiff("SET", currentPath, diff["+"] !));
                 }
 
                 return ret;
@@ -126,7 +127,7 @@ namespace Redis.OM.Modeling
                 }
                 else
                 {
-                    ret.Add(new JsonDiff("SET", currentPath, diff["+"]!));
+                    ret.Add(new JsonDiff("SET", currentPath, diff["+"] !));
                 }
 
                 return ret;
@@ -213,7 +214,7 @@ namespace Redis.OM.Modeling
                         var potentiallyModifiedKeys = current.Properties().Select(c => c.Name).Except(enumerable).Except(unchangedKeys);
                         foreach (var k in potentiallyModifiedKeys)
                         {
-                            var foundDiff = FindDiff(current[k]!, model[k]!);
+                            var foundDiff = FindDiff(current[k] !, model[k] !);
                             if (foundDiff.HasValues)
                             {
                                 diff[k] = foundDiff;
