@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -15,12 +16,14 @@ namespace Redis.OM.Modeling
     /// </summary>
     public class RedisCollectionStateManager
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };
 
-        private readonly DocumentAttribute _documentAttribute;
+        private readonly Func<object, object> snapshotValueFn;
+
+        private readonly Func<bool, object, object, IList<IObjectDiff>> detectDifferenceFn;
 
         static RedisCollectionStateManager()
         {
@@ -33,7 +36,21 @@ namespace Redis.OM.Modeling
         /// <param name="attr">The document attribute for the type.</param>
         public RedisCollectionStateManager(DocumentAttribute attr)
         {
-            _documentAttribute = attr;
+            switch (attr.StorageType)
+            {
+                case StorageType.Json:
+                    {
+                        this.detectDifferenceFn = DetectDifferenceHash;
+                        this.snapshotValueFn = SnapshotValueHash;
+                        break;
+                    }
+                default:
+                    {
+                        this.detectDifferenceFn = DetectDifferenceJson;
+                        this.snapshotValueFn = SnapshotValueJson;
+                        break;
+                    }
+            }
         }
 
         /// <summary>
@@ -58,16 +75,8 @@ namespace Redis.OM.Modeling
                 return;
             }
 
-            if (_documentAttribute.StorageType == StorageType.Json)
-            {
-                var json = JToken.FromObject(value, Newtonsoft.Json.JsonSerializer.Create(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-                Snapshot.Add(key, json);
-            }
-            else
-            {
-                var hash = value.BuildHashSet();
-                Snapshot.Add(key, hash);
-            }
+            var snapshotPiece = this.snapshotValueFn(value);
+            Snapshot.Add(key, snapshotPiece);
         }
 
         /// <summary>
@@ -77,47 +86,13 @@ namespace Redis.OM.Modeling
         internal IDictionary<string, IList<IObjectDiff>> DetectDifferences()
         {
             var res = new Dictionary<string, IList<IObjectDiff>>();
-            if (_documentAttribute.StorageType == StorageType.Json)
+            foreach (var key in Snapshot.Keys)
             {
-                foreach (var key in Snapshot.Keys)
-                {
-                    if (Data.ContainsKey(key))
-                    {
-                        var dataJson = JsonSerializer.Serialize(Data[key], JsonSerializerOptions);
-                        var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-                        var snapshot = (JToken)Snapshot[key];
-                        var diff = FindDiff(current!, snapshot);
-                        var diffArgs = BuildJsonDifference(diff, "$");
-                        res.Add(key, diffArgs);
-                    }
-                    else
-                    {
-                        res.Add(key, new List<IObjectDiff> { new JsonDiff("DEL", ".", string.Empty) });
-                    }
-                }
-            }
-            else
-            {
-                foreach (var key in Snapshot.Keys)
-                {
-                    if (Data.ContainsKey(key))
-                    {
-                        var dataHash = Data[key] !.BuildHashSet();
-                        var snapshotHash = (IDictionary<string, string>)Snapshot[key];
-                        var deletedKeys = snapshotHash.Keys.Except(dataHash.Keys).Select(x => new KeyValuePair<string, string>(x, string.Empty));
-                        var modifiedKeys = dataHash.Where(x =>
-                            !snapshotHash.Keys.Contains(x.Key) || snapshotHash[x.Key] != x.Value);
-                        var diff = new List<IObjectDiff>
-                        {
-                            new HashDiff(modifiedKeys, deletedKeys.Select(x => x.Key)),
-                        };
-                        res.Add(key, diff);
-                    }
-                    else
-                    {
-                        res.Add(key, new List<IObjectDiff> { new DelDiff() });
-                    }
-                }
+                var found = Data.ContainsKey(key);
+                var value = Data[key]!;
+                var snapshot = Snapshot[key];
+                var diff = this.detectDifferenceFn(found, value, snapshot);
+                res.Add(key, diff);
             }
 
             return res;
@@ -130,14 +105,14 @@ namespace Redis.OM.Modeling
             {
                 if (diff["+"] is JArray arr)
                 {
-                    var minusArr = (JArray)diff["-"] !;
+                    var minusArr = (JArray)diff["-"]!;
                     ret.AddRange(arr.Select(item => new JsonDiff("ARRAPPEND", currentPath, item)));
 
                     ret.AddRange(minusArr.Select(item => new JsonDiff("ARRREM", currentPath, item)));
                 }
                 else
                 {
-                    ret.Add(new JsonDiff("SET", currentPath, diff["+"] !));
+                    ret.Add(new JsonDiff("SET", currentPath, diff["+"]!));
                 }
 
                 return ret;
@@ -151,7 +126,7 @@ namespace Redis.OM.Modeling
                 }
                 else
                 {
-                    ret.Add(new JsonDiff("SET", currentPath, diff["+"] !));
+                    ret.Add(new JsonDiff("SET", currentPath, diff["+"]!));
                 }
 
                 return ret;
@@ -238,7 +213,7 @@ namespace Redis.OM.Modeling
                         var potentiallyModifiedKeys = current.Properties().Select(c => c.Name).Except(enumerable).Except(unchangedKeys);
                         foreach (var k in potentiallyModifiedKeys)
                         {
-                            var foundDiff = FindDiff(current[k] !, model[k] !);
+                            var foundDiff = FindDiff(current[k]!, model[k]!);
                             if (foundDiff.HasValues)
                             {
                                 diff[k] = foundDiff;
@@ -272,6 +247,57 @@ namespace Redis.OM.Modeling
             }
 
             return diff;
+        }
+
+        private static object SnapshotValueJson(object value)
+        {
+            var json = JToken.FromObject(value, Newtonsoft.Json.JsonSerializer.Create(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+            return json;
+        }
+
+        private static object SnapshotValueHash(object value)
+        {
+            var hash = value.BuildHashSet();
+            return hash;
+        }
+
+        private static IList<IObjectDiff> DetectDifferenceJson(bool found, object value, object snapshotObject)
+        {
+            if (found)
+            {
+                var dataJson = JsonSerializer.Serialize(value, JsonSerializerOptions);
+                var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                var snapshot = (JToken)snapshotObject;
+                var diff = FindDiff(current!, snapshot);
+                var diffArgs = BuildJsonDifference(diff, "$");
+                return diffArgs;
+            }
+            else
+            {
+                return new List<IObjectDiff> { new JsonDiff("DEL", ".", string.Empty) };
+            }
+        }
+
+        private static IList<IObjectDiff> DetectDifferenceHash(bool found, object value, object snapshotObject)
+        {
+            if (found)
+            {
+                var dataHash = value!.BuildHashSet();
+                var snapshotHash = (IDictionary<string, string>)snapshotObject;
+                var deletedKeys = snapshotHash.Keys.Except(dataHash.Keys).Select(x => new KeyValuePair<string, string>(x, string.Empty));
+                var modifiedKeys = dataHash.Where(x =>
+                    !snapshotHash.Keys.Contains(x.Key) || snapshotHash[x.Key] != x.Value);
+                var diff = new List<IObjectDiff>
+                {
+                    new HashDiff(modifiedKeys, deletedKeys.Select(x => x.Key)),
+                };
+
+                return diff;
+            }
+            else
+            {
+                return new List<IObjectDiff> { new DelDiff() };
+            }
         }
     }
 }
