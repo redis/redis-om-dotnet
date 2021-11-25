@@ -83,10 +83,7 @@ namespace Redis.OM.Modeling
             var res = new Dictionary<string, IList<IObjectDiff>>();
             foreach (var key in Snapshot.Keys)
             {
-                var found = Data.ContainsKey(key);
-                var value = Data[key] !;
-                var snapshot = Snapshot[key];
-                var diff = this._detectDifferenceFn(found, value, snapshot);
+                var diff = this._detectDifferenceFn(Data.ContainsKey(key), Data[key] !, Snapshot[key]);
                 res.Add(key, diff);
             }
 
