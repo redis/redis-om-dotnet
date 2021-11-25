@@ -36,21 +36,15 @@ namespace Redis.OM.Modeling
         /// <param name="attr">The document attribute for the type.</param>
         public RedisCollectionStateManager(DocumentAttribute attr)
         {
-            switch (attr.StorageType)
+            if (attr.StorageType == StorageType.Json)
             {
-                case StorageType.Json:
-                    {
-                        this._detectDifferenceFn = DetectDifferenceHash;
-                        this._snapshotValueFn = SnapshotValueHash;
-                        break;
-                    }
-
-                default:
-                    {
-                        this._detectDifferenceFn = DetectDifferenceJson;
-                        this._snapshotValueFn = SnapshotValueJson;
-                        break;
-                    }
+                this._detectDifferenceFn = DetectDifferenceJson;
+                this._snapshotValueFn = SnapshotValueJson;
+            }
+            else
+            {
+                this._detectDifferenceFn = DetectDifferenceHash;
+                this._snapshotValueFn = SnapshotValueHash;
             }
         }
 
