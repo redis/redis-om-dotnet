@@ -86,6 +86,57 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestBasicQueryWithExactNumericMatch()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);            
+            var y = 33;
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var res = collection.Where(x => x.Age == y).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Age:[33 33])",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestBasicFirstOrDefaultQuery()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);            
+            var y = 33;
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var res = collection.FirstOrDefault(x => x.Age == y);
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Age:[33 33])",
+                "LIMIT",
+                "0",
+                "1"));
+        }
+        
+        [Fact]
+        public void TestBasicQueryNoNameIndex()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);            
+            var y = 33;
+            var collection = new RedisCollection<PersonNoName>(_mock.Object);
+            var res = collection.FirstOrDefault(x => x.Age == y);
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "personnoname-idx",
+                "(@Age:[33 33])",
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Fact]
         public void TestBasicOrQuery()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
