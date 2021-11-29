@@ -260,7 +260,7 @@ namespace Redis.OM.Common
         /// <returns>The index field type.</returns>
         internal static SearchFieldType DetermineIndexFieldsType(MemberInfo member)
         {
-            if (TypeDeterminationUtilities.IsNumeric(member.DeclaringType!))
+            if (member is PropertyInfo info && TypeDeterminationUtilities.IsNumeric(info.PropertyType))
             {
                 return SearchFieldType.NUMERIC;
             }
