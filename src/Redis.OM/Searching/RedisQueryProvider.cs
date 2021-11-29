@@ -111,7 +111,7 @@ namespace Redis.OM.Searching
                 attr = type.GetCustomAttribute<DocumentAttribute>();
             }
 
-            if (attr == null || string.IsNullOrEmpty(attr.IndexName))
+            if (attr == null)
             {
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
