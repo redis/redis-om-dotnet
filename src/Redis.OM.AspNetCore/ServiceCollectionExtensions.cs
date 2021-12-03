@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Redis.OM;
 
-namespace Redis.Developer.AspDotnetCore
+namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class RedisMiddleware
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddRedis(this IServiceCollection services,
             string connectionString)
