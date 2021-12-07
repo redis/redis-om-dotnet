@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Redis.OM;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Redis.OM.AspNetCore
 {
     public static class ServiceCollectionExtensions
     {
