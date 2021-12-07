@@ -21,6 +21,7 @@ namespace Redis.OM
         static RedisObjectHandler()
         {
             JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
+            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
         }
 
         /// <summary>
@@ -275,15 +276,9 @@ namespace Redis.OM
                 {
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
-                else if (type == typeof(string) || type == typeof(GeoLoc))
+                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?))
                 {
                     ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
-                }
-                else if (type == typeof(DateTime) || (type == typeof(DateTime?) && hash.ContainsKey(propertyName)))
-                {
-                    DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                    dateTime = dateTime.AddMilliseconds(long.Parse(hash[propertyName]));
-                    ret += $"\"{propertyName}\":\"{dateTime:yyyy-MM-ddTHH:mm:ss.fffZ}\",";
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
