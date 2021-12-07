@@ -86,7 +86,7 @@ With Redis OM, you can model your data and declare indexes with minimal code. Fo
 public class Customer
 {
    [Indexed(Sortable = true)] public string FirstName { get; set; }
-   [Indexed] public string LastName { get; set; }
+   [Indexed(Aggregatable = true)] public string LastName { get; set; }
    public string Email { get; set; }
    [Indexed(Sortable = true)] public int Age { get; set; }
 }
