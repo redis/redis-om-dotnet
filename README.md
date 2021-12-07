@@ -146,7 +146,7 @@ customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -
 
 ## 📚 Documentation
 
-This README just scratches the surface. You can find complete documentation in the [Redis OM .NET docs site](https://redis-developer.github.io/redis-om-dotnet).
+This README just scratches the surface. You can find a full tutorial on the [Redis Developer Site](https://developer.redis.com/develop/dotnet/redis-om-dotnet/connecting-to-redis). All the summary docs for this library can be found on the repo's [github page](https://redis.github.io/redis-om-dotnet/).
 
 ## ⛏️ Troubleshooting
 
