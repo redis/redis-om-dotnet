@@ -25,6 +25,7 @@ namespace Redis.OM.Modeling
         static RedisCollectionStateManager()
         {
             JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
+            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
         }
 
         /// <summary>
