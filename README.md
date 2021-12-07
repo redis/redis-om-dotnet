@@ -86,8 +86,8 @@ With Redis OM, you can model your data and declare indexes with minimal code. Fo
 public class Customer
 {
    [Indexed(Sortable = true)] public string FirstName { get; set; }
-   [Indexed(Sortable = true)] public string LastName { get; set; }
-   [Indexed] public string Email { get; set; }
+   [Indexed(Aggregatable = true)] public string LastName { get; set; }
+   public string Email { get; set; }
    [Indexed(Sortable = true)] public int Age { get; set; }
 }
 ```
@@ -99,7 +99,7 @@ Now we need to create the Redis index. So we'll connect to Redis and then call `
 
 ```csharp
 var provider = new RedisConnectionProvider("redis://localhost:6379");
-connection.CreateIndex(typeof(Customer));
+provider.Connection.CreateIndex(typeof(Customer));
 ```
 
 Once the index is created, we can:
@@ -117,6 +117,16 @@ We can query our domain using expressions in LINQ, like so:
 
 ```csharp
 var customers = provider.RedisCollection<Customer>();
+
+// Insert customer
+customers.Insert(new Customer()
+{
+    FirstName = "James",
+    LastName = "Bond",
+    Age = 68,
+    Email = "bondjamesbond@email.com"
+});
+
 // Find all customers whose last name is "Bond"
 customers.Where(x => x.LastName == "Bond");
 
