@@ -22,6 +22,7 @@ namespace Redis.OM
         static RedisCommands()
         {
             Options.Converters.Add(new GeoLocJsonConverter());
+            Options.Converters.Add(new DateTimeJsonConverter());
         }
 
         /// <summary>

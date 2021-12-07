@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Redis.OM;
 
 namespace Redis.OM.Modeling
@@ -9,6 +10,12 @@ namespace Redis.OM.Modeling
     [AttributeUsage(AttributeTargets.Class)]
     public class DocumentAttribute : Attribute
     {
+        private static Dictionary<string, IIdGenerationStrategy> _idGenerationStrategies = new ()
+        {
+            { nameof(UlidGenerationStrategy), new UlidGenerationStrategy() },
+            { nameof(Uuid4IdGenerationStrategy), new Uuid4IdGenerationStrategy() },
+        };
+
         /// <summary>
         /// Gets or sets the storage type.
         /// </summary>
@@ -17,7 +24,7 @@ namespace Redis.OM.Modeling
         /// <summary>
         /// Gets or sets the IdGenerationStrategy, will use a ULID by default.
         /// </summary>
-        public IIdGenerationStrategy IdGenerationStrategy { get; set; } = new UlidGenerationStrategy();
+        public string IdGenerationStrategyName { get; set; } = nameof(UlidGenerationStrategy);
 
         /// <summary>
         /// Gets or sets the prefixes to use for the Documents.
@@ -43,5 +50,20 @@ namespace Redis.OM.Modeling
         /// Gets or sets the filter to use for indexing documents.
         /// </summary>
         public string? Filter { get; set; }
+
+        /// <summary>
+        /// Gets the IdGenerationStrategy.
+        /// </summary>
+        internal IIdGenerationStrategy IdGenerationStrategy => _idGenerationStrategies[IdGenerationStrategyName];
+
+        /// <summary>
+        /// Registers an Id generation Strategy with the Object Mapper.
+        /// </summary>
+        /// <param name="strategyName">The name of the strategy, which you will reference when declaring a Document.</param>
+        /// <param name="strategy">An instance of the Strategy class to be used by all documents to generate an id.</param>
+        public static void RegisterIdGenerationStrategy(string strategyName, IIdGenerationStrategy strategy)
+        {
+            _idGenerationStrategies.Add(strategyName, strategy);
+        }
     }
 }

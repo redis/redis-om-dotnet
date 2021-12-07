@@ -21,6 +21,7 @@ namespace Redis.OM
         static RedisObjectHandler()
         {
             JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
+            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
         }
 
         /// <summary>
@@ -100,9 +101,19 @@ namespace Redis.OM
                 throw new MissingMemberException("Missing Document Attribute decoration");
             }
 
-            var id = attr.IdGenerationStrategy.GenerateId();
+            string id;
+            id = attr.IdGenerationStrategy.GenerateId();
             if (idProperty != null)
             {
+                if (idProperty.GetValue(obj) != default)
+                {
+                    id = idProperty.GetValue(obj).ToString();
+                }
+                else
+                {
+                    id = attr.IdGenerationStrategy.GenerateId();
+                }
+
                 if (idProperty.PropertyType == typeof(string))
                 {
                     idProperty.SetValue(obj, id);
@@ -115,6 +126,10 @@ namespace Redis.OM
                 {
                     throw new InvalidOperationException("Software Defined Ids on objects must either be a string or Guid");
                 }
+            }
+            else
+            {
+                id = attr.IdGenerationStrategy.GenerateId();
             }
 
             if (attr.Prefixes == null || string.IsNullOrEmpty(attr.Prefixes.FirstOrDefault()))
@@ -192,6 +207,14 @@ namespace Redis.OM
                         hash.Add(propertyName, val.ToString());
                     }
                 }
+                else if (type == typeof(DateTime) || type == typeof(DateTime?))
+                {
+                    var val = (DateTime)property.GetValue(obj);
+                    if (val != default)
+                    {
+                        hash.Add(propertyName, new DateTimeOffset(val).ToUnixTimeMilliseconds().ToString());
+                    }
+                }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
                     var e = (IEnumerable<object>)property.GetValue(obj);
@@ -253,7 +276,7 @@ namespace Redis.OM
                 {
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
-                else if (type == typeof(string) || type == typeof(GeoLoc))
+                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?))
                 {
                     ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
                 }
