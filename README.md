@@ -43,6 +43,7 @@
   - [Why this is important](#why-this-is-important)
   - [So how do you get RediSearch and RedisJSON?](#so-how-do-you-get-redisearch-and-redisjson)
 - [❤️ Contributing](#-contributing)
+- [❤️ Our Contributors](#-our-contributors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -190,11 +191,14 @@ Don't want to run Redis yourself? RedisJSON is also available on Redis Cloud. [G
 
 ## ❤️ Contributing
 
-We'd love your contributions!
+We'd love your contributions! If you want to contribute please read our [Contributing](Contributing.md) document.
 
-**Bug reports** are especially helpful at this stage of the project. [You can open a bug report on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new).
+## ❤️ Our Contributors
 
-You can also **contribute documentation** -- or just let us know if something needs more detail. [Open an issue on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new) to get started.
+* @slorello89
+* @banker
+* @simonprickett
+* @BenShapira
 
 <!-- Logo -->
 [Logo]: images/logo.svg
