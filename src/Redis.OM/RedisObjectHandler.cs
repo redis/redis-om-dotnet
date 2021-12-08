@@ -105,16 +105,14 @@ namespace Redis.OM
             if (idProperty != null)
             {
                 Type[] supportedIdPropertyTypes = new Type[] { typeof(string), typeof(Guid), typeof(int) };
-                if (supportedIdPropertyTypes.Contains(idProperty.PropertyType))
-                {
-                    if (idProperty.GetValue(obj) != null)
-                    {
-                        id = idProperty.GetValue(obj).ToString();
-                    }
-                }
-                else
+                if (!supportedIdPropertyTypes.Contains(idProperty.PropertyType))
                 {
                     throw new InvalidOperationException("Software Defined Ids on objects must either be a string or Guid");
+                }
+
+                if (idProperty.GetValue(obj) != null)
+                {
+                    id = idProperty.GetValue(obj).ToString();
                 }
             }
 
