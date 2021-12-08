@@ -101,35 +101,21 @@ namespace Redis.OM
                 throw new MissingMemberException("Missing Document Attribute decoration");
             }
 
-            string id;
-            id = attr.IdGenerationStrategy.GenerateId();
+            string id = attr.IdGenerationStrategy.GenerateId();
             if (idProperty != null)
             {
-                if (idProperty.GetValue(obj) != default)
+                Type[] supportedIdPropertyTypes = new Type[] { typeof(string), typeof(Guid), typeof(int) };
+                if (supportedIdPropertyTypes.Contains(idProperty.PropertyType))
                 {
-                    id = idProperty.GetValue(obj).ToString();
-                }
-                else
-                {
-                    id = attr.IdGenerationStrategy.GenerateId();
-                }
-
-                if (idProperty.PropertyType == typeof(string))
-                {
-                    idProperty.SetValue(obj, id);
-                }
-                else if (idProperty.PropertyType == typeof(Guid))
-                {
-                    idProperty.SetValue(obj, id);
+                    if (idProperty.GetValue(obj) != null)
+                    {
+                        id = idProperty.GetValue(obj).ToString();
+                    }
                 }
                 else
                 {
                     throw new InvalidOperationException("Software Defined Ids on objects must either be a string or Guid");
                 }
-            }
-            else
-            {
-                id = attr.IdGenerationStrategy.GenerateId();
             }
 
             if (attr.Prefixes == null || string.IsNullOrEmpty(attr.Prefixes.FirstOrDefault()))
