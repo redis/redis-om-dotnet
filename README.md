@@ -191,7 +191,7 @@ Don't want to run Redis yourself? RedisJSON is also available on Redis Cloud. [G
 
 ## ❤️ Contributing
 
-We'd love your contributions! If you want to contribute please read our [Contributing](Contributing.md) document.
+We'd love your contributions! If you want to contribute please read our [Contributing](CONTRIBUTING.md) document.
 
 ## ❤️ Our Contributors
 
