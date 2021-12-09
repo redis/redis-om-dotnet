@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Moq.Language.Flow;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Redis.OM;
 using Redis.OM.Contracts;
@@ -83,6 +84,29 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "100"));
+        }
+
+        [Fact]
+        public void TestFirstOrDefaultWithMixedLocals()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var heightList = new List<double> {70.0, 68.0};
+            var y = 33;
+            foreach (var height in heightList)
+            {
+                
+                var collection = new RedisCollection<Person>(_mock.Object);
+                var res = collection.FirstOrDefault(x => x.Age == y && x.Height == height);
+                _mock.Verify(x => x.Execute(
+                    "FT.SEARCH",
+                    "person-idx",
+                    $"((@Age:[33 33]) (@Height:[{height} {height}]))",
+                    "LIMIT",
+                    "0",
+                    "1"));
+                
+            }
         }
 
         [Fact]
