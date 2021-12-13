@@ -199,6 +199,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * @banker
 * @simonprickett
 * @BenShapira
+* @satish860
 
 <!-- Logo -->
 [Logo]: images/logo.svg
