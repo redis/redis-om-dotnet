@@ -1,4 +1,5 @@
-﻿using Redis.OM.Contracts;
+﻿using System;
+using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Xunit;
 
@@ -28,8 +29,31 @@ namespace Redis.OM.Unit.Tests
             DocumentAttribute.RegisterIdGenerationStrategy(nameof(StaticIncrementStrategy), new StaticIncrementStrategy());
             var obj = new ObjectWithCustomIdGenerationStrategy();
             var id = _connection.Set(obj);
-            Assert.Equal("1", obj.Id);
-            Assert.Equal("1", id.Split(":")[1]);
+            Assert.Equal("0", obj.Id);
+            Assert.Equal("0", id.Split(":")[1]);
+            
+            var obj2 = new ObjectWithCustomIdGenerationStrategy();
+            var id2 = _connection.Set(obj2);
+            Assert.Equal("1", obj2.Id);
+            Assert.Equal("1", id2.Split(":")[1]);
+        }
+
+        [Fact]
+        public void TestUserSetIntId()
+        {
+            var obj = new ObjectWithIntegerId() {Id = 5};
+            var id = _connection.Set(obj);
+            Assert.Equal(5, obj.Id);
+            Assert.Equal("5", id.Split(":")[1]);
+        }
+
+        [Fact]
+        public void TestStandardIdGeneration()
+        {
+            var obj = new ObjectWithStandardId();
+            var id = _connection.Set(obj);
+            var ulid = Ulid.Parse(id.Split(":")[1]);
+            Assert.Equal(ulid.ToString(),obj.Id);
         }
     }
 }

@@ -85,7 +85,7 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Set's the id of the given field based off the objects id stratagey.
+        /// Set's the id of the given field based off the objects id strategy.
         /// </summary>
         /// <param name="obj">The object to set the field of.</param>
         /// <returns>The id.</returns>
@@ -101,18 +101,22 @@ namespace Redis.OM
                 throw new MissingMemberException("Missing Document Attribute decoration");
             }
 
-            string id = attr.IdGenerationStrategy.GenerateId();
+            object id = attr.IdGenerationStrategy.GenerateId();
             if (idProperty != null)
             {
-                Type[] supportedIdPropertyTypes = new Type[] { typeof(string), typeof(Guid), typeof(int) };
-                if (!supportedIdPropertyTypes.Contains(idProperty.PropertyType))
+                var supportedIdPropertyTypes = new[] { typeof(string), typeof(Guid), typeof(Ulid) };
+                if (!supportedIdPropertyTypes.Contains(idProperty.PropertyType) && !idProperty.PropertyType.IsValueType)
                 {
-                    throw new InvalidOperationException("Software Defined Ids on objects must either be a string or Guid");
+                    throw new InvalidOperationException("Software Defined Ids on objects must either be a string, ULID, Guid, or some other value type.");
                 }
 
                 if (idProperty.GetValue(obj) != null)
                 {
-                    id = idProperty.GetValue(obj).ToString();
+                    id = idProperty.GetValue(obj);
+                }
+                else
+                {
+                    idProperty.SetValue(obj, id);
                 }
             }
 
