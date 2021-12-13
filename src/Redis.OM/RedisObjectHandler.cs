@@ -85,7 +85,7 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Set's the id of the given field based off the objects id stratagey.
+        /// Set's the id of the given field based off the objects id strategy.
         /// </summary>
         /// <param name="obj">The object to set the field of.</param>
         /// <returns>The id.</returns>
@@ -101,35 +101,23 @@ namespace Redis.OM
                 throw new MissingMemberException("Missing Document Attribute decoration");
             }
 
-            string id;
-            id = attr.IdGenerationStrategy.GenerateId();
+            object id = attr.IdGenerationStrategy.GenerateId();
             if (idProperty != null)
             {
-                if (idProperty.GetValue(obj) != default)
+                var supportedIdPropertyTypes = new[] { typeof(string), typeof(Guid), typeof(Ulid) };
+                if (!supportedIdPropertyTypes.Contains(idProperty.PropertyType) && !idProperty.PropertyType.IsValueType)
                 {
-                    id = idProperty.GetValue(obj).ToString();
-                }
-                else
-                {
-                    id = attr.IdGenerationStrategy.GenerateId();
+                    throw new InvalidOperationException("Software Defined Ids on objects must either be a string, ULID, Guid, or some other value type.");
                 }
 
-                if (idProperty.PropertyType == typeof(string))
+                if (idProperty.GetValue(obj) != null)
                 {
-                    idProperty.SetValue(obj, id);
-                }
-                else if (idProperty.PropertyType == typeof(Guid))
-                {
-                    idProperty.SetValue(obj, id);
+                    id = idProperty.GetValue(obj);
                 }
                 else
                 {
-                    throw new InvalidOperationException("Software Defined Ids on objects must either be a string or Guid");
+                    idProperty.SetValue(obj, id);
                 }
-            }
-            else
-            {
-                id = attr.IdGenerationStrategy.GenerateId();
             }
 
             if (attr.Prefixes == null || string.IsNullOrEmpty(attr.Prefixes.FirstOrDefault()))
