@@ -154,8 +154,7 @@ namespace Redis.OM.Common
             {
                 if (member.Expression is not ConstantExpression c)
                 {
-                    throw new ArgumentException("Operand for expression must either be an indexed " +
-                                                "field of a model, a literal, or must have a value when expression is enumerated");
+                    return Expression.Lambda(member).Compile().DynamicInvoke().ToString();
                 }
 
                 var val = GetValue(member.Member, c.Value);
