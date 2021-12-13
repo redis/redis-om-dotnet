@@ -30,6 +30,14 @@ namespace Redis.OM.Test.ConsoleApp
             
             // Create index
             connection.CreateIndex(typeof(Customer));
+
+            // Insert Object
+            customers.Insert(new Customer{
+                FirstName = "James",
+                LastName = "Bond",
+                Email = "bondjamesbond@email.com",
+                Age = 68
+            });
             
             // query
             // Find all customers who's last name is "Bond"
