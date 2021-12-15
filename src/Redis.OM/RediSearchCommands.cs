@@ -23,6 +23,11 @@ namespace Redis.OM
         public static SearchResponse<T> Search<T>(this IRedisConnection connection, RedisQuery query)
             where T : notnull
         {
+            if (string.IsNullOrEmpty(query.Index))
+            {
+                query.Index = typeof(T).SerializeIndex().FirstOrDefault() ?? string.Empty;
+            }
+
             var res = connection.Execute("FT.SEARCH", query.SerializeQuery());
             return new SearchResponse<T>(res);
         }
@@ -37,6 +42,11 @@ namespace Redis.OM
         public static async Task<SearchResponse<T>> SearchAsync<T>(this IRedisConnection connection, RedisQuery query)
             where T : notnull
         {
+            if (string.IsNullOrEmpty(query.Index))
+            {
+                query.Index = typeof(T).SerializeIndex().FirstOrDefault() ?? string.Empty;
+            }
+
             var res = await connection.ExecuteAsync("FT.SEARCH", query.SerializeQuery());
             return new SearchResponse<T>(res);
         }
