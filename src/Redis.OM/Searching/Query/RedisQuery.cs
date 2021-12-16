@@ -9,6 +9,16 @@ namespace Redis.OM.Searching.Query
     public sealed class RedisQuery
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="RedisQuery"/> class.
+        /// An object to facilitate the Raw Redis query.
+        /// </summary>
+        /// <param name="index">Name of the Index to query.</param>
+        public RedisQuery(string index)
+        {
+            this.Index = index;
+        }
+
+        /// <summary>
         /// Gets or sets the flags for the query options.
         /// </summary>
         public long Flags { get; set; } = 0;
@@ -16,7 +26,7 @@ namespace Redis.OM.Searching.Query
         /// <summary>
         /// Gets or sets the index to query.
         /// </summary>
-        public string Index { get; set; } = string.Empty;
+        public string Index { get; set; }
 
         /// <summary>
         /// Gets or sets the query text.

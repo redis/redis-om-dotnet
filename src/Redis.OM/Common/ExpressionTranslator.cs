@@ -189,7 +189,7 @@ namespace Redis.OM.Common
             }
 
             var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}-idx" : attr.IndexName;
-            var query = new RedisQuery { Index = indexName!, QueryText = "*" };
+            var query = new RedisQuery(indexName!) { QueryText = "*" };
             switch (expression)
             {
                 case MethodCallExpression methodExpression:
