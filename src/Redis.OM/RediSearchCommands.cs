@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
 using Redis.OM.Searching.Query;
+using StackExchange.Redis;
 
 namespace Redis.OM
 {
@@ -128,6 +130,79 @@ namespace Redis.OM
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Gets the Index with the Index Name Pattern.
+        /// </summary>
+        /// <param name="connection">Connection.</param>
+        /// <param name="indexName">Name of the Index to be queries.</param>
+        /// <returns>Information about the Info.</returns>
+        public static Dictionary<string, string> GetIndexInfo(this IRedisConnection connection, string indexName)
+        {
+            var reply = connection.Execute("FT.INFO", indexName);
+            var res = reply.ToArray();
+            var info = ToDictionary(res);
+
+            return info;
+        }
+
+        /// <summary>
+        /// Gets the Index with the Index Name Pattern.
+        /// </summary>
+        /// <param name="connection">Connection.</param>
+        /// <param name="indexName">Name of the Index to be queries.</param>
+        /// <returns>Information about the Info.</returns>
+        public static async Task<Dictionary<string, string>> GetIndexInfoasync(
+            this IRedisConnection connection,
+            string indexName)
+        {
+            var reply = await connection.ExecuteAsync("FT.INFO", indexName);
+            var res = reply.ToArray();
+            var info = ToDictionary(res);
+            return info;
+        }
+
+        /// <summary>
+        /// Get The Index based on Type.
+        /// </summary>
+        /// <param name="connection">Connection Object.</param>
+        /// <typeparam name="T">Type of object from which the index name is derived.</typeparam>
+        /// <returns>Dictionary of Info.</returns>
+        public static Dictionary<string, string> GetIndexInfo<T>(this IRedisConnection connection)
+        {
+            var indexName = typeof(T).SerializeIndex().First();
+            return connection.GetIndexInfo(indexName);
+        }
+
+        /// <summary>
+        /// Get The Index based on Type.
+        /// </summary>
+        /// <param name="connection">Connection Object.</param>
+        /// <typeparam name="T">Type of object from which the index name is derived.</typeparam>
+        /// <returns>Dictionary of Info.</returns>
+        public static async Task<Dictionary<string, string>> GetIndexInfoasync<T>(this IRedisConnection connection)
+        {
+            var indexName = typeof(T).SerializeIndex().First();
+            return await connection.GetIndexInfoasync(indexName);
+        }
+
+        /// <summary>
+        /// Converts the Redis Reply List to Dictionary.
+        /// </summary>
+        /// <param name="res">Response from the command.</param>
+        /// <returns>Dictionary of Key and Value.</returns>
+        internal static Dictionary<string, string> ToDictionary(RedisReply[] res)
+        {
+            var info = new Dictionary<string, string>();
+            for (int i = 0; i < res.Length; i += 2)
+            {
+                var key = (string)res[i];
+                var val = res[i + 1];
+                info.Add(key, val);
+            }
+
+            return info;
         }
 
         /// <summary>
