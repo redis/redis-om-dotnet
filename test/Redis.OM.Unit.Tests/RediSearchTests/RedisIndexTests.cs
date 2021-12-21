@@ -103,7 +103,7 @@ namespace Redis.OM.Unit.Tests
             connection.DropIndex(typeof(TestPersonClassHappyPath));
             var res = connection.CreateIndex(typeof(TestPersonClassHappyPath));
             var reply = connection.GetIndexInfo("TestPersonClassHappyPath-idx");
-            Assert.Equal("TestPersonClassHappyPath-idx", reply["index_name"]);
+            Assert.Equal("TestPersonClassHappyPath-idx", reply.IndexName);
             connection.DropIndex(typeof(TestPersonClassHappyPath));
         }
 
@@ -116,7 +116,7 @@ namespace Redis.OM.Unit.Tests
             connection.DropIndex(typeof(TestPersonClassHappyPath));
             var res = connection.CreateIndex(typeof(TestPersonClassHappyPath));
             var reply = connection.GetIndexInfo("TestPersonClassHappyPath-idx");
-            Assert.Equal("TestPersonClassHappyPath-idx", reply["index_name"]);
+            Assert.Equal("TestPersonClassHappyPath-idx", reply.IndexName);
             connection.DropIndex(typeof(TestPersonClassHappyPath));
         }
 
