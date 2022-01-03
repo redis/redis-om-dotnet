@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
@@ -128,6 +129,28 @@ namespace Redis.OM
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Gets the List of Index.
+        /// </summary>
+        /// <param name="connection">Connection.</param>
+        /// <returns>List of Index Name.</returns>
+        public static string[] ListIndex(this IRedisConnection connection)
+        {
+            var indexList = connection.Execute("FT._LIST");
+            return indexList;
+        }
+
+        /// <summary>
+        /// Gets the List of Index.
+        /// </summary>
+        /// <param name="connection">Connection.</param>
+        /// <returns>List of Index Name.</returns>
+        public static async Task<string[]> ListIndexasync(this IRedisConnection connection)
+        {
+            var indexList = await connection.ExecuteAsync("FT._LIST");
+            return indexList;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -89,6 +90,32 @@ namespace Redis.OM.Unit.Tests
             connection.DropIndex(typeof(TestPersonClassHappyPath));
             var res = connection.DropIndex(typeof(TestPersonClassHappyPath));
             Assert.False(res);
+        }
+
+        [Fact]
+        public void TestListIndexWhichExist()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            connection.DropIndex(typeof(TestPersonClassHappyPath));
+            connection.CreateIndex(typeof(TestPersonClassHappyPath)); 
+            var res = connection.ListIndex();
+            Assert.Contains("TestPersonClassHappyPath-idx",res);
+            connection.DropIndex(typeof(TestPersonClassHappyPath));
+        }
+        
+        [Fact]
+        public async Task TestListIndexasyncWhichExist()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            connection.DropIndex(typeof(TestPersonClassHappyPath));
+            connection.CreateIndex(typeof(TestPersonClassHappyPath)); 
+            var res = await connection.ListIndexasync();
+            Assert.Contains("TestPersonClassHappyPath-idx",res);
+            connection.DropIndex(typeof(TestPersonClassHappyPath));
         }
     }
 }
