@@ -200,6 +200,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * @simonprickett
 * @BenShapira
 * @satish860
+* @dracco1993
 
 <!-- Logo -->
 [Logo]: images/logo.svg
