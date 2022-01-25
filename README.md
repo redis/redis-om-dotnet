@@ -201,6 +201,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * @BenShapira
 * @satish860
 * @dracco1993
+* @ecortese
 
 <!-- Logo -->
 [Logo]: images/logo.svg
