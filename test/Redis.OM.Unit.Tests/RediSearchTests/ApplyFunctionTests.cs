@@ -1,11 +1,10 @@
 ﻿using Moq;
-using System;
-using System.Linq;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Contracts;
-using Redis.OM;
 using Redis.OM.Modeling;
+using System;
+using System.Linq;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -820,6 +819,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestGeoDistance1Field2coordsTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestGeoDistance1Field2coords());
+        }
+
+        [Fact]
         public void TestGeoDistance1String2Field()
         {
             var expectedPredicate = "geodistance(\"1.5,3.2\",@Work)";
@@ -880,6 +885,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestGeoDistance1String2CoordsTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestGeoDistance1String2Coords());
+        }
+
+        [Fact]
         public void TestGeoDistance1Coord2Field()
         {
             var expectedPredicate = "geodistance(1.5,3.2,@Work)";
@@ -897,6 +908,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 x => ApplyFunctions.GeoDistance(1.5,3.2, (GeoLoc)x.RecordShell.Work), "geo").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+
+        [Fact]
+        public void TestGeoDistance1Coord2FieldTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestGeoDistance1Coord2Field());
         }
 
         [Fact]
@@ -920,6 +937,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestGeoDistance1Coord2StringTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestGeoDistance1Coord2String());
+        }
+
+        [Fact]
         public void TestGeoDistance1Coord2Cord()
         {
             var expectedPredicate = "geodistance(1.5,3.2,1.5,3.2)";
@@ -937,6 +960,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 x => ApplyFunctions.GeoDistance(1.5, 3.2, 1.5,3.2), "geo").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+
+        [Fact]
+        public void TestGeoDistance1Coord2CordTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestGeoDistance1Coord2Cord());
         }
 
         [Fact]
@@ -960,6 +989,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestGeoDistance1Coord2CordAdditionTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestGeoDistance1Coord2CordAddition());
+        }
+
+        [Fact]
         public void TestGeoDistance1Coord2CordNonLiteral()
         {
             var expectedPredicate = "geodistance(1.5,3.2,1.5,3.2)";
@@ -979,6 +1014,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 x => ApplyFunctions.GeoDistance(lon1, lat1, 1.5, 3.2), "geo").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+
+        [Fact]
+        public void TestGeoDistance1Coord2CordNonLiteralTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestGeoDistance1Coord2CordNonLiteral());
         }
 
         [Fact]

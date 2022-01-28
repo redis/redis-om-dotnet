@@ -1,10 +1,10 @@
 ﻿using Moq;
-using System.Linq;
-using System.Threading.Tasks;
+using Redis.OM;
 using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
-using Redis.OM;
 using Redis.OM.Searching;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -648,6 +648,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestQuantileNoGroupPredicateTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestQuantileNoGroupPredicate());
+        }
+
+        [Fact]
         public void TestQuantileNoGroupPredicateAsync()
         {
             var mockReply = new RedisReply[]
@@ -681,9 +687,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 var res = await collection.QuantileAsync(x => x.RecordShell.Age, .7);
                 Assert.Equal(5, res);
             }).GetAwaiter().GetResult();
-            
+        }
 
-            
+        [Fact]
+        public void TestQuantileNoGroupPredicateAsyncTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestQuantileNoGroupPredicateAsync());
         }
 
         [Fact]
@@ -723,6 +732,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ToArray();
 
             Assert.Equal(5, (int)res[0]["Age_QUANTILE_0.7"]);
+        }
+
+        [Fact]
+        public void TestQuantileWithGroupPredicateTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => TestQuantileWithGroupPredicate());
         }
 
         [Fact]

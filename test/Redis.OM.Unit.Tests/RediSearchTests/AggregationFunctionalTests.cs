@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Redis.OM.Aggregation;
+﻿using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -133,6 +130,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                     .StandardDeviationAsync(x => x["AdjustedSales"]);
                 Assert.Equal(358018.854252, stddev);
             }).GetAwaiter().GetResult();
+        }
+
+        [Fact]
+        public void GetAdjustedSalesStandardDeviationTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => GetAdjustedSalesStandardDeviation());
         }
 
         [Fact]
