@@ -230,6 +230,11 @@ namespace Redis.OM.Searching
 
         private static RedisReply InvariantCultureResultParsing<T>(RedisReply value)
         {
+            if (string.IsNullOrEmpty(value.ToString()) && Nullable.GetUnderlyingType(typeof(T)) != null)
+            {
+                return value;
+            }
+
             return typeof(T).FullName switch
             {
                 SYSTEMDOUBLETYPE => /*
