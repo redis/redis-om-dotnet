@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,6 +17,9 @@ namespace Redis.OM.Common
     /// </summary>
     internal static class ExpressionParserUtilities
     {
+        private const string SYSTEMDOUBLETYPE = "System.Double";
+        private const string SYSTEMSTRINGTYPE = "System.String";
+
         /// <summary>
         /// Get's the operand string.
         /// </summary>
@@ -25,7 +29,7 @@ namespace Redis.OM.Common
         {
             return exp switch
             {
-                ConstantExpression constExp => constExp.Value.ToString(),
+                ConstantExpression constExp => ValueToString(constExp.Value),
                 MemberExpression member => GetOperandStringForMember(member),
                 MethodCallExpression method when method.Method.Name == "get_Item" =>
                     $"@{((ConstantExpression)method.Arguments[0]).Value}",
@@ -157,8 +161,7 @@ namespace Redis.OM.Common
                     return Expression.Lambda(member).Compile().DynamicInvoke().ToString();
                 }
 
-                var val = GetValue(member.Member, c.Value);
-                return val.ToString();
+                return ValueToString(GetValue(member.Member, c.Value));
             }
 
             var propertyName = string.IsNullOrEmpty(searchField.PropertyName) ? member.Member.Name : searchField.PropertyName;
@@ -169,9 +172,7 @@ namespace Redis.OM.Common
         {
             return exp switch
             {
-                ConstantExpression constExp => constExp.Type == typeof(string)
-                    ? $"\"{constExp.Value}\""
-                    : $"{constExp.Value}",
+                ConstantExpression constExp => GetConstantStringForArgs(constExp),
                 MemberExpression member => GetOperandStringForMember(member),
                 MethodCallExpression method => $"@{((ConstantExpression)method.Arguments[0]).Value}",
                 UnaryExpression unary => GetOperandString(unary.Operand),
@@ -346,7 +347,7 @@ namespace Redis.OM.Common
                         {
                             if (item is ConstantExpression constant)
                             {
-                                innerArgList.Add(constant.Value.ToString());
+                                innerArgList.Add(GetConstantStringForArgs(constant));
                             }
                         }
 
@@ -400,6 +401,34 @@ namespace Redis.OM.Common
             var memberName = GetOperandStringForMember(member);
             var literal = GetOperandStringForQueryArgs(exp.Arguments[0]);
             return $"{memberName}:{literal}";
+        }
+
+        private static string ValueToString(object value)
+        {
+            return value.GetType().FullName switch
+            {
+                SYSTEMDOUBLETYPE => ((double)value).ToString(CultureInfo.InvariantCulture),
+                _ => value.ToString(),
+            };
+        }
+
+        private static string ConstantToString(ConstantExpression constExp)
+        {
+            return constExp.Type.FullName switch
+            {
+                SYSTEMDOUBLETYPE => $"{((double)constExp.Value).ToString(CultureInfo.InvariantCulture)}",
+                _ => $"{constExp.Value}",
+            };
+        }
+
+        private static string GetConstantStringForArgs(ConstantExpression constExp)
+        {
+            return constExp.Type.FullName switch
+            {
+                SYSTEMSTRINGTYPE => $"\"{constExp.Value}\"",
+                SYSTEMDOUBLETYPE => $"{((double)constExp.Value).ToString(CultureInfo.InvariantCulture)}",
+                _ => $"{constExp.Value}",
+            };
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -17,6 +18,10 @@ namespace Redis.OM.Searching
     /// </summary>
     internal class RedisQueryProvider : IQueryProvider
     {
+        private const string SYSTEMDOUBLETYPE = "System.Double";
+        private const string SYSTEMINT32TYPE = "System.Int32";
+        private const string SYSTEMINT64TYPE = "System.Int64";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisQueryProvider"/> class.
         /// </summary>
@@ -168,13 +173,15 @@ namespace Redis.OM.Searching
         /// </summary>
         /// <param name="expression">The expression to be built into a pipeline.</param>
         /// <param name="underpinningType">The indexed type underpinning the expression.</param>
+        /// <typeparam name="T">The type of the result.</typeparam>
         /// <returns>The result of the aggregation.</returns>
-        public async ValueTask<RedisReply> ExecuteReductiveAggregationAsync(MethodCallExpression expression, Type underpinningType)
+        public async ValueTask<RedisReply> ExecuteReductiveAggregationAsync<T>(MethodCallExpression expression, Type underpinningType)
         {
             var aggregation = ExpressionTranslator.BuildAggregationFromExpression(expression, underpinningType);
             var res = AggregationResult.FromRedisResult(await Connection.ExecuteAsync("FT.AGGREGATE", aggregation.Serialize()));
             var reductionName = ((Reduction)aggregation.Predicates.Last()).ResultName;
-            return res.First()[reductionName];
+
+            return InvariantCultureResultParsing<T>(res.First()[reductionName]);
         }
 
         /// <summary>
@@ -219,6 +226,22 @@ namespace Redis.OM.Searching
             }
 
             throw new NotImplementedException();
+        }
+
+        private static RedisReply InvariantCultureResultParsing<T>(RedisReply value)
+        {
+            return typeof(T).FullName switch
+            {
+                SYSTEMDOUBLETYPE => /*
+                        When expected value is a double it must be parsed using InvariantCulture due some cultures use comma (",") or other than dot (".")
+                        because implicid casting of a TResult can produce an invalid value to cast.
+                        Value sometimes can be an int/long so value.ToString(..) is required before parsing as as double
+                    */
+                    double.Parse(value.ToString(CultureInfo.InvariantCulture), NumberStyles.Number, CultureInfo.InvariantCulture),
+                SYSTEMINT32TYPE => (int)value,
+                SYSTEMINT64TYPE => (long)value,
+                _ => value,
+            };
         }
     }
 }

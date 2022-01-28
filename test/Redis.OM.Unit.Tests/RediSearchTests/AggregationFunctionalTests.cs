@@ -1,7 +1,6 @@
 ﻿using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -9,86 +8,94 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     [Collection("Redis")]
     public class AggregationFunctionalTests
     {
+        private static IRedisConnection _connection;
+        private static readonly object connectionLock = new();
+
+        /// <summary>
+        /// Init the database taking care to do it only once so that the test processes performed in parallel can count on an immutable database
+        /// </summary>
+        /// <param name="setup">RedisSetup object instance</param>
         public AggregationFunctionalTests(RedisSetup setup)
         {
-            _connection = setup.Connection;
-        }
-        private IRedisConnection _connection;
+            if (_connection != null)
+                return;
 
-        private void Setup()
-        {
-            var beaker = new Person
+            lock(connectionLock)
             {
-                Name = "Beaker",
-                Age = 23,
-                Sales = 500000,
-                SalesAdjustment = .6,
-                Height = 15,
-                DepartmentNumber = 3                
-            };
+                _connection = setup.Connection;
 
-            var bunsen = new Person
-            {
-                Name = "Dr Bunsen Honeydew",
-                Age = 63,
-                Sales = 500000,
-                SalesAdjustment = .6,
-                Height = 15,
-                DepartmentNumber = 3
-            };
+                var beaker = new Person
+                {
+                    Name = "Beaker",
+                    Age = 23,
+                    Sales = 500000,
+                    SalesAdjustment = .6,
+                    Height = 15,
+                    DepartmentNumber = 3
+                };
 
-            var fozzie = new Person
-            {
-                Name = "Fozzie Bear",
-                Age = 45,
-                Sales = 350000,
-                SalesAdjustment = .7,
-                Height = 14,
-                DepartmentNumber = 2
-            };
+                var bunsen = new Person
+                {
+                    Name = "Dr Bunsen Honeydew",
+                    Age = 63,
+                    Sales = 500000,
+                    SalesAdjustment = .6,
+                    Height = 15,
+                    DepartmentNumber = 3
+                };
 
-            var startler = new Person
-            {
-                Name = "Statler",
-                Age = 75,
-                Sales = 650000,
-                SalesAdjustment = .8,
-                Height = 13,
-                DepartmentNumber = 4
-            };
+                var fozzie = new Person
+                {
+                    Name = "Fozzie Bear",
+                    Age = 45,
+                    Sales = 350000,
+                    SalesAdjustment = .7,
+                    Height = 14,
+                    DepartmentNumber = 2
+                };
 
-            var waldorf = new Person
-            {
-                Name = "Waldorf",
-                Age = 78,
-                Sales = 750000,
-                SalesAdjustment = .8,
-                Height = 13,
-                DepartmentNumber = 4
-            };
+                var startler = new Person
+                {
+                    Name = "Statler",
+                    Age = 75,
+                    Sales = 650000,
+                    SalesAdjustment = .8,
+                    Height = 13,
+                    DepartmentNumber = 4
+                };
 
-            var kermit = new Person
-            {
-                Name = "Kermit the Frog",
-                Age = 52,
-                Sales = 1500000,
-                SalesAdjustment = .8,
-                Height = 13,
-                DepartmentNumber = 1
-            };            
+                var waldorf = new Person
+                {
+                    Name = "Waldorf",
+                    Age = 78,
+                    Sales = 750000,
+                    SalesAdjustment = .8,
+                    Height = 13,
+                    DepartmentNumber = 4
+                };
 
-            _connection.Set(kermit);
-            _connection.Set(waldorf);
-            _connection.Set(startler);
-            _connection.Set(fozzie);
-            _connection.Set(beaker);
-            _connection.Set(bunsen);
+                var kermit = new Person
+                {
+                    Name = "Kermit the Frog",
+                    Age = 52,
+                    Sales = 1500000,
+                    SalesAdjustment = .8,
+                    Height = 13,
+                    DepartmentNumber = 1
+                };
+
+                _connection.Set(kermit);
+                _connection.Set(waldorf);
+                _connection.Set(startler);
+                _connection.Set(fozzie);
+                _connection.Set(beaker);
+                _connection.Set(bunsen);
+            }
         }
 
         [Fact]
         public void GetDepartmentBySales()
         {
-            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
             var departments = collection
                 .Apply(x => x.RecordShell.Sales * x.RecordShell.SalesAdjustment, "AdjustedSales")
@@ -105,7 +112,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void GetHandicappedSales()
         {
-            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
             var employees = collection.Apply(x => x.RecordShell.Sales 
                 * x.RecordShell.SalesAdjustment, "AdjustedSales")
@@ -119,17 +125,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void GetAdjustedSalesStandardDeviation()
+        public async void GetAdjustedSalesStandardDeviation()
         {
-            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
-            Task.Run(async () =>
-            {
-                var stddev = await collection.Apply(x => x.RecordShell.Sales
-                    * x.RecordShell.SalesAdjustment, "AdjustedSales")
-                    .StandardDeviationAsync(x => x["AdjustedSales"]);
-                Assert.Equal(358018.854252, stddev);
-            }).GetAwaiter().GetResult();
+            var stddev = await collection.Apply(x => x.RecordShell.Sales
+                * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                .StandardDeviationAsync(x => x["AdjustedSales"]);
+
+            Assert.Equal(358018.854252, stddev);
         }
 
         [Fact]
@@ -139,17 +142,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void GetAverageAdjustedSales()
+        public async void GetAverageAdjustedSales()
         {
-            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
-            Task.Run(async () =>
-            {
-                var average = await collection.Apply(x => x.RecordShell.Sales
-                    * x.RecordShell.SalesAdjustment, "AdjustedSales")
-                    .AverageAsync(x => x["AdjustedSales"]);
-                Assert.Equal(527500, average);
-            }).GetAwaiter().GetResult();
+            var average = await collection.Apply(x => x.RecordShell.Sales
+                * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                .AverageAsync(x => x["AdjustedSales"]);
+            Assert.Equal(527500, average);
+
         }
     }
 }
