@@ -16,7 +16,7 @@
     <PackageProjectUrl>https://github.com/redis/redis-om-dotnet</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon-square.png</PackageIcon>
-    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/redis/redis-om-dotnet</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>redis redisearch indexing databases</PackageTags>

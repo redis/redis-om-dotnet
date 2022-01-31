@@ -210,7 +210,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 
 [ci-svg]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml/badge.svg
 [ci-url]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml
-[license-image]: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
+[license-image]: https://img.shields.io/badge/License-MIT-red.svg
 [license-url]: LICENSE
 
 <!-- Links -->
