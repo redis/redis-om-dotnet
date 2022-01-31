@@ -35,6 +35,7 @@
 - [🏁 Getting started](#-getting-started)
   - [Starting Redis](#starting-redis)
   - [📇 Modeling your domain (and indexing it!)](#-modeling-your-domain-and-indexing-it)
+  - [🔑 Keys and Ids](#-keys-and-ids)
   - [🔎 Querying](#-querying)
   - [🖩 Aggregations](#-aggregations)
 - [📚 Documentation](#-documentation)
@@ -112,11 +113,11 @@ Once the index is created, we can:
 
 Let's see how!
 
-### Keys and Ids
+### 🔑 Keys and Ids
 
 #### ULIDs and strings
 
-Ids are unique per object, and are used as part of key generation for the primary index in Redis. You can define  The natively supported Id types in Redis OM are [ULIDs][ulid-url]. You can bind the ULID so that Redis OM will generate to your objects by adding an Id field to your model, and explicitly decorating it with the `RedisIdField` attribute:
+Ids are unique per object, and are used as part of key generation for the primary index in Redis. The natively supported Id type in Redis OM is the [ULID][ulid-url]. You can bind ids to your model, by explicitly decorating your Id field with the `RedisIdField` attribute:
 
 ```csharp
 [Document]
@@ -130,7 +131,7 @@ public class Customer
 }
 ```
 
-When you call `Set` on the `RedisConnection` or call `Insert` in the `RedisCollection`, to insert your object into Redis, Redis OM will automatically set the ULID for you and you will be able to access it in the object. If the `Id` type is a string, and there is no explicitly overriding IdGenerationStrategy on the object, the ULID for the object will bind to the string
+When you call `Set` on the `RedisConnection` or call `Insert` in the `RedisCollection`, to insert your object into Redis, Redis OM will automatically set the id  for you and you will be able to access it in the object. If the `Id` type is a string, and there is no explicitly overriding IdGenerationStrategy on the object, the ULID for the object will bind to the string.
 
 #### Other types of ids
 
