@@ -55,6 +55,19 @@ namespace Redis.OM.Unit.Tests
             var ulid = Ulid.Parse(id.Split(":")[1]);
             Assert.Equal(ulid.ToString(),obj.Id);
         }
+        [Fact]
+        public void TestDateTimeOffset()
+        {
+            var obj = new ObjectWithDateTimeOffset
+            {
+                Offset = DateTimeOffset.Now
+            };
+
+            var id = _connection.Set(obj);
+
+            var alsoObj = _connection.Get<ObjectWithDateTimeOffset>(id);
+            Assert.Equal(obj.Offset, alsoObj.Offset);
+        }
 
         [Fact]
         public void TestNotDefaultUlid()
