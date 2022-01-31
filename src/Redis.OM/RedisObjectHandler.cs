@@ -18,6 +18,17 @@ namespace Redis.OM
     {
         private static readonly JsonSerializerOptions JsonSerializerOptions = new ();
 
+        private static readonly Dictionary<Type, object?> TypeDefaultCache = new ()
+        {
+            { typeof(string), null },
+            { typeof(Guid), default(Guid) },
+            { typeof(Ulid), default(Ulid) },
+            { typeof(int), default(int) },
+            { typeof(long), default(long) },
+            { typeof(uint), default(uint) },
+            { typeof(ulong), default(ulong) },
+        };
+
         static RedisObjectHandler()
         {
             JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
@@ -101,22 +112,41 @@ namespace Redis.OM
                 throw new MissingMemberException("Missing Document Attribute decoration");
             }
 
-            object id = attr.IdGenerationStrategy.GenerateId();
+            var id = attr.IdGenerationStrategy.GenerateId();
             if (idProperty != null)
             {
+                var idPropertyType = idProperty.PropertyType;
                 var supportedIdPropertyTypes = new[] { typeof(string), typeof(Guid), typeof(Ulid) };
-                if (!supportedIdPropertyTypes.Contains(idProperty.PropertyType) && !idProperty.PropertyType.IsValueType)
+                if (!supportedIdPropertyTypes.Contains(idPropertyType) && !idPropertyType.IsValueType)
                 {
                     throw new InvalidOperationException("Software Defined Ids on objects must either be a string, ULID, Guid, or some other value type.");
                 }
 
-                if (idProperty.GetValue(obj) != null)
+                var currId = idProperty.GetValue(obj);
+
+                if (!TypeDefaultCache.ContainsKey(idPropertyType))
                 {
-                    id = idProperty.GetValue(obj);
+                    TypeDefaultCache.Add(idPropertyType, Activator.CreateInstance(idPropertyType));
+                }
+
+                if (currId?.ToString() != TypeDefaultCache[idPropertyType]?.ToString())
+                {
+                    id = idProperty.GetValue(obj).ToString();
                 }
                 else
                 {
-                    idProperty.SetValue(obj, id);
+                    if (idPropertyType == typeof(Guid))
+                    {
+                        idProperty.SetValue(obj, Guid.Parse(id));
+                    }
+                    else if (idPropertyType == typeof(Ulid))
+                    {
+                        idProperty.SetValue(obj, Ulid.Parse(id));
+                    }
+                    else
+                    {
+                        idProperty.SetValue(obj, id);
+                    }
                 }
             }
 
@@ -187,7 +217,7 @@ namespace Redis.OM
                 var type = property.PropertyType;
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
-                if (type.IsPrimitive || type == typeof(decimal) || type == typeof(string) || type == typeof(GeoLoc))
+                if (type.IsPrimitive || type == typeof(decimal) || type == typeof(string) || type == typeof(GeoLoc) || type == typeof(Ulid) || type == typeof(Guid))
                 {
                     var val = property.GetValue(obj);
                     if (val != null)
