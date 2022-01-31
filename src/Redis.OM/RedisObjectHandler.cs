@@ -195,6 +195,14 @@ namespace Redis.OM
                         hash.Add(propertyName, val.ToString());
                     }
                 }
+                else if (type == typeof(DateTimeOffset))
+                {
+                    var val = (DateTimeOffset)property.GetValue(obj);
+                    if (val != null)
+                    {
+                        hash.Add(propertyName, val.ToString("O"));
+                    }
+                }
                 else if (type == typeof(DateTime) || type == typeof(DateTime?))
                 {
                     var val = (DateTime)property.GetValue(obj);
@@ -264,7 +272,7 @@ namespace Redis.OM
                 {
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
-                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?))
+                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset))
                 {
                     ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
                 }
