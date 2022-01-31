@@ -138,7 +138,7 @@ Redis OM also supports other types of ids, ids must either be strings or value t
 
 ##### Register IIdGenerationStrategy
 
-To Register an `IIdGenerationStrategy` with the `DocumentAttribute` class, simply call `DocumentAttribute.RegisterIdGenerationStrategy` passing in the strategy name, and the implementation of `IIdGenerationStrategy` you want to use. Let's say for example you had the `StaticIncrementStrategy, which maintains a static counter in memory, and increments ids based off that counter:
+To Register an `IIdGenerationStrategy` with the `DocumentAttribute` class, simply call `DocumentAttribute.RegisterIdGenerationStrategy` passing in the strategy name, and the implementation of `IIdGenerationStrategy` you want to use. Let's say for example you had the `StaticIncrementStrategy`, which maintains a static counter in memory, and increments ids based off that counter:
 
 ```csharp
 public class StaticIncrementStrategy : IIdGenerationStrategy
