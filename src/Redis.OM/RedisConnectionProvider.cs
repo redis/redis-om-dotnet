@@ -10,7 +10,7 @@ namespace Redis.OM
     /// </summary>
     public class RedisConnectionProvider
     {
-        private readonly ConnectionMultiplexer _mux;
+        private readonly IConnectionMultiplexer _mux;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisConnectionProvider"/> class.
@@ -29,6 +29,24 @@ namespace Redis.OM
         public RedisConnectionProvider(RedisConnectionConfiguration connectionConfig)
         {
             _mux = ConnectionMultiplexer.Connect(connectionConfig.ToStackExchangeConnectionString());
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisConnectionProvider"/> class.
+        /// </summary>
+        /// <param name="configurationOptions">The options relevant to a set of redis connections.</param>
+        public RedisConnectionProvider(ConfigurationOptions configurationOptions)
+        {
+            _mux = ConnectionMultiplexer.Connect(configurationOptions);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisConnectionProvider"/> class.
+        /// </summary>
+        /// <param name="connectionMultiplexer">The options relevant to a set of redis connections.</param>
+        public RedisConnectionProvider(IConnectionMultiplexer connectionMultiplexer)
+        {
+            _mux = connectionMultiplexer;
         }
 
         /// <summary>
