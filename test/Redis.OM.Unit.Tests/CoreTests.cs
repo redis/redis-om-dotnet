@@ -52,6 +52,17 @@ namespace Redis.OM.Unit.Tests
         }
 
         [Fact]
+        public void SimpleGetExistsTest()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            connection.Set("x", "value");
+            var result = connection.Exists("x");
+            Assert.Equal(1, result);
+        }
+
+        [Fact]
         public void SimpleJsonTest()
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";

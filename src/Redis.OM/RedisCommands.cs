@@ -363,5 +363,21 @@ namespace Redis.OM
         /// <param name="key">the key to unlink.</param>
         /// <returns>the status.</returns>
         public static string Unlink(this IRedisConnection connection, string key) => connection.Execute("UNLINK", key);
+
+        /// <summary>
+        /// Determines if a key exists.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key to check.</param>
+        /// <returns>the number of keys that exist from those specified as arguments.</returns>
+        public static int Exists(this IRedisConnection connection, string key) => connection.Execute("EXISTS", key);
+
+        /// <summary>
+        /// Determines if a key exists.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key to check.</param>
+        /// <returns>the number of keys that exist from those specified as arguments.</returns>
+        public static async Task<int> ExistsAsync(this IRedisConnection connection, string key) => await connection.ExecuteAsync("EXISTS", key);
     }
 }
