@@ -368,16 +368,16 @@ namespace Redis.OM
         /// Determines if a key exists.
         /// </summary>
         /// <param name="connection">the connection.</param>
-        /// <param name="key">the key to check.</param>
+        /// <param name="keys">the keys to check.</param>
         /// <returns>the number of keys that exist from those specified as arguments.</returns>
-        public static int Exists(this IRedisConnection connection, string key) => connection.Execute("EXISTS", key);
+        public static int Exists(this IRedisConnection connection, params string[] keys) => connection.Execute("EXISTS", keys);
 
         /// <summary>
         /// Determines if a key exists.
         /// </summary>
         /// <param name="connection">the connection.</param>
-        /// <param name="key">the key to check.</param>
+        /// <param name="keys">the keys to check.</param>
         /// <returns>the number of keys that exist from those specified as arguments.</returns>
-        public static async Task<int> ExistsAsync(this IRedisConnection connection, string key) => await connection.ExecuteAsync("EXISTS", key);
+        public static async Task<int> ExistsAsync(this IRedisConnection connection, params string[] keys) => await connection.ExecuteAsync("EXISTS", keys);
     }
 }

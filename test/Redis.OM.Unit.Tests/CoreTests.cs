@@ -58,8 +58,8 @@ namespace Redis.OM.Unit.Tests
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
             connection.Set("x", "value");
-            var result = connection.Exists("x");
-            Assert.Equal(1, result);
+            var result = connection.Exists("x", "x", "y");
+            Assert.Equal(2, result);
         }
 
         [Fact]
