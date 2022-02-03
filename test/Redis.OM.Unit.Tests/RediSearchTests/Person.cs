@@ -57,5 +57,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         
         [Indexed(Aggregatable =false)]
         public  string UnaggrateableField { get; set; }
+
+        [Indexed]
+        public string? NullableStringField { get; set; }
     }
 }

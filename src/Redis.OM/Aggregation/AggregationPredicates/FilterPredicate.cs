@@ -25,7 +25,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             switch (Expression)
             {
                 case BinaryExpression rootBinExpression:
-                    list.Add(ExpressionParserUtilities.ParseBinaryExpression(rootBinExpression));
+                    list.Add(ExpressionParserUtilities.ParseBinaryExpression(rootBinExpression, true));
                     break;
                 case MethodCallExpression method:
                     list.Add(ExpressionParserUtilities.GetOperandString(method));
