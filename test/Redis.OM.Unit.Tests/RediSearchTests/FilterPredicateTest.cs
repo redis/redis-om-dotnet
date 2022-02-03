@@ -54,10 +54,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
 
-            var five = 5;
-            var six = 6;
-
             var res = collection.Filter(x=>x.RecordShell.Name == "steve").ToArray();
+
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "FILTER",
+                expectedPredicate));
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+        
+        [Fact]
+        public void TestBasicFilterStringUnpackedFromVariable()
+        {
+            var expectedPredicate = "@Name == 'steve'";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",It.IsAny<string[]>()
+                ))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            var steve = "steve";
+            var res = collection.Filter(x=>x.RecordShell.Name == steve).ToArray();
 
             _mock.Verify(x=>x.Execute("FT.AGGREGATE",
                 "person-idx",
@@ -76,10 +94,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 ))
                 .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
-
-            var five = 5;
-            var six = 6;
-
+            
             var res = collection.Filter(x=>x.RecordShell.NullableStringField == "steve").ToArray();
 
             _mock.Verify(x=>x.Execute("FT.AGGREGATE",
