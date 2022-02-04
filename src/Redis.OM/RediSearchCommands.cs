@@ -143,31 +143,6 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Deletes an index. And drops associated records.
-        /// </summary>
-        /// <param name="connection">the connection.</param>
-        /// <param name="type">the type to drop the index for.</param>
-        /// <returns>whether the index was dropped or not.</returns>
-        public static async Task<bool> DropIndexAndAssociatedRecordsAsync(this IRedisConnection connection, Type type)
-        {
-            try
-            {
-                var indexName = type.SerializeIndex().First();
-                await connection.ExecuteAsync("FT.DROPINDEX", indexName, "DD");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("Unknown Index name"))
-                {
-                    return false;
-                }
-
-                throw;
-            }
-        }
-
-        /// <summary>
         /// Search redis with the given query.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
