@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using System;
+using Moq;
 using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Aggregation;
@@ -89,6 +90,52 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var res = collection.Sum(x => x.RecordShell.Age);
 
             Assert.Equal(5, res);
+        }
+        
+        [Fact]
+        public void TestMultiple()
+        {
+            var mockReply = new RedisReply[]
+            {
+                new RedisReply(1),
+                new RedisReply(new RedisReply[]
+                {
+                    "Age_SUM",
+                    5.0
+                })
+            };
+            _mock.Setup(x => x.Execute(
+                    It.IsAny<string>(),
+                    It.IsAny<string[]>()))
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            var res = collection
+                .GroupBy(x=>x.RecordShell.TagField)
+                .Sum(x => x.RecordShell.Sales)
+                .Average(x=>x.RecordShell.Age)
+                .ToList();
+
+            _mock.Verify(x=>x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "GROUPBY",
+                "1",
+                "@TagField",
+                "REDUCE",
+                "SUM",
+                "1",
+                "@Sales",
+                "AS",
+                "Sales_SUM",
+                "REDUCE",
+                "AVG",
+                "1",
+                "@Age",
+                "AS",
+                "Age_AVG"));
+        
         }
 
         [Fact]
