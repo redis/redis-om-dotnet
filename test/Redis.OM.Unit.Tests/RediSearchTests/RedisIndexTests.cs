@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Redis.OM;
-using Xunit;
 using Redis.OM.Modeling;
+using Xunit;
 
-namespace Redis.OM.Unit.Tests
+namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     public class RedisIndexTests
     {        
@@ -38,7 +35,7 @@ namespace Redis.OM.Unit.Tests
         public void TestIndexSerializationHappyPath()
         {
             var expected = new[] { "TestPersonClassHappyPath-idx",
-                "ON", "Hash", "PREFIX", "1", "Redis.OM.Unit.Tests.RedisIndexTests+TestPersonClassHappyPath:", "SCHEMA",
+                "ON", "Hash", "PREFIX", "1", "Redis.OM.Unit.Tests.RediSearchTests.RedisIndexTests+TestPersonClassHappyPath:", "SCHEMA",
                 "Name", "TEXT", "SORTABLE", "Age", "NUMERIC", "SORTABLE" };
             var indexArr = typeof(TestPersonClassHappyPath).SerializeIndex();
 
