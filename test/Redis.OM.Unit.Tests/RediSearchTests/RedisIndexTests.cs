@@ -69,6 +69,30 @@ namespace Redis.OM.Unit.Tests
         }
         
         [Fact]
+        public async Task TestCreateIndexAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
+            var res = await connection.CreateIndexAsync(typeof(TestPersonClassHappyPath));            
+            Assert.True(res);
+            await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
+        }
+
+        [Fact]
+        public void TestCreateAlreadyExistingIndex()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            connection.CreateIndex(typeof(TestPersonClassHappyPath));  
+            var res = connection.CreateIndex(typeof(TestPersonClassHappyPath));
+            Assert.False(res);
+            connection.DropIndex(typeof(TestPersonClassHappyPath));
+        }
+        
+        [Fact]
         public void TestDropExistingIndex()
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
@@ -81,6 +105,18 @@ namespace Redis.OM.Unit.Tests
         }
 
         [Fact]
+        public async Task TestDropExistingIndexAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
+            await connection.CreateIndexAsync(typeof(TestPersonClassHappyPath));            
+            var res = await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
+            Assert.True(res);
+        }
+
+        [Fact]
         public void TestDropIndexWhichDoesNotExist()
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
@@ -88,6 +124,17 @@ namespace Redis.OM.Unit.Tests
             var connection = provider.Connection;
             connection.DropIndex(typeof(TestPersonClassHappyPath));
             var res = connection.DropIndex(typeof(TestPersonClassHappyPath));
+            Assert.False(res);
+        }
+        
+        [Fact]
+        public async Task TestDropIndexWhichDoesNotExistAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
+            var res = await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
             Assert.False(res);
         }
     }
