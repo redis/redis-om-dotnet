@@ -137,6 +137,59 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Age_AVG"));
         
         }
+        
+        [Fact]
+        public void TestThree()
+        {
+            var mockReply = new RedisReply[]
+            {
+                new RedisReply(1),
+                new RedisReply(new RedisReply[]
+                {
+                    "Age_SUM",
+                    5.0
+                })
+            };
+            _mock.Setup(x => x.Execute(
+                    It.IsAny<string>(),
+                    It.IsAny<string[]>()))
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            var res = collection
+                .GroupBy(x=>x.RecordShell.TagField)
+                .Sum(x => x.RecordShell.Sales)
+                .Average(x=>x.RecordShell.Age)
+                .Sum(x=>x.RecordShell.Age)
+                .ToList();
+
+            _mock.Verify(x=>x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "GROUPBY",
+                "1",
+                "@TagField",
+                "REDUCE",
+                "SUM",
+                "1",
+                "@Sales",
+                "AS",
+                "Sales_SUM",
+                "REDUCE",
+                "AVG",
+                "1",
+                "@Age",
+                "AS",
+                "Age_AVG",
+                "REDUCE",
+                "SUM",
+                "1",
+                "@Age",
+                "AS",
+                "Age_SUM"));
+        
+        }
 
         [Fact]
         public void TestAverageNoGroupPredicate()
