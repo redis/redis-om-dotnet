@@ -62,6 +62,11 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                         }
                     }
                 }
+                else if (binaryExpression.Right is MemberExpression mem && mem.Expression is ConstantExpression frame)
+                {
+                    var val = ExpressionParserUtilities.GetValue(mem.Member, frame.Value);
+                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, System.Linq.Expressions.Expression.Constant(val)));
+                }
             }
             else if (expression is ConstantExpression c
                      && c.Value.ToString() == "*")
