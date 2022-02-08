@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
-using Redis.OM;
-using Redis.OM.Contracts;
+﻿using Redis.OM.Contracts;
+using System;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests

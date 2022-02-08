@@ -269,6 +269,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * @satish860
 * @dracco1993
 * @ecortese
+* @baldutech
 
 <!-- Logo -->
 [Logo]: images/logo.svg
