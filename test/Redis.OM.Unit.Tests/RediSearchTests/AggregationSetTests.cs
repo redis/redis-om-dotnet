@@ -268,5 +268,35 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             }).GetAwaiter().GetResult();
 
         }
+
+        [Fact]
+        public void TestVariableQuery()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true);
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",
+                    "person-idx",
+                    "@Name:fred",
+                    "WITHCURSOR",
+                    "COUNT",
+                    "1000"))
+                .Returns(MockedResult);
+
+            _mock.Setup(x => x.Execute(
+                    "FT.CURSOR",
+                    "READ",
+                    "person-idx",
+                    "5",
+                    "COUNT",
+                    "1000"))
+                .Returns(MockedResultCursorEnd);
+
+            var fred = "fred";
+            var result = collection.Where(x => x.RecordShell.Name == fred).ToList();
+            foreach (var item in result)
+            {
+                Assert.Equal("blah", item[$"FakeResult"]);
+            }
+        }
     }
 }

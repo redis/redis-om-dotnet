@@ -373,6 +373,11 @@ namespace Redis.OM.Common
             return predicates.Count == 0 || (predicates.Peek() is not GroupBy && predicates.Peek() is not SingleArgumentReduction);
         }
 
+        private static bool CheckMoveGroupBy(Stack<IAggregationPredicate> predicates)
+        {
+            return predicates.Count > 0 && predicates.Peek() is GroupBy;
+        }
+
         private static IAggregationPredicate TranslateApplyPredicate(MethodCallExpression exp)
         {
             var alias = ((ConstantExpression)exp.Arguments[2]).Value.ToString();
@@ -387,49 +392,49 @@ namespace Redis.OM.Common
             return sb;
         }
 
+        private static void PushReduction(Reduction reduction, Stack<IAggregationPredicate> operationStack)
+        {
+            var pushGroupBy = CheckForGroupby(operationStack);
+            var moveGroupBy = CheckMoveGroupBy(operationStack);
+            if (moveGroupBy)
+            {
+                var gb = operationStack.Pop();
+                operationStack.Push(reduction);
+                operationStack.Push(gb);
+            }
+            else
+            {
+                operationStack.Push(reduction);
+                if (pushGroupBy)
+                {
+                    operationStack.Push(new GroupBy(Array.Empty<string>()));
+                }
+            }
+        }
+
         private static void TranslateAndPushZeroArgumentPredicate(ReduceFunction function, Stack<IAggregationPredicate> stack)
         {
             var reduction = new ZeroArgumentReduction(function);
-            var pushGroupBy = CheckForGroupby(stack);
-            stack.Push(reduction);
-            if (pushGroupBy)
-            {
-                stack.Push(new GroupBy(Array.Empty<string>()));
-            }
+            PushReduction(reduction, stack);
         }
 
         private static void TranslateAndPushReductionPredicate(MethodCallExpression expression, ReduceFunction function, Stack<IAggregationPredicate> stack)
         {
             var member = GetFieldName(expression.Arguments[1]);
             var reduction = new SingleArgumentReduction(function, member);
-            var pushGroupBy = CheckForGroupby(stack);
-            stack.Push(reduction);
-            if (pushGroupBy)
-            {
-                stack.Push(new GroupBy(Array.Empty<string>()));
-            }
+            PushReduction(reduction, stack);
         }
 
         private static void TranslateAndPushFirstValuePredicate(MethodCallExpression expression, Stack<IAggregationPredicate> stack)
         {
             var reduction = new FirstValueReduction(expression);
-            var pushGroupBy = CheckForGroupby(stack);
-            stack.Push(reduction);
-            if (pushGroupBy)
-            {
-                stack.Push(new GroupBy(Array.Empty<string>()));
-            }
+            PushReduction(reduction, stack);
         }
 
         private static void TranslateAndPushTwoArgumentReductionPredicate(MethodCallExpression expression, ReduceFunction function, Stack<IAggregationPredicate> stack)
         {
             var reduction = new TwoArgumentReduction(function, expression);
-            var pushGroupBy = CheckForGroupby(stack);
-            stack.Push(reduction);
-            if (pushGroupBy)
-            {
-                stack.Push(new GroupBy(Array.Empty<string>()));
-            }
+            PushReduction(reduction, stack);
         }
 
         private static int TranslateTake(MethodCallExpression exp) => (int)((ConstantExpression)exp.Arguments[1]).Value;

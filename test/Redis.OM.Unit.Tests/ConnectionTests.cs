@@ -1,6 +1,5 @@
-﻿using System;
-using Redis.OM;
-using StackExchange.Redis;
+﻿using StackExchange.Redis;
+using System;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests
@@ -49,6 +48,20 @@ namespace Redis.OM.Unit.Tests
             connection.Execute("SET", "Foo", "Bar");
             var res = connection.Execute("GET", "Foo");
             Assert.Equal("Bar",res);
+        }
+
+        [Fact]
+        public void GivenMultiplexerConnection_WhenTestingSetCommand_ThenShouldExecuteSetCommandSuccessfully()
+        {
+            var hostInfo = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost:6379";
+            Console.WriteLine($"Current host info: {hostInfo}");
+            var multiplexer = ConnectionMultiplexer.Connect(hostInfo);
+            var provider = new RedisConnectionProvider(multiplexer);
+
+            var connection = provider.Connection;
+            connection.Execute("SET", "Foo", "Bar");
+            var res = connection.Execute("GET", "Foo");
+            Assert.Equal("Bar", res);
         }
     }
 }
