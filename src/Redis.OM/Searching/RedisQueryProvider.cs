@@ -17,17 +17,21 @@ namespace Redis.OM.Searching
     /// </summary>
     internal class RedisQueryProvider : IQueryProvider
     {
+        private readonly int _chunkSize;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisQueryProvider"/> class.
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="stateManager">The state manager.</param>
         /// <param name="documentAttribute">the document attribute for the indexed type.</param>
-        internal RedisQueryProvider(IRedisConnection connection, RedisCollectionStateManager stateManager, DocumentAttribute documentAttribute)
+        /// <param name="chunkSize">The size of chunks to use in pagination.</param>
+        internal RedisQueryProvider(IRedisConnection connection, RedisCollectionStateManager stateManager, DocumentAttribute documentAttribute, int chunkSize)
         {
             Connection = connection;
             StateManager = stateManager;
             DocumentAttribute = documentAttribute;
+            _chunkSize = chunkSize;
         }
 
         /// <summary>
@@ -35,11 +39,13 @@ namespace Redis.OM.Searching
         /// </summary>
         /// <param name="connection">the connection.</param>
         /// <param name="documentAttribute">The document attribute for the indexed type.</param>
-        internal RedisQueryProvider(IRedisConnection connection, DocumentAttribute documentAttribute)
+        /// <param name="chunkSize">The size of chunks to use in pagination.</param>
+        internal RedisQueryProvider(IRedisConnection connection, DocumentAttribute documentAttribute, int chunkSize)
         {
             Connection = connection;
             DocumentAttribute = documentAttribute;
             StateManager = new RedisCollectionStateManager(DocumentAttribute);
+            _chunkSize = chunkSize;
         }
 
         /// <summary>

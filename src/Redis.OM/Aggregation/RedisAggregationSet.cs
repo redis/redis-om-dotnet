@@ -18,6 +18,7 @@ namespace Redis.OM.Aggregation
     /// <typeparam name="T">The type of the record shell in the aggregation result.</typeparam>
     public class RedisAggregationSet<T> : IQueryable<AggregationResult<T>>, IAsyncEnumerable<AggregationResult<T>>
     {
+        private readonly int _chunkSize;
         private bool _useCursor;
 
         /// <summary>
@@ -25,7 +26,8 @@ namespace Redis.OM.Aggregation
         /// </summary>
         /// <param name="connection">the connection to use.</param>
         /// <param name="useCursor">whether or not to use a cursor.</param>
-        public RedisAggregationSet(IRedisConnection connection, bool useCursor = false)
+        /// <param name="chunkSize">Size of the chunks to use during pagination, larger chunks return larger payloads but with fewer round trips.</param>
+        public RedisAggregationSet(IRedisConnection connection, bool useCursor = false, int chunkSize = 1000)
         {
             var t = typeof(T);
             DocumentAttribute rootAttribute = t.GetCustomAttribute<DocumentAttribute>();
@@ -34,7 +36,8 @@ namespace Redis.OM.Aggregation
                 throw new ArgumentException("The root attribute of an AggregationSet must be decorated with a DocumentAttribute");
             }
 
-            Initialize(new RedisQueryProvider(connection, rootAttribute), null, useCursor);
+            _chunkSize = chunkSize;
+            Initialize(new RedisQueryProvider(connection, rootAttribute, _chunkSize), null, useCursor);
         }
 
         /// <summary>
@@ -42,8 +45,10 @@ namespace Redis.OM.Aggregation
         /// </summary>
         /// <param name="provider">the query provider.</param>
         /// <param name="useCursor">whether or not to use the cursor.</param>
-        internal RedisAggregationSet(RedisQueryProvider provider, bool useCursor = false)
+        /// <param name="chunkSize">Size of the chunks to use during pagination, larger chunks return larger payloads but with fewer round trips.</param>
+        internal RedisAggregationSet(RedisQueryProvider provider, bool useCursor = false, int chunkSize = 1000)
         {
+            _chunkSize = chunkSize;
             Initialize(provider, null, useCursor);
         }
 
@@ -54,6 +59,7 @@ namespace Redis.OM.Aggregation
         /// <param name="exp">the new expression.</param>
         internal RedisAggregationSet(RedisAggregationSet<T> source, Expression exp)
         {
+            _chunkSize = source._chunkSize;
             Initialize((RedisQueryProvider)source.Provider, exp, source._useCursor);
         }
 
@@ -70,21 +76,21 @@ namespace Redis.OM.Aggregation
         public IEnumerator<AggregationResult<T>> GetEnumerator()
         {
             var provider = (RedisQueryProvider)Provider;
-            return new AggregationEnumerator<T>(Expression, provider.Connection, useCursor: _useCursor);
+            return new AggregationEnumerator<T>(Expression, provider.Connection, useCursor: _useCursor, chunkSize: _chunkSize);
         }
 
         /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator()
         {
             var provider = (RedisQueryProvider)Provider;
-            return new AggregationEnumerator<T>(Expression, provider.Connection, useCursor: _useCursor);
+            return new AggregationEnumerator<T>(Expression, provider.Connection, useCursor: _useCursor, chunkSize: _chunkSize);
         }
 
         /// <inheritdoc/>
         public IAsyncEnumerator<AggregationResult<T>> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             var provider = (RedisQueryProvider)Provider;
-            return new AggregationEnumerator<T>(Expression, provider.Connection, useCursor: _useCursor);
+            return new AggregationEnumerator<T>(Expression, provider.Connection, useCursor: _useCursor, chunkSize: _chunkSize);
         }
 
         /// <summary>

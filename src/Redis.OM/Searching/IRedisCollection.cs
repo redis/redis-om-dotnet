@@ -19,6 +19,11 @@ namespace Redis.OM.Searching
         RedisCollectionStateManager StateManager { get; }
 
         /// <summary>
+        /// Gets the size of chunks to use when paginating.
+        /// </summary>
+        int ChunkSize { get; }
+
+        /// <summary>
         /// Saves the current state of the collection, overriding what was initially materialized.
         /// </summary>
         void Save();

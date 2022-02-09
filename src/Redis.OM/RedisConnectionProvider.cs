@@ -58,15 +58,17 @@ namespace Redis.OM
         /// Gets an aggregation set for redis.
         /// </summary>
         /// <typeparam name="T">The indexed type to run aggregations on.</typeparam>
+        /// <param name="chunkSize">Size of chunks to use during pagination, larger chunks = larger payloads returned but fewer round trips.</param>
         /// <returns>the aggregation set.</returns>
-        public RedisAggregationSet<T> AggregationSet<T>() => new (Connection);
+        public RedisAggregationSet<T> AggregationSet<T>(int chunkSize = 100) => new (Connection, chunkSize: chunkSize);
 
         /// <summary>
         /// Gets a redis collection.
         /// </summary>
         /// <typeparam name="T">The type the collection will be retrieving.</typeparam>
+        /// <param name="chunkSize">Size of chunks to use during pagination, larger chunks = larger payloads returned but fewer round trips.</param>
         /// <returns>A RedisCollection.</returns>
-        public IRedisCollection<T> RedisCollection<T>()
-            where T : notnull => new RedisCollection<T>(Connection);
+        public IRedisCollection<T> RedisCollection<T>(int chunkSize = 100)
+            where T : notnull => new RedisCollection<T>(Connection, chunkSize);
     }
 }
