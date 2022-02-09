@@ -24,7 +24,8 @@ namespace Redis.OM.Searching
         /// Initializes a new instance of the <see cref="RedisCollection{T}"/> class.
         /// </summary>
         /// <param name="connection">Connection to Redis.</param>
-        public RedisCollection(IRedisConnection connection)
+        /// <param name="chunkSize">Size of chunks to pull back during pagination, defaults to 100.</param>
+        public RedisCollection(IRedisConnection connection, int chunkSize = 100)
         {
             var t = typeof(T);
             DocumentAttribute rootAttribute = t.GetCustomAttribute<DocumentAttribute>();
@@ -33,9 +34,10 @@ namespace Redis.OM.Searching
                 throw new ArgumentException("The root attribute of a Redis Collection must be decorated with a DocumentAttribute");
             }
 
+            ChunkSize = chunkSize;
             _connection = connection;
             StateManager = new RedisCollectionStateManager(rootAttribute);
-            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute), null);
+            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute, ChunkSize), null);
         }
 
         /// <summary>
@@ -44,10 +46,12 @@ namespace Redis.OM.Searching
         /// <param name="provider">Query Provider.</param>
         /// <param name="expression">Expression to be parsed for the query.</param>
         /// <param name="stateManager">Manager of the internal state of the collection.</param>
-        internal RedisCollection(RedisQueryProvider provider, Expression expression, RedisCollectionStateManager stateManager)
+        /// <param name="chunkSize">Size of chunks to pull back during pagination, defaults to 100.</param>
+        internal RedisCollection(RedisQueryProvider provider, Expression expression, RedisCollectionStateManager stateManager, int chunkSize = 100)
         {
             StateManager = stateManager;
             _connection = provider.Connection;
+            ChunkSize = chunkSize;
             Initialize(provider, expression);
         }
 
@@ -65,6 +69,9 @@ namespace Redis.OM.Searching
         /// </summary>
         public RedisCollectionStateManager StateManager { get; }
 
+        /// <inheritdoc />
+        public int ChunkSize { get; }
+
         /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
@@ -80,7 +87,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {
-            return new RedisCollectionEnumerator<T>(Expression, _connection, 100, StateManager);
+            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager);
         }
 
         /// <inheritdoc/>
@@ -160,7 +167,7 @@ namespace Redis.OM.Searching
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             var provider = (RedisQueryProvider)Provider;
-            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, 100, StateManager);
+            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager);
         }
 
         private void Initialize(RedisQueryProvider provider, Expression? expression)
