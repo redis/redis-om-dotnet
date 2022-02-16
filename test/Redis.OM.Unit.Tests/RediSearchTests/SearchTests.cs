@@ -541,7 +541,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = collection.First(x => x.Name == "Steve");
             steve.Address = new Address {State = "Florida"};
             await collection.Update(steve);
-            var expected = "{\r\n  \"State\": \"Florida\"\r\n}";
+            var expected = $"{{{Environment.NewLine}  \"State\": \"Florida\"{Environment.NewLine}}}";
             _mock.Verify(x=>x.ExecuteAsync("EVALSHA","42","1","Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET","$.Address",expected));
 
             steve.Address.City = "Satellite Beach";
