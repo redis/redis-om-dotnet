@@ -260,5 +260,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal("Steve", reconstituded.Name);
             Assert.Equal(new GeoLoc(1.0,1.0), reconstituded.Home);
         }
+
+        [Fact]
+        public void TestCountWithEmptyCollection()
+        {
+            var collection = new RedisCollection<ClassForEmptyRedisCollection>(_connection);
+            var count = collection.Count();
+            Assert.Equal(0,count);
+        }
     }
 }
