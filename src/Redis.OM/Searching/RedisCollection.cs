@@ -157,7 +157,6 @@ namespace Redis.OM.Searching
         public async ValueTask SaveAsync()
         {
             var diff = StateManager.DetectDifferences();
-            Console.WriteLine(diff);
             var tasks = new List<Task<int?>>();
             foreach (var item in diff)
             {
