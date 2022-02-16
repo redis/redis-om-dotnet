@@ -68,5 +68,12 @@ namespace Redis.OM.Searching
         /// <param name="expression">the expression to be matched.</param>
         /// <returns>Whether anything matching the expression was found.</returns>
         bool Any(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Updates the provided item in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
+        /// </summary>
+        /// <param name="item">The item to update.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task Update(T item);
     }
 }
