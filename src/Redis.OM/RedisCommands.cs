@@ -365,6 +365,14 @@ namespace Redis.OM
         public static string Unlink(this IRedisConnection connection, string key) => connection.Execute("UNLINK", key);
 
         /// <summary>
+        /// Unlinks a key.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key to unlink.</param>
+        /// <returns>the status.</returns>
+        public static async Task<string> UnlinkAsync(this IRedisConnection connection, string key) => await connection.ExecuteAsync("UNLINK", key);
+
+        /// <summary>
         /// Unlinks the key and then adds an updated value of it.
         /// </summary>
         /// <param name="connection">The connection to redis.</param>

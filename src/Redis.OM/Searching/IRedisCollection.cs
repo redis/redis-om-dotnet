@@ -75,5 +75,12 @@ namespace Redis.OM.Searching
         /// <param name="item">The item to update.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task Update(T item);
+
+        /// <summary>
+        /// Deletes the item from Redis.
+        /// </summary>
+        /// <param name="item">The item to be deleted.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task Delete(T item);
     }
 }

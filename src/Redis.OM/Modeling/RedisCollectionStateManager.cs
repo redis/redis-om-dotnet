@@ -51,6 +51,16 @@ namespace Redis.OM.Modeling
         internal IDictionary<string, object?> Data { get; set; } = new Dictionary<string, object?>();
 
         /// <summary>
+        /// Removes the key from the data and snapshot.
+        /// </summary>
+        /// <param name="key">The key to remove.</param>
+        internal void Remove(string key)
+        {
+            Snapshot.Remove(key);
+            Data.Remove(key);
+        }
+
+        /// <summary>
         /// Add item to data.
         /// </summary>
         /// <param name="key">the item's key.</param>

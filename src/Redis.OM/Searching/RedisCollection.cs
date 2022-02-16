@@ -113,6 +113,14 @@ namespace Redis.OM.Searching
             StateManager.InsertIntoData(key, item);
         }
 
+        /// <inheritdoc />
+        public async Task Delete(T item)
+        {
+            var key = item.GetKey();
+            await _connection.UnlinkAsync(key);
+            StateManager.Remove(key);
+        }
+
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {

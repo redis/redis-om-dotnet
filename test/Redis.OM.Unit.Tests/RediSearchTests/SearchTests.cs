@@ -567,5 +567,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x=>x.ExecuteAsync("EVALSHA","42","1","Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET","$.Age","33", "SET","$.Height", "71.5"));
             Scripts.ShaCollection.Clear();
         }
+
+        [Fact]
+        public async Task TestDelete()
+        {
+            const string key = "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N";
+            _mock.Setup(x=>x.Execute("FT.SEARCH", It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            _mock.Setup(x => x.ExecuteAsync("UNLINK", It.IsAny<string[]>())).ReturnsAsync("1");
+            var colleciton = new RedisCollection<Person>(_mock.Object);
+            var steve = colleciton.First(x => x.Name == "Steve");
+            Assert.True(colleciton.StateManager.Data.ContainsKey(key));
+            Assert.True(colleciton.StateManager.Snapshot.ContainsKey(key));
+            await colleciton.Delete(steve);
+            _mock.Verify(x=>x.ExecuteAsync("UNLINK",key));
+            Assert.False(colleciton.StateManager.Data.ContainsKey(key));
+            Assert.False(colleciton.StateManager.Snapshot.ContainsKey(key));
+        }
     }
 }
