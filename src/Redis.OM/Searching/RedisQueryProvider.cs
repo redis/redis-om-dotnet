@@ -18,10 +18,6 @@ namespace Redis.OM.Searching
     /// </summary>
     internal class RedisQueryProvider : IQueryProvider
     {
-        private const string SYSTEMDOUBLETYPE = "System.Double";
-        private const string SYSTEMINT32TYPE = "System.Int32";
-        private const string SYSTEMINT64TYPE = "System.Int64";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisQueryProvider"/> class.
         /// </summary>
@@ -230,23 +226,46 @@ namespace Redis.OM.Searching
 
         private static RedisReply InvariantCultureResultParsing<T>(RedisReply value)
         {
-            if (string.IsNullOrEmpty(value.ToString()) && Nullable.GetUnderlyingType(typeof(T)) != null)
+            Type valueType = typeof(T);
+            Type underlingValueType = Nullable.GetUnderlyingType(valueType);
+
+            if (string.IsNullOrEmpty(value.ToString()) && underlingValueType != null)
             {
                 return value;
             }
 
-            return typeof(T).FullName switch
+            /*
+                When type of expected value is a double, float or decimal it must be parsed using InvariantCulture due some cultures use comma (",") or other than dot (".")
+                because implicid casting of a TResult can produce an invalid value to cast.
+                Value sometimes can be an int/long so value.ToString(..) is required before parsing as as double
+            */
+
+            if (valueType == typeof(double) || underlingValueType == typeof(double))
             {
-                SYSTEMDOUBLETYPE => /*
-                        When expected value is a double it must be parsed using InvariantCulture due some cultures use comma (",") or other than dot (".")
-                        because implicid casting of a TResult can produce an invalid value to cast.
-                        Value sometimes can be an int/long so value.ToString(..) is required before parsing as as double
-                    */
-                    double.Parse(value.ToString(CultureInfo.InvariantCulture), NumberStyles.Number, CultureInfo.InvariantCulture),
-                SYSTEMINT32TYPE => (int)value,
-                SYSTEMINT64TYPE => (long)value,
-                _ => value,
-            };
+                return double.Parse(value.ToString(CultureInfo.InvariantCulture), NumberStyles.Number, CultureInfo.InvariantCulture);
+            }
+
+            if (valueType == typeof(float) || underlingValueType == typeof(float))
+            {
+                return float.Parse(value.ToString(CultureInfo.InvariantCulture), NumberStyles.Number, CultureInfo.InvariantCulture);
+            }
+
+            if (valueType == typeof(decimal) || underlingValueType == typeof(decimal))
+            {
+                return float.Parse(value.ToString(CultureInfo.InvariantCulture), NumberStyles.Number, CultureInfo.InvariantCulture);
+            }
+
+            if (valueType == typeof(int) || underlingValueType == typeof(int))
+            {
+                return (int)value;
+            }
+
+            if (valueType == typeof(long) || underlingValueType == typeof(long))
+            {
+                return (int)value;
+            }
+
+            return value;
         }
     }
 }

@@ -17,9 +17,6 @@ namespace Redis.OM.Common
     /// </summary>
     internal static class ExpressionParserUtilities
     {
-        private const string SYSTEMDOUBLETYPE = "System.Double";
-        private const string SYSTEMSTRINGTYPE = "System.String";
-
         /// <summary>
         /// Get's the operand string.
         /// </summary>
@@ -405,30 +402,26 @@ namespace Redis.OM.Common
 
         private static string ValueToString(object value)
         {
-            return value.GetType().FullName switch
-            {
-                SYSTEMDOUBLETYPE => ((double)value).ToString(CultureInfo.InvariantCulture),
-                _ => value.ToString(),
-            };
-        }
+            Type valueType = value.GetType();
 
-        private static string ConstantToString(ConstantExpression constExp)
-        {
-            return constExp.Type.FullName switch
+            if (valueType == typeof(double) || Nullable.GetUnderlyingType(valueType) == typeof(double))
             {
-                SYSTEMDOUBLETYPE => $"{((double)constExp.Value).ToString(CultureInfo.InvariantCulture)}",
-                _ => $"{constExp.Value}",
-            };
+                return ((double)value).ToString(CultureInfo.InvariantCulture);
+            }
+
+            return value.ToString();
         }
 
         private static string GetConstantStringForArgs(ConstantExpression constExp)
         {
-            return constExp.Type.FullName switch
+            string valueAsString = ValueToString(constExp.Value);
+
+            if (constExp.Type == typeof(string))
             {
-                SYSTEMSTRINGTYPE => $"\"{constExp.Value}\"",
-                SYSTEMDOUBLETYPE => $"{((double)constExp.Value).ToString(CultureInfo.InvariantCulture)}",
-                _ => $"{constExp.Value}",
-            };
+                return $"\"{valueAsString}\"";
+            }
+
+            return $"{valueAsString}";
         }
     }
 }
