@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using Redis.OM.Searching;
 
 namespace Redis.OM.Aggregation.AggregationPredicates
@@ -40,7 +41,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         public IEnumerable<string> Serialize()
         {
             var numArgs = Max.HasValue ? 4 : 2;
-            var ret = new List<string> { "SORTBY", numArgs.ToString(), $"@{Property}", Direction == SortDirection.Ascending ? "ASC" : "DESC" };
+            var ret = new List<string> { "SORTBY", numArgs.ToString(CultureInfo.InvariantCulture), $"@{Property}", Direction == SortDirection.Ascending ? "ASC" : "DESC" };
             if (Max.HasValue)
             {
                 ret.Add("MAX");

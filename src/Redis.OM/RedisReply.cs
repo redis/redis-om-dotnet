@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using StackExchange.Redis;
 
@@ -100,7 +101,7 @@ namespace Redis.OM
                 return (double)v._internalDouble;
             }
 
-            if (v._internalString != null && double.TryParse(v._internalString, out var ret))
+            if (v._internalString != null && double.TryParse(v._internalString, NumberStyles.Number, CultureInfo.InvariantCulture, out var ret))
             {
                 return ret;
             }
