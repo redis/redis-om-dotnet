@@ -11,10 +11,7 @@ namespace Redis.OM
         /// <inheritdoc/>
         public string GenerateId()
         {
-            var guid = Guid.NewGuid();
-            var guidBytes = Encoding.UTF8.GetBytes(guid.ToString());
-            var id = Convert.ToBase64String(guidBytes);
-            return id;
+            return Guid.NewGuid().ToString();
         }
     }
 }

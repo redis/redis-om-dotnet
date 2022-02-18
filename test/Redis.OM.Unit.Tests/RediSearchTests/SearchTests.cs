@@ -457,5 +457,46 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100"));
         }
+
+        [Fact]
+        public void TestPaginationChunkSizesSinglePredicate()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>())).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x => x.Name == "Steve").ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:\"Steve\")",
+                "LIMIT",
+                "0",
+                "1000"));
+        }
+
+        [Fact]
+        public void TestPaginationChunkSizesMultiplePredicates()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.TagField == "Steve").GeoFilter(x => x.Home, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
+            Assert.Equal(32, res[0].Age);
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{Steve})",
+                "LIMIT",
+                "0",
+                "1000",
+                "GEOFILTER",
+                "Home",
+                "5",
+                "6.7",
+                "50",
+                "km"
+            ));
+        }
     }
 }

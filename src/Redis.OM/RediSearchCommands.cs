@@ -49,9 +49,21 @@ namespace Redis.OM
         /// <returns>whether the index was created or not.</returns>
         public static bool CreateIndex(this IRedisConnection connection, Type type)
         {
-            var serializedParams = type.SerializeIndex();
-            connection.Execute("FT.CREATE", serializedParams);
-            return true;
+            try
+            {
+                var serializedParams = type.SerializeIndex();
+                connection.Execute("FT.CREATE", serializedParams);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Index already exists"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -62,9 +74,21 @@ namespace Redis.OM
         /// <returns>whether the index was created or not.</returns>
         public static async Task<bool> CreateIndexAsync(this IRedisConnection connection, Type type)
         {
-            var serializedParams = type.SerializeIndex();
-            await connection.ExecuteAsync("FT.CREATE", serializedParams);
-            return true;
+            try
+            {
+                var serializedParams = type.SerializeIndex();
+                await connection.ExecuteAsync("FT.CREATE", serializedParams);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Index already exists"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -75,9 +99,21 @@ namespace Redis.OM
         /// <returns>whether the index was dropped or not.</returns>
         public static async Task<bool> DropIndexAsync(this IRedisConnection connection, Type type)
         {
-            var indexName = type.SerializeIndex().First();
-            await connection.ExecuteAsync("FT.DROPINDEX", indexName);
-            return true;
+            try
+            {
+                var indexName = type.SerializeIndex().First();
+                await connection.ExecuteAsync("FT.DROPINDEX", indexName);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Unknown Index name"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
         }
 
         /// <summary>

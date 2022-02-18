@@ -35,6 +35,7 @@
 - [🏁 Getting started](#-getting-started)
   - [Starting Redis](#starting-redis)
   - [📇 Modeling your domain (and indexing it!)](#-modeling-your-domain-and-indexing-it)
+  - [🔑 Keys and Ids](#-keys-and-ids)
   - [🔎 Querying](#-querying)
   - [🖩 Aggregations](#-aggregations)
 - [📚 Documentation](#-documentation)
@@ -111,6 +112,72 @@ Once the index is created, we can:
 * Run aggregations on Customers in Redis
 
 Let's see how!
+
+### 🔑 Keys and Ids
+
+#### ULIDs and strings
+
+Ids are unique per object, and are used as part of key generation for the primary index in Redis. The natively supported Id type in Redis OM is the [ULID][ulid-url]. You can bind ids to your model, by explicitly decorating your Id field with the `RedisIdField` attribute:
+
+```csharp
+[Document]
+public class Customer
+{
+    [RedisIdField] public Ulid Id { get; set; }
+    [Indexed(Sortable = true)] public string FirstName { get; set; }
+    [Indexed(Aggregatable = true)] public string LastName { get; set; }
+    public string Email { get; set; }
+    [Indexed(Sortable = true)] public int Age { get; set; }
+}
+```
+
+When you call `Set` on the `RedisConnection` or call `Insert` in the `RedisCollection`, to insert your object into Redis, Redis OM will automatically set the id  for you and you will be able to access it in the object. If the `Id` type is a string, and there is no explicitly overriding IdGenerationStrategy on the object, the ULID for the object will bind to the string.
+
+#### Other types of ids
+
+Redis OM also supports other types of ids, ids must either be strings or value types (e.g. ints, longs, GUIDs etc. . .), if you want a non-ULID id type, you must either set the id on each object prior to insertion, or you must register an `IIdGenerationStrategy` with the `DocumentAttribute` class.
+
+##### Register IIdGenerationStrategy
+
+To Register an `IIdGenerationStrategy` with the `DocumentAttribute` class, simply call `DocumentAttribute.RegisterIdGenerationStrategy` passing in the strategy name, and the implementation of `IIdGenerationStrategy` you want to use. Let's say for example you had the `StaticIncrementStrategy`, which maintains a static counter in memory, and increments ids based off that counter:
+
+```csharp
+public class StaticIncrementStrategy : IIdGenerationStrategy
+{
+    public static int Current = 0;
+    public string GenerateId()
+    {
+        return (Current++).ToString();
+    }
+}
+```
+
+You would then register that strategy with Redis.OM like so:
+
+```csharp
+DocumentAttribute.RegisterIdGenerationStrategy(nameof(StaticIncrementStrategy), new StaticIncrementStrategy());
+```
+
+Then, when you want to use that strategy for generating the Ids of a document, you can simply set the IdGenerationStrategy of your document attribute to the name of the strategy.
+
+```csharp
+[Document(IdGenerationStrategyName = nameof(StaticIncrementStrategy))]
+public class ObjectWithCustomIdGenerationStrategy
+{
+    [RedisIdField] public string Id { get; set; }
+}
+```
+
+#### Key Names
+
+The key names are, by default, the fully qualified class name of the object, followed by a colon, followed by the `Id`. For example, there is a Person class in the Unit Test project, an example id of that person class would be `Redis.OM.Unit.Tests.RediSearchTests.Person:01FTHAF0D1EKSN0XG67HYG36GZ`, because `Redis.OM.Unit.Tests.RediSearchTests.Person` is the fully qualified class name, and `01FTHAF0D1EKSN0XG67HYG36GZ` is the ULID (the default id type). If you want to change the prefix (the fully qualified class name), you can change that in the `DocumentAttribute` by setting the `Prefixes` property, which is an array of strings e.g.
+
+```csharp
+[Document(Prefixes = new []{"Person"})]
+public class Person
+```
+
+> Note: At this time, Redis.OM will only use the first prefix in the prefix list as the prefix when creating a key name. However, when an index is created, it will be created on all prefixes enumerated in the Prefixes property
 
 ### 🔎 Querying
 
@@ -202,6 +269,8 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * @satish860
 * @dracco1993
 * @ecortese
+* @DanJRWalsh
+* @baldutech
 
 <!-- Logo -->
 [Logo]: images/logo.svg
@@ -210,7 +279,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 
 [ci-svg]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml/badge.svg
 [ci-url]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml
-[license-image]: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
+[license-image]: https://img.shields.io/badge/License-MIT-red.svg
 [license-url]: LICENSE
 
 <!-- Links -->

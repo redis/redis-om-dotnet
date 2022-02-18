@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Redis.OM.Modeling;
 
@@ -15,6 +17,11 @@ namespace Redis.OM.Searching
         /// Gets the collection state manager.
         /// </summary>
         RedisCollectionStateManager StateManager { get; }
+
+        /// <summary>
+        /// Gets the size of chunks to use when paginating.
+        /// </summary>
+        int ChunkSize { get; }
 
         /// <summary>
         /// Saves the current state of the collection, overriding what was initially materialized.
@@ -54,5 +61,12 @@ namespace Redis.OM.Searching
         /// <param name="id">the id to lookup.</param>
         /// <returns>the item if it's present.</returns>
         T? FindById(string id);
+
+        /// <summary>
+        /// Checks to see if anything matching the expression exists.
+        /// </summary>
+        /// <param name="expression">the expression to be matched.</param>
+        /// <returns>Whether anything matching the expression was found.</returns>
+        bool Any(Expression<Func<T, bool>> expression);
     }
 }

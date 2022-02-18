@@ -98,8 +98,9 @@ namespace Redis.OM.Common
         /// Splits the expression apart into a query.
         /// </summary>
         /// <param name="rootBinaryExpression">The root expression.</param>
+        /// <param name="filterFormat">Whether or not to use the filter format.</param>
         /// <returns>a query.</returns>
-        internal static string ParseBinaryExpression(BinaryExpression rootBinaryExpression)
+        internal static string ParseBinaryExpression(BinaryExpression rootBinaryExpression, bool filterFormat = false)
         {
             var operationStack = new Stack<string>();
             var binExpressions = SplitBinaryExpression(rootBinaryExpression);
@@ -107,6 +108,13 @@ namespace Redis.OM.Common
             {
                 var right = GetOperandString(expression.Right);
                 var left = GetOperandString(expression.Left);
+
+                if (filterFormat && expression.Left is MemberExpression mem &&
+                    mem.Type == typeof(string))
+                {
+                    right = $"'{right}'";
+                }
+
                 operationStack.Push(right);
                 operationStack.Push(GetOperatorFromNodeType(expression.NodeType));
                 if (!string.IsNullOrEmpty(left))

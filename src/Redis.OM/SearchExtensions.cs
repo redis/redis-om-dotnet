@@ -94,7 +94,7 @@ namespace Redis.OM
                    null,
                    GetMethodInfo(Where, source, expression),
                    new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Redis.OM
                    null,
                    GetMethodInfo(Select, source, expression),
                    new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<TR>((RedisQueryProvider)source.Provider, exp, source.StateManager);
+            return new RedisCollection<TR>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(Skip, source, count),
                 new[] { source.Expression, Expression.Constant(count) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(Take, source, count),
                 new[] { source.Expression, Expression.Constant(count) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
         }
 
         /// <summary>
@@ -459,7 +459,7 @@ namespace Redis.OM
                 Expression.Constant(lat),
                 Expression.Constant(radius),
                 Expression.Constant(unit));
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
         }
 
         /// <summary>
