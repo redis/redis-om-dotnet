@@ -498,5 +498,65 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "km"
             ));
         }
+
+        [Fact]
+        public void TestNestedObjectStringSearch()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.Address.City == "Newark").ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Address_City:{Newark})",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedObjectNumericSearch()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.Address.HouseNumber == 4).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Address_HouseNumber:[4 4])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedQueryOfGeo()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.GeoFilter(x => x.Address.Location, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "1000",
+                "GEOFILTER",
+                "Address_Location",
+                "5",
+                "6.7",
+                "50",
+                "km"
+            ));
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Indexed(Aggregatable = true)]
         public GeoLoc? Work { get; set; }
 
+        [Indexed(CascadeDepth = 1)]
         public Address Address { get; set; }
 
         public bool? IsEngineer { get; set; }

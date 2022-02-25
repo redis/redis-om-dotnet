@@ -14,13 +14,25 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
         {
             [Searchable(Sortable = true)]
             public string Name { get; set; }
+            
             [Indexed]
             public string Tag { get; set; }
+            
             [Indexed(Sortable = true)]
             public int Age { get; set; }
+            
             [Indexed(Sortable = true)]
             public double Height { get; set; }
+            
             public string[] NickNames { get; set; }
+            
+            [Indexed(JsonPath = "$.ZipCode")]
+            [Indexed(JsonPath = "$.City")]
+            [Searchable(JsonPath = "$.StreetName", Aggregatable = true)]
+            public Address Address { get; set; }
+        
+            [Indexed(CascadeDepth = 1)]
+            public Address WorkAddress { get; set; }
         }
 
         
@@ -40,7 +52,13 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
             var expected = new[] { "person-idx",
                 "ON", "Json", "PREFIX", "1", "Redis.OM.Unit.Tests.SearchJsonTests.RedisJsonIndexTests+Person:", "SCHEMA",
                 "$.Name", "AS", "Name", "TEXT", "SORTABLE", "$.Tag", "AS","Tag","TAG", "SEPARATOR", "|","$.Age", "AS", "Age", 
-                "NUMERIC","SORTABLE", "$.Height", "AS", "Height", "NUMERIC", "SORTABLE" };
+                "NUMERIC","SORTABLE", "$.Height", "AS", "Height", "NUMERIC", "SORTABLE", "$.Address.ZipCode", "AS",
+                "Address_ZipCode", "TAG", "SEPARATOR", "|", "$.Address.City", "AS",
+                "Address_City", "TAG", "SEPARATOR", "|", "$.Address.StreetName", "AS", "Address_StreetName", "TEXT", "SORTABLE",
+                "$.WorkAddress.City", "AS","WorkAddress_City", "TAG", "SEPARATOR", "|",  "$.WorkAddress.State", "AS", "WorkAddress_State", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Location", "AS", "WorkAddress_Location", "GEO", "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC"
+                
+            };
             var indexArr = typeof(Person).SerializeIndex();
 
             for(var i = 0; i < indexArr.Length; i++)
@@ -49,5 +67,6 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
             }
             
         }
+        
     }
 }
