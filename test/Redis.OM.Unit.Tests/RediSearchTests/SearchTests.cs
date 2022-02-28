@@ -518,6 +518,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
         
         [Fact]
+        public void TestNestedObjectStringSearchNested2Levels()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.Address.ForwardingAddress.City == "Newark").ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Address_ForwardingAddress_City:{Newark})",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
         public void TestNestedObjectNumericSearch()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
@@ -529,6 +547,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "FT.SEARCH",
                 "person-idx",
                 "(@Address_HouseNumber:[4 4])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedObjectNumericSearch2Levels()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.Address.ForwardingAddress.HouseNumber == 4).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Address_ForwardingAddress_HouseNumber:[4 4])",
                 "LIMIT",
                 "0",
                 "1000"
@@ -552,6 +588,30 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000",
                 "GEOFILTER",
                 "Address_Location",
+                "5",
+                "6.7",
+                "50",
+                "km"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedQueryOfGeo2Levels()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.GeoFilter(x => x.Address.ForwardingAddress.Location, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "1000",
+                "GEOFILTER",
+                "Address_ForwardingAddress_Location",
                 "5",
                 "6.7",
                 "50",

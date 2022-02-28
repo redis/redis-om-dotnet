@@ -164,23 +164,11 @@ namespace Redis.OM.Common
         /// <returns>The alias to search for.</returns>
         internal static string GetSearchFieldNameFromMember(MemberExpression member)
         {
-            var memberPath = new List<string>();
-            var parentExpression = member.Expression;
-            var topMember = member;
-            while (parentExpression is MemberExpression parentMember)
-            {
-                if (parentMember.Member.Name != nameof(AggregationResult<object>.RecordShell))
-                {
-                    memberPath.Add(parentMember.Member.Name);
-                }
+            var stack = GetMemberChain(member);
+            var topMember = stack.Peek();
+            var memberPath = stack.Select(x => x.Name).ToArray();
 
-                parentExpression = parentMember.Expression;
-                topMember = parentMember;
-            }
-
-            memberPath.Add(member.Member.Name);
-
-            if (topMember == member)
+            if (topMember == member.Member)
             {
                 var searchField = member.Member.GetCustomAttributes().Where(x => x is SearchFieldAttribute).Cast<SearchFieldAttribute>().FirstOrDefault();
                 if (searchField != null && !string.IsNullOrEmpty(searchField.PropertyName))
@@ -206,7 +194,12 @@ namespace Redis.OM.Common
             var parentExpression = memberExpression.Expression;
             while (parentExpression is MemberExpression parentMember)
             {
-                memberStack.Push(memberExpression.Member);
+                if (parentMember.Member.Name == nameof(AggregationResult<object>.RecordShell))
+                {
+                    break;
+                }
+
+                memberStack.Push(parentMember.Member);
                 parentExpression = parentMember.Expression;
             }
 

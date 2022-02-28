@@ -51,7 +51,7 @@ namespace Redis.OM.Modeling
                         {
                             foreach (var property in info.PropertyType.GetProperties())
                             {
-                                ret.AddRange(property.SerializeArgsJson(cascadeDepth - 1, $"{pathPrefix}{info.Name}.", string.IsNullOrEmpty(aliasPrefix) ? $"{info.Name}_" : $"{aliasPrefix}_{info.Name}"));
+                                ret.AddRange(property.SerializeArgsJson(cascadeDepth - 1, $"{pathPrefix}{info.Name}.", string.IsNullOrEmpty(aliasPrefix) ? $"{info.Name}_" : $"{aliasPrefix}{info.Name}_"));
                             }
                         }
                     }

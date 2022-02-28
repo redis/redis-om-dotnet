@@ -260,5 +260,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal("Steve", reconstituded.Name);
             Assert.Equal(new GeoLoc(1.0,1.0), reconstituded.Home);
         }
+
+        [Fact]
+        public void TestNestedObjectQuery()
+        {
+            var testP = new Person{Name = "Steve", Home = new GeoLoc(1.0, 1.0), Address = new Address{ City = "Newark"}};
+            var id =_connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            Assert.True(collection.Where(x => x.Name == "Steve" && x.Address.City == "Newark").FirstOrDefault() != default);
+        }
+        
+        [Fact]
+        public void TestNestedObjectQuery2Levels()
+        {
+            var testP = new Person{Name = "Steve", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}};
+            var id =_connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            Assert.True(collection.Where(x => x.Name == "Steve" && x.Address.ForwardingAddress.City == "Newark").FirstOrDefault() != default);
+        }
     }
 }
