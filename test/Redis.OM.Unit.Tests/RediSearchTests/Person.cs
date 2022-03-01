@@ -33,7 +33,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public double? Height { get; set; }
 
         [ListType]
-        public List<string> NickNames { get; set; }
+        [Indexed]
+        public string[] NickNames { get; set; }
+
+        [Indexed]
+        public List<string> NickNamesList { get; set; }
 
         [Indexed]        
         public string TagField { get; set; }

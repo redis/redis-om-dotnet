@@ -207,14 +207,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             try
             {
                 var maryNicknames = new List<string> { "Mary", "Mae", "Mimi", "Mitzi" };
-                var maria = new Person { Name = "Maria", NickNames = maryNicknames };
+                var maria = new Person { Name = "Maria", NickNames = maryNicknames.ToArray() };
                 _connection.Set(maria);
                 maryNicknames.RemoveAt(1);
                 maryNicknames.RemoveAt(1);
                 var collection = new RedisCollection<Person>(_connection);
                 foreach (var mary in collection.Where(x => x.Name == "Maria"))
                 {
-                    mary.NickNames = maryNicknames;
+                    mary.NickNames = maryNicknames.ToArray();
                 }
                 collection.Save();
                 foreach (var mary in collection.Where(x => x.Name == "Maria"))
@@ -274,9 +274,29 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedObjectQuery2Levels()
         {
             var testP = new Person{Name = "Steve", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}};
-            var id =_connection.Set(testP);
+            var id = _connection.Set(testP);
             var collection = new RedisCollection<Person>(_connection);
             Assert.True(collection.Where(x => x.Name == "Steve" && x.Address.ForwardingAddress.City == "Newark").FirstOrDefault() != default);
+        }
+
+        [Fact]
+        public void TestArrayQuery()
+        {
+            var testP = new Person{Name = "Stephen", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}, NickNames = new []{"Steve"}};
+            var id = _connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            var steve = collection.FirstOrDefault(x => x.NickNames.Contains("Steve"));
+            Assert.Equal(id.Split(':')[1], steve.Id);
+        }
+        
+        [Fact]
+        public void TestListQuery()
+        {
+            var testP = new Person{Name = "Stephen", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}, NickNamesList = new List<string> {"Steve"}};
+            var id = _connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            var steve = collection.FirstOrDefault(x => x.NickNamesList.Contains("Steve"));
+            Assert.Equal(id.Split(':')[1], steve.Id);
         }
     }
 }

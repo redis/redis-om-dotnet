@@ -497,14 +497,26 @@ namespace Redis.OM.Common
 
         private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp)
         {
-            if (exp.Object is not MemberExpression member)
+            MemberExpression? expression = null;
+            if (exp.Object is MemberExpression)
             {
-                throw new ArgumentException("String that Contains is called on must be a member of an indexed class");
+                expression = exp.Object as MemberExpression;
+            }
+            else if (exp.Arguments.FirstOrDefault() is MemberExpression)
+            {
+                expression = exp.Arguments.FirstOrDefault() as MemberExpression;
             }
 
-            var memberName = GetOperandStringForMember(member);
-            var literal = GetOperandStringForQueryArgs(exp.Arguments[0]);
-            return $"{memberName}:{literal}";
+            if (expression == null)
+            {
+                throw new InvalidOperationException($"Could not parse query for Contains");
+            }
+
+            var type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
+
+            var memberName = GetOperandStringForMember(expression);
+            var literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
+            return (type == typeof(string)) ? $"{memberName}:{literal}" : $"{memberName}:{{{literal}}}";
         }
     }
 }

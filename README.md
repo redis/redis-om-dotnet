@@ -84,13 +84,14 @@ docker run -p 6379:6379 redislabs/redismod:preview
 With Redis OM, you can model your data and declare indexes with minimal code. For example, here's how we might model a customer object:
 
 ```csharp
-[Document]
+[Document(StorageType = StorageType.Json)]
 public class Customer
 {
-   [Indexed(Sortable = true)] public string FirstName { get; set; }
-   [Indexed(Aggregatable = true)] public string LastName { get; set; }
+   [Indexed] public string FirstName { get; set; }
+   [Indexed] public string LastName { get; set; }
    public string Email { get; set; }
    [Indexed(Sortable = true)] public int Age { get; set; }
+   [Indexed] public string[] NickNames {get; set;}
 }
 ```
 
@@ -103,6 +104,63 @@ Now we need to create the Redis index. So we'll connect to Redis and then call `
 var provider = new RedisConnectionProvider("redis://localhost:6379");
 provider.Connection.CreateIndex(typeof(Customer));
 ```
+
+### Indexing Embedded Documents
+
+There are two methods for indexing embedded documents with Redis.OM, an embedded document is a complex object, e.g. if our `Customer` model had an `Address` property with the following model:
+
+```csharp
+[Document(IndexName = "address-idx", StorageType = StorageType.Json)]
+public partial class Address
+{
+    public string StreetName { get; set; }
+    public string ZipCode { get; set; }
+    [Indexed] public string City { get; set; }
+    [Indexed] public string State { get; set; }
+    [Indexed(CascadeDepth = 1)] public Address ForwardingAddress { get; set; }
+    [Indexed] public GeoLoc Location { get; set; }
+    [Indexed] public int HouseNumber { get; set; }
+}
+```
+
+#### Index By JSON Path
+
+You can index fields by JSON path, in the top level model, in this case `Customer` you can decorate the `Address` property with an `Indexed` and/or `Searchable` attribute, specifying the JSON path to the desired field:
+
+```csharp
+[Document(StorageType = StorageType.Json)]
+public class Customer
+{
+   [Indexed] public string FirstName { get; set; }
+   [Indexed] public string LastName { get; set; }
+   public string Email { get; set; }
+   [Indexed(Sortable = true)] public int Age { get; set; }
+   [Indexed] public string[] NickNames {get; set;}
+   [Indexed(JsonPath = "$.ZipCode")]
+   [Searchable(JsonPath = "$.StreetAddress")]
+   public Address Address {get; set;}
+}
+```
+
+#### Cascading Index
+
+Alternatively, you can also embedded models by cascading indexes. In this instance you'd simply decorate the property with `Indexed` and set the `CascadeDepth` to whatever to however may levels you want the model to cascade for. The default is 0, so if `CascadeDepth` is not set, indexing an object will be a no-op:
+
+```csharp
+[Document(StorageType = StorageType.Json)]
+public class Customer
+{
+   [Indexed] public string FirstName { get; set; }
+   [Indexed] public string LastName { get; set; }
+   public string Email { get; set; }
+   [Indexed(Sortable = true)] public int Age { get; set; }
+   [Indexed] public string[] NickNames {get; set;}
+   [Indexed(CascadeDepth = 2)]
+   public Address Address {get; set;}
+}
+```
+
+In the above case, all indexed/searchable fields in Address will be indexed down 2 levels, so the `ForwardingAddress` field in `Address` will also be indexed.
 
 Once the index is created, we can:
 
@@ -120,14 +178,15 @@ Let's see how!
 Ids are unique per object, and are used as part of key generation for the primary index in Redis. The natively supported Id type in Redis OM is the [ULID][ulid-url]. You can bind ids to your model, by explicitly decorating your Id field with the `RedisIdField` attribute:
 
 ```csharp
-[Document]
+[Document(StorageType = StorageType.Json)]
 public class Customer
 {
     [RedisIdField] public Ulid Id { get; set; }
-    [Indexed(Sortable = true)] public string FirstName { get; set; }
-    [Indexed(Aggregatable = true)] public string LastName { get; set; }
+    [Indexed] public string FirstName { get; set; }
+    [Indexed] public string LastName { get; set; }
     public string Email { get; set; }
     [Indexed(Sortable = true)] public int Age { get; set; }
+    [Indexed] public string[] NickNames { get; set; }
 }
 ```
 
@@ -203,6 +262,9 @@ customers.Where(x => x.LastName == "Bond" || x.Age > 65);
 
 // Find all customers whose last name is Bond AND whose first name is James
 customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
+
+// Find all customers with the nickname of Jim
+customer.Where(x=>x.NickNames.Contains("Jim"));
 ```
 
 ### 🖩 Aggregations

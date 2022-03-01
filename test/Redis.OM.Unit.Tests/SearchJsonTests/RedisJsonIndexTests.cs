@@ -22,6 +22,21 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
             public double Height { get; set; }
             public string[] NickNames { get; set; }
         }
+        
+        [Document(IndexName = "person-idx", StorageType = StorageType.Json)]
+        public class PersonWithIndexedNickNames
+        {
+            [Searchable(Sortable = true)]
+            public string Name { get; set; }
+            [Indexed]
+            public string Tag { get; set; }
+            [Indexed(Sortable = true)]
+            public int Age { get; set; }
+            [Indexed(Sortable = true)]
+            public double Height { get; set; }
+            [Indexed]
+            public string[] NickNames { get; set; }
+        }
 
         [Document(IndexName = "person-idx", StorageType = StorageType.Json)]
         public class NestedPerson
@@ -148,6 +163,26 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
             var indexArr = typeof(NestedPersonCascade2).SerializeIndex();
 
             for(var i = 0; i < indexArr.Length; i++)
+            {
+                Assert.Equal(expected[i], indexArr[i]);
+            }
+        }
+
+        [Fact]
+        public void TestIndexSerializationWithNickNames()
+        {
+            var expected = new[] { "person-idx",
+                "ON", "Json", "PREFIX", "1", "Redis.OM.Unit.Tests.SearchJsonTests.RedisJsonIndexTests+PersonWithIndexedNickNames:", "SCHEMA",
+                "$.Name", "AS", "Name", "TEXT", "SORTABLE", 
+                "$.Tag", "AS","Tag","TAG", "SEPARATOR", "|",
+                "$.Age", "AS", "Age", "NUMERIC","SORTABLE", 
+                "$.Height", "AS", "Height", "NUMERIC", "SORTABLE",
+                "$.NickNames[*]", "AS","NickNames","TAG",
+                
+            };
+            var indexArr = typeof(PersonWithIndexedNickNames).SerializeIndex();
+
+            for(var i = 0; i < expected.Length; i++)
             {
                 Assert.Equal(expected[i], indexArr[i]);
             }

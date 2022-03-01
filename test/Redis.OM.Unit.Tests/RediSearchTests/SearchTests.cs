@@ -618,5 +618,60 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "km"
             ));
         }
+
+        [Fact]
+        public void TestArrayContains()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.Where(x => x.NickNames.Contains("Steve")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "@NickNames:{Steve}",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestArrayContainsVar()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var steve = "Steve";
+            collection.Where(x => x.NickNames.Contains(steve)).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "@NickNames:{Steve}",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+
+        [Fact]
+        public void TestArrayContainsNested()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.Where(x => x.Mother.NickNames.Contains("Di")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "@Mother_NickNames:{Di}",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
     }
 }

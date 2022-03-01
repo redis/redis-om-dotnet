@@ -44,7 +44,8 @@ namespace Redis.OM.Modeling
 
                     if (!TypeDeterminationUtilities.IsNumeric(innerType)
                         && innerType != typeof(string)
-                        && innerType != typeof(GeoLoc))
+                        && innerType != typeof(GeoLoc)
+                        && !IsTypeIndexableArray(innerType))
                     {
                         int cascadeDepth = remainingDepth == -1 ? attr.CascadeDepth : remainingDepth;
                         if (cascadeDepth > 0)
@@ -57,7 +58,8 @@ namespace Redis.OM.Modeling
                     }
                     else
                     {
-                        ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}" : $"{pathPrefix}{info.Name}");
+                        var pathPostFix = IsTypeIndexableArray(innerType) ? "[*]" : string.Empty;
+                        ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPrefix}" : $"{pathPrefix}{info.Name}{pathPostFix}");
                         ret.Add("AS");
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{aliasPrefix}{attr.PropertyName}" : $"{aliasPrefix}{info.Name}");
                         ret.AddRange(CommonSerialization(attr, innerType));
@@ -86,6 +88,8 @@ namespace Redis.OM.Modeling
             ret.AddRange(CommonSerialization(attr, innerType ?? info.PropertyType));
             return ret.ToArray();
         }
+
+        private static bool IsTypeIndexableArray(Type t) => t == typeof(string[]) || t == typeof(bool[]) || t == typeof(List<string>) || t == typeof(List<bool>);
 
         private static IEnumerable<string> SerializeIndexFromJsonPaths(PropertyInfo parentInfo, SearchFieldAttribute attribute, string prefix = "$.")
         {
