@@ -501,6 +501,181 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestNestedObjectStringSearch()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.Address.City == "Newark").ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Address_City:{Newark})",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedObjectStringSearchNested2Levels()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.Address.ForwardingAddress.City == "Newark").ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Address_ForwardingAddress_City:{Newark})",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedObjectNumericSearch()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.Address.HouseNumber == 4).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Address_HouseNumber:[4 4])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedObjectNumericSearch2Levels()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var res = collection.Where(x=>x.Address.ForwardingAddress.HouseNumber == 4).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Address_ForwardingAddress_HouseNumber:[4 4])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedQueryOfGeo()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.GeoFilter(x => x.Address.Location, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "1000",
+                "GEOFILTER",
+                "Address_Location",
+                "5",
+                "6.7",
+                "50",
+                "km"
+            ));
+        }
+        
+        [Fact]
+        public void TestNestedQueryOfGeo2Levels()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.GeoFilter(x => x.Address.ForwardingAddress.Location, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "1000",
+                "GEOFILTER",
+                "Address_ForwardingAddress_Location",
+                "5",
+                "6.7",
+                "50",
+                "km"
+            ));
+        }
+
+        [Fact]
+        public void TestArrayContains()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.Where(x => x.NickNames.Contains("Steve")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "@NickNames:{Steve}",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+        
+        [Fact]
+        public void TestArrayContainsVar()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            var steve = "Steve";
+            collection.Where(x => x.NickNames.Contains(steve)).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "@NickNames:{Steve}",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+
+        [Fact]
+        public void TestArrayContainsNested()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.Where(x => x.Mother.NickNames.Contains("Di")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "@Mother_NickNames:{Di}",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+
+        [Fact]
         public async Task TestUpdateJson()
         {
             _mock.Setup(x=>x.Execute("FT.SEARCH", It.IsAny<string[]>()))

@@ -530,7 +530,7 @@ namespace Redis.OM.Common
 
                 if (binExpression.Left is MemberExpression member)
                 {
-                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member.Member);
+                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
                     sb.Append("(");
                     sb.Append(predicate);
                     sb.Append(")");
@@ -558,7 +558,7 @@ namespace Redis.OM.Common
             return BuildQueryFromExpression(lambda.Body);
         }
 
-        private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberInfo member)
+        private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberExpression memberExpression)
         {
             var queryPredicate = expType switch
             {
@@ -566,17 +566,17 @@ namespace Redis.OM.Common
                 ExpressionType.LessThan => $"{left}:[-inf ({right}]",
                 ExpressionType.GreaterThanOrEqual => $"{left}:[{right} inf]",
                 ExpressionType.LessThanOrEqual => $"{left}:[-inf {right}]",
-                ExpressionType.Equal => BuildEqualityPredicate(member, right),
-                ExpressionType.NotEqual => BuildEqualityPredicate(member, right, true),
+                ExpressionType.Equal => BuildEqualityPredicate(memberExpression, right),
+                ExpressionType.NotEqual => BuildEqualityPredicate(memberExpression, right, true),
                 _ => string.Empty
             };
             return queryPredicate;
         }
 
-        private static string BuildEqualityPredicate(MemberInfo member, string right, bool negated = false)
+        private static string BuildEqualityPredicate(MemberExpression member, string right, bool negated = false)
         {
             var sb = new StringBuilder();
-            var fieldAttribute = member.GetCustomAttribute<SearchFieldAttribute>();
+            var fieldAttribute = ExpressionParserUtilities.DetermineSearchAttribute(member);
             if (fieldAttribute == null)
             {
                 throw new InvalidOperationException("Searches can only be performed on fields marked with a " +
@@ -588,10 +588,10 @@ namespace Redis.OM.Common
                 sb.Append("-");
             }
 
-            sb.Append($"@{member.Name}:");
+            sb.Append($"@{ExpressionParserUtilities.GetSearchFieldNameFromMember(member)}:");
             var searchFieldType = fieldAttribute.SearchFieldType != SearchFieldType.INDEXED
                 ? fieldAttribute.SearchFieldType
-                : DetermineIndexFieldsType(member);
+                : DetermineIndexFieldsType(member.Member);
             switch (searchFieldType)
             {
                 case SearchFieldType.TAG:

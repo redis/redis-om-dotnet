@@ -1085,5 +1085,69 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
+
+        [Fact]
+        public void TestNestedStringFormat()
+        {
+            var expectedPredicate = "format(\"Hello My State is %s\",@Address_State)";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",
+                    It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            collection.Apply(x => string.Format("Hello My State is {0}", x.RecordShell.Address.State), "StateText").ToArray();
+
+            _mock.Verify(x => x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "APPLY",
+                expectedPredicate,
+                "AS",
+                "StateText"));
+        }
+        
+        [Fact]
+        public void TestNestedNumericApply()
+        {
+            var expectedPredicate = "@Address_HouseNumber + 4";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",
+                    It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            collection.Apply(x => x.RecordShell.Address.HouseNumber + 4, "HouseNumPlus4").ToArray();
+
+            _mock.Verify(x => x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "APPLY",
+                expectedPredicate,
+                "AS",
+                "HouseNumPlus4"));
+        }
+        
+        [Fact]
+        public void TestGeoDistanceNested()
+        {
+            var expectedPredicate = "geodistance(@Home,@Address_Location)";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",
+                    "person-idx",
+                    "*",
+                    "APPLY",
+                    expectedPredicate,
+                    "AS",
+                    "geo"))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var res = collection.Apply(
+                x => ApplyFunctions.GeoDistance((GeoLoc)x.RecordShell.Home, (GeoLoc)x.RecordShell.Address.Location), "geo").ToArray();
+
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
     }
 }
