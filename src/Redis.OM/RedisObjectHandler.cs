@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
@@ -93,6 +94,43 @@ namespace Redis.OM
             }
 
             return string.Empty;
+        }
+
+        /// <summary>
+        /// Gets the fully formed key name for the given object.
+        /// </summary>
+        /// <param name="obj">the object to pull the key from.</param>
+        /// <returns>The key.</returns>
+        /// <exception cref="ArgumentException">Thrown if type is invalid or there's no id present on the key.</exception>
+        internal static string GetKey(this object obj)
+        {
+            var type = obj.GetType();
+            var documentAttribute = (DocumentAttribute)type.GetCustomAttribute(typeof(DocumentAttribute));
+            if (documentAttribute == null)
+            {
+                throw new ArgumentException("Missing Document Attribute on Declaring class");
+            }
+
+            var id = obj.GetId();
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentException("Id field is not correctly populated");
+            }
+
+            var sb = new StringBuilder();
+            if (documentAttribute.Prefixes.Any())
+            {
+                sb.Append(documentAttribute.Prefixes.First());
+                sb.Append(":");
+            }
+            else
+            {
+                sb.Append(type.FullName);
+                sb.Append(":");
+            }
+
+            sb.Append(id);
+            return sb.ToString();
         }
 
         /// <summary>
@@ -214,7 +252,8 @@ namespace Redis.OM
             var hash = new Dictionary<string, string>();
             foreach (var property in properties)
             {
-                var type = property.PropertyType;
+                var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
                 if (type.IsPrimitive || type == typeof(decimal) || type == typeof(string) || type == typeof(GeoLoc) || type == typeof(Ulid) || type == typeof(Guid))
@@ -286,7 +325,7 @@ namespace Redis.OM
             var ret = "{";
             foreach (var property in properties)
             {
-                var type = property.PropertyType;
+                var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
                 if (!hash.Any(x => x.Key.StartsWith(propertyName)))

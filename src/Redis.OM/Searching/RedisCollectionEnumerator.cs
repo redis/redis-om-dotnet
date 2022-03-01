@@ -182,7 +182,7 @@ namespace Redis.OM.Searching
                     continue;
                 }
 
-                _stateManager.Data.Add(record.Key, record.Value);
+                _stateManager.InsertIntoData(record.Key, record.Value);
                 _stateManager.InsertIntoSnapshot(record.Key, record.Value);
             }
         }
