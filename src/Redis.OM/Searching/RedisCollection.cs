@@ -84,6 +84,43 @@ namespace Redis.OM.Searching
             return res.Documents.Values.Any();
         }
 
+        /// <inheritdoc />
+        public async Task Update(T item)
+        {
+            var key = item.GetKey();
+            IList<IObjectDiff>? diff;
+            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+            if (diffConstructed)
+            {
+                if (diff!.Any())
+                {
+                    var args = new List<string>();
+                    var scriptName = diff!.First().Script;
+                    foreach (var update in diff!)
+                    {
+                        args.AddRange(update.SerializeScriptArgs());
+                    }
+
+                    await _connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray());
+                }
+            }
+            else
+            {
+                await _connection.UnlinkAndSet(key, item, StateManager.DocumentAttribute.StorageType);
+            }
+
+            StateManager.InsertIntoSnapshot(key, item);
+            StateManager.InsertIntoData(key, item);
+        }
+
+        /// <inheritdoc />
+        public async Task Delete(T item)
+        {
+            var key = item.GetKey();
+            await _connection.UnlinkAsync(key);
+            StateManager.Remove(key);
+        }
+
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {
@@ -120,7 +157,6 @@ namespace Redis.OM.Searching
         public async ValueTask SaveAsync()
         {
             var diff = StateManager.DetectDifferences();
-            Console.WriteLine(diff);
             var tasks = new List<Task<int?>>();
             foreach (var item in diff)
             {

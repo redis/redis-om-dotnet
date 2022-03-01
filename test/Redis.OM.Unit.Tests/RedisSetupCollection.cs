@@ -1,5 +1,6 @@
 ﻿using Redis.OM.Contracts;
 using System;
+using Redis.OM.Unit.Tests.RediSearchTests;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests
@@ -15,7 +16,8 @@ namespace Redis.OM.Unit.Tests
         {
             var personIndexExists = false;
             var hashPersonIndexExists = false;
-
+            var emptyIndexExists = false;
+            
             try
             {
                 Connection.Execute("FT.INFO", "person-idx");
@@ -36,10 +38,23 @@ namespace Redis.OM.Unit.Tests
                 // ignored
             }
 
+            try
+            {
+                Connection.Execute("FT.INFO", "empty-index");
+                emptyIndexExists = true;
+            }
+            catch
+            {
+                //ignored
+            }
+
             if(!personIndexExists)
                 Connection.CreateIndex(typeof(RediSearchTests.Person));
             if (!hashPersonIndexExists)
                 Connection.CreateIndex(typeof(RediSearchTests.HashPerson));
+            if(!emptyIndexExists)
+                Connection.CreateIndex(typeof(ClassForEmptyRedisCollection));
+            
         }
 
         private IRedisConnection _connection = null;

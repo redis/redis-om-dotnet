@@ -8,6 +8,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     public partial class Person
     {
         [RedisIdField]
+        [Indexed]
         public string Id { get; set; }
 
         public Person Mother { get; set; }
