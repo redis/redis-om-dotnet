@@ -262,11 +262,70 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+
         public void TestCountWithEmptyCollection()
         {
             var collection = new RedisCollection<ClassForEmptyRedisCollection>(_connection);
             var count = collection.Count();
             Assert.Equal(0,count);
+        }
+      
+        [Fact]
+        public async Task TestUpdate()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person {Name = "Steve", Age = 32};
+            var key = await collection.InsertAsync(testP);
+            var queriedP = await collection.FindByIdAsync(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            await collection.Update(queriedP);
+
+            var secondQueriedP = await collection.FindByIdAsync(key);
+            
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        [Fact]
+        public async Task TestUpdateName()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person {Name = "Steve", Age = 32};
+            var key = await collection.InsertAsync(testP);
+            var id = testP.Id;
+            var queriedP = collection.First(x => x.Id == id);
+            Assert.NotNull(queriedP);
+            queriedP.Name = "Bob";
+            await collection.Update(queriedP);
+
+            var secondQueriedP = await collection.FindByIdAsync(key);
+            
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal("Bob", secondQueriedP.Name);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        [Fact]
+        public async Task TestUpdateHashPerson()
+        {
+            var collection = new RedisCollection<HashPerson>(_connection);
+            var testP = new HashPerson {Name = "Steve", Age = 32};
+            var key = await collection.InsertAsync(testP);
+            var queriedP = await collection.FindByIdAsync(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            await collection.Update(queriedP);
+
+            var secondQueriedP = await collection.FindByIdAsync(key);
+            
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
         }
     }
 }

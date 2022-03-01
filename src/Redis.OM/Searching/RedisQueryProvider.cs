@@ -221,9 +221,9 @@ namespace Redis.OM.Searching
             switch (methodCall.Method.Name)
             {
                 case "FirstOrDefault":
-                    return ExecuteQuery<TResult>(expression).Documents.Values.FirstOrDefault() ?? default(TResult);
+                    return FirstOrDefault<TResult>(expression);
                 case "First":
-                    return ExecuteQuery<TResult>(expression).Documents.Values.First();
+                    return First<TResult>(expression);
                 case "Sum":
                 case "Min":
                 case "Max":
@@ -236,6 +236,30 @@ namespace Redis.OM.Searching
             }
 
             throw new NotImplementedException();
+        }
+
+        private TResult? First<TResult>(Expression expression)
+            where TResult : notnull
+        {
+            var res = ExecuteQuery<TResult>(expression).Documents.First();
+            StateManager.InsertIntoData(res.Key, res.Value);
+            StateManager.InsertIntoSnapshot(res.Key, res.Value);
+            return res.Value;
+        }
+
+        private TResult? FirstOrDefault<TResult>(Expression expression)
+            where TResult : notnull
+        {
+            var res = ExecuteQuery<TResult>(expression);
+            if (res.Documents.Any())
+            {
+                var kvp = res.Documents.FirstOrDefault();
+                StateManager.InsertIntoSnapshot(kvp.Key, kvp.Value);
+                StateManager.InsertIntoData(kvp.Key, kvp.Value);
+                return kvp.Value;
+            }
+
+            return default;
         }
     }
 }
