@@ -262,6 +262,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+
+        public void TestCountWithEmptyCollection()
+        {
+            var collection = new RedisCollection<ClassForEmptyRedisCollection>(_connection);
+            var count = collection.Count();
+            Assert.Equal(0,count);
+        }
+      
+        [Fact]
         public async Task TestUpdate()
         {
             var collection = new RedisCollection<Person>(_connection);

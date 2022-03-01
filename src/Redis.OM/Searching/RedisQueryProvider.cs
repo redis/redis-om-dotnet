@@ -164,9 +164,20 @@ namespace Redis.OM.Searching
         public RedisReply ExecuteReductiveAggregation(MethodCallExpression expression, Type underpinningType)
         {
             var aggregation = ExpressionTranslator.BuildAggregationFromExpression(expression, underpinningType);
-            var res = AggregationResult.FromRedisResult(Connection.Execute("FT.AGGREGATE", aggregation.Serialize()));
+            var reply = Connection.Execute("FT.AGGREGATE", aggregation.Serialize());
+            var res = AggregationResult.FromRedisResult(reply);
             var reductionName = ((Reduction)aggregation.Predicates.Last()).ResultName;
-            return res.First()[reductionName];
+            if (res.Any())
+            {
+                return res.First()[reductionName];
+            }
+
+            if (reductionName == "COUNT")
+            {
+                return reply.ToArray().First();
+            }
+
+            throw new Exception("Invalid value returned by server");
         }
 
         /// <summary>
