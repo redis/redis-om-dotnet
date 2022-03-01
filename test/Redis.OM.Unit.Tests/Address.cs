@@ -17,7 +17,7 @@ namespace Redis.OM.Unit.Tests
         [Indexed] public string City { get; set; }
         [Indexed] public string State { get; set; }
         [Indexed(CascadeDepth = 1)] public Address ForwardingAddress { get; set; }
-        [Indexed] public GeoLoc Location { get; set; }
-        [Indexed] public int HouseNumber { get; set; }
+        [Indexed] public GeoLoc? Location { get; set; }
+        [Indexed] public int? HouseNumber { get; set; }
     }
 }
