@@ -40,9 +40,9 @@
   - [🖩 Aggregations](#-aggregations)
 - [📚 Documentation](#-documentation)
 - [⛏️ Troubleshooting](#-troubleshooting)
-- [✨ RediSearch and RedisJSON](#-redisearch-and-redisjson)
+- [✨ Redis Stack](#-redis-stack)
   - [Why this is important](#why-this-is-important)
-  - [So how do you get RediSearch and RedisJSON?](#so-how-do-you-get-redisearch-and-redisjson)
+  - [So how do you get Redis Stack?](#so-how-do-you-get-redis-stack)
 - [❤️ Contributing](#-contributing)
 - [❤️ Our Contributors](#-our-contributors)
 
@@ -76,8 +76,10 @@ dotnet add package Redis.OM
 Before writing any code you'll need a Redis instance with the appropriate Redis modules! The quickest way to get this is with Docker:
 
 ```sh
-docker run -p 6379:6379 redislabs/redismod:preview
+docker run -p 6379:6379 -p 8001:8001 redis/redis-stack
 ```
+
+This launches the [redis-stack](https://redis.io/docs/stack/) an extension of Redis that adds all manner of modern data structures to Redis. You'll also notice that if you open up http://localhost:8001 you'll have access to the redis-insight GUI, a GUI you can use to visualize and work with your data in Redis.
 
 ### 📇 Modeling your domain (and indexing it!)
 
@@ -295,28 +297,26 @@ If you run into trouble or have any questions, we're here to help!
 First, check the [FAQ](docs/faq.md). If you don't find the answer there,
 hit us up on the [Redis Discord Server](http://discord.gg/redis).
 
-## ✨ RedisJSON
+## ✨ Redis Stack
 
-Redis OM can be used with regular Redis for Object mapping and getting objects by their IDs. For more advanced features like indexing, querying, and aggregation, Redis OM is dependeant on the [Source Available](https://redis.com/wp-content/uploads/2019/09/redis-source-available-license.pdf) [**RedisJSON**](https://oss.redis.com/redisjson/) module.
+Redis OM can be used with regular Redis for Object mapping and getting objects by their IDs. For more advanced features like indexing, querying, and aggregation, Redis OM is dependent on the [**Redis Stack**](https://redis.io/docs/stack/) platform, a collection of modules that extend Redis.
 
 ### Why this is important
 
-Without RedisJSON, you can still use Redis OM to create declarative models backed by Redis.
+Without Redis Stack, you can still use Redis OM to create declarative models backed by Redis.
 
 We'll store your model data in Redis as Hashes, and you can retrieve models using their primary keys.
 
-So, what won't work without these modules?
+So, what won't work without Redis Stack?
 
 1. You won't be able to nest models inside each other.
 2. You won't be able to use our expressive queries to find object -- you'll only be able to query by primary key.
 
-### So how do you get RedisJSON?
+### So how do you get Redis Stack?
 
-You can use RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary version of the module in its [Quick Start Guides](https://oss.redis.com/redisjson/#download-and-running-binaries).
+You can use Redis Stack with your self-hosted Redis deployment. Just follow the instructions for [Installing Redis Stack](https://redis.io/docs/stack/get-started/install/).
 
-> NOTE: The quick start guide has instructions on how to run the module in Redis with Docker.
-
-Don't want to run Redis yourself? RedisJSON is also available on Redis Cloud. [Get started here](https://redis.com/try-free/).
+Don't want to run Redis yourself? Redis Stack is also available on Redis Cloud. [Get started here](https://redis.com/try-free/).
 
 ## ❤️ Contributing
 
