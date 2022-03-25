@@ -20,11 +20,10 @@ namespace Redis.OM.Modeling
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };
 
-        private readonly DocumentAttribute _documentAttribute;
-
         static RedisCollectionStateManager()
         {
             JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
+            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
         }
 
         /// <summary>
@@ -33,8 +32,13 @@ namespace Redis.OM.Modeling
         /// <param name="attr">The document attribute for the type.</param>
         public RedisCollectionStateManager(DocumentAttribute attr)
         {
-            _documentAttribute = attr;
+            DocumentAttribute = attr;
         }
+
+        /// <summary>
+        /// Gets the DocumentAttribute for the underlying type.
+        /// </summary>
+        public DocumentAttribute DocumentAttribute { get; }
 
         /// <summary>
         /// Gets a snapshot from when the collection enumerated.
@@ -47,18 +51,36 @@ namespace Redis.OM.Modeling
         internal IDictionary<string, object?> Data { get; set; } = new Dictionary<string, object?>();
 
         /// <summary>
+        /// Removes the key from the data and snapshot.
+        /// </summary>
+        /// <param name="key">The key to remove.</param>
+        internal void Remove(string key)
+        {
+            Snapshot.Remove(key);
+            Data.Remove(key);
+        }
+
+        /// <summary>
+        /// Add item to data.
+        /// </summary>
+        /// <param name="key">the item's key.</param>
+        /// <param name="value">the item's value.</param>
+        internal void InsertIntoData(string key, object value)
+        {
+            Data.Remove(key);
+            Data.Add(key, value);
+        }
+
+        /// <summary>
         /// Add item to snapshot.
         /// </summary>
         /// <param name="key">the item's key.</param>
         /// <param name="value">the current value of the item.</param>
         internal void InsertIntoSnapshot(string key, object value)
         {
-            if (Snapshot.ContainsKey(key))
-            {
-                return;
-            }
+            Snapshot.Remove(key);
 
-            if (_documentAttribute.StorageType == StorageType.Json)
+            if (DocumentAttribute.StorageType == StorageType.Json)
             {
                 var json = JToken.FromObject(value, Newtonsoft.Json.JsonSerializer.Create(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
                 Snapshot.Add(key, json);
@@ -71,13 +93,52 @@ namespace Redis.OM.Modeling
         }
 
         /// <summary>
+        /// Builds a diff for a single object from what's currently in the snapshot.
+        /// </summary>
+        /// <param name="key">the key of the object in redis.</param>
+        /// <param name="value">The current value.</param>
+        /// <param name="differences">The detected differences.</param>
+        /// <returns>Whether a diff could be constructed.</returns>
+        internal bool TryDetectDifferencesSingle(string key, object value, out IList<IObjectDiff>? differences)
+        {
+            if (!Snapshot.ContainsKey(key))
+            {
+                differences = null;
+                return false;
+            }
+
+            if (DocumentAttribute.StorageType == StorageType.Json)
+            {
+                var dataJson = JsonSerializer.Serialize(value, JsonSerializerOptions);
+                var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                var snapshot = (JToken)Snapshot[key];
+                var diff = FindDiff(current!, snapshot);
+                differences = BuildJsonDifference(diff, "$");
+            }
+            else
+            {
+                var dataHash = value.BuildHashSet();
+                var snapshotHash = (IDictionary<string, string>)Snapshot[key];
+                var deletedKeys = snapshotHash.Keys.Except(dataHash.Keys).Select(x => new KeyValuePair<string, string>(x, string.Empty));
+                var modifiedKeys = dataHash.Where(x =>
+                    !snapshotHash.Keys.Contains(x.Key) || snapshotHash[x.Key] != x.Value);
+                differences = new List<IObjectDiff>
+                {
+                    new HashDiff(modifiedKeys, deletedKeys.Select(x => x.Key)),
+                };
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Detects the differences.
         /// </summary>
         /// <returns>a difference dictionary.</returns>
         internal IDictionary<string, IList<IObjectDiff>> DetectDifferences()
         {
             var res = new Dictionary<string, IList<IObjectDiff>>();
-            if (_documentAttribute.StorageType == StorageType.Json)
+            if (DocumentAttribute.StorageType == StorageType.Json)
             {
                 foreach (var key in Snapshot.Keys)
                 {
@@ -266,8 +327,12 @@ namespace Redis.OM.Modeling
 
                     break;
                 default:
-                    diff["+"] = currentObject;
-                    diff["-"] = snapshotObject;
+                    if (currentObject.ToString() != snapshotObject.ToString())
+                    {
+                        diff["+"] = currentObject;
+                        diff["-"] = snapshotObject;
+                    }
+
                     break;
             }
 

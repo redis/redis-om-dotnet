@@ -104,7 +104,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var ages = collection.Select(x => x.Age).ToList();
             foreach (var age in ages)
             {
-                Assert.True(age >= 0);
+                Assert.True(age >= 0 || age == null);               
             }
         }
 
@@ -204,21 +204,29 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestSaveArray()
         {
-            var maryNicknames = new List<string> {"Mary", "Mae", "Mimi", "Mitzi"};
-            var maria = new Person {Name = "Maria", NickNames = maryNicknames};
-            _connection.Set(maria);
-            maryNicknames.RemoveAt(1);
-            maryNicknames.RemoveAt(1);
-            var collection = new RedisCollection<Person>(_connection);
-            foreach (var mary in collection.Where(x => x.Name == "Maria"))
+            try
             {
-                mary.NickNames = maryNicknames;
+                var maryNicknames = new List<string> { "Mary", "Mae", "Mimi", "Mitzi" };
+                var maria = new Person { Name = "Maria", NickNames = maryNicknames.ToArray() };
+                _connection.Set(maria);
+                maryNicknames.RemoveAt(1);
+                maryNicknames.RemoveAt(1);
+                var collection = new RedisCollection<Person>(_connection);
+                foreach (var mary in collection.Where(x => x.Name == "Maria"))
+                {
+                    mary.NickNames = maryNicknames.ToArray();
+                }
+                collection.Save();
+                foreach (var mary in collection.Where(x => x.Name == "Maria"))
+                {
+                    Assert.Equal(maryNicknames.ToArray(), mary.NickNames);
+                }
             }
-            collection.Save();
-            foreach (var mary in collection.Where(x => x.Name == "Maria"))
+            catch(Exception)
             {
-                Assert.Equal(maryNicknames.ToArray(), mary.NickNames);
+                throw;
             }
+            
             
         }
         
@@ -251,6 +259,110 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var reconstituded = _connection.Get<Person>(id);
             Assert.Equal("Steve", reconstituded.Name);
             Assert.Equal(new GeoLoc(1.0,1.0), reconstituded.Home);
+        }
+
+        [Fact]
+        public void TestNestedObjectQuery()
+        {
+            var testP = new Person{Name = "Steve", Home = new GeoLoc(1.0, 1.0), Address = new Address{ City = "Newark"}};
+            var id =_connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            Assert.True(collection.Where(x => x.Name == "Steve" && x.Address.City == "Newark").FirstOrDefault() != default);
+        }
+        
+        [Fact]
+        public void TestNestedObjectQuery2Levels()
+        {
+            var testP = new Person{Name = "Steve", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}};
+            var id = _connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            Assert.True(collection.Where(x => x.Name == "Steve" && x.Address.ForwardingAddress.City == "Newark").FirstOrDefault() != default);
+        }
+
+        [Fact]
+        public void TestArrayQuery()
+        {
+            var testP = new Person{Name = "Stephen", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}, NickNames = new []{"Steve"}};
+            var id = _connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            var steve = collection.FirstOrDefault(x => x.NickNames.Contains("Steve"));
+            Assert.Equal(id.Split(':')[1], steve.Id);
+        }
+        
+        [Fact]
+        public void TestListQuery()
+        {
+            var testP = new Person{Name = "Stephen", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}, NickNamesList = new List<string> {"Steve"}};
+            var id = _connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            var steve = collection.FirstOrDefault(x => x.NickNamesList.Contains("Steve"));
+            Assert.Equal(id.Split(':')[1], steve.Id);
+        }
+      
+        [Fact]
+        public void TestCountWithEmptyCollection()
+        {
+            var collection = new RedisCollection<ClassForEmptyRedisCollection>(_connection);
+            var count = collection.Count();
+            Assert.Equal(0,count);
+        }
+      
+        [Fact]
+        public async Task TestUpdate()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person {Name = "Steve", Age = 32};
+            var key = await collection.InsertAsync(testP);
+            var queriedP = await collection.FindByIdAsync(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            await collection.Update(queriedP);
+
+            var secondQueriedP = await collection.FindByIdAsync(key);
+            
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        [Fact]
+        public async Task TestUpdateName()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person {Name = "Steve", Age = 32};
+            var key = await collection.InsertAsync(testP);
+            var id = testP.Id;
+            var queriedP = collection.First(x => x.Id == id);
+            Assert.NotNull(queriedP);
+            queriedP.Name = "Bob";
+            await collection.Update(queriedP);
+
+            var secondQueriedP = await collection.FindByIdAsync(key);
+            
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal("Bob", secondQueriedP.Name);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        [Fact]
+        public async Task TestUpdateHashPerson()
+        {
+            var collection = new RedisCollection<HashPerson>(_connection);
+            var testP = new HashPerson {Name = "Steve", Age = 32};
+            var key = await collection.InsertAsync(testP);
+            var queriedP = await collection.FindByIdAsync(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            await collection.Update(queriedP);
+
+            var secondQueriedP = await collection.FindByIdAsync(key);
+            
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
         }
     }
 }

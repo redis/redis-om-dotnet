@@ -14,7 +14,7 @@ namespace Redis.OM
 local num_args = table.getn(ARGV)
 for i=1, num_args, 3 do
     if 'ARRREM' == ARGV[i] then
-        local index = redis.call('JSON.ARRINDEX', key, ARGV[i+1], ARGV[i+2])
+        local index = redis.call('JSON.ARRINDEX', key, ARGV[i+1], ARGV[i+2])[1]
         if index>=0 then
             redis.call('JSON.ARRPOP', key, ARGV[i+1], index)
         end
@@ -61,6 +61,31 @@ end
 return redis.call('UNLINK',KEYS[1])";
 
         /// <summary>
+        /// Unlinks and sets a key for a Hash model.
+        /// </summary>
+        internal const string UnlinkAndSetHash = @"
+redis.call('UNLINK',KEYS[1])
+local num_fields = ARGV[1]
+local end_index = num_fields * 2 + 1
+local args = {}
+for i = 2, end_index, 2 do
+    args[i-1] = ARGV[i]
+    args[i] = ARGV[i+1]
+end
+redis.call('HSET',KEYS[1],unpack(args))
+return 0
+";
+
+        /// <summary>
+        /// Unlinks a JSON object and sets the key again with a fresh new JSON object.
+        /// </summary>
+        internal const string UnlinkAndSendJson = @"
+redis.call('UNLINK', KEYS[1])
+redis.call('JSON.SET', KEYS[1], '.', ARGV[1])
+return 0
+";
+
+        /// <summary>
         /// The scripts.
         /// </summary>
         internal static readonly Dictionary<string, string> ScriptCollection = new ()
@@ -68,6 +93,8 @@ return redis.call('UNLINK',KEYS[1])";
             { nameof(JsonDiffResolution), JsonDiffResolution },
             { nameof(HashDiffResolution), HashDiffResolution },
             { nameof(Unlink), Unlink },
+            { nameof(UnlinkAndSetHash), UnlinkAndSetHash },
+            { nameof(UnlinkAndSendJson), UnlinkAndSendJson },
         };
 
         /// <summary>

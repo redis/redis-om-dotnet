@@ -8,11 +8,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     public partial class Person
     {
         [RedisIdField]
+        [Indexed]
         public string Id { get; set; }
 
         public Person Mother { get; set; }
 
-        [Searchable(Sortable = true)]        
+        [Searchable]        
         public string Name { get; set; }
 
         [Indexed(Aggregatable = true)]
@@ -21,6 +22,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Indexed(Aggregatable = true)]
         public GeoLoc? Work { get; set; }
 
+        [Indexed(CascadeDepth = 2)]
         public Address Address { get; set; }
 
         public bool? IsEngineer { get; set; }
@@ -32,9 +34,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public double? Height { get; set; }
 
         [ListType]
-        public List<string> NickNames { get; set; }
+        [Indexed]
+        public string[] NickNames { get; set; }
 
-        [Indexed(Sortable = true)]        
+        [Indexed]
+        public List<string> NickNamesList { get; set; }
+
+        [Indexed]        
         public string TagField { get; set; }
 
         [Indexed(Sortable = true)]
@@ -52,10 +58,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Searchable(Aggregatable = true)]        
         public string TimeString { get; set; }
         
-        [Indexed(Aggregatable = true)]
+        [Indexed]
         public string Email { get; set; }
         
         [Indexed(Aggregatable =false)]
         public  string UnaggrateableField { get; set; }
+
+        [Indexed]
+        public string? NullableStringField { get; set; }
     }
 }

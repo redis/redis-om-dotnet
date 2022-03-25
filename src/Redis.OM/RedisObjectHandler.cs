@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
@@ -18,9 +19,21 @@ namespace Redis.OM
     {
         private static readonly JsonSerializerOptions JsonSerializerOptions = new ();
 
+        private static readonly Dictionary<Type, object?> TypeDefaultCache = new ()
+        {
+            { typeof(string), null },
+            { typeof(Guid), default(Guid) },
+            { typeof(Ulid), default(Ulid) },
+            { typeof(int), default(int) },
+            { typeof(long), default(long) },
+            { typeof(uint), default(uint) },
+            { typeof(ulong), default(ulong) },
+        };
+
         static RedisObjectHandler()
         {
             JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
+            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
         }
 
         /// <summary>
@@ -84,7 +97,44 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Set's the id of the given field based off the objects id stratagey.
+        /// Gets the fully formed key name for the given object.
+        /// </summary>
+        /// <param name="obj">the object to pull the key from.</param>
+        /// <returns>The key.</returns>
+        /// <exception cref="ArgumentException">Thrown if type is invalid or there's no id present on the key.</exception>
+        internal static string GetKey(this object obj)
+        {
+            var type = obj.GetType();
+            var documentAttribute = (DocumentAttribute)type.GetCustomAttribute(typeof(DocumentAttribute));
+            if (documentAttribute == null)
+            {
+                throw new ArgumentException("Missing Document Attribute on Declaring class");
+            }
+
+            var id = obj.GetId();
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentException("Id field is not correctly populated");
+            }
+
+            var sb = new StringBuilder();
+            if (documentAttribute.Prefixes.Any())
+            {
+                sb.Append(documentAttribute.Prefixes.First());
+                sb.Append(":");
+            }
+            else
+            {
+                sb.Append(type.FullName);
+                sb.Append(":");
+            }
+
+            sb.Append(id);
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Set's the id of the given field based off the objects id strategy.
         /// </summary>
         /// <param name="obj">The object to set the field of.</param>
         /// <returns>The id.</returns>
@@ -103,17 +153,38 @@ namespace Redis.OM
             var id = attr.IdGenerationStrategy.GenerateId();
             if (idProperty != null)
             {
-                if (idProperty.PropertyType == typeof(string))
+                var idPropertyType = idProperty.PropertyType;
+                var supportedIdPropertyTypes = new[] { typeof(string), typeof(Guid), typeof(Ulid) };
+                if (!supportedIdPropertyTypes.Contains(idPropertyType) && !idPropertyType.IsValueType)
                 {
-                    idProperty.SetValue(obj, id);
+                    throw new InvalidOperationException("Software Defined Ids on objects must either be a string, ULID, Guid, or some other value type.");
                 }
-                else if (idProperty.PropertyType == typeof(Guid))
+
+                var currId = idProperty.GetValue(obj);
+
+                if (!TypeDefaultCache.ContainsKey(idPropertyType))
                 {
-                    idProperty.SetValue(obj, id);
+                    TypeDefaultCache.Add(idPropertyType, Activator.CreateInstance(idPropertyType));
+                }
+
+                if (currId?.ToString() != TypeDefaultCache[idPropertyType]?.ToString())
+                {
+                    id = idProperty.GetValue(obj).ToString();
                 }
                 else
                 {
-                    throw new InvalidOperationException("Software Defined Ids on objects must either be a string or Guid");
+                    if (idPropertyType == typeof(Guid))
+                    {
+                        idProperty.SetValue(obj, Guid.Parse(id));
+                    }
+                    else if (idPropertyType == typeof(Ulid))
+                    {
+                        idProperty.SetValue(obj, Ulid.Parse(id));
+                    }
+                    else
+                    {
+                        idProperty.SetValue(obj, id);
+                    }
                 }
             }
 
@@ -181,15 +252,32 @@ namespace Redis.OM
             var hash = new Dictionary<string, string>();
             foreach (var property in properties)
             {
-                var type = property.PropertyType;
+                var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
-                if (type.IsPrimitive || type == typeof(decimal) || type == typeof(string) || type == typeof(GeoLoc))
+                if (type.IsPrimitive || type == typeof(decimal) || type == typeof(string) || type == typeof(GeoLoc) || type == typeof(Ulid) || type == typeof(Guid))
                 {
                     var val = property.GetValue(obj);
                     if (val != null)
                     {
                         hash.Add(propertyName, val.ToString());
+                    }
+                }
+                else if (type == typeof(DateTimeOffset))
+                {
+                    var val = (DateTimeOffset)property.GetValue(obj);
+                    if (val != null)
+                    {
+                        hash.Add(propertyName, val.ToString("O"));
+                    }
+                }
+                else if (type == typeof(DateTime) || type == typeof(DateTime?))
+                {
+                    var val = (DateTime)property.GetValue(obj);
+                    if (val != default)
+                    {
+                        hash.Add(propertyName, new DateTimeOffset(val).ToUnixTimeMilliseconds().ToString());
                     }
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
@@ -237,7 +325,7 @@ namespace Redis.OM
             var ret = "{";
             foreach (var property in properties)
             {
-                var type = property.PropertyType;
+                var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
                 if (!hash.Any(x => x.Key.StartsWith(propertyName)))
@@ -253,7 +341,7 @@ namespace Redis.OM
                 {
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
-                else if (type == typeof(string))
+                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset))
                 {
                     ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
                 }

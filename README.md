@@ -14,6 +14,7 @@
 
 ---
 
+[![NuGet](http://img.shields.io/nuget/v/Redis.OM.svg?style=flat-square)](https://www.nuget.org/packages/Redis.OM/)
 [![License][license-image]][license-url]
 [![Build Status][ci-svg]][ci-url]
 
@@ -21,7 +22,7 @@
 
 **Redis OM .NET** makes it easy to model Redis data in your .NET Applications.
 
-**Redis OM .NET** | [Redis OM Node.js][redis-om-js] | [Redis OM Spring][redis-om-spring] | [Redis OM Python][redis-om-python]
+**Redis OM .NET** | [Redis OM Node.js](https://github.com/redis/redis-om-node) | [Redis OM Spring](https://github.com/redis/redis-om-spring) | [Redis OM Python](https://github.com/redis/redis-om-python)
 
 <details>
   <summary><strong>Table of contents</strong></summary>
@@ -34,6 +35,7 @@
 - [🏁 Getting started](#-getting-started)
   - [Starting Redis](#starting-redis)
   - [📇 Modeling your domain (and indexing it!)](#-modeling-your-domain-and-indexing-it)
+  - [🔑 Keys and Ids](#-keys-and-ids)
   - [🔎 Querying](#-querying)
   - [🖩 Aggregations](#-aggregations)
 - [📚 Documentation](#-documentation)
@@ -42,6 +44,7 @@
   - [Why this is important](#why-this-is-important)
   - [So how do you get RediSearch and RedisJSON?](#so-how-do-you-get-redisearch-and-redisjson)
 - [❤️ Contributing](#-contributing)
+- [❤️ Our Contributors](#-our-contributors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -86,8 +89,9 @@ public class Customer
 {
    [Indexed] public string FirstName { get; set; }
    [Indexed] public string LastName { get; set; }
-   [Indexed] public string Email { get; set; }
+   public string Email { get; set; }
    [Indexed(Sortable = true)] public int Age { get; set; }
+   [Indexed] public string[] NickNames {get; set;}
 }
 ```
 
@@ -98,8 +102,65 @@ Now we need to create the Redis index. So we'll connect to Redis and then call `
 
 ```csharp
 var provider = new RedisConnectionProvider("redis://localhost:6379");
-connection.CreateIndex(typeof(Customer));
+provider.Connection.CreateIndex(typeof(Customer));
 ```
+
+### Indexing Embedded Documents
+
+There are two methods for indexing embedded documents with Redis.OM, an embedded document is a complex object, e.g. if our `Customer` model had an `Address` property with the following model:
+
+```csharp
+[Document(IndexName = "address-idx", StorageType = StorageType.Json)]
+public partial class Address
+{
+    public string StreetName { get; set; }
+    public string ZipCode { get; set; }
+    [Indexed] public string City { get; set; }
+    [Indexed] public string State { get; set; }
+    [Indexed(CascadeDepth = 1)] public Address ForwardingAddress { get; set; }
+    [Indexed] public GeoLoc Location { get; set; }
+    [Indexed] public int HouseNumber { get; set; }
+}
+```
+
+#### Index By JSON Path
+
+You can index fields by JSON path, in the top level model, in this case `Customer` you can decorate the `Address` property with an `Indexed` and/or `Searchable` attribute, specifying the JSON path to the desired field:
+
+```csharp
+[Document(StorageType = StorageType.Json)]
+public class Customer
+{
+   [Indexed] public string FirstName { get; set; }
+   [Indexed] public string LastName { get; set; }
+   public string Email { get; set; }
+   [Indexed(Sortable = true)] public int Age { get; set; }
+   [Indexed] public string[] NickNames {get; set;}
+   [Indexed(JsonPath = "$.ZipCode")]
+   [Searchable(JsonPath = "$.StreetAddress")]
+   public Address Address {get; set;}
+}
+```
+
+#### Cascading Index
+
+Alternatively, you can also embedded models by cascading indexes. In this instance you'd simply decorate the property with `Indexed` and set the `CascadeDepth` to whatever to however may levels you want the model to cascade for. The default is 0, so if `CascadeDepth` is not set, indexing an object will be a no-op:
+
+```csharp
+[Document(StorageType = StorageType.Json)]
+public class Customer
+{
+   [Indexed] public string FirstName { get; set; }
+   [Indexed] public string LastName { get; set; }
+   public string Email { get; set; }
+   [Indexed(Sortable = true)] public int Age { get; set; }
+   [Indexed] public string[] NickNames {get; set;}
+   [Indexed(CascadeDepth = 2)]
+   public Address Address {get; set;}
+}
+```
+
+In the above case, all indexed/searchable fields in Address will be indexed down 2 levels, so the `ForwardingAddress` field in `Address` will also be indexed.
 
 Once the index is created, we can:
 
@@ -110,12 +171,89 @@ Once the index is created, we can:
 
 Let's see how!
 
+### 🔑 Keys and Ids
+
+#### ULIDs and strings
+
+Ids are unique per object, and are used as part of key generation for the primary index in Redis. The natively supported Id type in Redis OM is the [ULID][ulid-url]. You can bind ids to your model, by explicitly decorating your Id field with the `RedisIdField` attribute:
+
+```csharp
+[Document(StorageType = StorageType.Json)]
+public class Customer
+{
+    [RedisIdField] public Ulid Id { get; set; }
+    [Indexed] public string FirstName { get; set; }
+    [Indexed] public string LastName { get; set; }
+    public string Email { get; set; }
+    [Indexed(Sortable = true)] public int Age { get; set; }
+    [Indexed] public string[] NickNames { get; set; }
+}
+```
+
+When you call `Set` on the `RedisConnection` or call `Insert` in the `RedisCollection`, to insert your object into Redis, Redis OM will automatically set the id  for you and you will be able to access it in the object. If the `Id` type is a string, and there is no explicitly overriding IdGenerationStrategy on the object, the ULID for the object will bind to the string.
+
+#### Other types of ids
+
+Redis OM also supports other types of ids, ids must either be strings or value types (e.g. ints, longs, GUIDs etc. . .), if you want a non-ULID id type, you must either set the id on each object prior to insertion, or you must register an `IIdGenerationStrategy` with the `DocumentAttribute` class.
+
+##### Register IIdGenerationStrategy
+
+To Register an `IIdGenerationStrategy` with the `DocumentAttribute` class, simply call `DocumentAttribute.RegisterIdGenerationStrategy` passing in the strategy name, and the implementation of `IIdGenerationStrategy` you want to use. Let's say for example you had the `StaticIncrementStrategy`, which maintains a static counter in memory, and increments ids based off that counter:
+
+```csharp
+public class StaticIncrementStrategy : IIdGenerationStrategy
+{
+    public static int Current = 0;
+    public string GenerateId()
+    {
+        return (Current++).ToString();
+    }
+}
+```
+
+You would then register that strategy with Redis.OM like so:
+
+```csharp
+DocumentAttribute.RegisterIdGenerationStrategy(nameof(StaticIncrementStrategy), new StaticIncrementStrategy());
+```
+
+Then, when you want to use that strategy for generating the Ids of a document, you can simply set the IdGenerationStrategy of your document attribute to the name of the strategy.
+
+```csharp
+[Document(IdGenerationStrategyName = nameof(StaticIncrementStrategy))]
+public class ObjectWithCustomIdGenerationStrategy
+{
+    [RedisIdField] public string Id { get; set; }
+}
+```
+
+#### Key Names
+
+The key names are, by default, the fully qualified class name of the object, followed by a colon, followed by the `Id`. For example, there is a Person class in the Unit Test project, an example id of that person class would be `Redis.OM.Unit.Tests.RediSearchTests.Person:01FTHAF0D1EKSN0XG67HYG36GZ`, because `Redis.OM.Unit.Tests.RediSearchTests.Person` is the fully qualified class name, and `01FTHAF0D1EKSN0XG67HYG36GZ` is the ULID (the default id type). If you want to change the prefix (the fully qualified class name), you can change that in the `DocumentAttribute` by setting the `Prefixes` property, which is an array of strings e.g.
+
+```csharp
+[Document(Prefixes = new []{"Person"})]
+public class Person
+```
+
+> Note: At this time, Redis.OM will only use the first prefix in the prefix list as the prefix when creating a key name. However, when an index is created, it will be created on all prefixes enumerated in the Prefixes property
+
 ### 🔎 Querying
 
 We can query our domain using expressions in LINQ, like so:
 
 ```csharp
 var customers = provider.RedisCollection<Customer>();
+
+// Insert customer
+customers.Insert(new Customer()
+{
+    FirstName = "James",
+    LastName = "Bond",
+    Age = 68,
+    Email = "bondjamesbond@email.com"
+});
+
 // Find all customers whose last name is "Bond"
 customers.Where(x => x.LastName == "Bond");
 
@@ -124,6 +262,9 @@ customers.Where(x => x.LastName == "Bond" || x.Age > 65);
 
 // Find all customers whose last name is Bond AND whose first name is James
 customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
+
+// Find all customers with the nickname of Jim
+customer.Where(x=>x.NickNames.Contains("Jim"));
 ```
 
 ### 🖩 Aggregations
@@ -145,7 +286,7 @@ customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -
 
 ## 📚 Documentation
 
-This README just scratches the surface. You can find complete documentation in the [Redis OM .NET docs site](https://redis-developer.github.io/redis-om-dotnet).
+This README just scratches the surface. You can find a full tutorial on the [Redis Developer Site](https://developer.redis.com/develop/dotnet/redis-om-dotnet/connecting-to-redis). All the summary docs for this library can be found on the repo's [github page](https://redis.github.io/redis-om-dotnet/).
 
 ## ⛏️ Troubleshooting
 
@@ -171,7 +312,7 @@ So, what won't work without these modules?
 
 ### So how do you get RedisJSON?
 
-You can use RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary version of the module in its [Quick Start Guides](https://oss.redis.com/redisjson/#download-and-running-binaries)
+You can use RedisJSON with your self-hosted Redis deployment. Just follow the instructions on installing the binary version of the module in its [Quick Start Guides](https://oss.redis.com/redisjson/#download-and-running-binaries).
 
 > NOTE: The quick start guide has instructions on how to run the module in Redis with Docker.
 
@@ -179,11 +320,19 @@ Don't want to run Redis yourself? RedisJSON is also available on Redis Cloud. [G
 
 ## ❤️ Contributing
 
-We'd love your contributions!
+We'd love your contributions! If you want to contribute please read our [Contributing](CONTRIBUTING.md) document.
 
-**Bug reports** are especially helpful at this stage of the project. [You can open a bug report on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new).
+## ❤️ Our Contributors
 
-You can also **contribute documentation** -- or just let us know if something needs more detail. [Open an issue on GitHub](https://github.com/redis-developer/redis-developer-dotnet/issues/new) to get started.
+* @slorello89
+* @banker
+* @simonprickett
+* @BenShapira
+* @satish860
+* @dracco1993
+* @ecortese
+* @DanJRWalsh
+* @baldutech
 
 <!-- Logo -->
 [Logo]: images/logo.svg
@@ -192,7 +341,7 @@ You can also **contribute documentation** -- or just let us know if something ne
 
 [ci-svg]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml/badge.svg
 [ci-url]: https://github.com/redis-developer/redis-developer-dotnet/actions/workflows/dotnet-core.yml
-[license-image]: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
+[license-image]: https://img.shields.io/badge/License-MIT-red.svg
 [license-url]: LICENSE
 
 <!-- Links -->

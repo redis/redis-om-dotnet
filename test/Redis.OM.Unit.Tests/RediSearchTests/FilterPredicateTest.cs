@@ -45,6 +45,67 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestBasicFilterString()
+        {
+            var expectedPredicate = "@Name == 'steve'";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",It.IsAny<string[]>()
+                    ))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            var res = collection.Filter(x=>x.RecordShell.Name == "steve").ToArray();
+
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "FILTER",
+                expectedPredicate));
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+        
+        [Fact]
+        public void TestBasicFilterStringUnpackedFromVariable()
+        {
+            var expectedPredicate = "@Name == 'steve'";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",It.IsAny<string[]>()
+                ))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            var steve = "steve";
+            var res = collection.Filter(x=>x.RecordShell.Name == steve).ToArray();
+
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "FILTER",
+                expectedPredicate));
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+
+        [Fact]
+        public void TestBasicFilterNullableString()
+        {
+            var expectedPredicate = "@NullableStringField == 'steve'";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",It.IsAny<string[]>()
+                ))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            
+            var res = collection.Filter(x=>x.RecordShell.NullableStringField == "steve").ToArray();
+
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "FILTER",
+                expectedPredicate));
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+
+        [Fact]
         public void TestFilterSingleIdentifier()
         {
             var expectedPredicate = "@Age < 6";

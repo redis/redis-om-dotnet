@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis.OM.Test.ConsoleApp", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redis.OM.Analyzer", "src\Redis.OM.Analyzer\Redis.OM.Analyzer.csproj", "{44FAD9BB-C6DF-402C-BCE7-64E7C674F8D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redis.OM.AspDotnetCore", "src\Redis.OM.AspDotnetCore\Redis.OM.AspDotnetCore.csproj", "{230ED77D-D625-43BC-94D6-6BDBACEA3EAF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redis.OM.AspNetCore", "src\Redis.OM.AspNetCore\Redis.OM.AspNetCore.csproj", "{230ED77D-D625-43BC-94D6-6BDBACEA3EAF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redis.OM.Test.AspDotnetCore", "test\Redis.OM.Test.AspDotnetCore\Redis.OM.Test.AspDotnetCore.csproj", "{3F609AB2-1492-4EBE-9FF2-B47829307E9E}"
 EndProject

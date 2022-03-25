@@ -17,17 +17,21 @@ namespace Redis.OM.Searching
     /// </summary>
     internal class RedisQueryProvider : IQueryProvider
     {
+        private readonly int _chunkSize;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisQueryProvider"/> class.
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="stateManager">The state manager.</param>
         /// <param name="documentAttribute">the document attribute for the indexed type.</param>
-        internal RedisQueryProvider(IRedisConnection connection, RedisCollectionStateManager stateManager, DocumentAttribute documentAttribute)
+        /// <param name="chunkSize">The size of chunks to use in pagination.</param>
+        internal RedisQueryProvider(IRedisConnection connection, RedisCollectionStateManager stateManager, DocumentAttribute documentAttribute, int chunkSize)
         {
             Connection = connection;
             StateManager = stateManager;
             DocumentAttribute = documentAttribute;
+            _chunkSize = chunkSize;
         }
 
         /// <summary>
@@ -35,11 +39,13 @@ namespace Redis.OM.Searching
         /// </summary>
         /// <param name="connection">the connection.</param>
         /// <param name="documentAttribute">The document attribute for the indexed type.</param>
-        internal RedisQueryProvider(IRedisConnection connection, DocumentAttribute documentAttribute)
+        /// <param name="chunkSize">The size of chunks to use in pagination.</param>
+        internal RedisQueryProvider(IRedisConnection connection, DocumentAttribute documentAttribute, int chunkSize)
         {
             Connection = connection;
             DocumentAttribute = documentAttribute;
             StateManager = new RedisCollectionStateManager(DocumentAttribute);
+            _chunkSize = chunkSize;
         }
 
         /// <summary>
@@ -111,7 +117,7 @@ namespace Redis.OM.Searching
                 attr = type.GetCustomAttribute<DocumentAttribute>();
             }
 
-            if (attr == null || string.IsNullOrEmpty(attr.IndexName))
+            if (attr == null)
             {
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
@@ -158,9 +164,20 @@ namespace Redis.OM.Searching
         public RedisReply ExecuteReductiveAggregation(MethodCallExpression expression, Type underpinningType)
         {
             var aggregation = ExpressionTranslator.BuildAggregationFromExpression(expression, underpinningType);
-            var res = AggregationResult.FromRedisResult(Connection.Execute("FT.AGGREGATE", aggregation.Serialize()));
+            var reply = Connection.Execute("FT.AGGREGATE", aggregation.Serialize());
+            var res = AggregationResult.FromRedisResult(reply);
             var reductionName = ((Reduction)aggregation.Predicates.Last()).ResultName;
-            return res.First()[reductionName];
+            if (res.Any())
+            {
+                return res.First()[reductionName];
+            }
+
+            if (reductionName == "COUNT")
+            {
+                return reply.ToArray().First();
+            }
+
+            throw new Exception("Invalid value returned by server");
         }
 
         /// <summary>
@@ -204,9 +221,9 @@ namespace Redis.OM.Searching
             switch (methodCall.Method.Name)
             {
                 case "FirstOrDefault":
-                    return ExecuteQuery<TResult>(expression).Documents.Values.FirstOrDefault() ?? default(TResult);
+                    return FirstOrDefault<TResult>(expression);
                 case "First":
-                    return ExecuteQuery<TResult>(expression).Documents.Values.First();
+                    return First<TResult>(expression);
                 case "Sum":
                 case "Min":
                 case "Max":
@@ -219,6 +236,30 @@ namespace Redis.OM.Searching
             }
 
             throw new NotImplementedException();
+        }
+
+        private TResult? First<TResult>(Expression expression)
+            where TResult : notnull
+        {
+            var res = ExecuteQuery<TResult>(expression).Documents.First();
+            StateManager.InsertIntoData(res.Key, res.Value);
+            StateManager.InsertIntoSnapshot(res.Key, res.Value);
+            return res.Value;
+        }
+
+        private TResult? FirstOrDefault<TResult>(Expression expression)
+            where TResult : notnull
+        {
+            var res = ExecuteQuery<TResult>(expression);
+            if (res.Documents.Any())
+            {
+                var kvp = res.Documents.FirstOrDefault();
+                StateManager.InsertIntoSnapshot(kvp.Key, kvp.Value);
+                StateManager.InsertIntoData(kvp.Key, kvp.Value);
+                return kvp.Value;
+            }
+
+            return default;
         }
     }
 }

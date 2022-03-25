@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,14 +6,18 @@
     <RootNamespace>Redis.OM</RootNamespace>
     <Nullable>enable</Nullable>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <PackageVersion>0.0.2</PackageVersion>
+    <PackageVersion>0.1.8</PackageVersion>
+    <Version>0.1.8</Version>
+    <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.1.8</PackageReleaseNotes>
+    <Description>Object Mapping and More for Redis</Description>
     <Title>Redis OM</Title>
     <Authors>Steve Lorello</Authors>
     <Copyright>Redis Inc</Copyright>
-    <PackageProjectUrl>https://github.com/redis-developer/redis-om-dotnet</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/redis/redis-om-dotnet</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon-square.png</PackageIcon>
-    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/redis-developer/redis-om-dotnet</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/redis/redis-om-dotnet</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>redis redisearch indexing databases</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -28,7 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../../images/icon-square.png" Pack="true" PackagePath="\"/>
+    <None Include="../../images/icon-square.png" Pack="true" PackagePath="\" />
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">

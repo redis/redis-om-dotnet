@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -25,7 +26,8 @@ namespace Redis.OM.Modeling
                 var split = str.Split(',');
                 if (split.Length == 2)
                 {
-                    if (double.TryParse(split[0], out var lon) && double.TryParse(split[1], out var lat))
+                    if (double.TryParse(split[0], NumberStyles.Number, CultureInfo.InvariantCulture, out var lon) &&
+                        double.TryParse(split[1], NumberStyles.Number, CultureInfo.InvariantCulture, out var lat))
                     {
                         return new GeoLoc(lon, lat);
                     }

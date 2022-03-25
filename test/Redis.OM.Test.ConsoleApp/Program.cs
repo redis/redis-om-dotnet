@@ -30,10 +30,18 @@ namespace Redis.OM.Test.ConsoleApp
             
             // Create index
             connection.CreateIndex(typeof(Customer));
+
+            // Insert Object
+            customers.Insert(new Customer{
+                FirstName = "James",
+                LastName = "Bond",
+                Email = "bondjamesbond@email.com",
+                Age = 68
+            });
             
             // query
             // Find all customers who's last name is "Bond"
-            customers.Where(x => x.LastName == "Bond");
+            var res = customers.Where(x => x.LastName == "Bond").ToList();
             
             // Find all customers who's last name is Bond OR who's age is greater than 65
             customers.Where(x => x.LastName == "Bond" || x.Age > 65);
@@ -48,7 +56,7 @@ namespace Redis.OM.Test.ConsoleApp
             customerAggregations.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
                 "FullName");
             
-            // Get Customer Distance from Mall of America.
+            // Get Customer Distance from Mall of America. 
             customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -93.241786, 44.853816),
                 "DistanceToMall");
         }

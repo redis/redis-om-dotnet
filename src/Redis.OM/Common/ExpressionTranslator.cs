@@ -189,7 +189,7 @@ namespace Redis.OM.Common
             }
 
             var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}-idx" : attr.IndexName;
-            var query = new RedisQuery { Index = indexName!, QueryText = "*" };
+            var query = new RedisQuery(indexName!) { QueryText = "*" };
             switch (expression)
             {
                 case MethodCallExpression methodExpression:
@@ -260,7 +260,7 @@ namespace Redis.OM.Common
         /// <returns>The index field type.</returns>
         internal static SearchFieldType DetermineIndexFieldsType(MemberInfo member)
         {
-            if (TypeDeterminationUtilities.IsNumeric(member.DeclaringType!))
+            if (member is PropertyInfo info && TypeDeterminationUtilities.IsNumeric(info.PropertyType))
             {
                 return SearchFieldType.NUMERIC;
             }
@@ -373,6 +373,11 @@ namespace Redis.OM.Common
             return predicates.Count == 0 || (predicates.Peek() is not GroupBy && predicates.Peek() is not SingleArgumentReduction);
         }
 
+        private static bool CheckMoveGroupBy(Stack<IAggregationPredicate> predicates)
+        {
+            return predicates.Count > 0 && predicates.Peek() is GroupBy;
+        }
+
         private static IAggregationPredicate TranslateApplyPredicate(MethodCallExpression exp)
         {
             var alias = ((ConstantExpression)exp.Arguments[2]).Value.ToString();
@@ -387,49 +392,49 @@ namespace Redis.OM.Common
             return sb;
         }
 
+        private static void PushReduction(Reduction reduction, Stack<IAggregationPredicate> operationStack)
+        {
+            var pushGroupBy = CheckForGroupby(operationStack);
+            var moveGroupBy = CheckMoveGroupBy(operationStack);
+            if (moveGroupBy)
+            {
+                var gb = operationStack.Pop();
+                operationStack.Push(reduction);
+                operationStack.Push(gb);
+            }
+            else
+            {
+                operationStack.Push(reduction);
+                if (pushGroupBy)
+                {
+                    operationStack.Push(new GroupBy(Array.Empty<string>()));
+                }
+            }
+        }
+
         private static void TranslateAndPushZeroArgumentPredicate(ReduceFunction function, Stack<IAggregationPredicate> stack)
         {
             var reduction = new ZeroArgumentReduction(function);
-            var pushGroupBy = CheckForGroupby(stack);
-            stack.Push(reduction);
-            if (pushGroupBy)
-            {
-                stack.Push(new GroupBy(Array.Empty<string>()));
-            }
+            PushReduction(reduction, stack);
         }
 
         private static void TranslateAndPushReductionPredicate(MethodCallExpression expression, ReduceFunction function, Stack<IAggregationPredicate> stack)
         {
             var member = GetFieldName(expression.Arguments[1]);
             var reduction = new SingleArgumentReduction(function, member);
-            var pushGroupBy = CheckForGroupby(stack);
-            stack.Push(reduction);
-            if (pushGroupBy)
-            {
-                stack.Push(new GroupBy(Array.Empty<string>()));
-            }
+            PushReduction(reduction, stack);
         }
 
         private static void TranslateAndPushFirstValuePredicate(MethodCallExpression expression, Stack<IAggregationPredicate> stack)
         {
             var reduction = new FirstValueReduction(expression);
-            var pushGroupBy = CheckForGroupby(stack);
-            stack.Push(reduction);
-            if (pushGroupBy)
-            {
-                stack.Push(new GroupBy(Array.Empty<string>()));
-            }
+            PushReduction(reduction, stack);
         }
 
         private static void TranslateAndPushTwoArgumentReductionPredicate(MethodCallExpression expression, ReduceFunction function, Stack<IAggregationPredicate> stack)
         {
             var reduction = new TwoArgumentReduction(function, expression);
-            var pushGroupBy = CheckForGroupby(stack);
-            stack.Push(reduction);
-            if (pushGroupBy)
-            {
-                stack.Push(new GroupBy(Array.Empty<string>()));
-            }
+            PushReduction(reduction, stack);
         }
 
         private static int TranslateTake(MethodCallExpression exp) => (int)((ConstantExpression)exp.Arguments[1]).Value;
@@ -525,7 +530,7 @@ namespace Redis.OM.Common
 
                 if (binExpression.Left is MemberExpression member)
                 {
-                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member.Member);
+                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
                     sb.Append("(");
                     sb.Append(predicate);
                     sb.Append(")");
@@ -553,7 +558,7 @@ namespace Redis.OM.Common
             return BuildQueryFromExpression(lambda.Body);
         }
 
-        private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberInfo member)
+        private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberExpression memberExpression)
         {
             var queryPredicate = expType switch
             {
@@ -561,17 +566,17 @@ namespace Redis.OM.Common
                 ExpressionType.LessThan => $"{left}:[-inf ({right}]",
                 ExpressionType.GreaterThanOrEqual => $"{left}:[{right} inf]",
                 ExpressionType.LessThanOrEqual => $"{left}:[-inf {right}]",
-                ExpressionType.Equal => BuildEqualityPredicate(member, right),
-                ExpressionType.NotEqual => BuildEqualityPredicate(member, right, true),
+                ExpressionType.Equal => BuildEqualityPredicate(memberExpression, right),
+                ExpressionType.NotEqual => BuildEqualityPredicate(memberExpression, right, true),
                 _ => string.Empty
             };
             return queryPredicate;
         }
 
-        private static string BuildEqualityPredicate(MemberInfo member, string right, bool negated = false)
+        private static string BuildEqualityPredicate(MemberExpression member, string right, bool negated = false)
         {
             var sb = new StringBuilder();
-            var fieldAttribute = member.GetCustomAttribute<SearchFieldAttribute>();
+            var fieldAttribute = ExpressionParserUtilities.DetermineSearchAttribute(member);
             if (fieldAttribute == null)
             {
                 throw new InvalidOperationException("Searches can only be performed on fields marked with a " +
@@ -583,10 +588,10 @@ namespace Redis.OM.Common
                 sb.Append("-");
             }
 
-            sb.Append($"@{member.Name}:");
+            sb.Append($"@{ExpressionParserUtilities.GetSearchFieldNameFromMember(member)}:");
             var searchFieldType = fieldAttribute.SearchFieldType != SearchFieldType.INDEXED
                 ? fieldAttribute.SearchFieldType
-                : DetermineIndexFieldsType(member);
+                : DetermineIndexFieldsType(member.Member);
             switch (searchFieldType)
             {
                 case SearchFieldType.TAG:
