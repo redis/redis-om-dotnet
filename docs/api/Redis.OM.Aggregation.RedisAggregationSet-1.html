@@ -140,19 +140,19 @@
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Boolean_.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.%23ctor(Redis.OM.Contracts.IRedisConnection%2CSystem.Boolean)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Boolean_System_Int32_.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.%23ctor(Redis.OM.Contracts.IRedisConnection%2CSystem.Boolean%2CSystem.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L28">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L30">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1__ctor_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.#ctor*"></a>
-  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Boolean_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Boolean)">RedisAggregationSet(IRedisConnection, Boolean)</h4>
+  <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Boolean_System_Int32_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Boolean,System.Int32)">RedisAggregationSet(IRedisConnection, Boolean, Int32)</h4>
   <div class="markdown level1 summary"><p>Initializes a new instance of the <a class="xref" href="Redis.OM.Aggregation.RedisAggregationSet-1.html">RedisAggregationSet&lt;T&gt;</a> class.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public RedisAggregationSet(IRedisConnection connection, bool useCursor = false)</code></pre>
+    <pre><code class="lang-csharp hljs">public RedisAggregationSet(IRedisConnection connection, bool useCursor = false, int chunkSize = 1000)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -176,16 +176,22 @@
         <td><p>whether or not to use a cursor.</p>
 </td>
       </tr>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">chunkSize</span></td>
+        <td><p>Size of the chunks to use during pagination, larger chunks return larger payloads but with fewer round trips.</p>
+</td>
+      </tr>
     </tbody>
   </table>
   <h3 id="properties">Properties
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ElementType.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ElementType%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ElementType.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ElementType%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L61">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L67">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1_ElementType_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ElementType*"></a>
   <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_ElementType" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ElementType">ElementType</h4>
@@ -212,10 +218,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_Expression.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.Expression%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_Expression.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.Expression%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L64">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L70">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1_Expression_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.Expression*"></a>
   <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_Expression" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.Expression">Expression</h4>
@@ -242,10 +248,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_Provider.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.Provider%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_Provider.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.Provider%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L67">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L73">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1_Provider_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.Provider*"></a>
   <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_Provider" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.Provider">Provider</h4>
@@ -274,10 +280,10 @@
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_GetAsyncEnumerator_System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.GetAsyncEnumerator(System.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_GetAsyncEnumerator_System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.GetAsyncEnumerator(System.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L84">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L90">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1_GetAsyncEnumerator_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.GetAsyncEnumerator*"></a>
   <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_GetAsyncEnumerator_System_Threading_CancellationToken_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.GetAsyncEnumerator(System.Threading.CancellationToken)">GetAsyncEnumerator(CancellationToken)</h4>
@@ -321,10 +327,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L70">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L76">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1_GetEnumerator_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.GetEnumerator*"></a>
   <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_GetEnumerator" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.GetEnumerator">GetEnumerator()</h4>
@@ -351,10 +357,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ToArrayAsync.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ToArrayAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ToArrayAsync.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ToArrayAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L109">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L115">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1_ToArrayAsync_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ToArrayAsync*"></a>
   <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_ToArrayAsync" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ToArrayAsync">ToArrayAsync()</h4>
@@ -383,10 +389,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ToListAsync.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ToListAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_ToListAsync.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.ToListAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L94">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L100">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1_ToListAsync_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ToListAsync*"></a>
   <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_ToListAsync" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.ToListAsync">ToListAsync()</h4>
@@ -417,10 +423,10 @@
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_System_Collections_IEnumerable_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.System%23Collections%23IEnumerable%23GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1_System_Collections_IEnumerable_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601.System%23Collections%23IEnumerable%23GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L77">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L83">View Source</a>
   </span>
   <a id="Redis_OM_Aggregation_RedisAggregationSet_1_System_Collections_IEnumerable_GetEnumerator_" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.System#Collections#IEnumerable#GetEnumerator*"></a>
   <h4 id="Redis_OM_Aggregation_RedisAggregationSet_1_System_Collections_IEnumerable_GetEnumerator" data-uid="Redis.OM.Aggregation.RedisAggregationSet`1.System#Collections#IEnumerable#GetEnumerator">IEnumerable.GetEnumerator()</h4>
@@ -623,10 +629,10 @@
               <div class="contribution">
                 <ul class="nav">
                   <li>
-                    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Aggregation_RedisAggregationSet_1.md&amp;value=---%0Auid%3A%20Redis.OM.Aggregation.RedisAggregationSet%601%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
                   </li>
                   <li>
-                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L19" class="contribution-link">View Source</a>
+                    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Aggregation/RedisAggregationSet.cs/#L19" class="contribution-link">View Source</a>
                   </li>
                 </ul>
               </div>

@@ -1,6 +1,6 @@
 {
   "homepages": [],
-  "source_base_path": "C:/Users/slore/projects/redis/redis-om/docfx_project",
+  "source_base_path": "C:/Users/slore/projects/redis/redis-om-dotnet/docfx_project",
   "xrefmap": "xrefmap.yml",
   "files": [
     {
@@ -9,7 +9,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.AggregateSortBy.html",
-          "hash": "vbs1hN5qPWsU6/fMet5DhU+GGjc5dXSkeO5b2aWaSiY="
+          "hash": "sN+ytZ5/uWQXb2RPTjxxdg517zcoielbaYgC0T/NikU="
         }
       },
       "is_incremental": true,
@@ -21,7 +21,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.Apply.html",
-          "hash": "s72vJCJnXAY8m8KLUbzcxNSe4OTLx1xP3wuZR+rPAQA="
+          "hash": "+luQnpuABXZ5GHXyuesf7ivlJ0UU1j40McwADg3uT1I="
         }
       },
       "is_incremental": true,
@@ -33,7 +33,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ApplyFunctions.html",
-          "hash": "c5aOHlNjVc3oQ1YsKLtmvb/c7JDQqxTyxLEMCGO6p+E="
+          "hash": "gyI/W0f4N5gm8kz59SaxCAy0IKvq7JEwOqcrTBLJ+Ws="
         }
       },
       "is_incremental": true,
@@ -45,7 +45,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.FilterPredicate.html",
-          "hash": "I5PNEpIoBjEY36yX9o5pB2vobx4gak0bANELe6NJlxM="
+          "hash": "uB5aCg7OkmUIk0Mgd7NV7L/5ZgIIipil7040dZP4abY="
         }
       },
       "is_incremental": true,
@@ -57,7 +57,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.FirstValueReduction.html",
-          "hash": "B3qlxyduiu7CCJukTWNOoL2yWSCTU9YCnbMTSZRE6G0="
+          "hash": "Jozg7ytzAVdEALzLEN5Gp0H0n60/tFu1AK5sMRN1zKs="
         }
       },
       "is_incremental": true,
@@ -69,7 +69,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.GroupBy.html",
-          "hash": "oTRWZAvTNpo1IK6Au0o2Jq4Yvc1Pc2hvgg7THkuZXn4="
+          "hash": "JVaGgbV2gE1eAWoTLhIxYNyS0wgM0je88nxrDa3RtgI="
         }
       },
       "is_incremental": true,
@@ -81,7 +81,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.IAggregationPredicate.html",
-          "hash": "q8OdX84FhWWhUvp8M4jlvqub70MF0gMpB5ph63D8iHc="
+          "hash": "f3NA9kpLbrVgX7/YvjLW3n/n/HTiGJZVbw2UgyOXbAw="
         }
       },
       "is_incremental": true,
@@ -93,7 +93,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.LimitPredicate.html",
-          "hash": "TSuUvcPYcxwtfmfdP/sMnqHdsZuV+BRaXf178trbLjg="
+          "hash": "RtWQEojRSZIzaosNXD55KV2PQzzTd3Tw0C5wN2Y6iKY="
         }
       },
       "is_incremental": true,
@@ -105,7 +105,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.QueryPredicate.html",
-          "hash": "Zh1xGZGBQbt15ahGrICgxExubDTs1Uw2gdiaGuloV/Q="
+          "hash": "g2IfE4iWgIVcoVTyfgWEESRYWRXb9lnXLAt40GWS74w="
         }
       },
       "is_incremental": true,
@@ -117,7 +117,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ReduceFunction.html",
-          "hash": "1f0yMkvxQkuqizA4CFUvjKo4B/8IedEyZ1+5k05hHcA="
+          "hash": "S79IrD/JvWdDkZb8ZP84CiVuzqAN5+g+NYUdcGViXlc="
         }
       },
       "is_incremental": true,
@@ -129,7 +129,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.Reduction.html",
-          "hash": "0ZlJquB7irCUunse0aDWTM8PJVcOFJ3cK0UQXXuFnIg="
+          "hash": "PeTKjmvzjb4y0tC1BLwM4fdOP1ZYX5ORDDpomGFmAuM="
         }
       },
       "is_incremental": true,
@@ -141,7 +141,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.SingleArgumentReduction.html",
-          "hash": "5JxVW3uEkfspqCIwQxMkB6brDV0SJicNmPrsZPyHAf4="
+          "hash": "nSh9ZL5wSRcRfD3rWOro2k1ooLv+W13MQc//TwAasds="
         }
       },
       "is_incremental": true,
@@ -153,7 +153,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.TwoArgumentReduction.html",
-          "hash": "CAmwyovXNnklYXD6XX+ZuKlsGSByueRCrqqk9l9wfQY="
+          "hash": "U9a8OlhcepEKnF7ky7bNIHy8eSPqC1ssLm06grZYPRU="
         }
       },
       "is_incremental": true,
@@ -165,7 +165,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationPredicates.ZeroArgumentReduction.html",
-          "hash": "40YsGPgWJ2notT55BexKRID+NH1BTrVjWHgskyocjzw="
+          "hash": "3iMoYAtuJHhaCptePYjgtW4ZTSUdNOAQJrk4Pwi63p4="
         }
       },
       "is_incremental": true,
@@ -189,7 +189,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.AggregationResult-1.html",
-          "hash": "eU0qf4QOrqEfwJzojyAX3cAOwuIInoa2K2IHS4qXAtQ="
+          "hash": "ff+Gg81BsPk4z0ERLNWATyx8ZdwSP8mr7dgVyDLYCSo="
         }
       },
       "is_incremental": true,
@@ -201,7 +201,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.GroupedAggregationSet-1.html",
-          "hash": "feBGuz2N3A+U/6I8oadvs0JXcCq2A/sZzd5YM9t+s0Y="
+          "hash": "p0tzf8CHyKswDd6LEkpyEvlHdnGPXTufrkSIu1p2yoA="
         }
       },
       "is_incremental": true,
@@ -213,7 +213,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.IAggregationResult.html",
-          "hash": "TdBbDfoMdEcrCcBcCsOmGiz9n3f9R/XY0/zUe7BXUWs="
+          "hash": "xmUBnBQ2OsE990A7z9nB/y3JWgLtusPpVxz6lBWHWKQ="
         }
       },
       "is_incremental": true,
@@ -225,7 +225,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.RedisAggregation.html",
-          "hash": "WCfm0JvUySSMmmPLUo0+GxRSXrc89hr1edL7HntQ+kw="
+          "hash": "94zB9p3YMh3vmONJdTdX6H3ciuJGwgLMWJpVstaHKik="
         }
       },
       "is_incremental": true,
@@ -237,7 +237,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Aggregation.RedisAggregationSet-1.html",
-          "hash": "0MmjVebj0Tl/JakkvIBGcdcFTqUr5a+nUP4YONH+GdQ="
+          "hash": "w3VfNNTtIDTJfW5BFo2QJWLhRTzWJSFTvC46rvQQXis="
         }
       },
       "is_incremental": true,
@@ -261,7 +261,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Common.BooleanExpression.html",
-          "hash": "9oqqGkN1m37th6fI0Q7uw963PxuQoYJRkoPZhJ/QrUM="
+          "hash": "8uND6w/UilaGH9sUXXfcoF2g/McrTzI++WeNdNyPDWw="
         }
       },
       "is_incremental": true,
@@ -285,7 +285,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Contracts.IRedisConnection.html",
-          "hash": "u+S6jVLicUACBUDmtxcNOpmVKcoZS3Bw8F6yJAxW4t4="
+          "hash": "9cjiIcRFCU+QWF2lY1hAMLkYC1FdjFAGvv6qh8xdb+s="
         }
       },
       "is_incremental": true,
@@ -297,7 +297,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Contracts.IRedisHydrateable.html",
-          "hash": "uoeMETwKCFEVwN9nc/PakDguvwRGwTWaicVmTtwbMjU="
+          "hash": "8lZIKFTOmTyIpGTj3Ha8GlZJ9pUf2p8AUcJUJCVrHXo="
         }
       },
       "is_incremental": true,
@@ -321,7 +321,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.GeoLocDistanceUnit.html",
-          "hash": "fn5QU3lQMKb9x0toWXDRu2TwqlnVaLHkw/4Q9dhJhKk="
+          "hash": "2AEsCSPFK6cr9Ju6QY3F81LjUns4k4zFJb18KeKbxTs="
         }
       },
       "is_incremental": true,
@@ -333,7 +333,19 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.IIdGenerationStrategy.html",
-          "hash": "+0rC2ZUHcSPWT4hP3d9Fs8y+iWFzd5m+rVjxD1nKlW0="
+          "hash": "0luGwjR28UvmD4twqungpQw19Cn7NgPEDo+QsguY/Kk="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.DateTimeJsonConverter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.DateTimeJsonConverter.html",
+          "hash": "8E7/ZOcGMYmVq/oMrZ+nVx0BdsoU50VW/qVe22VF7xY="
         }
       },
       "is_incremental": true,
@@ -345,7 +357,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.DocumentAttribute.html",
-          "hash": "KK3YsidGa3ov8yrz5xmAPkv1rVLcDqBzCpka0NgLYo0="
+          "hash": "aN6CC2QjBeHiRCHyDxylv2VXm1kZlGCuSTOJL1HBV/U="
         }
       },
       "is_incremental": true,
@@ -357,7 +369,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.GeoLoc.html",
-          "hash": "dhP6TMmRMrqXcdMhAMimZdT2hogyX34aHDMHYgWXAZw="
+          "hash": "I3Ehmvxhmu05Cs4BhiBofHYauTDy3Zk73c+3N/iTZpQ="
         }
       },
       "is_incremental": true,
@@ -369,7 +381,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.GeoLocJsonConverter.html",
-          "hash": "GGWzOR0gV3DNlWcz1GfNK8LCYAxQ0+rq3DlU2WoupFE="
+          "hash": "8eGrMDUIIyBsKxHPqDwqWirzEj1eG7nDm4XUuVhBL0Y="
         }
       },
       "is_incremental": true,
@@ -381,7 +393,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.IndexedAttribute.html",
-          "hash": "j2p+seoK33mAb77jilwVL/3xE7Is8fqp0BgPz9smk7A="
+          "hash": "uMpvicl8DhNh7lHHvvexEJk3UjloOqIty1L/nCav9x0="
         }
       },
       "is_incremental": true,
@@ -393,7 +405,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.RedisCollectionStateManager.html",
-          "hash": "NgOFth4vY8y1WIyKL/hjy9asN2rar+WbOxKLGJjXqes="
+          "hash": "7ItGxKU/9HPSCHX62g5fLRgdbx228j+uApTRIUh6s5I="
         }
       },
       "is_incremental": true,
@@ -405,7 +417,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.RedisFieldAttribute.html",
-          "hash": "HrgIDCsdiGxaSZyesQ7/0OytWSYh1Qag4j3kZ1V3EDA="
+          "hash": "oSY299vKeauJtT4PKuAgeNgR53uuHM3jKEjpsLnr0ss="
         }
       },
       "is_incremental": true,
@@ -417,7 +429,19 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.RedisIdFieldAttribute.html",
-          "hash": "6ZmDG7RsNlTU6jWqVfqgq9o5/AHdygG8Nz51IqYnDhI="
+          "hash": "ooe1CBZs9iSk0WQHAfNgWUvFpeGtEB7sAPpX3DUMjEM="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Redis.OM.Modeling.RedisIndexingException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Redis.OM.Modeling.RedisIndexingException.html",
+          "hash": "bRobxRC1RMkUUGoiRCJgE+N631fX+Febl9X/g7f7Luk="
         }
       },
       "is_incremental": true,
@@ -429,7 +453,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.SearchFieldAttribute.html",
-          "hash": "LWjmnMTKD02QZ5x4/NZDn3njc35xryblaxrAIhz6vfg="
+          "hash": "ILJ4ApQQZFXPF4r6VUBgbDC386mlVpnR0CVe769x9+8="
         }
       },
       "is_incremental": true,
@@ -441,7 +465,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.SearchableAttribute.html",
-          "hash": "lGWP0fCcmBSKktafVzqg0D5uWeP1P3pF0jzp0reYQMw="
+          "hash": "09bwgOQyKwb+yWPXBPd/RBUjI41lINsCqNPaX8XlKNU="
         }
       },
       "is_incremental": true,
@@ -453,7 +477,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.StorageType.html",
-          "hash": "Y3XFcjG+mAnTXJ6GxWYiZmyb70kZzzXziymY1xFp5Wo="
+          "hash": "IljEl62jYDLvzYDyEruUiN96dDypdWwEiW3QTdqBjxo="
         }
       },
       "is_incremental": true,
@@ -465,7 +489,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Modeling.html",
-          "hash": "81V03xe62F6ehY6FRAvxasH1Co8+NVJKHY+ytrQ57pg="
+          "hash": "yE4h51JQjPj3OXtIhJKGUTuMBn13TuZ/beVTLvs8MqQ="
         }
       },
       "is_incremental": true,
@@ -477,7 +501,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.RediSearchCommands.html",
-          "hash": "B8VDWaZfKU2revSPUZ6oYkJI0cRHLRwNfRIX4SVUb30="
+          "hash": "GBxlNf0A1SwljFvxTjdwuaJfhR87GGb/kP4KEjanV9M="
         }
       },
       "is_incremental": true,
@@ -489,7 +513,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.RedisCommands.html",
-          "hash": "sCcDXUj33tNS56IaH8xA6WzzBtWhkNVKdgzaYzc9A9k="
+          "hash": "ovzhqON4DI+Wr85TIh7/hI/lCnI1QLQ8XAFYJ98uDGg="
         }
       },
       "is_incremental": true,
@@ -501,7 +525,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.RedisConnectionConfiguration.html",
-          "hash": "mO3HxPpDBP2e6I4tMlgpQTmIKPOMYqKIvC52DEDQoMY="
+          "hash": "ZthxHf0NRRZreluLaMArncByoMPBPLvqAHbgFlIpdOM="
         }
       },
       "is_incremental": true,
@@ -513,7 +537,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.RedisConnectionProvider.html",
-          "hash": "ZJgU+1dEnpgiPMMOJIiUG8qQ7BiuLDtuZ/NEDV7sVE4="
+          "hash": "52eZxx9g3d+3OJw3PNfbnxSkESAXsDJZYI9/2eaT+X0="
         }
       },
       "is_incremental": true,
@@ -525,7 +549,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.RedisReply.html",
-          "hash": "g9sQoDPuls9tDrXT/hABkt0g/OQAUaTMR5oy48RQ0oY="
+          "hash": "jtfhPn56osfwcAHcot2uHfMRmufvR/shINsXPAeMNeE="
         }
       },
       "is_incremental": true,
@@ -537,7 +561,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.SearchExtensions.html",
-          "hash": "EpLD6TbmqCC0kpjSH3niS/pRKtyURZRU1KHiXNziJjA="
+          "hash": "Cv3ronMb7TveMWSO+DCjU8HNK3Y0iA1MKsrMhJ3TIi4="
         }
       },
       "is_incremental": true,
@@ -549,7 +573,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.IRedisCollection-1.html",
-          "hash": "g3x4KWTP3ONyN5aI2U5b1i/nVULmhmpD+FatnFIlZXk="
+          "hash": "zhFc1BguU8xjAlhfm9EiveBSWkt0OmiJhtI7RH0Bz90="
         }
       },
       "is_incremental": true,
@@ -561,7 +585,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.Query.QueryFlags.html",
-          "hash": "Hkrl1RuRA6eUdGChKSs3T5Mtx3IxmGmANBoxjaz4ERI="
+          "hash": "R2dKgZQ4ShvNYc5PITMGtL4+PRAmsDc2uJQYHC8r2po="
         }
       },
       "is_incremental": true,
@@ -573,7 +597,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.Query.QueryOption.html",
-          "hash": "SeFZ6rBoxoshZYPUWzH0y+Q1HVraFlezRikvScP4KIs="
+          "hash": "MlTlOkFQds8K6++invgAAptyAyi6SSGtwyVLleXtKwo="
         }
       },
       "is_incremental": true,
@@ -585,7 +609,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.Query.RedisFilter.html",
-          "hash": "156qPUrTxV0FHnhUxANSAeeIbm8sdayH/GsVyxVe3ug="
+          "hash": "q99f5AlP3zup7M4R1T3dqouFw9GkTKqgee52hcuZ+x0="
         }
       },
       "is_incremental": true,
@@ -597,7 +621,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.Query.RedisGeoFilter.html",
-          "hash": "Pmux1jpHuWietkMUnM9mGMAoUoNjdGquHIsKoIYRdYI="
+          "hash": "A1+ga8h3HEefvKCGOhAH3PfUcIvqa913ZEBRCPSyZZc="
         }
       },
       "is_incremental": true,
@@ -609,7 +633,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.Query.RedisQuery.html",
-          "hash": "TZPx+XK3cV17gD2fPciY8jttqKdAYv40itD72fRrwD8="
+          "hash": "xPOND8MOzTL05+uGLrOHW74XSRvtK/CplATnW6yLWAg="
         }
       },
       "is_incremental": true,
@@ -621,7 +645,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.Query.RedisSortBy.html",
-          "hash": "GqUj9blvaD/EkphPL47Wgp3JPYgQMz2A3Qa7hRZSYfU="
+          "hash": "WjsBryPeRkSexyN8ZFCiMket5GxVpyoNb40qbs+Wvmc="
         }
       },
       "is_incremental": true,
@@ -633,7 +657,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.Query.ReturnFields.html",
-          "hash": "y4JNarYm8tc4m16oLoREpjH0KYs+fnqhPSXcrtToChY="
+          "hash": "JmtbRxXB8dDqJfXcZkhzqJ1I2baAf1H1zSnrHqifR3M="
         }
       },
       "is_incremental": true,
@@ -645,7 +669,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.Query.SearchLimit.html",
-          "hash": "IdTD4J+E+iywQjPswZ2M3V8249nUVaSr3vUIHMTQDQs="
+          "hash": "WDi087poKOWDBROrHQ2kQKlYsbCOGuCRqZ3pz8uzH6s="
         }
       },
       "is_incremental": true,
@@ -669,7 +693,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.RedisCollection-1.html",
-          "hash": "zgGKnXN6MmQZcGtXGmzvzldEbfH2eMOG2ZHcPH2sSmE="
+          "hash": "u4moyttcwYXFM+4h+vtw/j6WMDwBWz1/o/MfzR12GW8="
         }
       },
       "is_incremental": true,
@@ -681,7 +705,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.SearchResponse-1.html",
-          "hash": "2bY1N9MP8cILXNuawAfs7psyP3wdpKz/0KxztjTMosI="
+          "hash": "NlWu1OdTwSPCk0RCzv7fXHHphqLC9s1/y827j/r8Pqc="
         }
       },
       "is_incremental": true,
@@ -693,7 +717,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.SearchResponse.html",
-          "hash": "vWunCiXrltFvNJT/z0b+K6Sx8c5h5YTX95o+jAJli5Q="
+          "hash": "3G98uzbdpExDN4heoD5cfs2kRO6d1Cd5x0k2W3Ze5ao="
         }
       },
       "is_incremental": true,
@@ -705,7 +729,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Searching.SortDirection.html",
-          "hash": "ltzPwpMm3g5ZQdQUBU7VCsuQGz4xW8bkubLTLwivkjQ="
+          "hash": "yDc6ymBDniFSsOacAX2JcbHrqOpPE2oJ4LWPIeBS3c4="
         }
       },
       "is_incremental": true,
@@ -729,7 +753,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.UlidGenerationStrategy.html",
-          "hash": "RLWcr/10rrikvzCe+kjcqh8tfDRfYJ0T4cVXrPDfEQI="
+          "hash": "WzRs4MQ4feMEw2lUUy7wAIXHg6Ijedm9EGYDomJlK+0="
         }
       },
       "is_incremental": true,
@@ -741,7 +765,7 @@
       "output": {
         ".html": {
           "relative_path": "api/Redis.OM.Uuid4IdGenerationStrategy.html",
-          "hash": "bs+nV94cUy7zX3WU4rbD+P3lOqNLoKqUO2YzgN6g4NA="
+          "hash": "VZTeh6RRmbJX7YKriKYUDGuvppgHmt9Qqa5bAbrTq9w="
         }
       },
       "is_incremental": true,
@@ -765,7 +789,7 @@
       "output": {
         ".html": {
           "relative_path": "api/index.html",
-          "hash": "U2Bzz435qufWgi89mdnA//MlSOdVdpqChFNDXF5/7ok="
+          "hash": "4ywk+RVShzGEqjv2/vLci6EVu6fVVfQn4kVNVVYduMI="
         }
       },
       "is_incremental": true,
@@ -777,7 +801,7 @@
       "output": {
         ".html": {
           "relative_path": "api/toc.html",
-          "hash": "BjkedgZ2r4AM8PyqcX8xIMS/5zdnGs/HZci0OHttif4="
+          "hash": "zx3yQquQEFmMCw5mbj+ROmQ0U8rW4/5Tqtr4fCVD1v0="
         }
       },
       "is_incremental": false,
@@ -789,7 +813,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/add-and-retrieve-objects/add-and-retrieve-objects.html",
-          "hash": "BVz2gM5REIZPX2vP4HkCDtbuiSZ/KfaV0Op7T1y6EWY="
+          "hash": "OAz3AZuAVnS9H0C+9BtY2Rd6UxRXpTP6Y7RIQAoo4JA="
         }
       },
       "is_incremental": true,
@@ -801,7 +825,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/aggregations/apply-functions/apply-functions.html",
-          "hash": "0HbLgsN2NI7uFJLH+M+B1BvkTpAmkA0iI1S9AkGHzcs="
+          "hash": "6sp/ofoo6rf6j3I6V4hSwaaM9ES4/zQBxg6Nl/Kklus="
         }
       },
       "is_incremental": true,
@@ -813,7 +837,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/aggregations/groups/groups.html",
-          "hash": "xfNRk6mWirfC9fsfBDKhs+asgPHYA9wacPinJ+NZQVQ="
+          "hash": "LSOKq7ZCO20zt1zkbBh75v+HT0tRSimUuN7H/679CtE="
         }
       },
       "is_incremental": true,
@@ -825,7 +849,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/aggregations/intro/intro.html",
-          "hash": "hTpZDBnAPSCRIuUNpj8fx2yIJQM7gec3KMnBzlhxcmM="
+          "hash": "gTvNesaRbscx45bxb2MDf3eLCeAiH88Ty9mTo3MYF+o="
         }
       },
       "is_incremental": true,
@@ -837,7 +861,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/creating-an-index/creating-an-index.html",
-          "hash": "KplOA6vntaBOyq6uAOiyZ2GB8vCIh5cU9V/3e5uH8wY="
+          "hash": "QpbGtBXIGfkinAtEeVsiGV3uQHb+eabwvUuLjBqLp0M="
         }
       },
       "is_incremental": true,
@@ -849,7 +873,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/intro.html",
-          "hash": "rdPwKWTxikTdV6VmGLMKdRLDKoPbNvP5bAyfg/6t1rc="
+          "hash": "7srPQcEmOk7Z/mQc8SkkdocaJTX3/ypqP93dojzwVEw="
         }
       },
       "is_incremental": true,
@@ -861,7 +885,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/searching/geo-filters/geo-filter.html",
-          "hash": "OanlnYvw61NC+ejUBkV0sqVQrhGEoDFVYZ4Va1+xlYM="
+          "hash": "1XwyRJ0q+hBhezn5Xo/bBIt4vOHBG9LGEZIv1MeKNu8="
         }
       },
       "is_incremental": true,
@@ -873,7 +897,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/searching/numeric-queries/numeric-queries.html",
-          "hash": "D3g0eUo/QOJ+6GiIYPkQg1Qu89pTlNAnJyugm+OrOu8="
+          "hash": "80HL9YIPvLDwyQHRFyofOcvcC/L7nQlWp2og1Wso0qE="
         }
       },
       "is_incremental": true,
@@ -885,7 +909,7 @@
       "output": {
         ".html": {
           "relative_path": "articles/searching/simple-text-queries/simple-text-queries.html",
-          "hash": "nQz/6XsLAnwz85nSxHVYZaKtcJeepqe1IGWTMMKlDdA="
+          "hash": "+p2HjclIXUqfOYBY7wIlcc615hAnlmxtCy7LiiVOivI="
         }
       },
       "is_incremental": true,
@@ -934,7 +958,7 @@
       "output": {
         ".html": {
           "relative_path": "index.html",
-          "hash": "GYnRCp0HwiboqfRJX1WVXqrMnepfANj2XluCa6j7aOg="
+          "hash": "6UtYU65Z8reNl6HA59vtDJBSPelVpQtA1KmXnmLi+Ak="
         }
       },
       "is_incremental": true,
@@ -971,8 +995,8 @@
         "ManagedReferenceDocumentProcessor": {
           "can_incremental": true,
           "incrementalPhase": "build",
-          "total_file_count": 63,
-          "skipped_file_count": 63
+          "total_file_count": 65,
+          "skipped_file_count": 65
         },
         "ResourceDocumentProcessor": {
           "can_incremental": false,

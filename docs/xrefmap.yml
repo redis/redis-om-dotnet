@@ -1085,14 +1085,14 @@ references:
   fullName.vb: Redis.OM.Aggregation.RedisAggregationSet(Of T)
   nameWithType: RedisAggregationSet<T>
   nameWithType.vb: RedisAggregationSet(Of T)
-- uid: Redis.OM.Aggregation.RedisAggregationSet`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Boolean)
-  name: RedisAggregationSet(IRedisConnection, Boolean)
-  href: api/Redis.OM.Aggregation.RedisAggregationSet-1.html#Redis_OM_Aggregation_RedisAggregationSet_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Boolean_
-  commentId: M:Redis.OM.Aggregation.RedisAggregationSet`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Boolean)
-  fullName: Redis.OM.Aggregation.RedisAggregationSet<T>.RedisAggregationSet(Redis.OM.Contracts.IRedisConnection, System.Boolean)
-  fullName.vb: Redis.OM.Aggregation.RedisAggregationSet(Of T).RedisAggregationSet(Redis.OM.Contracts.IRedisConnection, System.Boolean)
-  nameWithType: RedisAggregationSet<T>.RedisAggregationSet(IRedisConnection, Boolean)
-  nameWithType.vb: RedisAggregationSet(Of T).RedisAggregationSet(IRedisConnection, Boolean)
+- uid: Redis.OM.Aggregation.RedisAggregationSet`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Boolean,System.Int32)
+  name: RedisAggregationSet(IRedisConnection, Boolean, Int32)
+  href: api/Redis.OM.Aggregation.RedisAggregationSet-1.html#Redis_OM_Aggregation_RedisAggregationSet_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Boolean_System_Int32_
+  commentId: M:Redis.OM.Aggregation.RedisAggregationSet`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Boolean,System.Int32)
+  fullName: Redis.OM.Aggregation.RedisAggregationSet<T>.RedisAggregationSet(Redis.OM.Contracts.IRedisConnection, System.Boolean, System.Int32)
+  fullName.vb: Redis.OM.Aggregation.RedisAggregationSet(Of T).RedisAggregationSet(Redis.OM.Contracts.IRedisConnection, System.Boolean, System.Int32)
+  nameWithType: RedisAggregationSet<T>.RedisAggregationSet(IRedisConnection, Boolean, Int32)
+  nameWithType.vb: RedisAggregationSet(Of T).RedisAggregationSet(IRedisConnection, Boolean, Int32)
 - uid: Redis.OM.Aggregation.RedisAggregationSet`1.#ctor*
   name: RedisAggregationSet
   href: api/Redis.OM.Aggregation.RedisAggregationSet-1.html#Redis_OM_Aggregation_RedisAggregationSet_1__ctor_
@@ -1444,6 +1444,41 @@ references:
   commentId: N:Redis.OM.Modeling
   fullName: Redis.OM.Modeling
   nameWithType: Redis.OM.Modeling
+- uid: Redis.OM.Modeling.DateTimeJsonConverter
+  name: DateTimeJsonConverter
+  href: api/Redis.OM.Modeling.DateTimeJsonConverter.html
+  commentId: T:Redis.OM.Modeling.DateTimeJsonConverter
+  fullName: Redis.OM.Modeling.DateTimeJsonConverter
+  nameWithType: DateTimeJsonConverter
+- uid: Redis.OM.Modeling.DateTimeJsonConverter.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)
+  name: Read(ref Utf8JsonReader, Type, JsonSerializerOptions)
+  href: api/Redis.OM.Modeling.DateTimeJsonConverter.html#Redis_OM_Modeling_DateTimeJsonConverter_Read_System_Text_Json_Utf8JsonReader__System_Type_System_Text_Json_JsonSerializerOptions_
+  commentId: M:Redis.OM.Modeling.DateTimeJsonConverter.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)
+  name.vb: Read(ByRef Utf8JsonReader, Type, JsonSerializerOptions)
+  fullName: Redis.OM.Modeling.DateTimeJsonConverter.Read(ref System.Text.Json.Utf8JsonReader, System.Type, System.Text.Json.JsonSerializerOptions)
+  fullName.vb: Redis.OM.Modeling.DateTimeJsonConverter.Read(ByRef System.Text.Json.Utf8JsonReader, System.Type, System.Text.Json.JsonSerializerOptions)
+  nameWithType: DateTimeJsonConverter.Read(ref Utf8JsonReader, Type, JsonSerializerOptions)
+  nameWithType.vb: DateTimeJsonConverter.Read(ByRef Utf8JsonReader, Type, JsonSerializerOptions)
+- uid: Redis.OM.Modeling.DateTimeJsonConverter.Read*
+  name: Read
+  href: api/Redis.OM.Modeling.DateTimeJsonConverter.html#Redis_OM_Modeling_DateTimeJsonConverter_Read_
+  commentId: Overload:Redis.OM.Modeling.DateTimeJsonConverter.Read
+  isSpec: "True"
+  fullName: Redis.OM.Modeling.DateTimeJsonConverter.Read
+  nameWithType: DateTimeJsonConverter.Read
+- uid: Redis.OM.Modeling.DateTimeJsonConverter.Write(System.Text.Json.Utf8JsonWriter,System.DateTime,System.Text.Json.JsonSerializerOptions)
+  name: Write(Utf8JsonWriter, DateTime, JsonSerializerOptions)
+  href: api/Redis.OM.Modeling.DateTimeJsonConverter.html#Redis_OM_Modeling_DateTimeJsonConverter_Write_System_Text_Json_Utf8JsonWriter_System_DateTime_System_Text_Json_JsonSerializerOptions_
+  commentId: M:Redis.OM.Modeling.DateTimeJsonConverter.Write(System.Text.Json.Utf8JsonWriter,System.DateTime,System.Text.Json.JsonSerializerOptions)
+  fullName: Redis.OM.Modeling.DateTimeJsonConverter.Write(System.Text.Json.Utf8JsonWriter, System.DateTime, System.Text.Json.JsonSerializerOptions)
+  nameWithType: DateTimeJsonConverter.Write(Utf8JsonWriter, DateTime, JsonSerializerOptions)
+- uid: Redis.OM.Modeling.DateTimeJsonConverter.Write*
+  name: Write
+  href: api/Redis.OM.Modeling.DateTimeJsonConverter.html#Redis_OM_Modeling_DateTimeJsonConverter_Write_
+  commentId: Overload:Redis.OM.Modeling.DateTimeJsonConverter.Write
+  isSpec: "True"
+  fullName: Redis.OM.Modeling.DateTimeJsonConverter.Write
+  nameWithType: DateTimeJsonConverter.Write
 - uid: Redis.OM.Modeling.DocumentAttribute
   name: DocumentAttribute
   href: api/Redis.OM.Modeling.DocumentAttribute.html
@@ -1463,19 +1498,19 @@ references:
   isSpec: "True"
   fullName: Redis.OM.Modeling.DocumentAttribute.Filter
   nameWithType: DocumentAttribute.Filter
-- uid: Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategy
-  name: IdGenerationStrategy
-  href: api/Redis.OM.Modeling.DocumentAttribute.html#Redis_OM_Modeling_DocumentAttribute_IdGenerationStrategy
-  commentId: P:Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategy
-  fullName: Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategy
-  nameWithType: DocumentAttribute.IdGenerationStrategy
-- uid: Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategy*
-  name: IdGenerationStrategy
-  href: api/Redis.OM.Modeling.DocumentAttribute.html#Redis_OM_Modeling_DocumentAttribute_IdGenerationStrategy_
-  commentId: Overload:Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategy
+- uid: Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategyName
+  name: IdGenerationStrategyName
+  href: api/Redis.OM.Modeling.DocumentAttribute.html#Redis_OM_Modeling_DocumentAttribute_IdGenerationStrategyName
+  commentId: P:Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategyName
+  fullName: Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategyName
+  nameWithType: DocumentAttribute.IdGenerationStrategyName
+- uid: Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategyName*
+  name: IdGenerationStrategyName
+  href: api/Redis.OM.Modeling.DocumentAttribute.html#Redis_OM_Modeling_DocumentAttribute_IdGenerationStrategyName_
+  commentId: Overload:Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategyName
   isSpec: "True"
-  fullName: Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategy
-  nameWithType: DocumentAttribute.IdGenerationStrategy
+  fullName: Redis.OM.Modeling.DocumentAttribute.IdGenerationStrategyName
+  nameWithType: DocumentAttribute.IdGenerationStrategyName
 - uid: Redis.OM.Modeling.DocumentAttribute.IndexName
   name: IndexName
   href: api/Redis.OM.Modeling.DocumentAttribute.html#Redis_OM_Modeling_DocumentAttribute_IndexName
@@ -1528,6 +1563,19 @@ references:
   isSpec: "True"
   fullName: Redis.OM.Modeling.DocumentAttribute.Prefixes
   nameWithType: DocumentAttribute.Prefixes
+- uid: Redis.OM.Modeling.DocumentAttribute.RegisterIdGenerationStrategy(System.String,Redis.OM.IIdGenerationStrategy)
+  name: RegisterIdGenerationStrategy(String, IIdGenerationStrategy)
+  href: api/Redis.OM.Modeling.DocumentAttribute.html#Redis_OM_Modeling_DocumentAttribute_RegisterIdGenerationStrategy_System_String_Redis_OM_IIdGenerationStrategy_
+  commentId: M:Redis.OM.Modeling.DocumentAttribute.RegisterIdGenerationStrategy(System.String,Redis.OM.IIdGenerationStrategy)
+  fullName: Redis.OM.Modeling.DocumentAttribute.RegisterIdGenerationStrategy(System.String, Redis.OM.IIdGenerationStrategy)
+  nameWithType: DocumentAttribute.RegisterIdGenerationStrategy(String, IIdGenerationStrategy)
+- uid: Redis.OM.Modeling.DocumentAttribute.RegisterIdGenerationStrategy*
+  name: RegisterIdGenerationStrategy
+  href: api/Redis.OM.Modeling.DocumentAttribute.html#Redis_OM_Modeling_DocumentAttribute_RegisterIdGenerationStrategy_
+  commentId: Overload:Redis.OM.Modeling.DocumentAttribute.RegisterIdGenerationStrategy
+  isSpec: "True"
+  fullName: Redis.OM.Modeling.DocumentAttribute.RegisterIdGenerationStrategy
+  nameWithType: DocumentAttribute.RegisterIdGenerationStrategy
 - uid: Redis.OM.Modeling.DocumentAttribute.StorageType
   name: StorageType
   href: api/Redis.OM.Modeling.DocumentAttribute.html#Redis_OM_Modeling_DocumentAttribute_StorageType
@@ -1698,6 +1746,19 @@ references:
   isSpec: "True"
   fullName: Redis.OM.Modeling.RedisCollectionStateManager.RedisCollectionStateManager
   nameWithType: RedisCollectionStateManager.RedisCollectionStateManager
+- uid: Redis.OM.Modeling.RedisCollectionStateManager.DocumentAttribute
+  name: DocumentAttribute
+  href: api/Redis.OM.Modeling.RedisCollectionStateManager.html#Redis_OM_Modeling_RedisCollectionStateManager_DocumentAttribute
+  commentId: P:Redis.OM.Modeling.RedisCollectionStateManager.DocumentAttribute
+  fullName: Redis.OM.Modeling.RedisCollectionStateManager.DocumentAttribute
+  nameWithType: RedisCollectionStateManager.DocumentAttribute
+- uid: Redis.OM.Modeling.RedisCollectionStateManager.DocumentAttribute*
+  name: DocumentAttribute
+  href: api/Redis.OM.Modeling.RedisCollectionStateManager.html#Redis_OM_Modeling_RedisCollectionStateManager_DocumentAttribute_
+  commentId: Overload:Redis.OM.Modeling.RedisCollectionStateManager.DocumentAttribute
+  isSpec: "True"
+  fullName: Redis.OM.Modeling.RedisCollectionStateManager.DocumentAttribute
+  nameWithType: RedisCollectionStateManager.DocumentAttribute
 - uid: Redis.OM.Modeling.RedisFieldAttribute
   name: RedisFieldAttribute
   href: api/Redis.OM.Modeling.RedisFieldAttribute.html
@@ -1723,6 +1784,25 @@ references:
   commentId: T:Redis.OM.Modeling.RedisIdFieldAttribute
   fullName: Redis.OM.Modeling.RedisIdFieldAttribute
   nameWithType: RedisIdFieldAttribute
+- uid: Redis.OM.Modeling.RedisIndexingException
+  name: RedisIndexingException
+  href: api/Redis.OM.Modeling.RedisIndexingException.html
+  commentId: T:Redis.OM.Modeling.RedisIndexingException
+  fullName: Redis.OM.Modeling.RedisIndexingException
+  nameWithType: RedisIndexingException
+- uid: Redis.OM.Modeling.RedisIndexingException.#ctor(System.String)
+  name: RedisIndexingException(String)
+  href: api/Redis.OM.Modeling.RedisIndexingException.html#Redis_OM_Modeling_RedisIndexingException__ctor_System_String_
+  commentId: M:Redis.OM.Modeling.RedisIndexingException.#ctor(System.String)
+  fullName: Redis.OM.Modeling.RedisIndexingException.RedisIndexingException(System.String)
+  nameWithType: RedisIndexingException.RedisIndexingException(String)
+- uid: Redis.OM.Modeling.RedisIndexingException.#ctor*
+  name: RedisIndexingException
+  href: api/Redis.OM.Modeling.RedisIndexingException.html#Redis_OM_Modeling_RedisIndexingException__ctor_
+  commentId: Overload:Redis.OM.Modeling.RedisIndexingException.#ctor
+  isSpec: "True"
+  fullName: Redis.OM.Modeling.RedisIndexingException.RedisIndexingException
+  nameWithType: RedisIndexingException.RedisIndexingException
 - uid: Redis.OM.Modeling.SearchableAttribute
   name: SearchableAttribute
   href: api/Redis.OM.Modeling.SearchableAttribute.html
@@ -1787,6 +1867,32 @@ references:
   isSpec: "True"
   fullName: Redis.OM.Modeling.SearchFieldAttribute.Aggregatable
   nameWithType: SearchFieldAttribute.Aggregatable
+- uid: Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth
+  name: CascadeDepth
+  href: api/Redis.OM.Modeling.SearchFieldAttribute.html#Redis_OM_Modeling_SearchFieldAttribute_CascadeDepth
+  commentId: P:Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth
+  fullName: Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth
+  nameWithType: SearchFieldAttribute.CascadeDepth
+- uid: Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth*
+  name: CascadeDepth
+  href: api/Redis.OM.Modeling.SearchFieldAttribute.html#Redis_OM_Modeling_SearchFieldAttribute_CascadeDepth_
+  commentId: Overload:Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth
+  isSpec: "True"
+  fullName: Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth
+  nameWithType: SearchFieldAttribute.CascadeDepth
+- uid: Redis.OM.Modeling.SearchFieldAttribute.JsonPath
+  name: JsonPath
+  href: api/Redis.OM.Modeling.SearchFieldAttribute.html#Redis_OM_Modeling_SearchFieldAttribute_JsonPath
+  commentId: P:Redis.OM.Modeling.SearchFieldAttribute.JsonPath
+  fullName: Redis.OM.Modeling.SearchFieldAttribute.JsonPath
+  nameWithType: SearchFieldAttribute.JsonPath
+- uid: Redis.OM.Modeling.SearchFieldAttribute.JsonPath*
+  name: JsonPath
+  href: api/Redis.OM.Modeling.SearchFieldAttribute.html#Redis_OM_Modeling_SearchFieldAttribute_JsonPath_
+  commentId: Overload:Redis.OM.Modeling.SearchFieldAttribute.JsonPath
+  isSpec: "True"
+  fullName: Redis.OM.Modeling.SearchFieldAttribute.JsonPath
+  nameWithType: SearchFieldAttribute.JsonPath
 - uid: Redis.OM.Modeling.SearchFieldAttribute.Normalize
   name: Normalize
   href: api/Redis.OM.Modeling.SearchFieldAttribute.html#Redis_OM_Modeling_SearchFieldAttribute_Normalize
@@ -2052,6 +2158,19 @@ references:
   isSpec: "True"
   fullName: Redis.OM.RedisCommands.Unlink
   nameWithType: RedisCommands.Unlink
+- uid: Redis.OM.RedisCommands.UnlinkAsync(Redis.OM.Contracts.IRedisConnection,System.String)
+  name: UnlinkAsync(IRedisConnection, String)
+  href: api/Redis.OM.RedisCommands.html#Redis_OM_RedisCommands_UnlinkAsync_Redis_OM_Contracts_IRedisConnection_System_String_
+  commentId: M:Redis.OM.RedisCommands.UnlinkAsync(Redis.OM.Contracts.IRedisConnection,System.String)
+  fullName: Redis.OM.RedisCommands.UnlinkAsync(Redis.OM.Contracts.IRedisConnection, System.String)
+  nameWithType: RedisCommands.UnlinkAsync(IRedisConnection, String)
+- uid: Redis.OM.RedisCommands.UnlinkAsync*
+  name: UnlinkAsync
+  href: api/Redis.OM.RedisCommands.html#Redis_OM_RedisCommands_UnlinkAsync_
+  commentId: Overload:Redis.OM.RedisCommands.UnlinkAsync
+  isSpec: "True"
+  fullName: Redis.OM.RedisCommands.UnlinkAsync
+  nameWithType: RedisCommands.UnlinkAsync
 - uid: Redis.OM.RedisConnectionConfiguration
   name: RedisConnectionConfiguration
   href: api/Redis.OM.RedisConnectionConfiguration.html
@@ -2122,6 +2241,18 @@ references:
   commentId: M:Redis.OM.RedisConnectionProvider.#ctor(Redis.OM.RedisConnectionConfiguration)
   fullName: Redis.OM.RedisConnectionProvider.RedisConnectionProvider(Redis.OM.RedisConnectionConfiguration)
   nameWithType: RedisConnectionProvider.RedisConnectionProvider(RedisConnectionConfiguration)
+- uid: Redis.OM.RedisConnectionProvider.#ctor(StackExchange.Redis.ConfigurationOptions)
+  name: RedisConnectionProvider(ConfigurationOptions)
+  href: api/Redis.OM.RedisConnectionProvider.html#Redis_OM_RedisConnectionProvider__ctor_StackExchange_Redis_ConfigurationOptions_
+  commentId: M:Redis.OM.RedisConnectionProvider.#ctor(StackExchange.Redis.ConfigurationOptions)
+  fullName: Redis.OM.RedisConnectionProvider.RedisConnectionProvider(StackExchange.Redis.ConfigurationOptions)
+  nameWithType: RedisConnectionProvider.RedisConnectionProvider(ConfigurationOptions)
+- uid: Redis.OM.RedisConnectionProvider.#ctor(StackExchange.Redis.IConnectionMultiplexer)
+  name: RedisConnectionProvider(IConnectionMultiplexer)
+  href: api/Redis.OM.RedisConnectionProvider.html#Redis_OM_RedisConnectionProvider__ctor_StackExchange_Redis_IConnectionMultiplexer_
+  commentId: M:Redis.OM.RedisConnectionProvider.#ctor(StackExchange.Redis.IConnectionMultiplexer)
+  fullName: Redis.OM.RedisConnectionProvider.RedisConnectionProvider(StackExchange.Redis.IConnectionMultiplexer)
+  nameWithType: RedisConnectionProvider.RedisConnectionProvider(IConnectionMultiplexer)
 - uid: Redis.OM.RedisConnectionProvider.#ctor(System.String)
   name: RedisConnectionProvider(String)
   href: api/Redis.OM.RedisConnectionProvider.html#Redis_OM_RedisConnectionProvider__ctor_System_String_
@@ -2142,15 +2273,15 @@ references:
   isSpec: "True"
   fullName: Redis.OM.RedisConnectionProvider.AggregationSet
   nameWithType: RedisConnectionProvider.AggregationSet
-- uid: Redis.OM.RedisConnectionProvider.AggregationSet``1
-  name: AggregationSet<T>()
-  href: api/Redis.OM.RedisConnectionProvider.html#Redis_OM_RedisConnectionProvider_AggregationSet__1
-  commentId: M:Redis.OM.RedisConnectionProvider.AggregationSet``1
-  name.vb: AggregationSet(Of T)()
-  fullName: Redis.OM.RedisConnectionProvider.AggregationSet<T>()
-  fullName.vb: Redis.OM.RedisConnectionProvider.AggregationSet(Of T)()
-  nameWithType: RedisConnectionProvider.AggregationSet<T>()
-  nameWithType.vb: RedisConnectionProvider.AggregationSet(Of T)()
+- uid: Redis.OM.RedisConnectionProvider.AggregationSet``1(System.Int32)
+  name: AggregationSet<T>(Int32)
+  href: api/Redis.OM.RedisConnectionProvider.html#Redis_OM_RedisConnectionProvider_AggregationSet__1_System_Int32_
+  commentId: M:Redis.OM.RedisConnectionProvider.AggregationSet``1(System.Int32)
+  name.vb: AggregationSet(Of T)(Int32)
+  fullName: Redis.OM.RedisConnectionProvider.AggregationSet<T>(System.Int32)
+  fullName.vb: Redis.OM.RedisConnectionProvider.AggregationSet(Of T)(System.Int32)
+  nameWithType: RedisConnectionProvider.AggregationSet<T>(Int32)
+  nameWithType.vb: RedisConnectionProvider.AggregationSet(Of T)(Int32)
 - uid: Redis.OM.RedisConnectionProvider.Connection
   name: Connection
   href: api/Redis.OM.RedisConnectionProvider.html#Redis_OM_RedisConnectionProvider_Connection
@@ -2171,15 +2302,15 @@ references:
   isSpec: "True"
   fullName: Redis.OM.RedisConnectionProvider.RedisCollection
   nameWithType: RedisConnectionProvider.RedisCollection
-- uid: Redis.OM.RedisConnectionProvider.RedisCollection``1
-  name: RedisCollection<T>()
-  href: api/Redis.OM.RedisConnectionProvider.html#Redis_OM_RedisConnectionProvider_RedisCollection__1
-  commentId: M:Redis.OM.RedisConnectionProvider.RedisCollection``1
-  name.vb: RedisCollection(Of T)()
-  fullName: Redis.OM.RedisConnectionProvider.RedisCollection<T>()
-  fullName.vb: Redis.OM.RedisConnectionProvider.RedisCollection(Of T)()
-  nameWithType: RedisConnectionProvider.RedisCollection<T>()
-  nameWithType.vb: RedisConnectionProvider.RedisCollection(Of T)()
+- uid: Redis.OM.RedisConnectionProvider.RedisCollection``1(System.Int32)
+  name: RedisCollection<T>(Int32)
+  href: api/Redis.OM.RedisConnectionProvider.html#Redis_OM_RedisConnectionProvider_RedisCollection__1_System_Int32_
+  commentId: M:Redis.OM.RedisConnectionProvider.RedisCollection``1(System.Int32)
+  name.vb: RedisCollection(Of T)(Int32)
+  fullName: Redis.OM.RedisConnectionProvider.RedisCollection<T>(System.Int32)
+  fullName.vb: Redis.OM.RedisConnectionProvider.RedisCollection(Of T)(System.Int32)
+  nameWithType: RedisConnectionProvider.RedisCollection<T>(Int32)
+  nameWithType.vb: RedisConnectionProvider.RedisCollection(Of T)(Int32)
 - uid: Redis.OM.RediSearchCommands
   name: RediSearchCommands
   href: api/Redis.OM.RediSearchCommands.html
@@ -3604,6 +3735,58 @@ references:
   fullName.vb: Redis.OM.Searching.IRedisCollection(Of T)
   nameWithType: IRedisCollection<T>
   nameWithType.vb: IRedisCollection(Of T)
+- uid: Redis.OM.Searching.IRedisCollection`1.Any(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})
+  name: Any(Expression<Func<T, Boolean>>)
+  href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_Any_System_Linq_Expressions_Expression_System_Func__0_System_Boolean___
+  commentId: M:Redis.OM.Searching.IRedisCollection`1.Any(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})
+  name.vb: Any(Expression(Of Func(Of T, Boolean)))
+  fullName: Redis.OM.Searching.IRedisCollection<T>.Any(System.Linq.Expressions.Expression<System.Func<T, System.Boolean>>)
+  fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).Any(System.Linq.Expressions.Expression(Of System.Func(Of T, System.Boolean)))
+  nameWithType: IRedisCollection<T>.Any(Expression<Func<T, Boolean>>)
+  nameWithType.vb: IRedisCollection(Of T).Any(Expression(Of Func(Of T, Boolean)))
+- uid: Redis.OM.Searching.IRedisCollection`1.Any*
+  name: Any
+  href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_Any_
+  commentId: Overload:Redis.OM.Searching.IRedisCollection`1.Any
+  isSpec: "True"
+  fullName: Redis.OM.Searching.IRedisCollection<T>.Any
+  fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).Any
+  nameWithType: IRedisCollection<T>.Any
+  nameWithType.vb: IRedisCollection(Of T).Any
+- uid: Redis.OM.Searching.IRedisCollection`1.ChunkSize
+  name: ChunkSize
+  href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_ChunkSize
+  commentId: P:Redis.OM.Searching.IRedisCollection`1.ChunkSize
+  fullName: Redis.OM.Searching.IRedisCollection<T>.ChunkSize
+  fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).ChunkSize
+  nameWithType: IRedisCollection<T>.ChunkSize
+  nameWithType.vb: IRedisCollection(Of T).ChunkSize
+- uid: Redis.OM.Searching.IRedisCollection`1.ChunkSize*
+  name: ChunkSize
+  href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_ChunkSize_
+  commentId: Overload:Redis.OM.Searching.IRedisCollection`1.ChunkSize
+  isSpec: "True"
+  fullName: Redis.OM.Searching.IRedisCollection<T>.ChunkSize
+  fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).ChunkSize
+  nameWithType: IRedisCollection<T>.ChunkSize
+  nameWithType.vb: IRedisCollection(Of T).ChunkSize
+- uid: Redis.OM.Searching.IRedisCollection`1.Delete(`0)
+  name: Delete(T)
+  href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_Delete__0_
+  commentId: M:Redis.OM.Searching.IRedisCollection`1.Delete(`0)
+  fullName: Redis.OM.Searching.IRedisCollection<T>.Delete(T)
+  fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).Delete(T)
+  nameWithType: IRedisCollection<T>.Delete(T)
+  nameWithType.vb: IRedisCollection(Of T).Delete(T)
+- uid: Redis.OM.Searching.IRedisCollection`1.Delete*
+  name: Delete
+  href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_Delete_
+  commentId: Overload:Redis.OM.Searching.IRedisCollection`1.Delete
+  isSpec: "True"
+  fullName: Redis.OM.Searching.IRedisCollection<T>.Delete
+  fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).Delete
+  nameWithType: IRedisCollection<T>.Delete
+  nameWithType.vb: IRedisCollection(Of T).Delete
 - uid: Redis.OM.Searching.IRedisCollection`1.FindById(System.String)
   name: FindById(String)
   href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_FindById_System_String_
@@ -3723,6 +3906,23 @@ references:
   fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).StateManager
   nameWithType: IRedisCollection<T>.StateManager
   nameWithType.vb: IRedisCollection(Of T).StateManager
+- uid: Redis.OM.Searching.IRedisCollection`1.Update(`0)
+  name: Update(T)
+  href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_Update__0_
+  commentId: M:Redis.OM.Searching.IRedisCollection`1.Update(`0)
+  fullName: Redis.OM.Searching.IRedisCollection<T>.Update(T)
+  fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).Update(T)
+  nameWithType: IRedisCollection<T>.Update(T)
+  nameWithType.vb: IRedisCollection(Of T).Update(T)
+- uid: Redis.OM.Searching.IRedisCollection`1.Update*
+  name: Update
+  href: api/Redis.OM.Searching.IRedisCollection-1.html#Redis_OM_Searching_IRedisCollection_1_Update_
+  commentId: Overload:Redis.OM.Searching.IRedisCollection`1.Update
+  isSpec: "True"
+  fullName: Redis.OM.Searching.IRedisCollection<T>.Update
+  fullName.vb: Redis.OM.Searching.IRedisCollection(Of T).Update
+  nameWithType: IRedisCollection<T>.Update
+  nameWithType.vb: IRedisCollection(Of T).Update
 - uid: Redis.OM.Searching.Query
   name: Redis.OM.Searching.Query
   href: api/Redis.OM.Searching.Query.html
@@ -3821,6 +4021,19 @@ references:
   commentId: T:Redis.OM.Searching.Query.RedisQuery
   fullName: Redis.OM.Searching.Query.RedisQuery
   nameWithType: RedisQuery
+- uid: Redis.OM.Searching.Query.RedisQuery.#ctor(System.String)
+  name: RedisQuery(String)
+  href: api/Redis.OM.Searching.Query.RedisQuery.html#Redis_OM_Searching_Query_RedisQuery__ctor_System_String_
+  commentId: M:Redis.OM.Searching.Query.RedisQuery.#ctor(System.String)
+  fullName: Redis.OM.Searching.Query.RedisQuery.RedisQuery(System.String)
+  nameWithType: RedisQuery.RedisQuery(String)
+- uid: Redis.OM.Searching.Query.RedisQuery.#ctor*
+  name: RedisQuery
+  href: api/Redis.OM.Searching.Query.RedisQuery.html#Redis_OM_Searching_Query_RedisQuery__ctor_
+  commentId: Overload:Redis.OM.Searching.Query.RedisQuery.#ctor
+  isSpec: "True"
+  fullName: Redis.OM.Searching.Query.RedisQuery.RedisQuery
+  nameWithType: RedisQuery.RedisQuery
 - uid: Redis.OM.Searching.Query.RedisQuery.Filter
   name: Filter
   href: api/Redis.OM.Searching.Query.RedisQuery.html#Redis_OM_Searching_Query_RedisQuery_Filter
@@ -4020,14 +4233,14 @@ references:
   fullName.vb: Redis.OM.Searching.RedisCollection(Of T)
   nameWithType: RedisCollection<T>
   nameWithType.vb: RedisCollection(Of T)
-- uid: Redis.OM.Searching.RedisCollection`1.#ctor(Redis.OM.Contracts.IRedisConnection)
-  name: RedisCollection(IRedisConnection)
-  href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1__ctor_Redis_OM_Contracts_IRedisConnection_
-  commentId: M:Redis.OM.Searching.RedisCollection`1.#ctor(Redis.OM.Contracts.IRedisConnection)
-  fullName: Redis.OM.Searching.RedisCollection<T>.RedisCollection(Redis.OM.Contracts.IRedisConnection)
-  fullName.vb: Redis.OM.Searching.RedisCollection(Of T).RedisCollection(Redis.OM.Contracts.IRedisConnection)
-  nameWithType: RedisCollection<T>.RedisCollection(IRedisConnection)
-  nameWithType.vb: RedisCollection(Of T).RedisCollection(IRedisConnection)
+- uid: Redis.OM.Searching.RedisCollection`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Int32)
+  name: RedisCollection(IRedisConnection, Int32)
+  href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Int32_
+  commentId: M:Redis.OM.Searching.RedisCollection`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Int32)
+  fullName: Redis.OM.Searching.RedisCollection<T>.RedisCollection(Redis.OM.Contracts.IRedisConnection, System.Int32)
+  fullName.vb: Redis.OM.Searching.RedisCollection(Of T).RedisCollection(Redis.OM.Contracts.IRedisConnection, System.Int32)
+  nameWithType: RedisCollection<T>.RedisCollection(IRedisConnection, Int32)
+  nameWithType.vb: RedisCollection(Of T).RedisCollection(IRedisConnection, Int32)
 - uid: Redis.OM.Searching.RedisCollection`1.#ctor*
   name: RedisCollection
   href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1__ctor_
@@ -4055,6 +4268,40 @@ references:
   fullName.vb: Redis.OM.Searching.RedisCollection(Of T).Any
   nameWithType: RedisCollection<T>.Any
   nameWithType.vb: RedisCollection(Of T).Any
+- uid: Redis.OM.Searching.RedisCollection`1.ChunkSize
+  name: ChunkSize
+  href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1_ChunkSize
+  commentId: P:Redis.OM.Searching.RedisCollection`1.ChunkSize
+  fullName: Redis.OM.Searching.RedisCollection<T>.ChunkSize
+  fullName.vb: Redis.OM.Searching.RedisCollection(Of T).ChunkSize
+  nameWithType: RedisCollection<T>.ChunkSize
+  nameWithType.vb: RedisCollection(Of T).ChunkSize
+- uid: Redis.OM.Searching.RedisCollection`1.ChunkSize*
+  name: ChunkSize
+  href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1_ChunkSize_
+  commentId: Overload:Redis.OM.Searching.RedisCollection`1.ChunkSize
+  isSpec: "True"
+  fullName: Redis.OM.Searching.RedisCollection<T>.ChunkSize
+  fullName.vb: Redis.OM.Searching.RedisCollection(Of T).ChunkSize
+  nameWithType: RedisCollection<T>.ChunkSize
+  nameWithType.vb: RedisCollection(Of T).ChunkSize
+- uid: Redis.OM.Searching.RedisCollection`1.Delete(`0)
+  name: Delete(T)
+  href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1_Delete__0_
+  commentId: M:Redis.OM.Searching.RedisCollection`1.Delete(`0)
+  fullName: Redis.OM.Searching.RedisCollection<T>.Delete(T)
+  fullName.vb: Redis.OM.Searching.RedisCollection(Of T).Delete(T)
+  nameWithType: RedisCollection<T>.Delete(T)
+  nameWithType.vb: RedisCollection(Of T).Delete(T)
+- uid: Redis.OM.Searching.RedisCollection`1.Delete*
+  name: Delete
+  href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1_Delete_
+  commentId: Overload:Redis.OM.Searching.RedisCollection`1.Delete
+  isSpec: "True"
+  fullName: Redis.OM.Searching.RedisCollection<T>.Delete
+  fullName.vb: Redis.OM.Searching.RedisCollection(Of T).Delete
+  nameWithType: RedisCollection<T>.Delete
+  nameWithType.vb: RedisCollection(Of T).Delete
 - uid: Redis.OM.Searching.RedisCollection`1.ElementType
   name: ElementType
   href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1_ElementType
@@ -4278,6 +4525,23 @@ references:
   fullName.vb: Redis.OM.Searching.RedisCollection(Of T).System.Collections.IEnumerable.GetEnumerator
   nameWithType: RedisCollection<T>.IEnumerable.GetEnumerator
   nameWithType.vb: RedisCollection(Of T).System.Collections.IEnumerable.GetEnumerator
+- uid: Redis.OM.Searching.RedisCollection`1.Update(`0)
+  name: Update(T)
+  href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1_Update__0_
+  commentId: M:Redis.OM.Searching.RedisCollection`1.Update(`0)
+  fullName: Redis.OM.Searching.RedisCollection<T>.Update(T)
+  fullName.vb: Redis.OM.Searching.RedisCollection(Of T).Update(T)
+  nameWithType: RedisCollection<T>.Update(T)
+  nameWithType.vb: RedisCollection(Of T).Update(T)
+- uid: Redis.OM.Searching.RedisCollection`1.Update*
+  name: Update
+  href: api/Redis.OM.Searching.RedisCollection-1.html#Redis_OM_Searching_RedisCollection_1_Update_
+  commentId: Overload:Redis.OM.Searching.RedisCollection`1.Update
+  isSpec: "True"
+  fullName: Redis.OM.Searching.RedisCollection<T>.Update
+  fullName.vb: Redis.OM.Searching.RedisCollection(Of T).Update
+  nameWithType: RedisCollection<T>.Update
+  nameWithType.vb: RedisCollection(Of T).Update
 - uid: Redis.OM.Searching.SearchResponse
   name: SearchResponse
   href: api/Redis.OM.Searching.SearchResponse.html

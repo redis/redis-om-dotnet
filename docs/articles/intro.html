@@ -69,32 +69,41 @@
             <article class="content wrap" id="_content" data-uid="">
 <h1 id="getting-started">Getting Started</h1>
 
-<p>Redis OM is designed to make using Redis easier for .NET developers, so naturally the first question one might ask is how would you use it to connect to Redis?</p>
+<p>Redis OM is designed to make using Redis easier for .NET developers, so naturally the first question one might ask is where to start?</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>A .NET Standard 2.0 compatible version of .NET. This means that all .NET Framework versions 4.6.1+, .NET Core 2.0+ and .NET 5+ will work with Redis OM .NET.</li>
+<li>An IDE for writing .NET, Visual Studio, Rider, VS Code will all work.</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>To install Redis OM .NET all you need to do is add the <a href="https://www.nuget.org/packages/Redis.OM/"><code>Redis.OM</code></a> NuGet package to your project. This can be done by running <code>dotnet add package Redis.OM</code></p>
+<h2 id="connecting-to-redis">Connecting to Redis.</h2>
+<p>The next major step for getting started with Redis OM .NET is to connect to Redis.</p>
 <p>The Redis OM library is an abstraction above a lower level (closer to Redis) library—<a href="https://github.com/StackExchange/StackExchange.Redis">StackExchange.Redis</a>—which it uses to manage connections to Redis. That is however, an implementation detail which should not be a concern to the user. <code>RedisConnectionProvider</code> class contains the connection logic, and provides for connections to Redis. The RedisConnectionProvider should only be initialized once in your app's lifetime.</p>
 <h2 id="initializing-redisconnectionprovider">Initializing RedisConnectionProvider</h2>
 <p>RedisConnectionProvider takes a <a href="https://github.com/redis-developer/Redis-Developer-URI-Spec/blob/main/spec.md">Redis URI</a> and uses that to initialize a connection to Redis.</p>
-<p>Consequentially, all that needs to be done to initialize the client is calling the constructor of <code>RedisConnectionProvider</code> with a Redis uri. Alternatively, you can connect with a ConnectionConfiguration object.</p>
-<h3 id="connecting-to-a-standalone-instance-of-redis-no-auth">Connecting to a Standalone Instance of Redis No Auth</h3>
+<p>Consequentially, all that needs to be done to initialize the client is calling the constructor of <code>RedisConnectionProvider</code> with a Redis uri. Alternatively, you can connect with a ConnectionConfiguration object, or if you have a ConnectionMultiplexer in your DI container already, you can construct it with your ConnectionMultiplexer.</p>
+<h4 id="connecting-to-a-standalone-instance-of-redis-no-auth">Connecting to a Standalone Instance of Redis No Auth</h4>
 <pre><code class="lang-csharp">var provider = new RedisConnectionProvider(&quot;redis://hostname:port&quot;);
 </code></pre>
-<h3 id="connecting-to-standalone-instance-of-redis-just-password">Connecting to Standalone Instance of Redis Just Password</h3>
+<h4 id="connecting-to-standalone-instance-of-redis-just-password">Connecting to Standalone Instance of Redis Just Password</h4>
 <pre><code class="lang-csharp">var provider = new RedisConnectionProvider(&quot;redis://:password@hostname:port&quot;);
 </code></pre>
-<h3 id="connecting-to-standalone-instance-of-redis-or-redis-enterprise-username-and-password">Connecting to Standalone Instance of Redis or Redis Enterprise Username and Password</h3>
+<h4 id="connecting-to-standalone-instance-of-redis-or-redis-enterprise-username-and-password">Connecting to Standalone Instance of Redis or Redis Enterprise Username and Password</h4>
 <pre><code class="lang-csharp">var provider = new RedisConnectionProvider(&quot;redis://username:password@hostname:port&quot;);
 </code></pre>
-<h3 id="connecting-to-standalone-instance-of-redis-particular-database">Connecting to Standalone Instance of Redis Particular Database</h3>
+<h4 id="connecting-to-standalone-instance-of-redis-particular-database">Connecting to Standalone Instance of Redis Particular Database</h4>
 <pre><code class="lang-csharp">var provider = new RedisConnectionProvider(&quot;redis://username:password@hostname:port/4&quot;);
 </code></pre>
-<h3 id="connecting-to-redis-sentinel">Connecting to Redis Sentinel</h3>
+<h4 id="connecting-to-redis-sentinel">Connecting to Redis Sentinel</h4>
 <p>When connecting to Redis Sentinel, you will need to provide the sentinel</p>
 <pre><code class="lang-csharp">var provider = new RedisConnectionProvider(&quot;redis://username:password@sentinel-hostname:port?endpoint=another-sentinel-host:port&amp;endpoint=yet-another-sentinel-hot:port&amp;sentinel_primary_name=redisprimary&quot;);
 </code></pre>
-<h3 id="connecting-to-redis-cluster">Connecting to Redis Cluster</h3>
+<h4 id="connecting-to-redis-cluster">Connecting to Redis Cluster</h4>
 <p>Connecting to a Redis Cluster is similar to connecting to a standalone server, it is advisable however to include at least one other alternative endpoint in the URI as a query parameter in case of a failover event.</p>
 <pre><code class="lang-csharp">var provider = new RedisConnectionProvider(&quot;redis://username:password@hostname:port?endpoint=another-primary-host:port&quot;);
 </code></pre>
-<h2 id="getting-connection-rediscollection-redisaggregationset">Getting Connection RedisCollection RedisAggregationSet</h2>
+<h2 id="getting-the-redisconnection-rediscollection-and-redisaggregationset">Getting the RedisConnection, RedisCollection, and RedisAggregationSet</h2>
 <p>There are three primary drivers of Redis in this Library, which can all be accessed from the <code>provider</code> object after it's been initialize.</p>
 <ul>
 <li>The RedisConnection - this provides a command level interface to Redis, a limited set of commands are directly implemented, but any command can be executed via the <code>Execute</code> and <code>ExecuteAsync</code> commands. To get a handle to the RedisConnection just use <code>provider.Connection</code></li>
@@ -109,7 +118,7 @@
               <div class="contribution">
                 <ul class="nav">
                   <li>
-                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/docfx_project/articles/intro.md/#L1" class="contribution-link">Improve this Doc</a>
+                    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/docfx_project/articles/intro.md/#L1" class="contribution-link">Improve this Doc</a>
                   </li>
                 </ul>
               </div>

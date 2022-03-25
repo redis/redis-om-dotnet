@@ -142,19 +142,19 @@
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1__ctor_Redis_OM_Contracts_IRedisConnection_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.%23ctor(Redis.OM.Contracts.IRedisConnection)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Int32_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.%23ctor(Redis.OM.Contracts.IRedisConnection%2CSystem.Int32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L27">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L28">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1__ctor_" data-uid="Redis.OM.Searching.RedisCollection`1.#ctor*"></a>
-  <h4 id="Redis_OM_Searching_RedisCollection_1__ctor_Redis_OM_Contracts_IRedisConnection_" data-uid="Redis.OM.Searching.RedisCollection`1.#ctor(Redis.OM.Contracts.IRedisConnection)">RedisCollection(IRedisConnection)</h4>
+  <h4 id="Redis_OM_Searching_RedisCollection_1__ctor_Redis_OM_Contracts_IRedisConnection_System_Int32_" data-uid="Redis.OM.Searching.RedisCollection`1.#ctor(Redis.OM.Contracts.IRedisConnection,System.Int32)">RedisCollection(IRedisConnection, Int32)</h4>
   <div class="markdown level1 summary"><p>Initializes a new instance of the <a class="xref" href="Redis.OM.Searching.RedisCollection-1.html">RedisCollection&lt;T&gt;</a> class.</p>
 </div>
   <div class="markdown level1 conceptual"></div>
   <h5 class="decalaration">Declaration</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public RedisCollection(IRedisConnection connection)</code></pre>
+    <pre><code class="lang-csharp hljs">public RedisCollection(IRedisConnection connection, int chunkSize = 100)</code></pre>
   </div>
   <h5 class="parameters">Parameters</h5>
   <table class="table table-bordered table-striped table-condensed">
@@ -172,16 +172,53 @@
         <td><p>Connection to Redis.</p>
 </td>
       </tr>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">chunkSize</span></td>
+        <td><p>Size of chunks to pull back during pagination, defaults to 100.</p>
+</td>
+      </tr>
     </tbody>
   </table>
   <h3 id="properties">Properties
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_ElementType.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.ElementType%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_ChunkSize.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.ChunkSize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L55">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L73">View Source</a>
+  </span>
+  <a id="Redis_OM_Searching_RedisCollection_1_ChunkSize_" data-uid="Redis.OM.Searching.RedisCollection`1.ChunkSize*"></a>
+  <h4 id="Redis_OM_Searching_RedisCollection_1_ChunkSize" data-uid="Redis.OM.Searching.RedisCollection`1.ChunkSize">ChunkSize</h4>
+  <div class="markdown level1 summary"><p>Gets the size of chunks to use when paginating.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ChunkSize { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_ElementType.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.ElementType%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L59">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_ElementType_" data-uid="Redis.OM.Searching.RedisCollection`1.ElementType*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_ElementType" data-uid="Redis.OM.Searching.RedisCollection`1.ElementType">ElementType</h4>
@@ -208,10 +245,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Expression.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Expression%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Expression.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Expression%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L58">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L62">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_Expression_" data-uid="Redis.OM.Searching.RedisCollection`1.Expression*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_Expression" data-uid="Redis.OM.Searching.RedisCollection`1.Expression">Expression</h4>
@@ -238,10 +275,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Provider.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Provider%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Provider.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Provider%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L61">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L65">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_Provider_" data-uid="Redis.OM.Searching.RedisCollection`1.Provider*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_Provider" data-uid="Redis.OM.Searching.RedisCollection`1.Provider">Provider</h4>
@@ -268,10 +305,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_StateManager.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.StateManager%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_StateManager.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.StateManager%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L66">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L70">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_StateManager_" data-uid="Redis.OM.Searching.RedisCollection`1.StateManager*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_StateManager" data-uid="Redis.OM.Searching.RedisCollection`1.StateManager">StateManager</h4>
@@ -301,10 +338,10 @@
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Any_System_Linq_Expressions_Expression_System_Func__0_System_Boolean___.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Any(System.Linq.Expressions.Expression%7BSystem.Func%7B%600%2CSystem.Boolean%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Any_System_Linq_Expressions_Expression_System_Func__0_System_Boolean___.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Any(System.Linq.Expressions.Expression%7BSystem.Func%7B%600%2CSystem.Boolean%7D%7D)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L73">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L80">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_Any_" data-uid="Redis.OM.Searching.RedisCollection`1.Any*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_Any_System_Linq_Expressions_Expression_System_Func__0_System_Boolean___" data-uid="Redis.OM.Searching.RedisCollection`1.Any(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">Any(Expression&lt;Func&lt;T, Boolean&gt;&gt;)</h4>
@@ -351,10 +388,60 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_FindById_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.FindById(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Delete__0_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Delete(%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L154">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L117">View Source</a>
+  </span>
+  <a id="Redis_OM_Searching_RedisCollection_1_Delete_" data-uid="Redis.OM.Searching.RedisCollection`1.Delete*"></a>
+  <h4 id="Redis_OM_Searching_RedisCollection_1_Delete__0_" data-uid="Redis.OM.Searching.RedisCollection`1.Delete(`0)">Delete(T)</h4>
+  <div class="markdown level1 summary"><p>Deletes the item from Redis.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public async Task Delete(T item)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">T</span></td>
+        <td><span class="parametername">item</span></td>
+        <td><p>The item to be deleted.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span></td>
+        <td><p>A <span class="xref">System.Threading.Tasks.Task</span> representing the asynchronous operation.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_FindById_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.FindById(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L197">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_FindById_" data-uid="Redis.OM.Searching.RedisCollection`1.FindById*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_FindById_System_String_" data-uid="Redis.OM.Searching.RedisCollection`1.FindById(System.String)">FindById(String)</h4>
@@ -401,10 +488,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_FindByIdAsync_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.FindByIdAsync(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_FindByIdAsync_System_String_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.FindByIdAsync(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L157">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L200">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_FindByIdAsync_" data-uid="Redis.OM.Searching.RedisCollection`1.FindByIdAsync*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_FindByIdAsync_System_String_" data-uid="Redis.OM.Searching.RedisCollection`1.FindByIdAsync(System.String)">FindByIdAsync(String)</h4>
@@ -451,10 +538,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_GetAsyncEnumerator_System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.GetAsyncEnumerator(System.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_GetAsyncEnumerator_System_Threading_CancellationToken_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.GetAsyncEnumerator(System.Threading.CancellationToken)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L160">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L203">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_GetAsyncEnumerator_" data-uid="Redis.OM.Searching.RedisCollection`1.GetAsyncEnumerator*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_GetAsyncEnumerator_System_Threading_CancellationToken_" data-uid="Redis.OM.Searching.RedisCollection`1.GetAsyncEnumerator(System.Threading.CancellationToken)">GetAsyncEnumerator(CancellationToken)</h4>
@@ -498,10 +585,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L81">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L125">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_GetEnumerator_" data-uid="Redis.OM.Searching.RedisCollection`1.GetEnumerator*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_GetEnumerator" data-uid="Redis.OM.Searching.RedisCollection`1.GetEnumerator">GetEnumerator()</h4>
@@ -528,10 +615,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Insert__0_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Insert(%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Insert__0_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Insert(%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L142">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L185">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_Insert_" data-uid="Redis.OM.Searching.RedisCollection`1.Insert*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_Insert__0_" data-uid="Redis.OM.Searching.RedisCollection`1.Insert(`0)">Insert(T)</h4>
@@ -578,10 +665,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_InsertAsync__0_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.InsertAsync(%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_InsertAsync__0_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.InsertAsync(%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L148">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L191">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_InsertAsync_" data-uid="Redis.OM.Searching.RedisCollection`1.InsertAsync*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_InsertAsync__0_" data-uid="Redis.OM.Searching.RedisCollection`1.InsertAsync(`0)">InsertAsync(T)</h4>
@@ -628,10 +715,10 @@
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Save.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Save%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Save.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Save%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L93">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L137">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_Save_" data-uid="Redis.OM.Searching.RedisCollection`1.Save*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_Save" data-uid="Redis.OM.Searching.RedisCollection`1.Save">Save()</h4>
@@ -644,10 +731,10 @@
   </div>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_SaveAsync.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.SaveAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_SaveAsync.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.SaveAsync%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L113">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L157">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_SaveAsync_" data-uid="Redis.OM.Searching.RedisCollection`1.SaveAsync*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_SaveAsync" data-uid="Redis.OM.Searching.RedisCollection`1.SaveAsync">SaveAsync()</h4>
@@ -674,14 +761,64 @@
       </tr>
     </tbody>
   </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_Update__0_.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.Update(%600)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L88">View Source</a>
+  </span>
+  <a id="Redis_OM_Searching_RedisCollection_1_Update_" data-uid="Redis.OM.Searching.RedisCollection`1.Update*"></a>
+  <h4 id="Redis_OM_Searching_RedisCollection_1_Update__0_" data-uid="Redis.OM.Searching.RedisCollection`1.Update(`0)">Update(T)</h4>
+  <div class="markdown level1 summary"><p>Updates the provided item in Redis. Document must have a property marked with the <a class="xref" href="Redis.OM.Modeling.RedisIdFieldAttribute.html">RedisIdFieldAttribute</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public async Task Update(T item)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">T</span></td>
+        <td><span class="parametername">item</span></td>
+        <td><p>The item to update.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span></td>
+        <td><p>A <span class="xref">System.Threading.Tasks.Task</span> representing the asynchronous operation.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
   <h3 id="eii">Explicit Interface Implementations
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_System_Collections_IEnumerable_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.System%23Collections%23IEnumerable%23GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1_System_Collections_IEnumerable_GetEnumerator.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601.System%23Collections%23IEnumerable%23GetEnumerator%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L87">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L131">View Source</a>
   </span>
   <a id="Redis_OM_Searching_RedisCollection_1_System_Collections_IEnumerable_GetEnumerator_" data-uid="Redis.OM.Searching.RedisCollection`1.System#Collections#IEnumerable#GetEnumerator*"></a>
   <h4 id="Redis_OM_Searching_RedisCollection_1_System_Collections_IEnumerable_GetEnumerator" data-uid="Redis.OM.Searching.RedisCollection`1.System#Collections#IEnumerable#GetEnumerator">IEnumerable.GetEnumerator()</h4>
@@ -755,10 +892,10 @@
               <div class="contribution">
                 <ul class="nav">
                   <li>
-                    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Searching_RedisCollection_1.md&amp;value=---%0Auid%3A%20Redis.OM.Searching.RedisCollection%601%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
                   </li>
                   <li>
-                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L18" class="contribution-link">View Source</a>
+                    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Searching/RedisCollection.cs/#L18" class="contribution-link">View Source</a>
                   </li>
                 </ul>
               </div>

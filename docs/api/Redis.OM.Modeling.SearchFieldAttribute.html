@@ -221,17 +221,17 @@
   <h6><strong>Assembly</strong>: Redis.OM.dll</h6>
   <h5 id="Redis_OM_Modeling_SearchFieldAttribute_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">[AttributeUsage(AttributeTargets.Property)]
+    <pre><code class="lang-csharp hljs">[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
 public abstract class SearchFieldAttribute : RedisFieldAttribute</code></pre>
   </div>
   <h3 id="properties">Properties
   </h3>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute_Aggregatable.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute.Aggregatable%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute_Aggregatable.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute.Aggregatable%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L20">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L20">View Source</a>
   </span>
   <a id="Redis_OM_Modeling_SearchFieldAttribute_Aggregatable_" data-uid="Redis.OM.Modeling.SearchFieldAttribute.Aggregatable*"></a>
   <h4 id="Redis_OM_Modeling_SearchFieldAttribute_Aggregatable" data-uid="Redis.OM.Modeling.SearchFieldAttribute.Aggregatable">Aggregatable</h4>
@@ -259,10 +259,75 @@ public abstract class SearchFieldAttribute : RedisFieldAttribute</code></pre>
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute_Normalize.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute.Normalize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute_CascadeDepth.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L26">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L39">View Source</a>
+  </span>
+  <a id="Redis_OM_Modeling_SearchFieldAttribute_CascadeDepth_" data-uid="Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth*"></a>
+  <h4 id="Redis_OM_Modeling_SearchFieldAttribute_CascadeDepth" data-uid="Redis.OM.Modeling.SearchFieldAttribute.CascadeDepth">CascadeDepth</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the depth into the object graph to automatically generate the index.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int CascadeDepth { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute_JsonPath.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute.JsonPath%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L34">View Source</a>
+  </span>
+  <a id="Redis_OM_Modeling_SearchFieldAttribute_JsonPath_" data-uid="Redis.OM.Modeling.SearchFieldAttribute.JsonPath*"></a>
+  <h4 id="Redis_OM_Modeling_SearchFieldAttribute_JsonPath" data-uid="Redis.OM.Modeling.SearchFieldAttribute.JsonPath">JsonPath</h4>
+  <div class="markdown level1 summary"><p>Gets or sets the JSON path to the desired attribute to index. This is used for
+indexing individual fields within objects. Defaults to &quot;.&quot;, which assumes the entire field will be indexed
+If the indexed field is a scalar, it will only index that field. If that index is an object the index
+will be recursively built based off the <a class="xref" href="Redis.OM.Modeling.SearchFieldAttribute.html#Redis_OM_Modeling_SearchFieldAttribute_CascadeDepth">CascadeDepth</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string JsonPath { get; set; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute_Normalize.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute.Normalize%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L26">View Source</a>
   </span>
   <a id="Redis_OM_Modeling_SearchFieldAttribute_Normalize_" data-uid="Redis.OM.Modeling.SearchFieldAttribute.Normalize*"></a>
   <h4 id="Redis_OM_Modeling_SearchFieldAttribute_Normalize" data-uid="Redis.OM.Modeling.SearchFieldAttribute.Normalize">Normalize</h4>
@@ -291,10 +356,10 @@ public abstract class SearchFieldAttribute : RedisFieldAttribute</code></pre>
   </table>
   <span class="small pull-right mobile-hide">
     <span class="divider">|</span>
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute_Sortable.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute.Sortable%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute_Sortable.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute.Sortable%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
   </span>
   <span class="small pull-right mobile-hide">
-    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L15">View Source</a>
+    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L15">View Source</a>
   </span>
   <a id="Redis_OM_Modeling_SearchFieldAttribute_Sortable_" data-uid="Redis.OM.Modeling.SearchFieldAttribute.Sortable*"></a>
   <h4 id="Redis_OM_Modeling_SearchFieldAttribute_Sortable" data-uid="Redis.OM.Modeling.SearchFieldAttribute.Sortable">Sortable</h4>
@@ -328,10 +393,10 @@ public abstract class SearchFieldAttribute : RedisFieldAttribute</code></pre>
               <div class="contribution">
                 <ul class="nav">
                   <li>
-                    <a href="https://github.com/redis-developer/redis-developer-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                    <a href="https://github.com/redis/redis-om-dotnet/new/docs/apiSpec/new?filename=Redis_OM_Modeling_SearchFieldAttribute.md&amp;value=---%0Auid%3A%20Redis.OM.Modeling.SearchFieldAttribute%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
                   </li>
                   <li>
-                    <a href="https://github.com/redis-developer/redis-developer-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L9" class="contribution-link">View Source</a>
+                    <a href="https://github.com/redis/redis-om-dotnet/blob/docs/src/Redis.OM/Modeling/SearchFieldAttribute.cs/#L9" class="contribution-link">View Source</a>
                   </li>
                 </ul>
               </div>
