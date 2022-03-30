@@ -68,7 +68,7 @@ namespace Redis.OM.Common
             {
                 ConstantExpression constExp => $"{constExp.Value}",
                 MemberExpression member => GetOperandStringForMember(member),
-                MethodCallExpression method => TranslateContainsStandardQuerySyntax(method),
+                MethodCallExpression method => TranslateMethodStandardQuerySyntax(method),
                 UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
@@ -247,27 +247,35 @@ namespace Redis.OM.Common
             memberPath.Add(member.Member.Name);
 
             var searchField = member.Member.GetCustomAttributes().Where(x => x is SearchFieldAttribute).Cast<SearchFieldAttribute>().FirstOrDefault();
-            if (searchField == null)
-            {
-                if (member.Expression is not ConstantExpression c)
-                {
-                    try
-                    {
-                        return Expression.Lambda(member).Compile().DynamicInvoke().ToString();
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException(
-                            $"Could not retrieve value from {member.Member.Name}, most likely, it is not properly decorated in the model defining the index.", ex);
-                    }
-                }
 
-                var val = GetValue(member.Member, c.Value);
-                return val.ToString();
+            var dependencyChain = new List<MemberExpression>();
+            var pointingExpression = member;
+            while (pointingExpression != null)
+            {
+                dependencyChain.Add(pointingExpression);
+                pointingExpression = pointingExpression.Expression as MemberExpression;
             }
 
-            var propertyName = GetSearchFieldNameFromMember(member);
-            return $"@{propertyName}";
+            if (dependencyChain.Last().Expression is ConstantExpression c)
+            {
+                var resolved = c.Value;
+                for (var i = dependencyChain.Count; i > 0; i--)
+                {
+                    var expr = dependencyChain[i - 1];
+                    resolved = GetValue(expr.Member, resolved);
+                }
+
+                return resolved.ToString();
+            }
+
+            if (searchField != null)
+            {
+                var propertyName = GetSearchFieldNameFromMember(member);
+                return $"@{propertyName}";
+            }
+
+            throw new InvalidOperationException(
+                $"Could not retrieve value from {member.Member.Name}, most likely, it is not properly decorated in the model defining the index.");
         }
 
         private static string GetOperandStringStringArgs(Expression exp)
@@ -493,6 +501,36 @@ namespace Redis.OM.Common
                 }
             }
             while (true);
+        }
+
+        private static string TranslateMethodStandardQuerySyntax(MethodCallExpression exp)
+        {
+            return exp.Method.Name switch
+            {
+                nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
+                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp),
+                _ => throw new InvalidOperationException($"Unable to parse method {exp.Method.Name}")
+            };
+        }
+
+        private static string TranslateFormatMethodStandardQuerySyntax(MethodCallExpression exp)
+        {
+            var format = GetOperandString(exp.Arguments[0]);
+            string[] args;
+            if (exp.Arguments[1] is NewArrayExpression newArrayExpression)
+            {
+                args = newArrayExpression.Expressions.Select(GetOperandString).ToArray();
+            }
+            else
+            {
+                args = new string[exp.Arguments.Count - 1];
+                for (var i = 1; i < exp.Arguments.Count; i++)
+                {
+                    args[i - 1] = GetOperandString(exp.Arguments[i]);
+                }
+            }
+
+            return string.Format(format, args);
         }
 
         private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp)
