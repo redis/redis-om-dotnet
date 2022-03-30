@@ -308,8 +308,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var anonObject = new Person() {Name = "Steve"};
-            collection.Where(x => x.Name == anonObject.Name).ToList();
+            var modelObject = new Person() {Name = "Steve"};
+            collection.Where(x => x.Name == modelObject.Name).ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
@@ -326,8 +326,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var anonObject = new Person() {Name = "Steve"};
-            collection.Where(x => x.Name == $"A {nameof(Person)} named {anonObject.Name}").ToList();
+            var modelObject = new Person() {Name = "Steve"};
+            collection.Where(x => x.Name == $"A {nameof(Person)} named {modelObject.Name}").ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
@@ -344,10 +344,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var anonObject = new Person() {Name = "Steve"};
+            var modelObject = new Person() {Name = "Steve"};
             var a = "A";
             var named = "named";
-            collection.Where(x => x.Name == $"{a} {nameof(Person)} {named} {anonObject.Name}").ToList();
+            collection.Where(x => x.Name == string.Format("{0} {1} {2} {3}", a, nameof(Person), named, modelObject.Name)).ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
