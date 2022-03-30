@@ -302,6 +302,62 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
         
         [Fact]
+        public void TestBasicQueryFromPropertyOfModel()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var anonObject = new Person() {Name = "Steve"};
+            collection.Where(x => x.Name == anonObject.Name).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:\"Steve\")",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestBasicQueryFromPropertyOfModelWithStringInterpolation()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var anonObject = new Person() {Name = "Steve"};
+            collection.Where(x => x.Name == $"A {nameof(Person)} named {anonObject.Name}").ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:\"A Person named Steve\")",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestBasicQueryFromPropertyOfModelWithStringFormatFourArgs()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var anonObject = new Person() {Name = "Steve"};
+            var a = "A";
+            var named = "named";
+            collection.Where(x => x.Name == $"{a} {nameof(Person)} {named} {anonObject.Name}").ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:\"A Person named Steve\")",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
         public void TestBasicQueryWithContainsWithNegation()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))                            
