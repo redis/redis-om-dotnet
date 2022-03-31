@@ -380,8 +380,38 @@ namespace Redis.OM
         /// <param name="value">The value.</param>
         /// <param name="storageType">The storage type of the value.</param>
         /// <typeparam name="T">The type of the value.</typeparam>
+        internal static void UnlinkAndSet<T>(this IRedisConnection connection, string key, T value, StorageType storageType)
+        {
+            _ = value ?? throw new ArgumentNullException(nameof(value));
+            if (storageType == StorageType.Json)
+            {
+                connection.CreateAndEval(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, Options) });
+            }
+            else
+            {
+                var hash = value.BuildHashSet();
+                var args = new List<string>((hash.Keys.Count * 2) + 1);
+                args.Add(hash.Keys.Count.ToString());
+                foreach (var pair in hash)
+                {
+                    args.Add(pair.Key);
+                    args.Add(pair.Value);
+                }
+
+                connection.CreateAndEval(nameof(Scripts.UnlinkAndSetHash), new[] { key }, args.ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Unlinks the key and then adds an updated value of it.
+        /// </summary>
+        /// <param name="connection">The connection to redis.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="storageType">The storage type of the value.</param>
+        /// <typeparam name="T">The type of the value.</typeparam>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal static async Task UnlinkAndSet<T>(this IRedisConnection connection, string key, T value, StorageType storageType)
+        internal static async Task UnlinkAndSetAsync<T>(this IRedisConnection connection, string key, T value, StorageType storageType)
         {
             _ = value ?? throw new ArgumentNullException(nameof(value));
             if (storageType == StorageType.Json)

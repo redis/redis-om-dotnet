@@ -87,7 +87,36 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
-        public async Task Update(T item)
+        public void Update(T item)
+        {
+            var key = item.GetKey();
+            IList<IObjectDiff>? diff;
+            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+            if (diffConstructed)
+            {
+                if (diff!.Any())
+                {
+                    var args = new List<string>();
+                    var scriptName = diff!.First().Script;
+                    foreach (var update in diff!)
+                    {
+                        args.AddRange(update.SerializeScriptArgs());
+                    }
+
+                    _connection.CreateAndEval(scriptName, new[] { key }, args.ToArray());
+                }
+            }
+            else
+            {
+                _connection.UnlinkAndSet(key, item, StateManager.DocumentAttribute.StorageType);
+            }
+
+            StateManager.InsertIntoSnapshot(key, item);
+            StateManager.InsertIntoData(key, item);
+        }
+
+        /// <inheritdoc />
+        public async Task UpdateAsync(T item)
         {
             var key = item.GetKey();
             IList<IObjectDiff>? diff;
@@ -108,7 +137,7 @@ namespace Redis.OM.Searching
             }
             else
             {
-                await _connection.UnlinkAndSet(key, item, StateManager.DocumentAttribute.StorageType);
+                await _connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType);
             }
 
             StateManager.InsertIntoSnapshot(key, item);
@@ -116,7 +145,15 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
-        public async Task Delete(T item)
+        public void Delete(T item)
+        {
+            var key = item.GetKey();
+            _connection.Unlink(key);
+            StateManager.Remove(key);
+        }
+
+        /// <inheritdoc />
+        public async Task DeleteAsync(T item)
         {
             var key = item.GetKey();
             await _connection.UnlinkAsync(key);

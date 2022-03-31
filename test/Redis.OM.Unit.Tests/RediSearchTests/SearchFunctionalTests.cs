@@ -309,7 +309,26 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
       
         [Fact]
-        public async Task TestUpdate()
+        public void TestUpdate()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person {Name = "Steve", Age = 32};
+            var key = collection.Insert(testP);
+            var queriedP = collection.FindById(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            collection.Update(queriedP);
+
+            var secondQueriedP = collection.FindById(key);
+            
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+        
+        [Fact]
+        public async Task TestUpdateAsync()
         {
             var collection = new RedisCollection<Person>(_connection);
             var testP = new Person {Name = "Steve", Age = 32};
@@ -317,7 +336,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = await collection.FindByIdAsync(key);
             Assert.NotNull(queriedP);
             queriedP.Age = 33;
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
@@ -337,7 +356,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = collection.First(x => x.Id == id);
             Assert.NotNull(queriedP);
             queriedP.Name = "Bob";
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
@@ -356,7 +375,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = await collection.FindByIdAsync(key);
             Assert.NotNull(queriedP);
             queriedP.Age = 33;
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
