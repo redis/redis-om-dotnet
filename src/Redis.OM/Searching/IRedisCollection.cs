@@ -82,5 +82,89 @@ namespace Redis.OM.Searching
         /// <param name="item">The item to be deleted.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task Delete(T item);
+
+        /// <summary>
+        /// Async method for enumerating the collection to a list.
+        /// </summary>
+        /// <returns>The enumerated collection as a list.</returns>
+        Task<IList<T>> ToListAsync();
+
+        /// <summary>
+        /// Retrieves the count of the collection async.
+        /// </summary>
+        /// <returns>The Collection's count.</returns>
+        Task<int> CountAsync();
+
+        /// <summary>
+        /// Retrieves the count of the collection async.
+        /// </summary>
+        /// <param name="expression">The predicate match.</param>
+        /// <returns>The Collection's count.</returns>
+        Task<int> CountAsync(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// returns if there's any items in the colleciton.
+        /// </summary>
+        /// <returns>True if there are items present.</returns>
+        Task<bool> AnyAsync();
+
+        /// <summary>
+        /// returns if there's any items in the colleciton.
+        /// </summary>
+        /// <returns>True if there are items present.</returns>
+        /// <param name="expression">The predicate match.</param>
+        Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Returns the first item asynchronously.
+        /// </summary>
+        /// <returns>First or default result.</returns>
+        Task<T> FirstAsync();
+
+        /// <summary>
+        /// Returns the first item asynchronously.
+        /// </summary>
+        /// <param name="expression">The predicate match.</param>
+        /// <returns>First or default result.</returns>
+        Task<T> FirstAsync(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Returns the first or default asynchronously.
+        /// </summary>
+        /// <returns>First or default result.</returns>
+        Task<T?> FirstOrDefaultAsync();
+
+        /// <summary>
+        /// Returns the first or default asynchronously.
+        /// </summary>
+        /// <param name="expression">The predicate match.</param>
+        /// <returns>First or default result.</returns>
+        Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Returns a single record or throws a <see cref="InvalidOperationException"/> if the sequence is empty or contains more than 1 record.
+        /// </summary>
+        /// <returns>The single instance.</returns>
+        Task<T> SingleAsync();
+
+        /// <summary>
+        /// Returns a single record or throws a <see cref="InvalidOperationException"/> if the sequence is empty or contains more than 1 record.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>The single instance.</returns>
+        Task<T> SingleAsync(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Returns a single record or the default if there are none, or more than 1.
+        /// </summary>
+        /// <returns>The single instance.</returns>
+        Task<T?> SingleOrDefaultAsync();
+
+        /// <summary>
+        /// Returns a single record or the default if there are none, or more than 1.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>The single instance.</returns>
+        Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> expression);
     }
 }

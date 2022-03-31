@@ -6,8 +6,10 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Searching.Query;
 
 namespace Redis.OM.Searching
 {
@@ -119,6 +121,142 @@ namespace Redis.OM.Searching
             var key = item.GetKey();
             await _connection.UnlinkAsync(key);
             StateManager.Remove(key);
+        }
+
+        /// <inheritdoc />
+        public async Task<IList<T>> ToListAsync()
+        {
+            var list = new List<T>();
+            await foreach (var item in this)
+            {
+                list.Add(item);
+            }
+
+            return list;
+        }
+
+        /// <inheritdoc />
+        public async Task<int> CountAsync()
+        {
+            var query = new RedisQuery(StateManager.DocumentAttribute.GetIndexName(typeof(T)));
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
+        }
+
+        /// <inheritdoc />
+        public async Task<int> CountAsync(Expression<Func<T, bool>> expression)
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, typeof(T));
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> AnyAsync()
+        {
+            var query = new RedisQuery(StateManager.DocumentAttribute.GetIndexName(typeof(T)));
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, typeof(T));
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
+        }
+
+        /// <inheritdoc />
+        public async Task<T> FirstAsync()
+        {
+            var query = new RedisQuery(StateManager.DocumentAttribute.GetIndexName(typeof(T)));
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            return res.Documents.Select(x => x.Value).First();
+        }
+
+        /// <inheritdoc />
+        public async Task<T> FirstAsync(Expression<Func<T, bool>> expression)
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, typeof(T));
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            return res.Documents.Select(x => x.Value).First();
+        }
+
+        /// <inheritdoc />
+        public async Task<T?> FirstOrDefaultAsync()
+        {
+            var query = new RedisQuery(StateManager.DocumentAttribute.GetIndexName(typeof(T)));
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            return res.Documents.Select(x => x.Value).FirstOrDefault();
+        }
+
+        /// <inheritdoc />
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> expression)
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, typeof(T));
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            return res.Documents.Select(x => x.Value).FirstOrDefault();
+        }
+
+        /// <inheritdoc />
+        public async Task<T> SingleAsync()
+        {
+            var query = new RedisQuery(StateManager.DocumentAttribute.GetIndexName(typeof(T)));
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            if (res.DocumentCount > 1)
+            {
+                throw new InvalidOperationException("Sequence contained more than one element.");
+            }
+
+            return res.Documents.Single().Value;
+        }
+
+        /// <inheritdoc />
+        public async Task<T> SingleAsync(Expression<Func<T, bool>> expression)
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, typeof(T));
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            if (res.DocumentCount > 1)
+            {
+                throw new InvalidOperationException("Sequence contained more than one element.");
+            }
+
+            return res.Documents.Single().Value;
+        }
+
+        /// <inheritdoc />
+        public async Task<T?> SingleOrDefaultAsync()
+        {
+            var query = new RedisQuery(StateManager.DocumentAttribute.GetIndexName(typeof(T)));
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            if (res.DocumentCount != 1)
+            {
+                return default;
+            }
+
+            return res.Documents.SingleOrDefault().Value;
+        }
+
+        /// <inheritdoc />
+        public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> expression)
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, typeof(T));
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            if (res.DocumentCount != 1)
+            {
+                return default;
+            }
+
+            return res.Documents.SingleOrDefault().Value;
         }
 
         /// <inheritdoc/>

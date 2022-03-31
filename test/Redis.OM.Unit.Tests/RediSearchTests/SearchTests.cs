@@ -24,6 +24,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"01FVN836BNQGYMT80V7RCVY73N\"}"
             })
         };
+        
+        RedisReply _mockReplyNone = new RedisReply[]
+        {
+            new (0),
+        };
+        
+        RedisReply _mockReply2Count = new RedisReply[]
+        {
+            new RedisReply(2),
+            new RedisReply("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"),
+            new RedisReply(new RedisReply[]
+            {
+                "$",
+                "{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"01FVN836BNQGYMT80V7RCVY73N\"}"
+            })
+        };
 
         RedisReply _mockReplySelect = new RedisReply[]
         {
@@ -758,6 +774,396 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x=>x.ExecuteAsync("UNLINK",key));
             Assert.False(colleciton.StateManager.Data.ContainsKey(key));
             Assert.False(colleciton.StateManager.Snapshot.ContainsKey(key));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestFirstAsync(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            if (useExpression)
+            {
+                _ = await collection.FirstAsync( x=> x.TagField == "bob");
+            }
+            else
+            {
+                _ = await collection.FirstAsync();
+            }
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestFirstAsyncNone(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReplyNone);
+
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            if (useExpression)
+            {
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => await collection.FirstAsync(x=>x.TagField == "bob"));
+            }
+            else
+            {
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => await collection.FirstAsync());
+            }
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestFirstOrDefaultAsync(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            Person? res;
+            if (useExpression)
+            {
+                res = await collection.FirstOrDefaultAsync(x=>x.TagField == "bob");
+            }
+            else
+            {
+                res = await collection.FirstOrDefaultAsync();
+            }
+            
+            Assert.NotNull(res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestFirstOrDefaultAsyncNone(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReplyNone);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            
+            Person? res;
+            if (useExpression)
+            {
+                res = await collection.FirstOrDefaultAsync(x=>x.TagField == "bob");
+            }
+            else
+            {
+                res = await collection.FirstOrDefaultAsync();
+            }
+
+            Assert.Null(res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestSingleAsync(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            var collection = new RedisCollection<Person>(_mock.Object);
+            Person res;
+            if (useExpression)
+            {
+                res = await collection.SingleAsync(x => x.TagField == "bob");
+            }
+            else
+            {
+                res = await collection.SingleAsync();
+            }
+            Assert.NotNull(res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestSingleAsyncNone(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReplyNone);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            if (useExpression)
+            {
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => await collection.SingleAsync(x=>x.TagField == "bob"));
+            }
+            else
+            {
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => await collection.SingleAsync());
+            }
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestSingleAsyncTwo(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            if (useExpression)
+            {
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => await collection.SingleAsync(x=>x.TagField == "bob"));
+            }
+            else
+            {
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => await collection.SingleAsync());
+            }
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestSingleOrDefaultAsync(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+
+            Person? res;
+            if (useExpression)
+            {
+                res = await collection.SingleOrDefaultAsync(x => x.TagField == "bob");
+            }
+            else
+            {
+                res = await collection.SingleOrDefaultAsync();
+            }
+            
+            Assert.NotNull(res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestSingleOrDefaultAsyncNone(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReplyNone);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+
+            Person? res;
+            if (useExpression)
+            {
+                res = await collection.SingleOrDefaultAsync(x => x.TagField == "bob");
+            }
+            else
+            {
+                res = await collection.SingleOrDefaultAsync();
+            }
+            
+            Assert.Null(res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestSingleOrDefaultAsyncTwo(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+
+            Person? res;
+            if (useExpression)
+            {
+                res = await collection.SingleOrDefaultAsync(x => x.TagField == "bob");
+            }
+            else
+            {
+                res = await collection.SingleOrDefaultAsync();
+            }
+            
+            Assert.Null(res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestAnyAsync(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var res = await (useExpression ? collection.AnyAsync(x => x.TagField == "bob") : collection.AnyAsync()); 
+            Assert.True(res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "0"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestAnyAsyncNone(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReplyNone);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            var res = await (useExpression ? collection.AnyAsync(x => x.TagField == "bob") : collection.AnyAsync()); 
+            
+            Assert.False(res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "0"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestCountAsync(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            var res = await (useExpression ? collection.CountAsync(x => x.TagField == "bob") : collection.CountAsync());
+            Assert.Equal(1,res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "0"));
+        }
+        
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task TestCount2Async(bool useExpression)
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
+            var res = await (useExpression ? collection.CountAsync(x => x.TagField == "bob") : collection.CountAsync());
+            Assert.Equal(2,res);
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "0"));
         }
     }
 }

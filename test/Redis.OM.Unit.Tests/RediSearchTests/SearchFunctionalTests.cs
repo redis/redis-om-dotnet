@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
+using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
@@ -363,6 +364,48 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(33, secondQueriedP.Age);
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
             Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        [Fact]
+        public async Task TestToListAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection,10000);
+            var list = await collection.ToListAsync();
+            
+            Assert.Equal(collection.Count(), list.Count);
+        }
+
+        [Fact]
+        public async Task CountAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection, 10000);
+            var count = await collection.CountAsync();
+            Assert.Equal(collection.Count(), count);
+        }
+
+        [Fact]
+        public async Task TestFirstOrDefaultAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection,10000);
+            Assert.NotNull(await collection.FirstOrDefaultAsync());
+        }
+
+        [Fact]
+        public async Task TestAnyAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection,10000);
+            Assert.True(await collection.AnyAsync());
+        }
+
+        [Fact]
+        public async Task TestSingleAsync()
+        {
+            var person = new Person {Name = "foo"};
+            var collection = new RedisCollection<Person>(_connection,10000);
+            await collection.InsertAsync(person);
+            var id = person.Id;
+            var res = await collection.SingleAsync(x => x.Id == id);
+            Assert.Equal("foo",res.Name);
         }
     }
 }
