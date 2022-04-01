@@ -73,27 +73,27 @@ namespace Redis.OM.Searching
         /// Updates the provided item in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
         /// </summary>
         /// <param name="item">The item to update.</param>
-        void Update(T item);
+        void UpdateSync(T item);
 
         /// <summary>
         /// Updates the provided item in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
         /// </summary>
         /// <param name="item">The item to update.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task UpdateAsync(T item);
+        Task Update(T item);
 
         /// <summary>
         /// Deletes the item from Redis.
         /// </summary>
         /// <param name="item">The item to be deleted.</param>
-        void Delete(T item);
+        void DeleteSync(T item);
 
         /// <summary>
         /// Deletes the item from Redis.
         /// </summary>
         /// <param name="item">The item to be deleted.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task DeleteAsync(T item);
+        Task Delete(T item);
 
         /// <summary>
         /// Async method for enumerating the collection to a list.

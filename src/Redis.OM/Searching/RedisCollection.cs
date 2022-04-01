@@ -87,7 +87,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
-        public void Update(T item)
+        public void UpdateSync(T item)
         {
             var key = item.GetKey();
             IList<IObjectDiff>? diff;
@@ -116,7 +116,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
-        public async Task UpdateAsync(T item)
+        public async Task Update(T item)
         {
             var key = item.GetKey();
             IList<IObjectDiff>? diff;
@@ -145,7 +145,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
-        public void Delete(T item)
+        public void DeleteSync(T item)
         {
             var key = item.GetKey();
             _connection.Unlink(key);
@@ -153,7 +153,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
-        public async Task DeleteAsync(T item)
+        public async Task Delete(T item)
         {
             var key = item.GetKey();
             await _connection.UnlinkAsync(key);
