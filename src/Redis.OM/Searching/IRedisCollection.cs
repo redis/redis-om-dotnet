@@ -49,14 +49,14 @@ namespace Redis.OM.Searching
         Task<string> InsertAsync(T item);
 
         /// <summary>
-        /// finds an item by it's ID.
+        /// finds an item by it's ID or keyname.
         /// </summary>
         /// <param name="id">the id to lookup.</param>
         /// <returns>the item if it's present.</returns>
         Task<T?> FindByIdAsync(string id);
 
         /// <summary>
-        /// finds an item by it's ID.
+        /// finds an item by it's ID or keyname.
         /// </summary>
         /// <param name="id">the id to lookup.</param>
         /// <returns>the item if it's present.</returns>
