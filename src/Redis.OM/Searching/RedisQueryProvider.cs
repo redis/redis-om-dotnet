@@ -128,6 +128,34 @@ namespace Redis.OM.Searching
         }
 
         /// <summary>
+        /// Executes the query.
+        /// </summary>
+        /// <param name="expression">The expression to be built and executed.</param>
+        /// <typeparam name="T">The indexed type.</typeparam>
+        /// <returns>The response.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if indexed type not properly decorated.</exception>
+        public async Task<SearchResponse<T>> ExecuteQueryAsync<T>(Expression expression)
+            where T : notnull
+        {
+            var type = typeof(T);
+            var attr = type.GetCustomAttribute<DocumentAttribute>();
+            if (attr == null)
+            {
+                type = GetRootType((MethodCallExpression)expression);
+                attr = type.GetCustomAttribute<DocumentAttribute>();
+            }
+
+            if (attr == null)
+            {
+                throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
+            }
+
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type);
+            var response = await Connection.SearchRawResultAsync(query);
+            return new SearchResponse<T>(response);
+        }
+
+        /// <summary>
         /// Executes an aggregation.
         /// </summary>
         /// <param name="expression">The expression to be built into a pipeline.</param>
