@@ -216,7 +216,7 @@ namespace Redis.OM
             if (attr == null || attr.StorageType == StorageType.Hash)
             {
                 var dict = await connection.HGetAllAsync(keyName);
-                return (T?)RedisObjectHandler.FromHashSet<T>(dict);
+                return dict.Any() ? (T?)RedisObjectHandler.FromHashSet<T>(dict) : default;
             }
 
             return connection.JsonGet<T>(keyName, ".");
@@ -234,8 +234,8 @@ namespace Redis.OM
         {
             var args = new List<string> { key };
             args.AddRange(paths);
-            var res = connection.Execute("JSON.GET", args.ToArray());
-            return JsonSerializer.Deserialize<T>(res, Options);
+            var res = (string)connection.Execute("JSON.GET", args.ToArray());
+            return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, Options) : default;
         }
 
         /// <summary>

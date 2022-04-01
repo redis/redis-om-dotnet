@@ -118,19 +118,32 @@ namespace Redis.OM
             }
 
             var sb = new StringBuilder();
-            if (documentAttribute.Prefixes.Any())
+            sb.Append(GetKeyPrefix(type));
+            sb.Append(":");
+            sb.Append(id);
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Generates the key prefix for the given type and id.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The key name.</returns>
+        internal static string GetKeyPrefix(this Type type)
+        {
+            var documentAttribute = (DocumentAttribute)type.GetCustomAttribute(typeof(DocumentAttribute));
+            if (documentAttribute == null)
             {
-                sb.Append(documentAttribute.Prefixes.First());
-                sb.Append(":");
-            }
-            else
-            {
-                sb.Append(type.FullName);
-                sb.Append(":");
+                throw new ArgumentException("Missing Document Attribute on Declaring class");
             }
 
-            sb.Append(id);
-            return sb.ToString();
+            if (documentAttribute.Prefixes.Any())
+            {
+                return documentAttribute.Prefixes.First();
+            }
+
+            return type.FullName!;
         }
 
         /// <summary>
