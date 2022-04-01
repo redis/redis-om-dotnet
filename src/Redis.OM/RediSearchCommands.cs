@@ -177,5 +177,17 @@ namespace Redis.OM
             var args = query.SerializeQuery();
             return connection.Execute("FT.SEARCH", args);
         }
+
+        /// <summary>
+        /// Search redis with the given query.
+        /// </summary>
+        /// <param name="connection">the connection to redis.</param>
+        /// <param name="query">the query to use in the search.</param>
+        /// <returns>a Redis reply.</returns>
+        internal static Task<RedisReply> SearchRawResultAsync(this IRedisConnection connection, RedisQuery query)
+        {
+            var args = query.SerializeQuery();
+            return connection.ExecuteAsync("FT.SEARCH", args);
+        }
     }
 }
