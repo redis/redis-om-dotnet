@@ -388,5 +388,49 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var result = await _connection.GetAsync<HashPerson>("NotARealId");
             Assert.Null(result);
         }
+
+        [Fact]
+        public async Task FindByIdAsync()
+        {
+            var person = new Person {Name = "Bob"};
+            var collection = new RedisCollection<Person>(_connection);
+            await collection.InsertAsync(person);
+            var alsoBob = await collection.FindByIdAsync(person.Id);
+            Assert.NotNull(alsoBob);
+            Assert.Equal("Bob",person.Name);
+        }
+
+        [Fact]
+        public void FindById()
+        {
+            var person = new Person {Name = "Bob"};
+            var collection = new RedisCollection<Person>(_connection);
+            collection.Insert(person);
+            var alsoBob = collection.FindById(person.Id);
+            Assert.NotNull(alsoBob);
+            Assert.Equal("Bob",person.Name);
+        }
+
+        [Fact]
+        public void FindByKey()
+        {
+            var person = new Person {Name = "Bob"};
+            var collection = new RedisCollection<Person>(_connection);
+            var key = collection.Insert(person);
+            var alsoBob = collection.FindById(key);
+            Assert.NotNull(alsoBob);
+            Assert.Equal("Bob",person.Name);
+        }
+
+        [Fact]
+        public async Task FindByKeyAsync()
+        {
+            var person = new Person {Name = "Bob"};
+            var collection = new RedisCollection<Person>(_connection);
+            var key = await collection.InsertAsync(person);
+            var alsoBob = await collection.FindByIdAsync(key);
+            Assert.NotNull(alsoBob);
+            Assert.Equal("Bob",person.Name);
+        }
     }
 }
