@@ -117,24 +117,6 @@ namespace Redis.OM
                 throw new ArgumentException("Id field is not correctly populated");
             }
 
-            return GenerateKeyName(type, id);
-        }
-
-        /// <summary>
-        /// Generates a key name.
-        /// </summary>
-        /// <param name="type">the type to generate the key name for.</param>
-        /// <param name="id">the id.</param>
-        /// <returns>The key name.</returns>
-        /// <exception cref="ArgumentException">Exception thrown if the type in question is not decorated by a DocumentAttribute.</exception>
-        internal static string GenerateKeyName(Type type, string id)
-        {
-            var documentAttribute = (DocumentAttribute)type.GetCustomAttribute(typeof(DocumentAttribute));
-            if (documentAttribute == null)
-            {
-                throw new ArgumentException("Missing Document Attribute on Declaring class");
-            }
-
             var sb = new StringBuilder();
             if (documentAttribute.Prefixes.Any())
             {

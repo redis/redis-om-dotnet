@@ -72,9 +72,6 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public int ChunkSize { get; }
 
-        /// <inheritdoc />
-        public T? FindByKey(string key) => _connection.Get<T>(key);
-
         /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
@@ -197,13 +194,10 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public T? FindById(string id) => _connection.Get<T>(RedisObjectHandler.GenerateKeyName(typeof(T), id));
+        public T? FindById(string id) => _connection.Get<T>(id);
 
         /// <inheritdoc/>
-        public async Task<T?> FindByKeyAsync(string key) => await _connection.GetAsync<T>(key);
-
-        /// <inheritdoc/>
-        public async Task<T?> FindByIdAsync(string id) => await _connection.GetAsync<T>(RedisObjectHandler.GenerateKeyName(typeof(T), id));
+        public async Task<T?> FindByIdAsync(string id) => await _connection.GetAsync<T>(id);
 
         /// <inheritdoc/>
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)

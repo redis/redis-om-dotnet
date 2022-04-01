@@ -63,20 +63,6 @@ namespace Redis.OM.Searching
         T? FindById(string id);
 
         /// <summary>
-        /// finds an item by its Key name.
-        /// </summary>
-        /// <param name="key">the leu to lookup.</param>
-        /// <returns>the item if it's present.</returns>
-        Task<T?> FindByKeyAsync(string key);
-
-        /// <summary>
-        /// finds an item by it's Key name.
-        /// </summary>
-        /// <param name="key">the key to lookup.</param>
-        /// <returns>the item if it's present.</returns>
-        T? FindByKey(string key);
-
-        /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
         /// <param name="expression">the expression to be matched.</param>
