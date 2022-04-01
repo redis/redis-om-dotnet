@@ -369,10 +369,20 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public T? FindById(string id) => _connection.Get<T>(id);
+        public T? FindById(string id)
+        {
+            var prefix = typeof(T).GetKeyPrefix();
+            string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
+            return _connection.Get<T>(key);
+        }
 
         /// <inheritdoc/>
-        public async Task<T?> FindByIdAsync(string id) => await _connection.GetAsync<T>(id);
+        public async Task<T?> FindByIdAsync(string id)
+        {
+            var prefix = typeof(T).GetKeyPrefix();
+            string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
+            return await _connection.GetAsync<T>(key);
+        }
 
         /// <inheritdoc/>
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
