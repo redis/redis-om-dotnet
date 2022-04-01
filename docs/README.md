@@ -110,7 +110,7 @@ To perform basic Get & Set operations on your data.
 
 ```csharp
 var id = collection.Add(new Person{Name = "Kermit the Frog"});
-var kermit = collection.FindById(id);
+var kermit = collection.FindByKey(id);
 ```
 
 #### Command Usage
