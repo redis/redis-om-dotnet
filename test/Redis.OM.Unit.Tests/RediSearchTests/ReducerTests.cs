@@ -1310,5 +1310,35 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal(5, (int)res[0]["Age_MAX"]);
         }
+
+        [Fact]
+        public void TestCountMembers()
+        {
+            var mockReply = new RedisReply[]
+            {
+                new RedisReply(1),
+            };
+            
+            _mock.Setup(x => x.Execute(
+                    It.IsAny<string>(),
+                    It.IsAny<string[]>()))
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            collection.GroupBy(x => x.RecordShell.Height).CountGroupMembers().ToList();
+            
+            _mock.Verify(x=>x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "GROUPBY",
+                "1",
+                "@Height",
+                "REDUCE",
+                "COUNT",
+                "0",
+                "AS",
+                "COUNT"));
+        }
     }
 }

@@ -185,6 +185,21 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Get's a count of the members of an aggregation group.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <typeparam name="T">The indexed type.</typeparam>
+        /// <returns>The counts of the members within all the groups.</returns>
+        public static GroupedAggregationSet<T> CountGroupMembers<T>(this GroupedAggregationSet<T> source)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(CountGroupMembers, source),
+                new[] { source.Expression });
+            return new GroupedAggregationSet<T>(source, exp);
+        }
+
+        /// <summary>
         /// Counts distinct elements matching the expression.
         /// </summary>
         /// <param name="source">The source.</param>
