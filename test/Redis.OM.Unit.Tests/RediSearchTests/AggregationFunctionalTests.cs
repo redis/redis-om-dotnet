@@ -148,5 +148,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 Assert.Equal(527500, average);
             }).GetAwaiter().GetResult();
         }
+
+        [Fact]
+        public async Task GetGroupCount()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            var results = await collection.GroupBy(x => x.RecordShell.Age).CountGroupMembers().ToListAsync();
+            foreach (var result in results)
+            {
+                Assert.True(1<=result["COUNT"]);
+            }
+        }
     }
 }
