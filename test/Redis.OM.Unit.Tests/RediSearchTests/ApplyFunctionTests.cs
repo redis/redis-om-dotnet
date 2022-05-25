@@ -1149,5 +1149,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
+        
+        [Fact]
+        public void TestMultipleOperations()
+        {
+            var expectedPredicate = "@Age + 5 - 6";
+            _mock.Setup(x => x.Execute(It.IsAny<string>(),
+                    It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var res = collection.Apply(
+                x=>x.RecordShell.Age + 5 - 6, "res").ToArray();
+
+            _mock.Verify(x => x.Execute(
+                    "FT.AGGREGATE",
+                    "person-idx",
+                    "*",
+                    "APPLY",
+                    expectedPredicate,
+                    "AS",
+                    "res"));
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+        
     }
 }
