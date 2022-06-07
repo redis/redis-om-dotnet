@@ -348,14 +348,29 @@ namespace Redis.OM
 
                 if (type == typeof(bool) || type == typeof(bool?))
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":{hash[propertyName].ToLower()},";
                 }
                 else if (type.IsPrimitive || type == typeof(decimal))
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
                 else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset))
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
