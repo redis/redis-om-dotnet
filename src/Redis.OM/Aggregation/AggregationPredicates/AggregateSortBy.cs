@@ -44,7 +44,6 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <inheritdoc/>
         public IEnumerable<string> Serialize()
         {
-            var numArgs = Max.HasValue ? 4 : 2;
             var ret = new List<string> { "SORTBY", NumArgs.ToString(), $"@{Property}", Direction == SortDirection.Ascending ? "ASC" : "DESC" };
             if (Max.HasValue)
             {
