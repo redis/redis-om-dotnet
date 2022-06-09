@@ -310,7 +310,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = collection.FindById(key);
             Assert.NotNull(queriedP);
             queriedP.Age = 33;
-            collection.UpdateSync(queriedP);
+            collection.Update(queriedP);
 
             var secondQueriedP = collection.FindById(key);
             
@@ -329,7 +329,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = await collection.FindByIdAsync(key);
             Assert.NotNull(queriedP);
             queriedP.Age = 33;
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
@@ -349,7 +349,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = collection.First(x => x.Id == id);
             Assert.NotNull(queriedP);
             queriedP.Name = "Bob";
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
@@ -368,7 +368,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = await collection.FindByIdAsync(key);
             Assert.NotNull(queriedP);
             queriedP.Age = 33;
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
