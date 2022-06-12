@@ -133,6 +133,9 @@ namespace Redis.OM.Common
                     case "LongCountAsync":
                         TranslateAndPushZeroArgumentPredicate(ReduceFunction.COUNT, aggregation.Predicates);
                         break;
+                    case "CountGroupMembers":
+                        TranslateAndPushZeroArgumentPredicate(ReduceFunction.COUNT, aggregation.Predicates);
+                        break;
                     case "CountDistinct":
                     case "CountDistinctAsync":
                         TranslateAndPushReductionPredicate(exp, ReduceFunction.COUNT_DISTINCT, aggregation.Predicates);
