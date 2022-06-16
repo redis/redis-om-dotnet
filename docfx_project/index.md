@@ -91,7 +91,7 @@ Now we need to create the Redis index. So we'll connect to Redis and then call `
 
 ```csharp
 var provider = new RedisConnectionProvider("redis://localhost:6379");
-connection.CreateIndex(typeof(Customer));
+provider.Connection.CreateIndex(typeof(Customer));
 ```
 
 Once the index is created, we can:
