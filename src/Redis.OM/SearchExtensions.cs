@@ -185,6 +185,21 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Get's a count of the members of an aggregation group.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <typeparam name="T">The indexed type.</typeparam>
+        /// <returns>The counts of the members within all the groups.</returns>
+        public static GroupedAggregationSet<T> CountGroupMembers<T>(this GroupedAggregationSet<T> source)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(CountGroupMembers, source),
+                new[] { source.Expression });
+            return new GroupedAggregationSet<T>(source, exp);
+        }
+
+        /// <summary>
         /// Counts distinct elements matching the expression.
         /// </summary>
         /// <param name="source">The source.</param>
@@ -459,6 +474,42 @@ namespace Redis.OM
                 Expression.Constant(lat),
                 Expression.Constant(radius),
                 Expression.Constant(unit));
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+        }
+
+        /// <summary>
+        /// Orders the collection by the provided attribute.
+        /// </summary>
+        /// <param name="source">The Redis Collection.</param>
+        /// <param name="expression">The expression.</param>
+        /// <typeparam name="T">The base type.</typeparam>
+        /// <typeparam name="TField">The field type to order by.</typeparam>
+        /// <returns>A redis collection extending the pipeline of linq expressions with the relevant SORTBY.</returns>
+        public static IRedisCollection<T> OrderBy<T, TField>(this IRedisCollection<T> source, Expression<Func<T, TField>> expression)
+            where T : notnull
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(OrderBy, source, expression),
+                new[] { source.Expression, Expression.Quote(expression) });
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+        }
+
+        /// <summary>
+        /// Orders the collection by the provided attribute.
+        /// </summary>
+        /// <param name="source">The Redis Collection.</param>
+        /// <param name="expression">The expression.</param>
+        /// <typeparam name="T">The base type.</typeparam>
+        /// <typeparam name="TField">The field type to order by.</typeparam>
+        /// <returns>A redis collection extending the pipeline of linq expressions with the relevant SORTBY.</returns>
+        public static IRedisCollection<T> OrderByDescending<T, TField>(this IRedisCollection<T> source, Expression<Func<T, TField>> expression)
+            where T : notnull
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(OrderByDescending, source, expression),
+                new[] { source.Expression, Expression.Quote(expression) });
             return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
         }
 
