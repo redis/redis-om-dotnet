@@ -1,4 +1,4 @@
-using Moq;
+﻿using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -384,7 +384,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             collection.Load(x => new {x.RecordShell.Name, x.RecordShell.Age}).ToList();
             _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx","*","LOAD","2","Name", "Age","WITHCURSOR", "COUNT","10000"));
         }
-        
+
         [Fact]
         public void TestLoadAll()
         {
@@ -392,11 +392,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
             _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
             collection.LoadAll().ToList();
-            _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx","*","LOAD","*", "WITHCURSOR", "COUNT","10000"));
+            _mock.Verify(x =>
+                x.Execute("FT.AGGREGATE", "person-idx", "*", "LOAD", "*", "WITHCURSOR", "COUNT", "10000"));
+        }
 
         [Fact]
         public void TestMultipleOrderBys()
         {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
             _ = collection.OrderBy(x => x.RecordShell.Name).OrderByDescending(x => x.RecordShell.Age).ToList();
             _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx", "*", "SORTBY", "4", "@Name", "ASC", "@Age", "DESC", "WITHCURSOR", "COUNT", "10000"));
         }
