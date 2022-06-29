@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Redis.OM;
 
 namespace Redis.OM.Aggregation
@@ -44,6 +45,13 @@ namespace Redis.OM.Aggregation
         /// </summary>
         /// <param name="key">the aggregation alias.</param>
         public RedisReply this[string key] => Aggregations[key];
+
+        /// <summary>
+        /// Hydrates the record from the available properties. Basically, this will place all the properties found in "Aggregations"
+        /// into an instance of your model, and in the special case where you've called a LoadAll on a JSON model, this should parse the entire record.
+        /// </summary>
+        /// <returns>An instance of the base class hydrated as much as possible by the Results of the aggregation.</returns>
+        public T Hydrate() => RedisObjectHandler.FromHashSet<T>(Aggregations);
 
         /// <summary>
         /// Initializes a set of aggregations from an aggregation result.

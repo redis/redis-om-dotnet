@@ -91,10 +91,10 @@ namespace Redis.OM.Common
                         TranslateAndPushReductionPredicate(exp, ReduceFunction.MAX, aggregation.Predicates);
                         break;
                     case "OrderBy":
-                        aggregation.Predicates.Push(TranslateSortBy(exp, SortDirection.Ascending));
+                        PushAggregateSortBy(exp, SortDirection.Ascending, aggregation.Predicates);
                         break;
                     case "OrderByDescending":
-                        aggregation.Predicates.Push(TranslateSortBy(exp, SortDirection.Descending));
+                        PushAggregateSortBy(exp, SortDirection.Descending, aggregation.Predicates);
                         break;
                     case "Take":
                         if (aggregation.Limit != null)
@@ -160,6 +160,12 @@ namespace Redis.OM.Common
                     case "RandomSample":
                     case "RandomSampleAsync":
                         TranslateAndPushTwoArgumentReductionPredicate(exp, ReduceFunction.RANDOM_SAMPLE, aggregation.Predicates);
+                        break;
+                    case "Load":
+                        TranslateAndPushLoad(aggregation.Predicates, exp);
+                        break;
+                    case "LoadAll":
+                        aggregation.Predicates.Push(new LoadAll());
                         break;
                 }
             }
@@ -304,7 +310,7 @@ namespace Redis.OM.Common
         /// <param name="exp">The expression.</param>
         /// <returns>The field names.</returns>
         /// <exception cref="ArgumentException">Thrown if the expression is of an unrecognized type.</exception>
-        private static string[] GetFieldNamesGroupBy(Expression exp)
+        private static string[] GetFieldNamesForExpression(Expression exp)
         {
             if (exp is ConstantExpression constExp)
             {
@@ -323,12 +329,12 @@ namespace Redis.OM.Common
 
             if (exp is UnaryExpression unary)
             {
-                return GetFieldNamesGroupBy(unary.Operand);
+                return GetFieldNamesForExpression(unary.Operand);
             }
 
             if (exp is LambdaExpression lambda)
             {
-                return GetFieldNamesGroupBy(lambda.Body);
+                return GetFieldNamesForExpression(lambda.Body);
             }
 
             if (exp is NewExpression newExpression)
@@ -339,6 +345,17 @@ namespace Redis.OM.Common
             throw new ArgumentException("Invalid expression type detected");
         }
 
+        private static void TranslateAndPushLoad(Stack<IAggregationPredicate> predicates, MethodCallExpression expression)
+        {
+            var properties = GetFieldNamesForExpression(expression.Arguments[1]);
+            if (properties.Length < 1)
+            {
+                throw new ArgumentException("Load predicate must contain at least 1 property");
+            }
+
+            predicates.Push(new Load(properties));
+        }
+
         /// <summary>
         /// Translate and push a group by expression.
         /// </summary>
@@ -346,7 +363,7 @@ namespace Redis.OM.Common
         /// <param name="expression">The expression to parse.</param>
         private static void TranslateAndPushGroupBy(Stack<IAggregationPredicate> predicates, MethodCallExpression expression)
         {
-            var properties = GetFieldNamesGroupBy(expression.Arguments[1]);
+            var properties = GetFieldNamesForExpression(expression.Arguments[1]);
             if (predicates.Count > 0 && predicates.Peek() is GroupBy)
             {
                 var gb = (GroupBy)predicates.Pop();
@@ -377,6 +394,21 @@ namespace Redis.OM.Common
             var alias = ((ConstantExpression)exp.Arguments[2]).Value.ToString();
             var lambda = (LambdaExpression)((UnaryExpression)exp.Arguments[1]).Operand;
             return new Apply(lambda.Body, alias);
+        }
+
+        private static void PushAggregateSortBy(MethodCallExpression expression, SortDirection dir, Stack<IAggregationPredicate> operationStack)
+        {
+            var sb = TranslateSortBy(expression, dir);
+            if (operationStack.Any() && operationStack.Peek() is MultiSort ms)
+            {
+                ms.InsertPredicate(sb);
+            }
+            else
+            {
+                ms = new MultiSort();
+                ms.InsertPredicate(sb);
+                operationStack.Push(ms);
+            }
         }
 
         private static AggregateSortBy TranslateSortBy(MethodCallExpression expression, SortDirection dir)

@@ -364,5 +364,46 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 Assert.Equal("blah", item[$"FakeResult"]);
             }
         }
+
+        [Fact]
+        public void TestLoad()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            collection.Load(x => x.RecordShell.Name).ToList();
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx","*","LOAD","1","Name","WITHCURSOR", "COUNT","10000"));
+        }
+        
+        [Fact]
+        public void TestMultiVariant()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            collection.Load(x => new {x.RecordShell.Name, x.RecordShell.Age}).ToList();
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx","*","LOAD","2","Name", "Age","WITHCURSOR", "COUNT","10000"));
+        }
+
+        [Fact]
+        public void TestLoadAll()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            collection.LoadAll().ToList();
+            _mock.Verify(x =>
+                x.Execute("FT.AGGREGATE", "person-idx", "*", "LOAD", "*", "WITHCURSOR", "COUNT", "10000"));
+        }
+
+        [Fact]
+        public void TestMultipleOrderBys()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _ = collection.OrderBy(x => x.RecordShell.Name).OrderByDescending(x => x.RecordShell.Age).ToList();
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx", "*", "SORTBY", "4", "@Name", "ASC", "@Age", "DESC", "WITHCURSOR", "COUNT", "10000"));
+        }
     }
 }

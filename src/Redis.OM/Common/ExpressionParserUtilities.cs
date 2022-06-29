@@ -126,7 +126,7 @@ namespace Redis.OM.Common
 
                 operationStack.Push(right);
                 operationStack.Push(GetOperatorFromNodeType(expression.NodeType));
-                if (!string.IsNullOrEmpty(left))
+                if (!string.IsNullOrEmpty(left) && !(expression.Left is BinaryExpression))
                 {
                     operationStack.Push(left);
                 }

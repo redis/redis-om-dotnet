@@ -1256,5 +1256,322 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "0"));
         }
+
+        [Fact]
+        public async Task TestOrderByWithAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var expectedPredicate = "*";
+            _ = await collection.OrderBy(x => x.Age).ToListAsync();
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "100",
+                "SORTBY",
+                "Age",
+                "ASC"));
+        }
+
+        [Fact]
+        public async Task TestOrderByDescendingWithAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var expectedPredicate = "*";
+            _ = await collection.OrderByDescending(x => x.Age).ToListAsync();
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "100",
+                "SORTBY",
+                "Age",
+                "DESC"));
+        }
+
+        [Fact]
+        public async Task CombinedExpressionsWithFirstOrDefaultAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.Where(x => x.Name == "Bob").FirstOrDefaultAsync();
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Fact]
+        public async Task CombinedExpressionsWithFirstAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.Where(x => x.Name == "Bob").FirstAsync();
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Fact]
+        public async Task CombinedExpressionsWithAnyAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.Where(x => x.Name == "Bob").AnyAsync();
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "0"));
+        }
+
+        [Fact]
+        public async Task CombinedExpressionsSingleOrDefaultAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.Where(x => x.Name == "Bob").SingleOrDefaultAsync();
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Fact]
+        public async Task CombinedExpressionsSingleAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.Where(x => x.Name == "Bob").SingleAsync();
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Fact]
+        public async Task CombinedExpressionsCountAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.Where(x => x.Name == "Bob").CountAsync();
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "0"));
+        }
+
+        [Fact]
+        public async Task TestCombinedExpressionWithExpressionFirstOrDefaultAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply2Count);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.GeoFilter(x => x.Home, 5,5,10,GeoLocDistanceUnit.Miles).FirstOrDefaultAsync(x=>x.Name == "Bob");
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1",
+                "GEOFILTER",
+                "Home",
+                "5",
+                "5",
+                "10",
+                "mi"));
+        }
+
+        [Fact]
+        public async Task TestCombinedExpressionWithExpressionFirstAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.GeoFilter(x => x.Home, 5,5,10,GeoLocDistanceUnit.Miles).FirstAsync(x=>x.Name == "Bob");
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1",
+                "GEOFILTER",
+                "Home",
+                "5",
+                "5",
+                "10",
+                "mi"));
+        }
+
+        [Fact]
+        public async Task TestCombinedExpressionWithExpressionAnyAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.GeoFilter(x => x.Home, 5,5,10,GeoLocDistanceUnit.Miles).AnyAsync(x=>x.Name == "Bob");
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "0",
+                "GEOFILTER",
+                "Home",
+                "5",
+                "5",
+                "10",
+                "mi"));
+        }
+
+        [Fact]
+        public async Task TestCombinedExpressionWithExpressionSingleAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.GeoFilter(x => x.Home, 5,5,10,GeoLocDistanceUnit.Miles).SingleAsync(x=>x.Name == "Bob");
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1",
+                "GEOFILTER",
+                "Home",
+                "5",
+                "5",
+                "10",
+                "mi"));
+        }
+
+        [Fact]
+        public async Task TestCombinedExpressionWithExpressionSingleOrDefaultAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.GeoFilter(x => x.Home, 5,5,10,GeoLocDistanceUnit.Miles).SingleOrDefaultAsync(x=>x.Name == "Bob");
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "1",
+                "GEOFILTER",
+                "Home",
+                "5",
+                "5",
+                "10",
+                "mi"));
+        }
+
+        [Fact]
+        public async Task TestCombinedExpressionWithExpressionCountAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            var expectedPredicate = "(@Name:\"Bob\")";
+            _ = await collection.GeoFilter(x => x.Home, 5,5,10,GeoLocDistanceUnit.Miles).CountAsync(x=>x.Name == "Bob");
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                expectedPredicate,
+                "LIMIT",
+                "0",
+                "0",
+                "GEOFILTER",
+                "Home",
+                "5",
+                "5",
+                "10",
+                "mi"));
+        }
+
     }
 }
