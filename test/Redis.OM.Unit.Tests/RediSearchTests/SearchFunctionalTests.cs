@@ -282,6 +282,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = collection.FirstOrDefault(x => x.NickNames.Contains("Steve"));
             Assert.Equal(id.Split(':')[1], steve.Id);
         }
+
+        [Fact]
+        public void TestArrayQuerySpecialChars()
+        {
+            var testP = new Person{Name = "Stephen", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}, NickNames = new []{"Steve@redis.com"}};
+            var id = _connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            var steve = collection.FirstOrDefault(x => x.NickNames.Contains("Steve@redis.com"));
+            Assert.Equal(id.Split(':')[1], steve.Id);
+        }
         
         [Fact]
         public void TestListQuery()
