@@ -1169,7 +1169,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                     expectedPredicate,
                     "AS",
                     "res"));
-            Assert.Equal("Blah", res[0]["FakeResult"]);
         }
         
     }
