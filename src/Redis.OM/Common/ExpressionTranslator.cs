@@ -18,15 +18,6 @@ namespace Redis.OM.Common
     internal class ExpressionTranslator
     {
         /// <summary>
-        /// Characters to escape when serializing a tag expression.
-        /// </summary>
-        private static readonly char[] TagEscapeChars =
-        {
-            ',', '.', '<', '>', '{', '}', '[', ']', '"', '\'', ':', ';',
-            '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '~', '|', ' ',
-        };
-
-        /// <summary>
         /// Build's an aggregation from an expression.
         /// </summary>
         /// <param name="expression">The expression to translate.</param>
@@ -131,6 +122,9 @@ namespace Redis.OM.Common
                     case "LongCount":
                     case "CountAsync":
                     case "LongCountAsync":
+                        TranslateAndPushZeroArgumentPredicate(ReduceFunction.COUNT, aggregation.Predicates);
+                        break;
+                    case "CountGroupMembers":
                         TranslateAndPushZeroArgumentPredicate(ReduceFunction.COUNT, aggregation.Predicates);
                         break;
                     case "CountDistinct":
@@ -612,7 +606,7 @@ namespace Redis.OM.Common
             switch (searchFieldType)
             {
                 case SearchFieldType.TAG:
-                    sb.Append($"{{{EscapeTagField(right)}}}");
+                    sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(right)}}}");
                     break;
                 case SearchFieldType.TEXT:
                     sb.Append($"\"{right}\"");
@@ -622,22 +616,6 @@ namespace Redis.OM.Common
                     break;
                 default:
                     throw new InvalidOperationException("Could not translate query, equality searches only supported for Tag and numeric fields");
-            }
-
-            return sb.ToString();
-        }
-
-        private static string EscapeTagField(string text)
-        {
-            var sb = new StringBuilder();
-            foreach (var c in text)
-            {
-                if (TagEscapeChars.Contains(c))
-                {
-                    sb.Append("\\");
-                }
-
-                sb.Append(c);
             }
 
             return sb.ToString();

@@ -282,6 +282,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = collection.FirstOrDefault(x => x.NickNames.Contains("Steve"));
             Assert.Equal(id.Split(':')[1], steve.Id);
         }
+
+        [Fact]
+        public void TestArrayQuerySpecialChars()
+        {
+            var testP = new Person{Name = "Stephen", Home = new GeoLoc(1.0, 1.0), Address = new Address{ ForwardingAddress = new Address{City = "Newark"}}, NickNames = new []{"Steve@redis.com"}};
+            var id = _connection.Set(testP);
+            var collection = new RedisCollection<Person>(_connection);
+            var steve = collection.FirstOrDefault(x => x.NickNames.Contains("Steve@redis.com"));
+            Assert.Equal(id.Split(':')[1], steve.Id);
+        }
         
         [Fact]
         public void TestListQuery()
@@ -310,7 +320,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = collection.FindById(key);
             Assert.NotNull(queriedP);
             queriedP.Age = 33;
-            collection.UpdateSync(queriedP);
+            collection.Update(queriedP);
 
             var secondQueriedP = collection.FindById(key);
             
@@ -329,7 +339,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = await collection.FindByIdAsync(key);
             Assert.NotNull(queriedP);
             queriedP.Age = 33;
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
@@ -349,7 +359,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = collection.First(x => x.Id == id);
             Assert.NotNull(queriedP);
             queriedP.Name = "Bob";
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
@@ -368,7 +378,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var queriedP = await collection.FindByIdAsync(key);
             Assert.NotNull(queriedP);
             queriedP.Age = 33;
-            await collection.Update(queriedP);
+            await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
             
