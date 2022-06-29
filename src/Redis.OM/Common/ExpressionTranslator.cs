@@ -91,10 +91,10 @@ namespace Redis.OM.Common
                         TranslateAndPushReductionPredicate(exp, ReduceFunction.MAX, aggregation.Predicates);
                         break;
                     case "OrderBy":
-                        aggregation.Predicates.Push(TranslateSortBy(exp, SortDirection.Ascending));
+                        PushAggregateSortBy(exp, SortDirection.Ascending, aggregation.Predicates);
                         break;
                     case "OrderByDescending":
-                        aggregation.Predicates.Push(TranslateSortBy(exp, SortDirection.Descending));
+                        PushAggregateSortBy(exp, SortDirection.Descending, aggregation.Predicates);
                         break;
                     case "Take":
                         if (aggregation.Limit != null)
@@ -377,6 +377,21 @@ namespace Redis.OM.Common
             var alias = ((ConstantExpression)exp.Arguments[2]).Value.ToString();
             var lambda = (LambdaExpression)((UnaryExpression)exp.Arguments[1]).Operand;
             return new Apply(lambda.Body, alias);
+        }
+
+        private static void PushAggregateSortBy(MethodCallExpression expression, SortDirection dir, Stack<IAggregationPredicate> operationStack)
+        {
+            var sb = TranslateSortBy(expression, dir);
+            if (operationStack.Any() && operationStack.Peek() is MultiSort ms)
+            {
+                ms.InsertPredicate(sb);
+            }
+            else
+            {
+                ms = new MultiSort();
+                ms.InsertPredicate(sb);
+                operationStack.Push(ms);
+            }
         }
 
         private static AggregateSortBy TranslateSortBy(MethodCallExpression expression, SortDirection dir)
