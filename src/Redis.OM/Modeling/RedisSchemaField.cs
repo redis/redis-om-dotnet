@@ -170,7 +170,7 @@ namespace Redis.OM.Modeling
 
             if (searchFieldType == "TAG" && attr is IndexedAttribute tag)
             {
-                if (tag.Separator != ',' && declaredType == typeof(string))
+                if (tag.Separator != ',' && !declaredType.IsEnum)
                 {
                     ret.Add("SEPARATOR");
                     ret.Add(tag.Separator.ToString());
