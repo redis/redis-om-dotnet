@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Redis.OM.Modeling
 {
@@ -64,5 +67,14 @@ namespace Redis.OM.Modeling
 
             throw new ArgumentException("Unrecognized Index type, can only index numerics, GeoLoc, or String");
         }
+
+        /// <summary>
+        /// Determines SearchFieldType of provided property info.
+        /// </summary>
+        /// <param name="info">The PropertyInfo to check.</param>
+        /// <returns>The Search field type.</returns>
+        internal static SearchFieldType GetSearchFieldFromEnumProperty(PropertyInfo info) =>
+            info.GetCustomAttributes<JsonConverterAttribute>().FirstOrDefault() is JsonConverterAttribute converter
+            && converter.ConverterType == typeof(JsonStringEnumConverter) ? SearchFieldType.TAG : SearchFieldType.NUMERIC;
     }
 }
