@@ -1593,13 +1593,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "$.Ulid", 
                 "AS", 
                 "Ulid",
-                "TAG",
+                "TAG", "SEPARATOR", "|",
                 "$.Boolean",
                 "AS",
                 "Boolean",
-                "TAG", 
+                "TAG", "SEPARATOR", "|", 
                 "$.Guid",
-                "AS", "Guid", "TAG", "$.AnEnum", "AS", "AnEnum", "TAG",
+                "AS", "Guid", "TAG", "SEPARATOR", "|", "$.AnEnum", "AS", "AnEnum", "TAG",
                 "$.AnEnumAsInt", "AS", "AnEnumAsInt","NUMERIC"
                 ));
         }
@@ -1621,9 +1621,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypesHash:", 
                 "SCHEMA", 
                 "Ulid",
-                "TAG",
+                "TAG", "SEPARATOR", "|",
                 "Boolean",
-                "TAG", "Guid", "TAG", "AnEnum","NUMERIC"
+                "TAG", "SEPARATOR", "|", "Guid", "TAG", "SEPARATOR", "|", "AnEnum","NUMERIC"
             ));
         }
 
