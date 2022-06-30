@@ -504,7 +504,7 @@ namespace Redis.OM.Common
             return sb;
         }
 
-        private static string BuildQueryFromExpression(Expression exp, ExpressionType? type = null)
+        private static string BuildQueryFromExpression(Expression exp)
         {
             if (exp is BinaryExpression binExp)
             {
@@ -518,7 +518,7 @@ namespace Redis.OM.Common
 
             if (exp is UnaryExpression uni)
             {
-                var operandString = BuildQueryFromExpression(uni.Operand, uni.NodeType);
+                var operandString = BuildQueryFromExpression(uni.Operand);
                 if (uni.NodeType == ExpressionType.Not)
                 {
                     operandString = $"-{operandString}";
