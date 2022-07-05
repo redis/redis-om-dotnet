@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Modeling;
@@ -260,9 +261,17 @@ namespace Redis.OM.Common
         /// <returns>The index field type.</returns>
         internal static SearchFieldType DetermineIndexFieldsType(MemberInfo member)
         {
-            if (member is PropertyInfo info && TypeDeterminationUtilities.IsNumeric(info.PropertyType))
+            if (member is PropertyInfo info)
             {
-                return SearchFieldType.NUMERIC;
+                if (TypeDeterminationUtilities.IsNumeric(info.PropertyType))
+                {
+                    return SearchFieldType.NUMERIC;
+                }
+
+                if (info.PropertyType.IsEnum)
+                {
+                    return TypeDeterminationUtilities.GetSearchFieldFromEnumProperty(info);
+                }
             }
 
             return SearchFieldType.TAG;
@@ -518,6 +527,12 @@ namespace Redis.OM.Common
                 return operandString;
             }
 
+            if (exp is MemberExpression member && member.Type == typeof(bool))
+            {
+                var property = ExpressionParserUtilities.GetOperandString(exp);
+                return $"{property}:{{true}}";
+            }
+
             throw new ArgumentException("Unparseable Lambda Body detected");
         }
 
@@ -556,6 +571,30 @@ namespace Redis.OM.Common
 
                 if (binExpression.Left is MemberExpression member)
                 {
+                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
+                    sb.Append("(");
+                    sb.Append(predicate);
+                    sb.Append(")");
+                }
+                else if (binExpression.Left is UnaryExpression uni)
+                {
+                    member = (MemberExpression)uni.Operand;
+                    var attr = member.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() as JsonConverterAttribute;
+                    if (attr != null && attr.ConverterType == typeof(JsonStringEnumConverter))
+                    {
+                        if (int.TryParse(rightContent, out int ordinal))
+                        {
+                            rightContent = Enum.ToObject(member.Type, ordinal).ToString();
+                        }
+                    }
+                    else
+                    {
+                        if (!int.TryParse(rightContent, out _))
+                        {
+                            rightContent = ((int)Enum.Parse(member.Type, rightContent)).ToString();
+                        }
+                    }
+
                     var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
                     sb.Append("(");
                     sb.Append(predicate);
