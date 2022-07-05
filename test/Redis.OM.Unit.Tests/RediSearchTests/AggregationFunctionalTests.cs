@@ -146,31 +146,25 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void GetAdjustedSalesStandardDeviation()
+        public async Task GetAdjustedSalesStandardDeviation()
         {
             Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
-            Task.Run(async () =>
-            {
-                var stddev = await collection.Apply(x => x.RecordShell.Sales
-                    * x.RecordShell.SalesAdjustment, "AdjustedSales")
-                    .StandardDeviationAsync(x => x["AdjustedSales"]);
-                Assert.Equal(358018.854252, stddev);
-            }).GetAwaiter().GetResult();
+            var stddev = await collection.Apply(x => x.RecordShell.Sales
+                                                     * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                .StandardDeviationAsync(x => x["AdjustedSales"]);
+            Assert.Equal(358018.854252, stddev);
         }
 
         [Fact]
-        public void GetAverageAdjustedSales()
+        public async Task GetAverageAdjustedSales()
         {
             Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
-            Task.Run(async () =>
-            {
-                var average = await collection.Apply(x => x.RecordShell.Sales
-                    * x.RecordShell.SalesAdjustment, "AdjustedSales")
-                    .AverageAsync(x => x["AdjustedSales"]);
-                Assert.Equal(527500, average);
-            }).GetAwaiter().GetResult();
+            var average = await collection.Apply(x => x.RecordShell.Sales
+                                                      * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                .AverageAsync(x => x["AdjustedSales"]);
+            Assert.Equal(527500, average);
         }
 
         [Fact]
