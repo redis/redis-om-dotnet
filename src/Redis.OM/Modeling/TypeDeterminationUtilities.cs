@@ -65,7 +65,7 @@ namespace Redis.OM.Modeling
                 return SearchFieldType.TAG;
             }
 
-            throw new ArgumentException("Unrecognized Index type, can only index numerics, GeoLoc, or String");
+            throw new ArgumentException("Unrecognized Index type, can only index numerics, GeoLoc, strings, ULIDs, GUIDs, Enums, and Booleans");
         }
 
         /// <summary>
