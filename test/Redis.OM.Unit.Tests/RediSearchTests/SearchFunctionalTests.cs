@@ -566,6 +566,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotEmpty(result);
             result = await collection.Where(x => (int)x.AnEnumAsInt > 1).ToListAsync();
             Assert.NotEmpty(result);
+            result = await collection.Where(x => x.AnEnumAsInt > AnEnum.two).ToListAsync();
+            Assert.NotEmpty(result);
             result = await collection.Where(x => x.AnEnumAsInt == AnEnum.three).ToListAsync();
             Assert.NotEmpty(result);
             result = await collection.Where(x => x.AnEnumAsInt == three).ToListAsync();
