@@ -88,7 +88,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
 
         [Fact]
-        public void TestAsyncEnumeration()
+        public async Task TestAsyncEnumeration()
         {
             _mock.Setup(x => x.ExecuteAsync(
                 "FT.AGGREGATE",
@@ -112,20 +112,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var res = collection.Where(x=>x.RecordShell.Age<(int?)three);
             
             var i = 0;
-            Task.Run(async () =>
+            await foreach (var item in res)
             {
-                await foreach (var item in res)
-                {
-                    Assert.Equal("blah", item[$"FakeResult"]);
-                    i++;
-                }
-                Assert.Equal(2000, i);
-            }).GetAwaiter().GetResult();
+                Assert.Equal("blah", item[$"FakeResult"]);
+                i++;
+            }
+            Assert.Equal(2000, i);
             
         }
 
         [Fact]
-        public void TestToList()
+        public async Task TestToList()
         {
             _mock.Setup(x => x.ExecuteAsync(
                 "FT.AGGREGATE",
@@ -146,20 +143,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ReturnsAsync(MockedResultCursorEnd);
             var collection = new RedisAggregationSet<Person>(_mock.Object, true);
             var res = collection.Where(x => x.RecordShell.Age < 3);
-            Task.Run(async () =>
+            var result = await res.ToListAsync();
+            foreach (var item in result)
             {
-                var result = await res.ToListAsync();
-                foreach (var item in result)
-                {
-                    Assert.Equal("blah", item[$"FakeResult"]);
-                }
-                Assert.Equal(2000, result.Count());
-            }).GetAwaiter().GetResult();
+                Assert.Equal("blah", item[$"FakeResult"]);
+            }
+            Assert.Equal(2000, result.Count());
             
         }
 
         [Fact]
-        public void TestToArray()
+        public async Task TestToArray()
         {
             _mock.Setup(x => x.ExecuteAsync(
                 "FT.AGGREGATE",
@@ -180,20 +174,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ReturnsAsync(MockedResultCursorEnd);
             var collection = new RedisAggregationSet<Person>(_mock.Object, true);
             var res = collection.Where(x => x.RecordShell.Age < 3);
-            Task.Run(async () => 
+            var result = await res.ToArrayAsync();
+            foreach (var item in result)
             {
-                var result = await res.ToArrayAsync();
-                foreach (var item in result)
-                {
-                    Assert.Equal("blah", item[$"FakeResult"]);
-                }
-                Assert.Equal(2000, result.Count());
-            }).GetAwaiter().GetResult();
+                Assert.Equal("blah", item[$"FakeResult"]);
+            }
+            Assert.Equal(2000, result.Count());
             
         }
 
         [Fact]
-        public void TestAsyncEnumerationGrouped()
+        public async Task TestAsyncEnumerationGrouped()
         {
             _mock.Setup(x => x.ExecuteAsync(
                 "FT.AGGREGATE",
@@ -219,20 +210,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var res = collection.Where(x => x.RecordShell.Age < 3).GroupBy(x=>x.RecordShell.Height);
 
             var i = 0;
-            Task.Run(async () =>
+            await foreach (var item in res)
             {
-                await foreach (var item in res)
-                {
-                    Assert.Equal("blah", item[$"FakeResult"]);
-                    i++;
-                }
-                Assert.Equal(2000, i);
-            }).GetAwaiter().GetResult();
-
+                Assert.Equal("blah", item[$"FakeResult"]);
+                i++;
+            }
+            Assert.Equal(2000, i);
         }
 
         [Fact]
-        public void TestToListGrouped()
+        public async Task TestToListGrouped()
         {
             _mock.Setup(x => x.ExecuteAsync(
                 "FT.AGGREGATE",
@@ -256,20 +243,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ReturnsAsync(MockedResultCursorEnd);
             var collection = new RedisAggregationSet<Person>(_mock.Object, true);
             var res = collection.Where(x => x.RecordShell.Age < 3).GroupBy(x=>x.RecordShell.Height);
-            Task.Run(async () =>
+            var result = await res.ToListAsync();
+            foreach (var item in result)
             {
-                var result = await res.ToListAsync();
-                foreach (var item in result)
-                {
-                    Assert.Equal("blah", item[$"FakeResult"]);
-                }
-                Assert.Equal(2000, result.Count());
-            }).GetAwaiter().GetResult();
+                Assert.Equal("blah", item[$"FakeResult"]);
+            }
+            Assert.Equal(2000, result.Count());
 
         }
 
         [Fact]
-        public void TestToArrayGrouped()
+        public async Task TestToArrayGrouped()
         {
             _mock.Setup(x => x.ExecuteAsync(
                 "FT.AGGREGATE",
@@ -293,15 +277,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ReturnsAsync(MockedResultCursorEnd);
             var collection = new RedisAggregationSet<Person>(_mock.Object, true);
             var res = collection.Where(x => x.RecordShell.Age < 3).GroupBy(x=>x.RecordShell.Height);
-            Task.Run(async () =>
+            var result = await res.ToArrayAsync();
+            foreach (var item in result)
             {
-                var result = await res.ToArrayAsync();
-                foreach (var item in result)
-                {
-                    Assert.Equal("blah", item[$"FakeResult"]);
-                }
-                Assert.Equal(2000, result.Count());
-            }).GetAwaiter().GetResult();
+                Assert.Equal("blah", item[$"FakeResult"]);
+            }
+            Assert.Equal(2000, result.Count());
 
         }
 

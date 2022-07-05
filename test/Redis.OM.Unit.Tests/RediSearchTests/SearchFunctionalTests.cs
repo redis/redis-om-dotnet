@@ -162,23 +162,20 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
         
         [Fact]
-        public void TestSaveAsync()
+        public async Task TestSaveAsync()
         {
             var collection = new RedisCollection<Person>(_connection);
-            Task.Run(async () =>
+            var chrises = collection.Where(x=>x.Name == "Chris");
+            var count = chrises.Count();
+            await foreach (var person in chrises)
             {
-                var chrises = collection.Where(x=>x.Name == "Chris");
-                var count = chrises.Count();
-                await foreach (var person in chrises)
-                {
-                    person.Name = "Augustine";
-                    person.Mother = new Person {Name = "Monica"};
-                }
-                await collection.SaveAsync();
-                var augustines = collection.Where(x => x.Name == "Augustine");
-                var numSteves = augustines.Count();
-                Assert.Equal(count, augustines.Count());
-            }).GetAwaiter().GetResult();
+                person.Name = "Augustine";
+                person.Mother = new Person {Name = "Monica"};
+            }
+            await collection.SaveAsync();
+            var augustines = collection.Where(x => x.Name == "Augustine");
+            var numSteves = augustines.Count();
+            Assert.Equal(count, augustines.Count());
         }
         
         [Fact]
