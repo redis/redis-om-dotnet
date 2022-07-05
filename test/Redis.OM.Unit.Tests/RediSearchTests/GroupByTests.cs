@@ -46,7 +46,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestSimpleGroupBy0()
         {
-            var expectedPredicate = "@Name";
             _mock.Setup(x => x.Execute(
                     "FT.AGGREGATE",
                     "person-idx",

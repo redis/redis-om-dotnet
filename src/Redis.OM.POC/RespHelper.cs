@@ -89,7 +89,7 @@ namespace Redis.OM
         public static async Task<RedisReply> ReadBulkStringAsync(Socket socket, string currentString)
         {
             if (currentString == "-1")
-                return null;
+                return "";
             var size = int.Parse(currentString);
             var buffer = new ArraySegment<byte>(new byte[size + 2]);
             //var buffer = new byte[size + 2];
@@ -100,7 +100,7 @@ namespace Redis.OM
         public static RedisReply ReadBulkString(Socket socket, string currentString)
         {
             if (currentString == "-1")
-                return null;
+                return "";
             var size = int.Parse(currentString);
             var buffer = new byte[size+2];
             socket.Receive(buffer);
