@@ -333,6 +333,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * @ecortese
 * @DanJRWalsh
 * @baldutech
+* @shacharPash
 
 <!-- Logo -->
 [Logo]: images/logo.svg
