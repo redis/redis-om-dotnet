@@ -1,6 +1,7 @@
 ﻿using System;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Unit.Tests.RediSearchTests;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests
@@ -98,6 +99,19 @@ namespace Redis.OM.Unit.Tests
             var guid = Guid.Parse(id.Split(":")[1]);
             Assert.NotEqual(default, guid);
             Assert.NotEqual(default, obj.Id);
+        }
+
+        [Fact]
+        public void TestTwoMatchingPrefixObjects()
+        {
+            var obj = new HashObjectWithTwoPropertiesWithMatchingPrefixes
+            {
+                Name = "Bob",
+                LocationNumber = 10
+            };
+
+            var id = _connection.Set(obj);
+            _connection.Get<HashObjectWithTwoPropertiesWithMatchingPrefixes>(id);
         }
     }
 }

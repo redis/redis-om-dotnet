@@ -68,6 +68,41 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Tries to parse the hash set into a fully or partially hydrated object.
+        /// </summary>
+        /// <param name="hash">The hash to generate the object from.</param>
+        /// <typeparam name="T">The type to convert to.</typeparam>
+        /// <returns>A fully or partially hydrated object.</returns>
+        /// <exception cref="Exception">Thrown if deserialization fails.</exception>
+        /// <exception cref="ArgumentException">Thrown if documentAttribute not decorating type.</exception>
+        internal static T FromHashSet<T>(IDictionary<string, RedisReply> hash)
+        {
+            var stringDictionary = hash.ToDictionary(x => x.Key, x => x.Value.ToString());
+            if (typeof(IRedisHydrateable).IsAssignableFrom(typeof(T)))
+            {
+                var obj = Activator.CreateInstance<T>();
+                ((IRedisHydrateable)obj!).Hydrate(stringDictionary);
+            }
+
+            var attr = Attribute.GetCustomAttribute(typeof(T), typeof(DocumentAttribute)) as DocumentAttribute;
+            string asJson;
+            if (attr != null && attr.StorageType == StorageType.Json && hash.ContainsKey("$"))
+            {
+                asJson = hash["$"];
+            }
+            else if (attr != null)
+            {
+                asJson = SendToJson(stringDictionary, typeof(T));
+            }
+            else
+            {
+                throw new ArgumentException("Type must be decorated with a DocumentAttribute");
+            }
+
+            return JsonSerializer.Deserialize<T>(asJson, JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+        }
+
+        /// <summary>
         /// Turns hash set into a basic object. To be used when you won't know the type at compile time.
         /// </summary>
         /// <param name="hash">The hash.</param>
@@ -277,6 +312,11 @@ namespace Redis.OM
                         hash.Add(propertyName, val.ToString());
                     }
                 }
+                else if (type.IsEnum)
+                {
+                    var val = property.GetValue(obj);
+                    hash.Add(propertyName, ((int)val).ToString());
+                }
                 else if (type == typeof(DateTimeOffset))
                 {
                     var val = (DateTimeOffset)property.GetValue(obj);
@@ -348,14 +388,29 @@ namespace Redis.OM
 
                 if (type == typeof(bool) || type == typeof(bool?))
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":{hash[propertyName].ToLower()},";
                 }
-                else if (type.IsPrimitive || type == typeof(decimal))
+                else if (type.IsPrimitive || type == typeof(decimal) || type.IsEnum)
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
                 else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset))
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))

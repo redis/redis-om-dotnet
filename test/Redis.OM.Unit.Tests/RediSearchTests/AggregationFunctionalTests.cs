@@ -78,7 +78,29 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 SalesAdjustment = .8,
                 Height = 13,
                 DepartmentNumber = 1
-            };            
+            };
+            
+            var hashWaldorf = new HashPerson
+            {
+                Name = "Waldorf",
+                Email = "Waldorf@muppets.com",
+                Age = 78,
+                Sales = 750000,
+                SalesAdjustment = .8,
+                Height = 13,
+                DepartmentNumber = 4
+            };
+
+            var hashKermit = new HashPerson
+            {
+                Name = "Kermit the Frog",
+                Email = "kermit@muppets.com",
+                Age = 52,
+                Sales = 1500000,
+                SalesAdjustment = .8,
+                Height = 13,
+                DepartmentNumber = 1
+            };
 
             _connection.Set(kermit);
             _connection.Set(waldorf);
@@ -86,6 +108,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _connection.Set(fozzie);
             _connection.Set(beaker);
             _connection.Set(bunsen);
+            _connection.Set(hashKermit);
+            _connection.Set(hashWaldorf);
         }
 
         [Fact]
@@ -122,31 +146,82 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void GetAdjustedSalesStandardDeviation()
+        public async Task GetAdjustedSalesStandardDeviation()
         {
             Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
-            Task.Run(async () =>
-            {
-                var stddev = await collection.Apply(x => x.RecordShell.Sales
-                    * x.RecordShell.SalesAdjustment, "AdjustedSales")
-                    .StandardDeviationAsync(x => x["AdjustedSales"]);
-                Assert.Equal(358018.854252, stddev);
-            }).GetAwaiter().GetResult();
+            var stddev = await collection.Apply(x => x.RecordShell.Sales
+                                                     * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                .StandardDeviationAsync(x => x["AdjustedSales"]);
+            Assert.Equal(358018.854252, stddev);
         }
 
         [Fact]
-        public void GetAverageAdjustedSales()
+        public async Task GetAverageAdjustedSales()
         {
             Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
-            Task.Run(async () =>
+            var average = await collection.Apply(x => x.RecordShell.Sales
+                                                      * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                .AverageAsync(x => x["AdjustedSales"]);
+            Assert.Equal(527500, average);
+        }
+
+        [Fact]
+        public async Task TestLoad()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            await foreach (var result in collection.Load(x => x.RecordShell.Name))
             {
-                var average = await collection.Apply(x => x.RecordShell.Sales
-                    * x.RecordShell.SalesAdjustment, "AdjustedSales")
-                    .AverageAsync(x => x["AdjustedSales"]);
-                Assert.Equal(527500, average);
-            }).GetAwaiter().GetResult();
+                Assert.False(string.IsNullOrEmpty(result["Name"]));
+            }
+        }
+        
+        [Fact]
+        public async Task TestLoadAll()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            await foreach (var result in collection.LoadAll())
+            {
+                Assert.NotNull(result.Hydrate().Name);
+            }
+        }
+
+        [Fact]
+        public async Task TestPartialHydration()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            await foreach (var result in collection.Apply(x => x.RecordShell.Sales * x.RecordShell.SalesAdjustment, "AdjustedSales"))
+            {
+                var partialHydration = result.Hydrate();
+                Assert.True(partialHydration.Sales > 0);
+                Assert.True(partialHydration.SalesAdjustment > 0);
+            }
+        }
+
+        [Fact]
+        public async Task TestHydrateHash()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<HashPerson>(_connection);
+            await foreach (var result in collection.LoadAll())
+            {
+                Assert.NotNull(result.Hydrate().Name);
+            }
+        }
+
+        [Fact]
+        public async Task TestPartialHydrationHash()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<HashPerson>(_connection);
+            await foreach (var result in collection.Load(x=>x.RecordShell.Email))
+            {
+                Assert.NotNull(result.Hydrate().Email);
+            }
         }
 
         [Fact]

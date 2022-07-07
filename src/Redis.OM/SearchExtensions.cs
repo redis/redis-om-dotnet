@@ -478,6 +478,42 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Orders the collection by the provided attribute.
+        /// </summary>
+        /// <param name="source">The Redis Collection.</param>
+        /// <param name="expression">The expression.</param>
+        /// <typeparam name="T">The base type.</typeparam>
+        /// <typeparam name="TField">The field type to order by.</typeparam>
+        /// <returns>A redis collection extending the pipeline of linq expressions with the relevant SORTBY.</returns>
+        public static IRedisCollection<T> OrderBy<T, TField>(this IRedisCollection<T> source, Expression<Func<T, TField>> expression)
+            where T : notnull
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(OrderBy, source, expression),
+                new[] { source.Expression, Expression.Quote(expression) });
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+        }
+
+        /// <summary>
+        /// Orders the collection by the provided attribute.
+        /// </summary>
+        /// <param name="source">The Redis Collection.</param>
+        /// <param name="expression">The expression.</param>
+        /// <typeparam name="T">The base type.</typeparam>
+        /// <typeparam name="TField">The field type to order by.</typeparam>
+        /// <returns>A redis collection extending the pipeline of linq expressions with the relevant SORTBY.</returns>
+        public static IRedisCollection<T> OrderByDescending<T, TField>(this IRedisCollection<T> source, Expression<Func<T, TField>> expression)
+            where T : notnull
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(OrderByDescending, source, expression),
+                new[] { source.Expression, Expression.Quote(expression) });
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+        }
+
+        /// <summary>
         /// Get a Random sample from redis.
         /// </summary>
         /// <param name="source">The source.</param>
@@ -581,6 +617,70 @@ namespace Redis.OM
                 GetMethodInfo(CountDistinctish, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
             return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+        }
+
+        /// <summary>
+        /// Loads the provided property or properties regardless of whether or not they are set up as Aggregatable in Redis.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="expression">The field expression to use for the load.</param>
+        /// <typeparam name="T">The base type.</typeparam>
+        /// <typeparam name="TLoadType">The Type to instruct redis to load.</typeparam>
+        /// <returns>A RedisAggregationSet.</returns>
+        public static RedisAggregationSet<T> Load<T, TLoadType>(this RedisAggregationSet<T> source, Expression<Func<AggregationResult<T>, TLoadType>> expression)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(Load, source, expression),
+                new[] { source.Expression, Expression.Quote(expression) });
+            return new RedisAggregationSet<T>(source, exp);
+        }
+
+        /// <summary>
+        /// Loads all indexed attributes in a document into the Aggregation pipeline.
+        /// </summary>
+        /// <param name="source">The source set.</param>
+        /// <typeparam name="T">The base type.</typeparam>
+        /// <returns>A RedisAggregationSet.</returns>
+        public static RedisAggregationSet<T> LoadAll<T>(this RedisAggregationSet<T> source)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(LoadAll, source),
+                source.Expression);
+            return new RedisAggregationSet<T>(source, exp);
+        }
+
+        /// <summary>
+        /// Loads the provided property or properties regardless of whether or not they are set up as Aggregatable in Redis.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="expression">The field expression to use for the load.</param>
+        /// <typeparam name="T">The base type.</typeparam>
+        /// <typeparam name="TLoadType">The Type to instruct redis to load.</typeparam>
+        /// <returns>A GroupedAggregationSet.</returns>
+        public static GroupedAggregationSet<T> Load<T, TLoadType>(this GroupedAggregationSet<T> source, Expression<Func<AggregationResult<T>, TLoadType>> expression)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(Load, source, expression),
+                new[] { source.Expression, Expression.Quote(expression) });
+            return new GroupedAggregationSet<T>(source, exp);
+        }
+
+        /// <summary>
+        /// Loads all indexed attributes in a document into the Aggregation pipeline.
+        /// </summary>
+        /// <param name="source">The source set.</param>
+        /// <typeparam name="T">The base type.</typeparam>
+        /// <returns>A RedisAggregationSet.</returns>
+        public static GroupedAggregationSet<T> LoadAll<T>(this GroupedAggregationSet<T> source)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(LoadAll, source),
+                source.Expression);
+            return new GroupedAggregationSet<T>(source, exp);
         }
 
         /// <summary>
