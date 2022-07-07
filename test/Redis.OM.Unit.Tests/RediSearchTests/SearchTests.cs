@@ -850,7 +850,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.False(colleciton.StateManager.Data.ContainsKey(key));
             Assert.False(colleciton.StateManager.Snapshot.ContainsKey(key));
         }
-
         [Fact]
         public void TestDelete()
         {
@@ -1744,6 +1743,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "$.Addresses[*].City", "AS", "Addresses_City", "TAG", "SEPARATOR", "|",
                 "$.Addresses[*].State", "AS", "Addresses_State", "TAG", "SEPARATOR", "|",
                 "$.Addresses[*].AddressType", "AS", "Addresses_AddressType", "TAG",
+                "$.Addresses[*].Boolean", "AS", "Addresses_Boolean", "TAG", "SEPARATOR", "|",
+                "$.Addresses[*].Guid", "AS", "Addresses_Guid", "TAG", "SEPARATOR", "|",
+                "$.Addresses[*].Ulid", "AS", "Addresses_Ulid", "TAG", "SEPARATOR", "|",
                 "$.AddressList[*].City", "AS", "AddressList_City", "TAG", "SEPARATOR", "|",
                 "$.AddressList[*].State", "AS", "AddressList_State", "TAG", "SEPARATOR", "|",
                 "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", "$.Numeric", "AS", "Numeric", "NUMERIC"));
@@ -1824,6 +1826,50 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "FT.SEARCH", 
                 "objectwithembeddedarrayofobjects-idx", 
                 "((@Addresses_City:{Satellite\\ Beach}) (@AddressList_City:{Newark}))", 
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultiplePredicatesInsideAny()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
+
+            await collection.Where(x => 
+                x.Addresses.Any(a => a.City == "Satellite Beach" && a.State == "Florida")).ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH", 
+                "objectwithembeddedarrayofobjects-idx", 
+                "((@Addresses_City:{Satellite\\ Beach}) (@Addresses_State:{Florida}))", 
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public async Task TestAnyQueryForArrayOfEmbeddedObjectsOtherTypes()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var boolean = true;
+            var ulid = Ulid.NewUlid();
+            var guid = Guid.NewGuid();
+            
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
+
+            await collection.Where(x => 
+                x.Addresses.Any(a => a.Ulid == ulid) && x.Addresses.Any(a=>a.Guid == guid) && x.Addresses.Any(a=>a.Boolean == boolean)).ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH", 
+                "objectwithembeddedarrayofobjects-idx", 
+                $"(((@Addresses_Ulid:{{{ulid}}}) (@Addresses_Guid:{{{ExpressionParserUtilities.EscapeTagField(guid.ToString())}}})) (@Addresses_Boolean:{{{boolean}}}))", 
                 "LIMIT",
                 "0",
                 "100"));

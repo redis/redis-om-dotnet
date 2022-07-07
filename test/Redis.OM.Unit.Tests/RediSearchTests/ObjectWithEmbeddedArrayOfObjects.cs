@@ -9,6 +9,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Indexed(JsonPath = "$.City")]
         [Indexed(JsonPath = "$.State")]
         [Indexed(JsonPath = "$.AddressType")]
+        [Indexed(JsonPath = "$.Boolean")]
+        [Indexed(JsonPath = "$.Guid")]
+        [Indexed(JsonPath = "$.Ulid")]
         public Address[] Addresses { get; set; }
         
         [Indexed(JsonPath = "$.City")]
