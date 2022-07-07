@@ -590,5 +590,27 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotEmpty(result);
             Assert.Equal(AnEnum.two, result.First().AnEnum);
         }
+
+        [Fact]
+        public async Task TestAnySearchEmbeddedObjects()
+        {
+            var obj = new ObjectWithEmbeddedArrayOfObjects()
+            {
+                Name = "Bob",
+                Numeric = 100,
+                Addresses = new[] {new Address {City = "Newark", State = "New Jersey"}},
+                AddressList = new List<Address> {new() {City = "Satellite Beach", State = "Florida"}}
+            };
+
+            await _connection.SetAsync(obj);
+
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_connection);
+
+            var results = await collection.Where(x => x.Addresses.Any(x => x.City == "Newark")).ToListAsync();
+            Assert.NotEmpty(results);
+            results = await collection.Where(x => x.AddressList.Any(x => x.City == "Satellite Beach")).ToListAsync();
+            Assert.NotEmpty(results);
+            
+        }
     }
 }

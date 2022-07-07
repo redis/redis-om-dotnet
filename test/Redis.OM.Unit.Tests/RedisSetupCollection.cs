@@ -19,6 +19,7 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(ClassForEmptyRedisCollection));
             Connection.CreateIndex(typeof(ObjectWithStringLikeValueTypes));
             Connection.CreateIndex(typeof(ObjectWithStringLikeValueTypesHash));
+            Connection.CreateIndex(typeof(ObjectWithEmbeddedArrayOfObjects));
         }
 
         private IRedisConnection _connection = null;
@@ -46,6 +47,7 @@ namespace Redis.OM.Unit.Tests
             Connection.DropIndexAndAssociatedRecords(typeof(RediSearchTests.HashPerson));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithStringLikeValueTypes));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithStringLikeValueTypesHash));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithEmbeddedArrayOfObjects));
         }
     }
 }
