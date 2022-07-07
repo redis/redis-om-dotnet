@@ -133,7 +133,10 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 "$.WorkAddress.AddressType", "AS", "WorkAddress_AddressType", "TAG",
                 "$.WorkAddress.State", "AS", "WorkAddress_State", "TAG", "SEPARATOR", "|",
                 "$.WorkAddress.Location", "AS", "WorkAddress_Location", "GEO", 
-                "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC"
+                "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC",
+                "$.WorkAddress.Boolean", "AS", "WorkAddress_Boolean", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Ulid", "AS", "WorkAddress_Ulid", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Guid", "AS", "WorkAddress_Guid", "TAG", "SEPARATOR", "|",
                 
             };
             var indexArr = typeof(NestedPerson).SerializeIndex();
@@ -164,8 +167,14 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 "$.WorkAddress.ForwardingAddress.State", "AS", "WorkAddress_ForwardingAddress_State", "TAG", "SEPARATOR", "|",
                 "$.WorkAddress.ForwardingAddress.Location", "AS", "WorkAddress_ForwardingAddress_Location", "GEO",
                 "$.WorkAddress.ForwardingAddress.HouseNumber", "AS", "WorkAddress_ForwardingAddress_HouseNumber", "NUMERIC",
+                "$.WorkAddress.ForwardingAddress.Boolean", "AS", "WorkAddress_ForwardingAddress_Boolean", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.ForwardingAddress.Ulid", "AS", "WorkAddress_ForwardingAddress_Ulid", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.ForwardingAddress.Guid", "AS", "WorkAddress_ForwardingAddress_Guid", "TAG", "SEPARATOR", "|",
                 "$.WorkAddress.Location", "AS", "WorkAddress_Location", "GEO", 
-                "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC"
+                "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC",
+                "$.WorkAddress.Boolean", "AS", "WorkAddress_Boolean", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Ulid", "AS", "WorkAddress_Ulid", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Guid", "AS", "WorkAddress_Guid", "TAG", "SEPARATOR", "|",
                 
             };
             var indexArr = typeof(NestedPersonCascade2).SerializeIndex();

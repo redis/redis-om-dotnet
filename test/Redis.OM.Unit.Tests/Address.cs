@@ -23,6 +23,9 @@ namespace Redis.OM.Unit.Tests
         [Indexed(CascadeDepth = 1)] public Address ForwardingAddress { get; set; }
         [Indexed] public GeoLoc? Location { get; set; }
         [Indexed] public int? HouseNumber { get; set; }
+        [Indexed] public bool? Boolean { get; set; }
+        [Indexed] public Ulid? Ulid { get; set; }
+        [Indexed] public Guid? Guid { get; set; }
     }
 
     public enum AddressType
