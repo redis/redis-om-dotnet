@@ -36,11 +36,15 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// </summary>
         public int? Max { get; set; }
 
+        /// <summary>
+        /// gets the number of arguments of this predicate.
+        /// </summary>
+        internal int NumArgs => Max.HasValue ? 4 : 2;
+
         /// <inheritdoc/>
         public IEnumerable<string> Serialize()
         {
-            var numArgs = Max.HasValue ? 4 : 2;
-            var ret = new List<string> { "SORTBY", numArgs.ToString(), $"@{Property}", Direction == SortDirection.Ascending ? "ASC" : "DESC" };
+            var ret = new List<string> { "SORTBY", NumArgs.ToString(), $"@{Property}", Direction == SortDirection.Ascending ? "ASC" : "DESC" };
             if (Max.HasValue)
             {
                 ret.Add("MAX");

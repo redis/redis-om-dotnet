@@ -18,6 +18,15 @@ namespace Redis.OM.Common
     internal static class ExpressionParserUtilities
     {
         /// <summary>
+        /// Characters to escape when serializing a tag expression.
+        /// </summary>
+        private static readonly char[] TagEscapeChars =
+        {
+            ',', '.', '<', '>', '{', '}', '[', ']', '"', '\'', ':', ';',
+            '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '~', '|', ' ',
+        };
+
+        /// <summary>
         /// Get's the operand string.
         /// </summary>
         /// <param name="exp">the expression to parse.</param>
@@ -117,7 +126,7 @@ namespace Redis.OM.Common
 
                 operationStack.Push(right);
                 operationStack.Push(GetOperatorFromNodeType(expression.NodeType));
-                if (!string.IsNullOrEmpty(left))
+                if (!string.IsNullOrEmpty(left) && !(expression.Left is BinaryExpression))
                 {
                     operationStack.Push(left);
                 }
@@ -232,6 +241,27 @@ namespace Redis.OM.Common
             }
 
             return attr;
+        }
+
+        /// <summary>
+        /// Escapes a tag field string.
+        /// </summary>
+        /// <param name="text">the text toe escape.</param>
+        /// <returns>The Escaped Text.</returns>
+        internal static string EscapeTagField(string text)
+        {
+            var sb = new StringBuilder();
+            foreach (var c in text)
+            {
+                if (TagEscapeChars.Contains(c))
+                {
+                    sb.Append("\\");
+                }
+
+                sb.Append(c);
+            }
+
+            return sb.ToString();
         }
 
         private static string GetOperandStringForMember(MemberExpression member)
@@ -554,7 +584,7 @@ namespace Redis.OM.Common
 
             var memberName = GetOperandStringForMember(expression);
             var literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
-            return (type == typeof(string)) ? $"{memberName}:{literal}" : $"{memberName}:{{{literal}}}";
+            return (type == typeof(string)) ? $"{memberName}:{literal}" : $"{memberName}:{{{EscapeTagField(literal)}}}";
         }
     }
 }

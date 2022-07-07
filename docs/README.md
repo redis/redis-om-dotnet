@@ -19,10 +19,7 @@ Welcome to Redis OM, Redis' high-level abstraction above Redis for .NET. The lib
          * [Document Attribute](#document-attribute)
          * [Property Attributes](#property-attributes)
             * [RedisIdField](#redisidfield)
-            * [Tag](#tag)
-            * [Numeric](#numeric)
-            * [Text](#text)
-            * [Geo](#geo)
+            * [Indexed Fields](#indexed-fields)
          * [Example Class](#example-class)
       * [Creating Indices](#creating-indices)
          * [Create](#create)
@@ -194,8 +191,15 @@ Every class indexed by Redis must contain an Id Field marked with the `RedisIdFi
 
 In addition to declaring an Id Field, you can also declare indexed fields, which will let you search for values within those fields afterward. There are two types of Field level attributes.
 
-1. Indexed - This type of index is valid for fields that are of the type `string`, a Numeric type (double/int/float etc. . .), or can be decorated for fields that are of the type `GeoLoc`, the exact way that the indexed field is interpreted depends on the indexed type
-2. Searchable - This type is only valid for `string` fields, but this enables full-text search on the decorated fields.
+1. Indexed - The exact way that the indexed field is interpreted depends on the index type.  It can be applied to fields with the following value types.
+	* `string`
+	* Numeric types such as `double`, `int`, `float`, etc.
+	* `GeoLoc`
+	* Array of `string` or `bool`
+	* List of `string` or `bool`
+
+2. Searchable - This enables full-text search on the decorated field.  It can be applied to fields with the following value types.
+	* `string`
 
 ###### IndexedAttribute Properties
 

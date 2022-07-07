@@ -14,7 +14,7 @@ namespace Redis.OM.Modeling
         {
             var val = reader.GetString();
             DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            return dateTime.AddMilliseconds(long.Parse(val!));
+            return TimeZoneInfo.ConvertTimeFromUtc(dateTime.AddMilliseconds(long.Parse(val!)), TimeZoneInfo.Local);
         }
 
         /// <inheritdoc />
