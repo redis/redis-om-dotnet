@@ -140,11 +140,7 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 
             };
             var indexArr = typeof(NestedPerson).SerializeIndex();
-
-            for(var i = 0; i < indexArr.Length; i++)
-            {
-                Assert.Equal(expected[i], indexArr[i]);
-            }
+            Assert.Equal(expected.OrderBy(x=>x), indexArr.OrderBy(x=>x));
         }
         
         [Fact]
@@ -178,11 +174,7 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 
             };
             var indexArr = typeof(NestedPersonCascade2).SerializeIndex();
-
-            for(var i = 0; i < indexArr.Length; i++)
-            {
-                Assert.Equal(expected[i], indexArr[i]);
-            }
+            Assert.Equal(expected.OrderBy(x=>x), indexArr.OrderBy(x=>x));
         }
 
         [Fact]
