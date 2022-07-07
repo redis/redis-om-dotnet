@@ -122,12 +122,18 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
         {
             var expected = new[] { "person-idx",
                 "ON", "Json", "PREFIX", "1", "Redis.OM.Unit.Tests.SearchJsonTests.RedisJsonIndexTests+NestedPerson:", "SCHEMA",
-                "$.Name", "AS", "Name", "TEXT", "SORTABLE", "$.Tag", "AS","Tag","TAG", "SEPARATOR", "|","$.Age", "AS", "Age", 
-                "NUMERIC","SORTABLE", "$.Height", "AS", "Height", "NUMERIC", "SORTABLE", "$.Address.ZipCode", "AS",
-                "Address_ZipCode", "TAG", "SEPARATOR", "|", "$.Address.City", "AS",
-                "Address_City", "TAG", "SEPARATOR", "|", "$.Address.StreetName", "AS", "Address_StreetName", "TEXT", "SORTABLE",
-                "$.WorkAddress.City", "AS","WorkAddress_City", "TAG", "SEPARATOR", "|",  "$.WorkAddress.State", "AS", "WorkAddress_State", "TAG", "SEPARATOR", "|",
-                "$.WorkAddress.Location", "AS", "WorkAddress_Location", "GEO", "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC"
+                "$.Name", "AS", "Name", "TEXT", "SORTABLE", 
+                "$.Tag", "AS","Tag","TAG", "SEPARATOR", "|",
+                "$.Age", "AS", "Age", "NUMERIC","SORTABLE", 
+                "$.Height", "AS", "Height", "NUMERIC", "SORTABLE", 
+                "$.Address.ZipCode", "AS", "Address_ZipCode", "TAG", "SEPARATOR", "|",
+                "$.Address.City", "AS", "Address_City", "TAG", "SEPARATOR", "|", 
+                "$.Address.StreetName", "AS", "Address_StreetName", "TEXT", "SORTABLE",
+                "$.WorkAddress.City", "AS","WorkAddress_City", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.AddressType", "AS", "WorkAddress_AddressType", "TAG",
+                "$.WorkAddress.State", "AS", "WorkAddress_State", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Location", "AS", "WorkAddress_Location", "GEO", 
+                "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC"
                 
             };
             var indexArr = typeof(NestedPerson).SerializeIndex();
@@ -151,8 +157,10 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 "$.Address.City", "AS", "Address_City", "TAG", "SEPARATOR", "|", 
                 "$.Address.StreetName", "AS", "Address_StreetName", "TEXT", "SORTABLE",
                 "$.WorkAddress.City", "AS","WorkAddress_City", "TAG", "SEPARATOR", "|",  
+                "$.WorkAddress.AddressType", "AS", "WorkAddress_AddressType", "TAG",
                 "$.WorkAddress.State", "AS", "WorkAddress_State", "TAG", "SEPARATOR", "|",
                 "$.WorkAddress.ForwardingAddress.City", "AS", "WorkAddress_ForwardingAddress_City", "TAG", "SEPARATOR", "|", 
+                "$.WorkAddress.ForwardingAddress.AddressType", "AS", "WorkAddress_ForwardingAddress_AddressType", "TAG",
                 "$.WorkAddress.ForwardingAddress.State", "AS", "WorkAddress_ForwardingAddress_State", "TAG", "SEPARATOR", "|",
                 "$.WorkAddress.ForwardingAddress.Location", "AS", "WorkAddress_ForwardingAddress_Location", "GEO",
                 "$.WorkAddress.ForwardingAddress.HouseNumber", "AS", "WorkAddress_ForwardingAddress_HouseNumber", "NUMERIC",

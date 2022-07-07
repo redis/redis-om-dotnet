@@ -1727,5 +1727,146 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             
             _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", "objectwithstringlikevaluetypes-idx", expectedPredicate, "LIMIT", "0", "100"));
         }
+
+        [Fact]
+        public async Task TestIndexCreationWithEmbeddedListOfDocuments()
+        {
+            _mock.Setup(x => x.ExecuteAsync("FT.CREATE", It.IsAny<string[]>())).ReturnsAsync("OK");
+            await _mock.Object.CreateIndexAsync(typeof(ObjectWithEmbeddedArrayOfObjects));
+            _mock.Verify(x=>x.ExecuteAsync("FT.CREATE",
+                "objectwithembeddedarrayofobjects-idx",
+                "ON", 
+                "Json", 
+                "PREFIX", 
+                "1", 
+                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithEmbeddedArrayOfObjects:", 
+                "SCHEMA",
+                "$.Addresses[*].City", "AS", "Addresses_City", "TAG", "SEPARATOR", "|",
+                "$.Addresses[*].State", "AS", "Addresses_State", "TAG", "SEPARATOR", "|",
+                "$.Addresses[*].AddressType", "AS", "Addresses_AddressType", "TAG",
+                "$.AddressList[*].City", "AS", "AddressList_City", "TAG", "SEPARATOR", "|",
+                "$.AddressList[*].State", "AS", "AddressList_State", "TAG", "SEPARATOR", "|",
+                "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", "$.Numeric", "AS", "Numeric", "NUMERIC"));
+        }
+
+        [Fact]
+        public async Task TestAnyQueryForArrayOfEmbeddedObjects()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
+
+            await collection.Where(x => 
+                x.Addresses.Any(a => a.City == "Satellite Beach")).ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH", 
+                "objectwithembeddedarrayofobjects-idx", 
+                "(@Addresses_City:{Satellite\\ Beach})", 
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public async Task TestAnyQueryForArrayOfEmbeddedObjectsEnum()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
+
+            await collection.Where(x => 
+                x.Addresses.Any(a => a.AddressType == AddressType.Home)).ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH", 
+                "objectwithembeddedarrayofobjects-idx", 
+                "(@Addresses_AddressType:{Home})", 
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public async Task TestAnyQueryForArrayOfEmbeddedObjectsExtraPredicate()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
+
+            await collection.Where(x => 
+               x.Numeric == 100 || x.Name == "Bob" && x.Addresses.Any(a => a.City == "Satellite Beach")).ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH", 
+                "objectwithembeddedarrayofobjects-idx", 
+                "((@Numeric:[100 100]) | ((@Name:{Bob}) (@Addresses_City:{Satellite\\ Beach})))", 
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultipleAnys()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
+
+            await collection.Where(x => 
+                x.Addresses.Any(a => a.City == "Satellite Beach") && x.AddressList.Any(x=>x.City == "Newark")).ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH", 
+                "objectwithembeddedarrayofobjects-idx", 
+                "((@Addresses_City:{Satellite\\ Beach}) (@AddressList_City:{Newark}))", 
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public async Task TestAnyQueryForListOfEmbeddedObjects()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
+
+            await collection.Where(x => 
+                x.AddressList.Any(a => a.City == "Satellite Beach")).ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH", 
+                "objectwithembeddedarrayofobjects-idx", 
+                "(@AddressList_City:{Satellite\\ Beach})", 
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultiVariat()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
+
+            await collection.Where(x => 
+                x.Addresses.Any(a => a.City == "Satellite Beach" && a.State == "Florida")).ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH", 
+                "objectwithembeddedarrayofobjects-idx", 
+                "((@Addresses_City:{Satellite\\ Beach}) (@Addresses_State:{Florida}))", 
+                "LIMIT",
+                "0",
+                "100"));
+        }
     }
 }
