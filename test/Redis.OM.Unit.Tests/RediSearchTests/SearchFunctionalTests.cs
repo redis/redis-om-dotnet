@@ -171,6 +171,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 person.Name = "Augustine";
                 person.Mother = new Person {Name = "Monica"};
+                person.IsEngineer = true;
             }
             await collection.SaveAsync();
             var augustines = collection.Where(x => x.Name == "Augustine");
