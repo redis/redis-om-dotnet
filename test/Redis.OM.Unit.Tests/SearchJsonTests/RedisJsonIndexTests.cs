@@ -122,20 +122,25 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
         {
             var expected = new[] { "person-idx",
                 "ON", "Json", "PREFIX", "1", "Redis.OM.Unit.Tests.SearchJsonTests.RedisJsonIndexTests+NestedPerson:", "SCHEMA",
-                "$.Name", "AS", "Name", "TEXT", "SORTABLE", "$.Tag", "AS","Tag","TAG", "SEPARATOR", "|","$.Age", "AS", "Age", 
-                "NUMERIC","SORTABLE", "$.Height", "AS", "Height", "NUMERIC", "SORTABLE", "$.Address.ZipCode", "AS",
-                "Address_ZipCode", "TAG", "SEPARATOR", "|", "$.Address.City", "AS",
-                "Address_City", "TAG", "SEPARATOR", "|", "$.Address.StreetName", "AS", "Address_StreetName", "TEXT", "SORTABLE",
-                "$.WorkAddress.City", "AS","WorkAddress_City", "TAG", "SEPARATOR", "|",  "$.WorkAddress.State", "AS", "WorkAddress_State", "TAG", "SEPARATOR", "|",
-                "$.WorkAddress.Location", "AS", "WorkAddress_Location", "GEO", "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC"
+                "$.Name", "AS", "Name", "TEXT", "SORTABLE", 
+                "$.Tag", "AS","Tag","TAG", "SEPARATOR", "|",
+                "$.Age", "AS", "Age", "NUMERIC","SORTABLE", 
+                "$.Height", "AS", "Height", "NUMERIC", "SORTABLE", 
+                "$.Address.ZipCode", "AS", "Address_ZipCode", "TAG", "SEPARATOR", "|",
+                "$.Address.City", "AS", "Address_City", "TAG", "SEPARATOR", "|", 
+                "$.Address.StreetName", "AS", "Address_StreetName", "TEXT", "SORTABLE",
+                "$.WorkAddress.City", "AS","WorkAddress_City", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.AddressType", "AS", "WorkAddress_AddressType", "TAG",
+                "$.WorkAddress.State", "AS", "WorkAddress_State", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Location", "AS", "WorkAddress_Location", "GEO", 
+                "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC",
+                "$.WorkAddress.Boolean", "AS", "WorkAddress_Boolean", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Ulid", "AS", "WorkAddress_Ulid", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Guid", "AS", "WorkAddress_Guid", "TAG", "SEPARATOR", "|",
                 
             };
             var indexArr = typeof(NestedPerson).SerializeIndex();
-
-            for(var i = 0; i < indexArr.Length; i++)
-            {
-                Assert.Equal(expected[i], indexArr[i]);
-            }
+            Assert.Equal(expected.OrderBy(x=>x), indexArr.OrderBy(x=>x));
         }
         
         [Fact]
@@ -151,21 +156,25 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 "$.Address.City", "AS", "Address_City", "TAG", "SEPARATOR", "|", 
                 "$.Address.StreetName", "AS", "Address_StreetName", "TEXT", "SORTABLE",
                 "$.WorkAddress.City", "AS","WorkAddress_City", "TAG", "SEPARATOR", "|",  
+                "$.WorkAddress.AddressType", "AS", "WorkAddress_AddressType", "TAG",
                 "$.WorkAddress.State", "AS", "WorkAddress_State", "TAG", "SEPARATOR", "|",
                 "$.WorkAddress.ForwardingAddress.City", "AS", "WorkAddress_ForwardingAddress_City", "TAG", "SEPARATOR", "|", 
+                "$.WorkAddress.ForwardingAddress.AddressType", "AS", "WorkAddress_ForwardingAddress_AddressType", "TAG",
                 "$.WorkAddress.ForwardingAddress.State", "AS", "WorkAddress_ForwardingAddress_State", "TAG", "SEPARATOR", "|",
                 "$.WorkAddress.ForwardingAddress.Location", "AS", "WorkAddress_ForwardingAddress_Location", "GEO",
                 "$.WorkAddress.ForwardingAddress.HouseNumber", "AS", "WorkAddress_ForwardingAddress_HouseNumber", "NUMERIC",
+                "$.WorkAddress.ForwardingAddress.Boolean", "AS", "WorkAddress_ForwardingAddress_Boolean", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.ForwardingAddress.Ulid", "AS", "WorkAddress_ForwardingAddress_Ulid", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.ForwardingAddress.Guid", "AS", "WorkAddress_ForwardingAddress_Guid", "TAG", "SEPARATOR", "|",
                 "$.WorkAddress.Location", "AS", "WorkAddress_Location", "GEO", 
-                "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC"
+                "$.WorkAddress.HouseNumber", "AS", "WorkAddress_HouseNumber", "NUMERIC",
+                "$.WorkAddress.Boolean", "AS", "WorkAddress_Boolean", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Ulid", "AS", "WorkAddress_Ulid", "TAG", "SEPARATOR", "|",
+                "$.WorkAddress.Guid", "AS", "WorkAddress_Guid", "TAG", "SEPARATOR", "|",
                 
             };
             var indexArr = typeof(NestedPersonCascade2).SerializeIndex();
-
-            for(var i = 0; i < indexArr.Length; i++)
-            {
-                Assert.Equal(expected[i], indexArr[i]);
-            }
+            Assert.Equal(expected.OrderBy(x=>x), indexArr.OrderBy(x=>x));
         }
 
         [Fact]
