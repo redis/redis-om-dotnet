@@ -51,6 +51,15 @@ namespace Redis.OM.Modeling
         internal IDictionary<string, object?> Data { get; set; } = new Dictionary<string, object?>();
 
         /// <summary>
+        /// Clears out all the data in the state manager at re-enumeration.
+        /// </summary>
+        internal void Clear()
+        {
+            Snapshot.Clear();
+            Data.Clear();
+        }
+
+        /// <summary>
         /// Removes the key from the data and snapshot.
         /// </summary>
         /// <param name="key">The key to remove.</param>

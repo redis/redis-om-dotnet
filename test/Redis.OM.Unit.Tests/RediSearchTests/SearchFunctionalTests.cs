@@ -160,15 +160,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steves = collection.Where(x => x.Name == "Steve");
             Assert.Equal(count, steves.Count());
         }
-        
+
         [Fact]
         public async Task TestSaveAsync()
         {
             var collection = new RedisCollection<Person>(_connection);
-            var chrises = collection.Where(x=>x.Name == "Chris");
-            var count = chrises.Count();
-            await foreach (var person in chrises)
+            var count = 0;
+            await foreach (var person in collection.Where(x=>x.Name == "Chris"))
             {
+                count++;
                 person.Name = "Augustine";
                 person.Mother = new Person {Name = "Monica"};
                 person.IsEngineer = true;
@@ -178,7 +178,26 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var numSteves = augustines.Count();
             Assert.Equal(count, augustines.Count());
         }
-        
+
+        [Fact]
+
+        public async Task TestSaveAsyncSecondEnumeration()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var count = 0;
+            await collection.Where(x => x.Name == "Chris").ToListAsync();
+            await foreach (var person in collection.Where(x => x.Name == "Chris"))
+            {
+                count++;
+                person.Name = "Thomas";
+            }
+
+            await collection.SaveAsync();
+            var augustines = collection.Where(x => x.Name == "Thomas");
+            Assert.Equal(count, augustines.Count());
+            
+        }
+
         [Fact]
         public async Task TestSaveHashAsync()
         {
