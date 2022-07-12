@@ -144,6 +144,21 @@ public class Customer
 }
 ```
 
+##### Indexing Arrays of Objects
+
+This methodology can also be used for indexing string and string-like value-types within objects within Arrays and Lists, so for example if we had an array of Addresses, and we wanted to index the cities within those addresses we could do so with the following
+
+```cs
+[Indexed(JsonPath = "$.City")]
+public Address[] Addresses { get; set; }
+```
+
+Those Cities can then be queried with an `Any` predicate within the main `Where` clause.
+
+```cs
+collection.Where(c=>c.Addresses.Any(a=>a.City == "Satellite Beach"))
+```
+
 #### Cascading Index
 
 Alternatively, you can also embedded models by cascading indexes. In this instance you'd simply decorate the property with `Indexed` and set the `CascadeDepth` to whatever to however may levels you want the model to cascade for. The default is 0, so if `CascadeDepth` is not set, indexing an object will be a no-op:

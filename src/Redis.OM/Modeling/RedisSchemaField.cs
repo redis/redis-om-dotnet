@@ -98,10 +98,23 @@ namespace Redis.OM.Modeling
 
         private static IEnumerable<string> SerializeIndexFromJsonPaths(PropertyInfo parentInfo, SearchFieldAttribute attribute, string prefix = "$.")
         {
+            var isCollection = false;
             var indexArgs = new List<string>();
             var path = attribute.JsonPath;
             var propertyNames = path!.Split('.').Skip(1).ToArray();
             var type = parentInfo.PropertyType;
+            if (type.IsArray)
+            {
+                type = type.GetElementType();
+                isCollection = true;
+            }
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                type = type.GenericTypeArguments.First();
+                isCollection = true;
+            }
+
             PropertyInfo propertyInfo = parentInfo;
             foreach (var name in propertyNames)
             {
@@ -115,7 +128,8 @@ namespace Redis.OM.Modeling
                 type = childProperty.PropertyType;
             }
 
-            indexArgs.Add($"{prefix}{parentInfo.Name}{path.Substring(1)}");
+            var arrayStr = isCollection ? "[*]" : string.Empty;
+            indexArgs.Add($"{prefix}{parentInfo.Name}{arrayStr}{path.Substring(1)}");
             indexArgs.Add("AS");
             indexArgs.Add($"{parentInfo.Name}_{string.Join("_", propertyNames)}");
             var underlyingType = Nullable.GetUnderlyingType(type);
