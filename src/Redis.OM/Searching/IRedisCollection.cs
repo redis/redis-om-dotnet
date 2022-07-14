@@ -178,5 +178,40 @@ namespace Redis.OM.Searching
         /// <param name="expression">The expression.</param>
         /// <returns>The single instance.</returns>
         Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Retrieves the count of the collection async.
+        /// </summary>
+        /// <param name="expression">The predicate match.</param>
+        /// <returns>The Collection's count.</returns>
+        int Count(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Returns the first item asynchronously.
+        /// </summary>
+        /// <param name="expression">The predicate match.</param>
+        /// <returns>First or default result.</returns>
+        T First(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Returns the first or default asynchronously.
+        /// </summary>
+        /// <param name="expression">The predicate match.</param>
+        /// <returns>First or default result.</returns>
+        T? FirstOrDefault(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Returns a single record or throws a <see cref="InvalidOperationException"/> if the sequence is empty or contains more than 1 record.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>The single instance.</returns>
+        T Single(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Returns a single record or the default if there are none, or more than 1.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>The single instance.</returns>
+        T? SingleOrDefault(Expression<Func<T, bool>> expression);
     }
 }

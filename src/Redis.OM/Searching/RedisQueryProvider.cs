@@ -63,6 +63,11 @@ namespace Redis.OM.Searching
         /// </summary>
         internal DocumentAttribute DocumentAttribute { get; }
 
+        /// <summary>
+        /// Gets or sets the main boolean expression to be used for building the filter for this collection.
+        /// </summary>
+        internal Expression? BooleanExpression { get; set; }
+
         /// <inheritdoc/>
         public IQueryable CreateQuery(Expression expression)
         {
@@ -90,7 +95,8 @@ namespace Redis.OM.Searching
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
             where TElement : notnull
         {
-            return new RedisCollection<TElement>(this, expression, StateManager);
+            var booleanExpression = expression as Expression<Func<TElement, bool>>;
+            return new RedisCollection<TElement>(this, expression, StateManager, booleanExpression);
         }
 
         /// <inheritdoc/>
@@ -103,10 +109,11 @@ namespace Redis.OM.Searching
         /// Executes the query.
         /// </summary>
         /// <param name="expression">The expression to be built and executed.</param>
+        /// <param name="mainBooleanExpression">The main boolean expression to build the filter off of.</param>
         /// <typeparam name="T">The indexed type.</typeparam>
         /// <returns>The response.</returns>
         /// <exception cref="InvalidOperationException">Thrown if indexed type not properly decorated.</exception>
-        public SearchResponse<T> ExecuteQuery<T>(Expression expression)
+        public SearchResponse<T> ExecuteQuery<T>(Expression expression, Expression? mainBooleanExpression)
             where T : notnull
         {
             var type = typeof(T);
@@ -122,7 +129,7 @@ namespace Redis.OM.Searching
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
-            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type);
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression);
             var response = Connection.SearchRawResult(query);
             return new SearchResponse<T>(response);
         }
@@ -131,10 +138,11 @@ namespace Redis.OM.Searching
         /// Executes the query.
         /// </summary>
         /// <param name="expression">The expression to be built and executed.</param>
+        /// /// <param name="mainBooleanExpression">The main boolean expression to build the filter off of.</param>
         /// <typeparam name="T">The indexed type.</typeparam>
         /// <returns>The response.</returns>
         /// <exception cref="InvalidOperationException">Thrown if indexed type not properly decorated.</exception>
-        public async Task<SearchResponse<T>> ExecuteQueryAsync<T>(Expression expression)
+        public async Task<SearchResponse<T>> ExecuteQueryAsync<T>(Expression expression, Expression? mainBooleanExpression)
             where T : notnull
         {
             var type = typeof(T);
@@ -150,7 +158,7 @@ namespace Redis.OM.Searching
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
-            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type);
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression);
             var response = await Connection.SearchRawResultAsync(query);
             return new SearchResponse<T>(response);
         }
@@ -269,7 +277,7 @@ namespace Redis.OM.Searching
         private TResult? First<TResult>(Expression expression)
             where TResult : notnull
         {
-            var res = ExecuteQuery<TResult>(expression).Documents.First();
+            var res = ExecuteQuery<TResult>(expression, BooleanExpression).Documents.First();
             StateManager.InsertIntoData(res.Key, res.Value);
             StateManager.InsertIntoSnapshot(res.Key, res.Value);
             return res.Value;
@@ -278,7 +286,7 @@ namespace Redis.OM.Searching
         private TResult? FirstOrDefault<TResult>(Expression expression)
             where TResult : notnull
         {
-            var res = ExecuteQuery<TResult>(expression);
+            var res = ExecuteQuery<TResult>(expression, BooleanExpression);
             if (res.Documents.Any())
             {
                 var kvp = res.Documents.FirstOrDefault();
