@@ -22,6 +22,8 @@ namespace Redis.OM.Searching
     {
         private readonly IRedisConnection _connection;
 
+        private Expression<Func<T, bool>>? _booleanExpression;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCollection{T}"/> class.
         /// </summary>
@@ -39,7 +41,7 @@ namespace Redis.OM.Searching
             ChunkSize = chunkSize;
             _connection = connection;
             StateManager = new RedisCollectionStateManager(rootAttribute);
-            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute, ChunkSize), null);
+            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute, ChunkSize), null, null);
         }
 
         /// <summary>
@@ -49,12 +51,13 @@ namespace Redis.OM.Searching
         /// <param name="expression">Expression to be parsed for the query.</param>
         /// <param name="stateManager">Manager of the internal state of the collection.</param>
         /// <param name="chunkSize">Size of chunks to pull back during pagination, defaults to 100.</param>
-        internal RedisCollection(RedisQueryProvider provider, Expression expression, RedisCollectionStateManager stateManager, int chunkSize = 100)
+        /// <param name="booleanExpression">The expression to build the filter from.</param>
+        internal RedisCollection(RedisQueryProvider provider, Expression expression, RedisCollectionStateManager stateManager, Expression<Func<T, bool>>? booleanExpression, int chunkSize = 100)
         {
             StateManager = stateManager;
             _connection = provider.Connection;
             ChunkSize = chunkSize;
-            Initialize(provider, expression);
+            Initialize(provider, expression, booleanExpression);
         }
 
         /// <inheritdoc/>
@@ -75,15 +78,34 @@ namespace Redis.OM.Searching
         public int ChunkSize { get; }
 
         /// <summary>
+        /// Gets or sets the main boolean expression to be used for building the filter for this collection.
+        /// </summary>
+        internal Expression<Func<T, bool>>? BooleanExpression
+        {
+            get
+            {
+                return _booleanExpression;
+            }
+
+            set
+            {
+                _booleanExpression = value;
+                ((RedisQueryProvider)Provider).BooleanExpression = value;
+            }
+        }
+
+        /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
         /// <param name="expression">the expression to be matched.</param>
         /// <returns>Whether anything matching the expression was found.</returns>
         public bool Any(Expression<Func<T, bool>> expression)
         {
-            var provider = (RedisQueryProvider)Provider;
-            var res = provider.ExecuteQuery<T>(expression);
-            return res.Documents.Values.Any();
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)_connection.Search<T>(query).DocumentCount > 0;
         }
 
         /// <inheritdoc />
@@ -175,7 +197,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<int> CountAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T));
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
         }
@@ -184,7 +206,8 @@ namespace Redis.OM.Searching
         public async Task<int> CountAsync(Expression<Func<T, bool>> expression)
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T));
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
         }
@@ -192,7 +215,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<bool> AnyAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T));
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
         }
@@ -201,7 +224,8 @@ namespace Redis.OM.Searching
         public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T));
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
         }
@@ -209,7 +233,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T> FirstAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T));
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             return res.Documents.Select(x => x.Value).First();
@@ -219,7 +243,8 @@ namespace Redis.OM.Searching
         public async Task<T> FirstAsync(Expression<Func<T, bool>> expression)
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T));
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             return res.Documents.Select(x => x.Value).First();
@@ -228,7 +253,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T?> FirstOrDefaultAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T));
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             return res.Documents.Select(x => x.Value).FirstOrDefault();
@@ -238,7 +263,8 @@ namespace Redis.OM.Searching
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> expression)
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T));
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             return res.Documents.Select(x => x.Value).FirstOrDefault();
@@ -247,7 +273,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T> SingleAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T));
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount > 1)
@@ -262,7 +288,8 @@ namespace Redis.OM.Searching
         public async Task<T> SingleAsync(Expression<Func<T, bool>> expression)
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T));
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount > 1)
@@ -276,7 +303,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T?> SingleOrDefaultAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T));
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount != 1)
@@ -291,7 +318,8 @@ namespace Redis.OM.Searching
         public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> expression)
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T));
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount != 1)
@@ -302,11 +330,87 @@ namespace Redis.OM.Searching
             return res.Documents.SingleOrDefault().Value;
         }
 
+        /// <inheritdoc />
+        public int Count(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)_connection.Search<T>(query).DocumentCount;
+        }
+
+        /// <inheritdoc />
+        public T First(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = _connection.Search<T>(query);
+            var result = res.Documents.First();
+            StateManager.InsertIntoData(result.Key, result.Value);
+            StateManager.InsertIntoSnapshot(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc />
+        public T? FirstOrDefault(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = _connection.Search<T>(query);
+            var result = res.Documents.FirstOrDefault();
+            StateManager.InsertIntoData(result.Key, result.Value);
+            StateManager.InsertIntoSnapshot(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc />
+        public T Single(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = _connection.Search<T>(query);
+            if (res.DocumentCount > 1)
+            {
+                throw new InvalidOperationException("Sequence contained more than one element.");
+            }
+
+            var result = res.Documents.Single();
+            StateManager.InsertIntoData(result.Key, result.Value);
+            StateManager.InsertIntoSnapshot(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc />
+        public T? SingleOrDefault(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = _connection.Search<T>(query);
+            if (res.DocumentCount != 1)
+            {
+                return default;
+            }
+
+            var result = res.Documents.SingleOrDefault();
+            StateManager.InsertIntoData(result.Key, result.Value);
+            StateManager.InsertIntoSnapshot(result.Key, result.Value);
+            return result.Value;
+        }
+
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {
             StateManager.Clear();
-            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager);
+            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager, BooleanExpression);
         }
 
         /// <inheritdoc/>
@@ -396,7 +500,7 @@ namespace Redis.OM.Searching
         {
             var provider = (RedisQueryProvider)Provider;
             StateManager.Clear();
-            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager);
+            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression);
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
@@ -404,7 +508,7 @@ namespace Redis.OM.Searching
             return f.Method;
         }
 
-        private void Initialize(RedisQueryProvider provider, Expression? expression)
+        private void Initialize(RedisQueryProvider provider, Expression? expression, Expression<Func<T, bool>>? booleanExpression)
         {
             if (expression != null && !typeof(IQueryable<T>).IsAssignableFrom(expression.Type))
             {
@@ -413,6 +517,7 @@ namespace Redis.OM.Searching
 
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
             Expression = expression ?? Expression.Constant(this);
+            BooleanExpression = booleanExpression;
         }
     }
 }
