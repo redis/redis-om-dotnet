@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Redis.OM.Modeling
 {
@@ -30,9 +31,12 @@ namespace Redis.OM.Modeling
         /// <inheritdoc/>
         public string[] SerializeScriptArgs()
         {
-            return _value.Type == JTokenType.String
-                ? new[] { _operation, _path, $"\"{_value}\"" }
-                : new[] { _operation, _path, _value.ToString() };
+            return _value.Type switch
+            {
+                JTokenType.String => new[] { _operation, _path, $"\"{_value}\"" },
+                JTokenType.Boolean => new[] { _operation, _path, _value.ToString().ToLower() },
+                _ => new[] { _operation, _path, _value.ToString() }
+            };
         }
     }
 }

@@ -305,6 +305,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {
+            StateManager.Clear();
             return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager);
         }
 
@@ -394,6 +395,7 @@ namespace Redis.OM.Searching
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             var provider = (RedisQueryProvider)Provider;
+            StateManager.Clear();
             return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager);
         }
 

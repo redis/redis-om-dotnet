@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Redis.OM.Modeling
 {
@@ -45,6 +46,10 @@ namespace Redis.OM.Modeling
                     if (!TypeDeterminationUtilities.IsNumeric(innerType)
                         && innerType != typeof(string)
                         && innerType != typeof(GeoLoc)
+                        && innerType != typeof(Ulid)
+                        && innerType != typeof(bool)
+                        && innerType != typeof(Guid)
+                        && !innerType.IsEnum
                         && !IsTypeIndexableArray(innerType))
                     {
                         int cascadeDepth = remainingDepth == -1 ? attr.CascadeDepth : remainingDepth;
@@ -62,7 +67,7 @@ namespace Redis.OM.Modeling
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPrefix}" : $"{pathPrefix}{info.Name}{pathPostFix}");
                         ret.Add("AS");
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{aliasPrefix}{attr.PropertyName}" : $"{aliasPrefix}{info.Name}");
-                        ret.AddRange(CommonSerialization(attr, innerType));
+                        ret.AddRange(CommonSerialization(attr, innerType, info));
                     }
                 }
             }
@@ -85,7 +90,7 @@ namespace Redis.OM.Modeling
 
             var ret = new List<string> { !string.IsNullOrEmpty(attr.PropertyName) ? attr.PropertyName : info.Name };
             var innerType = Nullable.GetUnderlyingType(info.PropertyType);
-            ret.AddRange(CommonSerialization(attr, innerType ?? info.PropertyType));
+            ret.AddRange(CommonSerialization(attr, innerType ?? info.PropertyType, info));
             return ret.ToArray();
         }
 
@@ -93,10 +98,24 @@ namespace Redis.OM.Modeling
 
         private static IEnumerable<string> SerializeIndexFromJsonPaths(PropertyInfo parentInfo, SearchFieldAttribute attribute, string prefix = "$.")
         {
+            var isCollection = false;
             var indexArgs = new List<string>();
             var path = attribute.JsonPath;
             var propertyNames = path!.Split('.').Skip(1).ToArray();
             var type = parentInfo.PropertyType;
+            if (type.IsArray)
+            {
+                type = type.GetElementType();
+                isCollection = true;
+            }
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                type = type.GenericTypeArguments.First();
+                isCollection = true;
+            }
+
+            PropertyInfo propertyInfo = parentInfo;
             foreach (var name in propertyNames)
             {
                 var childProperty = type.GetProperty(name);
@@ -105,19 +124,22 @@ namespace Redis.OM.Modeling
                     throw new RedisIndexingException($"{path} not found in {parentInfo.Name} object graph.");
                 }
 
+                propertyInfo = childProperty;
                 type = childProperty.PropertyType;
             }
 
-            indexArgs.Add($"{prefix}{parentInfo.Name}{path.Substring(1)}");
+            var arrayStr = isCollection ? "[*]" : string.Empty;
+            indexArgs.Add($"{prefix}{parentInfo.Name}{arrayStr}{path.Substring(1)}");
             indexArgs.Add("AS");
             indexArgs.Add($"{parentInfo.Name}_{string.Join("_", propertyNames)}");
             var underlyingType = Nullable.GetUnderlyingType(type);
-            indexArgs.AddRange(CommonSerialization(attribute, underlyingType ?? type));
+            indexArgs.AddRange(CommonSerialization(attribute, underlyingType ?? type, propertyInfo));
             return indexArgs;
         }
 
-        private static string GetSearchFieldType(SearchFieldType typeEnum, Type declaredType)
+        private static string GetSearchFieldType(Type declaredType, SearchFieldAttribute attr, PropertyInfo propertyInfo)
         {
+            var typeEnum = attr.SearchFieldType;
             if (typeEnum != SearchFieldType.INDEXED)
             {
                 return typeEnum.ToString();
@@ -128,12 +150,17 @@ namespace Redis.OM.Modeling
                 return "GEO";
             }
 
+            if (declaredType.IsEnum)
+            {
+                return propertyInfo.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() is JsonConverterAttribute converter && converter.ConverterType == typeof(JsonStringEnumConverter) ? "TAG" : "NUMERIC";
+            }
+
             return TypeDeterminationUtilities.IsNumeric(declaredType) ? "NUMERIC" : "TAG";
         }
 
-        private static string[] CommonSerialization(SearchFieldAttribute attr, Type declaredType)
+        private static string[] CommonSerialization(SearchFieldAttribute attr, Type declaredType, PropertyInfo propertyInfo)
         {
-            var searchFieldType = GetSearchFieldType(attr.SearchFieldType, declaredType);
+            var searchFieldType = GetSearchFieldType(declaredType, attr, propertyInfo);
             var ret = new List<string> { searchFieldType };
             if (attr is SearchableAttribute text)
             {
@@ -157,7 +184,7 @@ namespace Redis.OM.Modeling
 
             if (searchFieldType == "TAG" && attr is IndexedAttribute tag)
             {
-                if (tag.Separator != ',')
+                if (tag.Separator != ',' && !declaredType.IsEnum)
                 {
                     ret.Add("SEPARATOR");
                     ret.Add(tag.Separator.ToString());

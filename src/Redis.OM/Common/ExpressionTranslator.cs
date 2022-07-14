@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Modeling;
@@ -260,12 +261,107 @@ namespace Redis.OM.Common
         /// <returns>The index field type.</returns>
         internal static SearchFieldType DetermineIndexFieldsType(MemberInfo member)
         {
-            if (member is PropertyInfo info && TypeDeterminationUtilities.IsNumeric(info.PropertyType))
+            if (member is PropertyInfo info)
             {
-                return SearchFieldType.NUMERIC;
+                if (TypeDeterminationUtilities.IsNumeric(info.PropertyType))
+                {
+                    return SearchFieldType.NUMERIC;
+                }
+
+                if (info.PropertyType.IsEnum)
+                {
+                    return TypeDeterminationUtilities.GetSearchFieldFromEnumProperty(info);
+                }
             }
 
             return SearchFieldType.TAG;
+        }
+
+        /// <summary>
+        /// Translates a binary expression.
+        /// </summary>
+        /// <param name="binExpression">The Binary Expression.</param>
+        /// <returns>The query string formatted from the binary expression.</returns>
+        /// <exception cref="ArgumentException">Thrown if expression is not parsable because of the arguments passed into it.</exception>
+        internal static string TranslateBinaryExpression(BinaryExpression binExpression)
+        {
+            var sb = new StringBuilder();
+            if (binExpression.Left is BinaryExpression leftBin && binExpression.Right is BinaryExpression rightBin)
+            {
+                sb.Append("(");
+                sb.Append(TranslateBinaryExpression(leftBin));
+                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
+                sb.Append(TranslateBinaryExpression(rightBin));
+                sb.Append(")");
+            }
+            else if (binExpression.Left is BinaryExpression left)
+            {
+                sb.Append("(");
+                sb.Append(TranslateBinaryExpression(left));
+                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right));
+                sb.Append(")");
+            }
+            else if (binExpression.Right is BinaryExpression right)
+            {
+                sb.Append("(");
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left));
+                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
+                sb.Append(TranslateBinaryExpression(right));
+                sb.Append(")");
+            }
+            else
+            {
+                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left);
+
+                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right);
+
+                if (binExpression.Left is MemberExpression member)
+                {
+                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
+                    sb.Append("(");
+                    sb.Append(predicate);
+                    sb.Append(")");
+                }
+                else if (binExpression.Left is UnaryExpression uni)
+                {
+                    member = (MemberExpression)uni.Operand;
+                    var attr = member.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() as JsonConverterAttribute;
+                    if (attr != null && attr.ConverterType == typeof(JsonStringEnumConverter))
+                    {
+                        if (int.TryParse(rightContent, out int ordinal))
+                        {
+                            rightContent = Enum.ToObject(member.Type, ordinal).ToString();
+                        }
+                    }
+                    else
+                    {
+                        if (!int.TryParse(rightContent, out _))
+                        {
+                            rightContent = ((int)Enum.Parse(member.Type, rightContent)).ToString();
+                        }
+                    }
+
+                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
+                    sb.Append("(");
+                    sb.Append(predicate);
+                    sb.Append(")");
+                }
+                else if (binExpression.Left is MethodCallExpression)
+                {
+                    sb.Append("(");
+                    sb.Append(leftContent);
+                    sb.Append(SplitPredicateSeporators(binExpression.NodeType));
+                    sb.Append(rightContent);
+                    sb.Append(")");
+                }
+                else
+                {
+                    throw new ArgumentException("Left side of expression must be a member of the search class");
+                }
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -518,56 +614,13 @@ namespace Redis.OM.Common
                 return operandString;
             }
 
+            if (exp is MemberExpression member && member.Type == typeof(bool))
+            {
+                var property = ExpressionParserUtilities.GetOperandString(exp);
+                return $"{property}:{{true}}";
+            }
+
             throw new ArgumentException("Unparseable Lambda Body detected");
-        }
-
-        private static string TranslateBinaryExpression(BinaryExpression binExpression)
-        {
-            var sb = new StringBuilder();
-            if (binExpression.Left is BinaryExpression leftBin && binExpression.Right is BinaryExpression rightBin)
-            {
-                sb.Append("(");
-                sb.Append(TranslateBinaryExpression(leftBin));
-                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(TranslateBinaryExpression(rightBin));
-                sb.Append(")");
-            }
-            else if (binExpression.Left is BinaryExpression left)
-            {
-                sb.Append("(");
-                sb.Append(TranslateBinaryExpression(left));
-                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right));
-                sb.Append(")");
-            }
-            else if (binExpression.Right is BinaryExpression right)
-            {
-                sb.Append("(");
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left));
-                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(TranslateBinaryExpression(right));
-                sb.Append(")");
-            }
-            else
-            {
-                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left);
-
-                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right);
-
-                if (binExpression.Left is MemberExpression member)
-                {
-                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
-                    sb.Append("(");
-                    sb.Append(predicate);
-                    sb.Append(")");
-                }
-                else
-                {
-                    throw new ArgumentException("Left side of expression must be a member of the search class");
-                }
-            }
-
-            return sb.ToString();
         }
 
         private static string TranslateFirstMethod(MethodCallExpression expression)

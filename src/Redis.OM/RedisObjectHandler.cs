@@ -312,6 +312,11 @@ namespace Redis.OM
                         hash.Add(propertyName, val.ToString());
                     }
                 }
+                else if (type.IsEnum)
+                {
+                    var val = property.GetValue(obj);
+                    hash.Add(propertyName, ((int)val).ToString());
+                }
                 else if (type == typeof(DateTimeOffset))
                 {
                     var val = (DateTimeOffset)property.GetValue(obj);
@@ -383,14 +388,29 @@ namespace Redis.OM
 
                 if (type == typeof(bool) || type == typeof(bool?))
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":{hash[propertyName].ToLower()},";
                 }
-                else if (type.IsPrimitive || type == typeof(decimal))
+                else if (type.IsPrimitive || type == typeof(decimal) || type.IsEnum)
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
                 else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset))
                 {
+                    if (!hash.ContainsKey(propertyName))
+                    {
+                        continue;
+                    }
+
                     ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))

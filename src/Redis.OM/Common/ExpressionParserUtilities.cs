@@ -146,6 +146,7 @@ namespace Redis.OM.Common
             return exp.Method.Name switch
             {
                 "Contains" => TranslateContainsStandardQuerySyntax(exp),
+                "Any" => TranslateAnyForEmbeddedObjects(exp),
                 _ => throw new ArgumentException($"Unrecognized method for query translation:{exp.Method.Name}")
             };
         }
@@ -539,6 +540,7 @@ namespace Redis.OM.Common
             {
                 nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
                 nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp),
+                "Any" => TranslateAnyForEmbeddedObjects(exp),
                 _ => throw new InvalidOperationException($"Unable to parse method {exp.Method.Name}")
             };
         }
@@ -585,6 +587,15 @@ namespace Redis.OM.Common
             var memberName = GetOperandStringForMember(expression);
             var literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
             return (type == typeof(string)) ? $"{memberName}:{literal}" : $"{memberName}:{{{EscapeTagField(literal)}}}";
+        }
+
+        private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp)
+        {
+            var type = exp.Arguments.Last().Type;
+            var prefix = GetOperandString(exp.Arguments[0]);
+            var lambda = (LambdaExpression)exp.Arguments.Last();
+            var tempQuery = ExpressionTranslator.TranslateBinaryExpression((BinaryExpression)lambda.Body);
+            return tempQuery.Replace("@", $"{prefix}_");
         }
     }
 }

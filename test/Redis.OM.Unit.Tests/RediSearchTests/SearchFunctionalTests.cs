@@ -7,6 +7,7 @@ using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
+using Redis.OM.Searching.Query;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -159,27 +160,44 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steves = collection.Where(x => x.Name == "Steve");
             Assert.Equal(count, steves.Count());
         }
-        
+
         [Fact]
-        public void TestSaveAsync()
+        public async Task TestSaveAsync()
         {
             var collection = new RedisCollection<Person>(_connection);
-            Task.Run(async () =>
+            var count = 0;
+            await foreach (var person in collection.Where(x=>x.Name == "Chris"))
             {
-                var chrises = collection.Where(x=>x.Name == "Chris");
-                var count = chrises.Count();
-                await foreach (var person in chrises)
-                {
-                    person.Name = "Augustine";
-                    person.Mother = new Person {Name = "Monica"};
-                }
-                await collection.SaveAsync();
-                var augustines = collection.Where(x => x.Name == "Augustine");
-                var numSteves = augustines.Count();
-                Assert.Equal(count, augustines.Count());
-            }).GetAwaiter().GetResult();
+                count++;
+                person.Name = "Augustine";
+                person.Mother = new Person {Name = "Monica"};
+                person.IsEngineer = true;
+            }
+            await collection.SaveAsync();
+            var augustines = collection.Where(x => x.Name == "Augustine");
+            var numSteves = augustines.Count();
+            Assert.Equal(count, augustines.Count());
         }
-        
+
+        [Fact]
+
+        public async Task TestSaveAsyncSecondEnumeration()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var count = 0;
+            await collection.Where(x => x.Name == "Chris").ToListAsync();
+            await foreach (var person in collection.Where(x => x.Name == "Chris"))
+            {
+                count++;
+                person.Name = "Thomas";
+            }
+
+            await collection.SaveAsync();
+            var augustines = collection.Where(x => x.Name == "Thomas");
+            Assert.Equal(count, augustines.Count());
+            
+        }
+
         [Fact]
         public async Task TestSaveHashAsync()
         {
@@ -503,6 +521,116 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var alsoBob = await collection.FindByIdAsync(key);
             Assert.NotNull(alsoBob);
             Assert.Equal("Bob",person.Name);
+        }
+
+        [Fact]
+        public async Task SearchByUlid()
+        {
+            var ulid = Ulid.NewUlid();
+            var obj = new ObjectWithStringLikeValueTypes
+            {
+                Ulid = ulid
+            };
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection);
+            var key = await collection.InsertAsync(obj);
+            var alsoObj = await collection.FirstOrDefaultAsync(x => x.Ulid == ulid);
+            Assert.NotNull(alsoObj);
+        }
+        
+        [Fact]
+        public async Task SearchByBoolean()
+        {
+            var obj = new ObjectWithStringLikeValueTypes
+            {
+                Boolean = true
+            };
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection);
+            var key = await collection.InsertAsync(obj);
+            var alsoObj = await collection.FirstOrDefaultAsync(x => x.Boolean == true);
+            Assert.NotNull(alsoObj);
+            alsoObj = await collection.FirstOrDefaultAsync(x => x.Boolean);
+            Assert.NotNull(alsoObj);
+        }
+        
+        [Fact]
+        public async Task SearchByBooleanFalse()
+        {
+            var obj = new ObjectWithStringLikeValueTypes
+            {
+                Boolean = false
+            };
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection);
+            var key = await collection.InsertAsync(obj);
+            var alsoObj = await collection.FirstOrDefaultAsync(x => x.Boolean == false);
+            Assert.NotNull(alsoObj);
+            alsoObj = await collection.FirstOrDefaultAsync(x => !x.Boolean);
+            Assert.NotNull(alsoObj);
+        }
+
+        [Fact]
+        public async Task TestSearchByStringEnum()
+        {
+            var obj = new ObjectWithStringLikeValueTypes() {AnEnum = AnEnum.two, AnEnumAsInt = AnEnum.three};
+            await _connection.SetAsync(obj);
+            var anEnum = AnEnum.two;
+            var three = AnEnum.three;
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection);
+            var result = await collection.Where(x => x.AnEnum == AnEnum.two).ToListAsync();
+            Assert.NotEmpty(result);
+            result = await collection.Where(x => x.AnEnum == anEnum).ToListAsync();
+            Assert.NotEmpty(result);
+            result = await collection.Where(x => x.AnEnum == obj.AnEnum).ToListAsync();
+            Assert.NotEmpty(result);
+            result = await collection.Where(x => (int)x.AnEnumAsInt > 1).ToListAsync();
+            Assert.NotEmpty(result);
+            result = await collection.Where(x => x.AnEnumAsInt > AnEnum.two).ToListAsync();
+            Assert.NotEmpty(result);
+            result = await collection.Where(x => x.AnEnumAsInt == AnEnum.three).ToListAsync();
+            Assert.NotEmpty(result);
+            result = await collection.Where(x => x.AnEnumAsInt == three).ToListAsync();
+            Assert.NotEmpty(result);
+            result = await collection.Where(x => x.AnEnumAsInt == obj.AnEnumAsInt).ToListAsync();
+            Assert.NotEmpty(result);
+        }
+        
+        [Fact]
+        public async Task TestSearchByStringEnumHash()
+        {
+            var obj = new ObjectWithStringLikeValueTypesHash() {AnEnum = AnEnum.two};
+            await _connection.SetAsync(obj);
+            var anEnum = AnEnum.two;
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypesHash>(_connection);
+            var result = await collection.Where(x => x.AnEnum == AnEnum.two).ToListAsync();
+            Assert.NotEmpty(result);
+            Assert.Equal(AnEnum.two, result.First().AnEnum);
+            result = await collection.Where(x => x.AnEnum == anEnum).ToListAsync();
+            Assert.NotEmpty(result);
+            Assert.Equal(AnEnum.two, result.First().AnEnum);
+            result = await collection.Where(x => x.AnEnum == obj.AnEnum).ToListAsync();
+            Assert.NotEmpty(result);
+            Assert.Equal(AnEnum.two, result.First().AnEnum);
+        }
+
+        [Fact]
+        public async Task TestAnySearchEmbeddedObjects()
+        {
+            var obj = new ObjectWithEmbeddedArrayOfObjects()
+            {
+                Name = "Bob",
+                Numeric = 100,
+                Addresses = new[] {new Address {City = "Newark", State = "New Jersey"}},
+                AddressList = new List<Address> {new() {City = "Satellite Beach", State = "Florida"}}
+            };
+
+            await _connection.SetAsync(obj);
+
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_connection);
+
+            var results = await collection.Where(x => x.Addresses.Any(x => x.City == "Newark")).ToListAsync();
+            Assert.NotEmpty(results);
+            results = await collection.Where(x => x.AddressList.Any(x => x.City == "Satellite Beach")).ToListAsync();
+            Assert.NotEmpty(results);
+            
         }
     }
 }

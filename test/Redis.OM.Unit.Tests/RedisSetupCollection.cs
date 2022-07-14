@@ -14,47 +14,12 @@ namespace Redis.OM.Unit.Tests
     {
         public RedisSetup()
         {
-            var personIndexExists = false;
-            var hashPersonIndexExists = false;
-            var emptyIndexExists = false;
-            
-            try
-            {
-                Connection.Execute("FT.INFO", "person-idx");
-                personIndexExists = true;
-            }
-            catch
-            {
-                // ignored
-            }
-
-            try
-            {
-                Connection.Execute("FT.INFO", "hash-person-idx");
-                hashPersonIndexExists = true;
-            }
-            catch
-            {
-                // ignored
-            }
-
-            try
-            {
-                Connection.Execute("FT.INFO", "empty-index");
-                emptyIndexExists = true;
-            }
-            catch
-            {
-                //ignored
-            }
-
-            if(!personIndexExists)
-                Connection.CreateIndex(typeof(RediSearchTests.Person));
-            if (!hashPersonIndexExists)
-                Connection.CreateIndex(typeof(RediSearchTests.HashPerson));
-            if(!emptyIndexExists)
-                Connection.CreateIndex(typeof(ClassForEmptyRedisCollection));
-            
+            Connection.CreateIndex(typeof(RediSearchTests.Person));
+            Connection.CreateIndex(typeof(RediSearchTests.HashPerson));
+            Connection.CreateIndex(typeof(ClassForEmptyRedisCollection));
+            Connection.CreateIndex(typeof(ObjectWithStringLikeValueTypes));
+            Connection.CreateIndex(typeof(ObjectWithStringLikeValueTypesHash));
+            Connection.CreateIndex(typeof(ObjectWithEmbeddedArrayOfObjects));
         }
 
         private IRedisConnection _connection = null;
@@ -80,6 +45,9 @@ namespace Redis.OM.Unit.Tests
         {
             Connection.DropIndexAndAssociatedRecords(typeof(RediSearchTests.Person));
             Connection.DropIndexAndAssociatedRecords(typeof(RediSearchTests.HashPerson));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithStringLikeValueTypes));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithStringLikeValueTypesHash));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithEmbeddedArrayOfObjects));
         }
     }
 }
