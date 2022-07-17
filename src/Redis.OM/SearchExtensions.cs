@@ -90,11 +90,14 @@ namespace Redis.OM
         public static IRedisCollection<T> Where<T>(this IRedisCollection<T> source, Expression<Func<T, bool>> expression)
             where T : notnull
         {
+            var collection = (RedisCollection<T>)source;
+            var combined = collection.BooleanExpression == null ? expression : collection.BooleanExpression.And(expression);
+
             var exp = Expression.Call(
                    null,
                    GetMethodInfo(Where, source, expression),
                    new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, combined, source.ChunkSize);
         }
 
         /// <summary>
@@ -113,7 +116,7 @@ namespace Redis.OM
                    null,
                    GetMethodInfo(Select, source, expression),
                    new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<TR>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+            return new RedisCollection<TR>((RedisQueryProvider)source.Provider, exp, source.StateManager, null, source.ChunkSize);
         }
 
         /// <summary>
@@ -126,11 +129,12 @@ namespace Redis.OM
         public static IRedisCollection<T> Skip<T>(this IRedisCollection<T> source, int count)
             where T : notnull
         {
+            var collection = (RedisCollection<T>)source;
             var exp = Expression.Call(
                 null,
                 GetMethodInfo(Skip, source, count),
                 new[] { source.Expression, Expression.Constant(count) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.ChunkSize);
         }
 
         /// <summary>
@@ -143,11 +147,12 @@ namespace Redis.OM
         public static IRedisCollection<T> Take<T>(this IRedisCollection<T> source, int count)
             where T : notnull
         {
+            var collection = (RedisCollection<T>)source;
             var exp = Expression.Call(
                 null,
                 GetMethodInfo(Take, source, count),
                 new[] { source.Expression, Expression.Constant(count) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.ChunkSize);
         }
 
         /// <summary>
@@ -465,6 +470,7 @@ namespace Redis.OM
         public static IRedisCollection<T> GeoFilter<T>(this IRedisCollection<T> source, Expression<Func<T, GeoLoc?>> expression, double lon, double lat, double radius, GeoLocDistanceUnit unit)
             where T : notnull
         {
+            var collection = (RedisCollection<T>)source;
             var exp = Expression.Call(
                 null,
                 GetMethodInfo(GeoFilter, source, expression, lon, lat, radius, unit),
@@ -474,7 +480,7 @@ namespace Redis.OM
                 Expression.Constant(lat),
                 Expression.Constant(radius),
                 Expression.Constant(unit));
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.ChunkSize);
         }
 
         /// <summary>
@@ -488,11 +494,12 @@ namespace Redis.OM
         public static IRedisCollection<T> OrderBy<T, TField>(this IRedisCollection<T> source, Expression<Func<T, TField>> expression)
             where T : notnull
         {
+            var collection = (RedisCollection<T>)source;
             var exp = Expression.Call(
                 null,
                 GetMethodInfo(OrderBy, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.ChunkSize);
         }
 
         /// <summary>
@@ -506,11 +513,12 @@ namespace Redis.OM
         public static IRedisCollection<T> OrderByDescending<T, TField>(this IRedisCollection<T> source, Expression<Func<T, TField>> expression)
             where T : notnull
         {
+            var collection = (RedisCollection<T>)source;
             var exp = Expression.Call(
                 null,
                 GetMethodInfo(OrderByDescending, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.ChunkSize);
         }
 
         /// <summary>
