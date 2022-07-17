@@ -35,7 +35,8 @@ namespace Redis.OM.Searching
         /// <param name="connection">the connection to redis.</param>
         /// <param name="chunkSize">the size of a chunk to pull back.</param>
         /// <param name="stateManager">the state manager.</param>
-        public RedisCollectionEnumerator(Expression exp, IRedisConnection connection, int chunkSize, RedisCollectionStateManager stateManager)
+        /// <param name="booleanExpression">The main boolean expression to use to build the filter.</param>
+        public RedisCollectionEnumerator(Expression exp, IRedisConnection connection, int chunkSize, RedisCollectionStateManager stateManager, Expression<Func<T, bool>>? booleanExpression)
         {
             Type rootType;
             var t = typeof(T);
@@ -50,7 +51,7 @@ namespace Redis.OM.Searching
                 rootType = t;
             }
 
-            _query = ExpressionTranslator.BuildQueryFromExpression(exp, rootType);
+            _query = ExpressionTranslator.BuildQueryFromExpression(exp, rootType, booleanExpression);
             if (_query.Limit != null)
             {
                 _limited = true;

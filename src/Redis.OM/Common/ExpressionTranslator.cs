@@ -174,14 +174,15 @@ namespace Redis.OM.Common
             return aggregation;
         }
 
-         /// <summary>
+        /// <summary>
         /// Build's a query from the given expression.
         /// </summary>
         /// <param name="expression">The expression.</param>
         /// <param name="type">The root type.</param>
+        /// <param name="mainBooleanExpression">The primary boolean expression to build the filter from.</param>
         /// <returns>A Redis query.</returns>
         /// <exception cref="InvalidOperationException">Thrown if type is missing indexing.</exception>
-        internal static RedisQuery BuildQueryFromExpression(Expression expression, Type type)
+        internal static RedisQuery BuildQueryFromExpression(Expression expression, Type type, Expression? mainBooleanExpression)
         {
             var attr = type.GetCustomAttribute<DocumentAttribute>();
             if (attr == null)
@@ -206,9 +207,6 @@ namespace Redis.OM.Common
                     {
                         switch (exp.Method.Name)
                         {
-                            case "Where":
-                                query.QueryText = TranslateWhereMethod(exp);
-                                break;
                             case "OrderBy":
                                 query.SortBy = TranslateOrderByMethod(exp, true);
                                 break;
@@ -231,11 +229,6 @@ namespace Redis.OM.Common
                             case "FirstOrDefault":
                                 query.Limit ??= new SearchLimit { Offset = 0 };
                                 query.Limit.Number = 1;
-                                if (exp.Arguments.Count > 1)
-                                {
-                                    query.QueryText = TranslateFirstMethod(exp);
-                                }
-
                                 break;
                             case "GeoFilter":
                                 query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
@@ -250,6 +243,9 @@ namespace Redis.OM.Common
                     query.QueryText = BuildQueryFromExpression(lambda.Body);
                     break;
             }
+
+            query.QueryText = mainBooleanExpression == null ? "*" : BuildQueryFromExpression(
+                ((LambdaExpression)mainBooleanExpression).Body);
 
             return query;
         }
