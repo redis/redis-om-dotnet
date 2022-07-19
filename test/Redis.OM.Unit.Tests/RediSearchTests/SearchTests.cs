@@ -25,12 +25,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"01FVN836BNQGYMT80V7RCVY73N\"}"
             })
         };
-        
+
         RedisReply _mockReplyNone = new RedisReply[]
         {
             new (0),
         };
-        
+
         RedisReply _mockReply2Count = new RedisReply[]
         {
             new RedisReply(2),
@@ -49,7 +49,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             new RedisReply(new RedisReply[]
             {
                 "Name",
-                "Steve"                
+                "Steve"
             })
         };
 
@@ -57,10 +57,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQuery()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);            
+                .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33).ToList();            
+            var res = collection.Where(x => x.Age < 33).ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
@@ -69,7 +69,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public void TestBasicNegationQuery()
         {
@@ -91,7 +91,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithVariable()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);            
+                .Returns(_mockReply);
             var y = 33;
             var collection = new RedisCollection<Person>(_mock.Object);
             var res = collection.Where(x => x.Age < y).ToList();
@@ -113,7 +113,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var y = 33;
             foreach (var height in heightList)
             {
-                
+
                 var collection = new RedisCollection<Person>(_mock.Object);
                 var res = collection.FirstOrDefault(x => x.Age == y && x.Height == height);
                 _mock.Verify(x => x.Execute(
@@ -123,7 +123,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                     "LIMIT",
                     "0",
                     "1"));
-                
+
             }
         }
 
@@ -131,7 +131,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithExactNumericMatch()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);            
+                .Returns(_mockReply);
             var y = 33;
             var collection = new RedisCollection<Person>(_mock.Object);
             var res = collection.Where(x => x.Age == y).ToList();
@@ -148,7 +148,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicFirstOrDefaultQuery()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);            
+                .Returns(_mockReply);
             var y = 33;
             var collection = new RedisCollection<Person>(_mock.Object);
             var res = collection.FirstOrDefault(x => x.Age == y);
@@ -160,12 +160,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"));
         }
-        
+
         [Fact]
         public void TestBasicQueryNoNameIndex()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);            
+                .Returns(_mockReply);
             var y = 33;
             var collection = new RedisCollection<PersonNoName>(_mock.Object);
             var res = collection.FirstOrDefault(x => x.Age == y);
@@ -182,7 +182,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicOrQuery()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);               
+                .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
             var res = collection.Where(x => x.Age < 33 || x.TagField == "Steve").ToList();
@@ -274,7 +274,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33 && x.TagField == "Steve" && x.Height>=70).ToList();            
+            var res = collection.Where(x => x.Age < 33 && x.TagField == "Steve" && x.Height>=70).ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
@@ -304,9 +304,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestBasicQueryWithContains()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))            
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
             var res = collection.Where(x => x.Name.Contains("Ste")).ToList();
             _mock.Verify(x => x.Execute(
@@ -317,7 +317,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public void TestBasicQueryFromPropertyOfModel()
         {
@@ -377,9 +377,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestBasicQueryWithContainsWithNegation()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))                            
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
             var res = collection.Where(x => !x.Name.Contains("Ste")).ToList();
             Assert.Equal(32, res[0].Age);
@@ -391,7 +391,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                     "0",
                     "100"));
         }
-        
+
         [Fact]
         public void TestTwoPredicateQueryWithContains()
         {
@@ -413,10 +413,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestTwoPredicateQueryWithPrefixMatching()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);            
+                .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.Contains("Ste*") || x.TagField == "John").ToList();            
+            var res = collection.Where(x => x.Name.Contains("Ste*") || x.TagField == "John").ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
@@ -441,7 +441,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "5",
                 "6.7",
                 "50",
-                "km"                
+                "km"
                 ))
                 .Returns(_mockReply);
 
@@ -500,7 +500,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSelectComlexAnonType()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReplySelect);            
+                .Returns(_mockReplySelect);
 
             var collection = new RedisCollection<Person>(_mock.Object);
             var res = collection.Select(x => new { x.Name }).ToList();
@@ -590,7 +590,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
-        
+
         [Fact]
         public void TestNestedObjectStringSearchNested2Levels()
         {
@@ -608,7 +608,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
-        
+
         [Fact]
         public void TestNestedObjectNumericSearch()
         {
@@ -626,7 +626,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
-        
+
         [Fact]
         public void TestNestedObjectNumericSearch2Levels()
         {
@@ -644,7 +644,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
-        
+
         [Fact]
         public void TestNestedQueryOfGeo()
         {
@@ -668,7 +668,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "km"
             ));
         }
-        
+
         [Fact]
         public void TestNestedQueryOfGeo2Levels()
         {
@@ -710,7 +710,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
-        
+
         [Fact]
         public void TestArrayContainsSpecialChar()
         {
@@ -728,7 +728,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
-        
+
         [Fact]
         public void TestArrayContainsVar()
         {
@@ -814,7 +814,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.UpdateAsync(steve);
             expected = "\"Satellite Beach\"";
             _mock.Verify(x=>x.ExecuteAsync("EVALSHA","42","1","Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET","$.Address.City",expected));
-            
+
             Scripts.ShaCollection.Clear();
         }
 
@@ -886,7 +886,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 _ = await collection.FirstAsync();
             }
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
                 "person-idx",
@@ -895,7 +895,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -923,7 +923,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -931,9 +931,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
             Person? res;
             if (useExpression)
@@ -944,7 +944,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 res = await collection.FirstOrDefaultAsync();
             }
-            
+
             Assert.NotNull(res);
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
@@ -962,11 +962,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReplyNone);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
-            
+
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
-            
+
             Person? res;
             if (useExpression)
             {
@@ -994,7 +994,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
             var collection = new RedisCollection<Person>(_mock.Object);
             Person res;
@@ -1015,7 +1015,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1023,7 +1023,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReplyNone);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
             if (useExpression)
@@ -1034,7 +1034,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 await Assert.ThrowsAsync<InvalidOperationException>(async () => await collection.SingleAsync());
             }
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
                 "person-idx",
@@ -1043,7 +1043,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1051,7 +1051,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply2Count);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
             if (useExpression)
@@ -1062,7 +1062,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 await Assert.ThrowsAsync<InvalidOperationException>(async () => await collection.SingleAsync());
             }
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
                 "person-idx",
@@ -1071,7 +1071,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1079,9 +1079,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
-            
+
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
 
             Person? res;
@@ -1093,7 +1093,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 res = await collection.SingleOrDefaultAsync();
             }
-            
+
             Assert.NotNull(res);
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
@@ -1103,7 +1103,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1111,9 +1111,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReplyNone);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
-            
+
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
 
             Person? res;
@@ -1125,7 +1125,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 res = await collection.SingleOrDefaultAsync();
             }
-            
+
             Assert.Null(res);
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
@@ -1135,7 +1135,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1143,9 +1143,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply2Count);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
-            
+
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
 
             Person? res;
@@ -1157,7 +1157,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 res = await collection.SingleOrDefaultAsync();
             }
-            
+
             Assert.Null(res);
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
@@ -1175,12 +1175,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
 
-            var res = await (useExpression ? collection.AnyAsync(x => x.TagField == "bob") : collection.AnyAsync()); 
+            var res = await (useExpression ? collection.AnyAsync(x => x.TagField == "bob") : collection.AnyAsync());
             Assert.True(res);
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
@@ -1190,7 +1190,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "0"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1198,12 +1198,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReplyNone);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
-            
+
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
-            var res = await (useExpression ? collection.AnyAsync(x => x.TagField == "bob") : collection.AnyAsync()); 
-            
+            var res = await (useExpression ? collection.AnyAsync(x => x.TagField == "bob") : collection.AnyAsync());
+
             Assert.False(res);
             _mock.Verify(x=>x.ExecuteAsync(
                 "FT.SEARCH",
@@ -1213,7 +1213,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "0"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1221,7 +1221,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
 
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
@@ -1235,7 +1235,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "0"));
         }
-        
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1243,7 +1243,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply2Count);
-            
+
             var collection = new RedisCollection<Person>(_mock.Object);
             var expectedPredicate = useExpression ?  "(@TagField:{bob})" : "*";
             var res = await (useExpression ? collection.CountAsync(x => x.TagField == "bob") : collection.CountAsync());
@@ -1580,29 +1580,29 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ReturnsAsync("OK");
 
             await _mock.Object.CreateIndexAsync(typeof(ObjectWithStringLikeValueTypes));
-            
-            _mock.Verify(x=>x.ExecuteAsync("FT.CREATE", 
-                "objectwithstringlikevaluetypes-idx", 
-                "ON", 
-                "Json", 
-                "PREFIX", 
-                "1", 
-                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypes:", 
+
+            _mock.Verify(x=>x.ExecuteAsync("FT.CREATE",
+                "objectwithstringlikevaluetypes-idx",
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypes:",
                 "SCHEMA",
-                "$.Ulid", 
-                "AS", 
+                "$.Ulid",
+                "AS",
                 "Ulid",
                 "TAG", "SEPARATOR", "|",
                 "$.Boolean",
                 "AS",
                 "Boolean",
-                "TAG", "SEPARATOR", "|", 
+                "TAG", "SEPARATOR", "|",
                 "$.Guid",
                 "AS", "Guid", "TAG", "SEPARATOR", "|", "$.AnEnum", "AS", "AnEnum", "TAG",
                 "$.AnEnumAsInt", "AS", "AnEnumAsInt","NUMERIC"
                 ));
         }
-        
+
         [Fact]
         public async Task TestCreateIndexWithStringlikeValueTypesHash()
         {
@@ -1610,15 +1610,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ReturnsAsync("OK");
 
             await _mock.Object.CreateIndexAsync(typeof(ObjectWithStringLikeValueTypesHash));
-            
-            _mock.Verify(x=>x.ExecuteAsync("FT.CREATE", 
-                "objectwithstringlikevaluetypeshash-idx", 
-                "ON", 
-                "Hash", 
-                "PREFIX", 
-                "1", 
-                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypesHash:", 
-                "SCHEMA", 
+
+            _mock.Verify(x=>x.ExecuteAsync("FT.CREATE",
+                "objectwithstringlikevaluetypeshash-idx",
+                "ON",
+                "Hash",
+                "PREFIX",
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypesHash:",
+                "SCHEMA",
                 "Ulid",
                 "TAG", "SEPARATOR", "|",
                 "Boolean",
@@ -1631,31 +1631,31 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object);
 
             var ulid = Ulid.NewUlid();
 
             await collection.Where(x => x.Ulid == ulid).ToListAsync();
             var expectedPredicate = $"(@Ulid:{{{ulid}}})";
-            
+
             _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", "objectwithstringlikevaluetypes-idx", expectedPredicate, "LIMIT", "0", "100"));
         }
-        
+
         [Fact]
         public async Task TestQueryOfGuid()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object);
 
             var guid = Guid.NewGuid();
 
             await collection.Where(x => x.Guid == guid).ToListAsync();
-            
+
             var expectedPredicate = $"(@Guid:{{{ExpressionParserUtilities.EscapeTagField(guid.ToString())}}})";
-            
+
             _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", "objectwithstringlikevaluetypes-idx", expectedPredicate, "LIMIT", "0", "100"));
         }
 
@@ -1664,66 +1664,66 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object);
 
             var boolean = true;
 
             await collection.Where(x => x.Boolean == true).ToListAsync();
-            
+
             var expectedPredicate = $"(@Boolean:{{{true}}})";
-            
+
             _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", "objectwithstringlikevaluetypes-idx", expectedPredicate, "LIMIT", "0", "100"));
         }
-        
+
         [Fact]
         public async Task TestQueryOfEnum()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object);
 
             var anEnum = AnEnum.two;
 
             await collection.Where(x => x.AnEnum == AnEnum.two && x.AnEnumAsInt == anEnum).ToListAsync();
-            
+
             var expectedPredicate = $"((@AnEnum:{{{AnEnum.two}}}) (@AnEnumAsInt:[1 1]))";
-            
+
             _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", "objectwithstringlikevaluetypes-idx", expectedPredicate, "LIMIT", "0", "100"));
         }
-        
+
         [Fact]
         public async Task TestQueryOfEnumHash()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithStringLikeValueTypesHash>(_mock.Object);
 
             var anEnum = AnEnum.two;
 
             await collection.Where(x => x.AnEnum == AnEnum.two).ToListAsync();
-            
+
             var expectedPredicate = $"(@AnEnum:[1 1])";
-            
+
             _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", "objectwithstringlikevaluetypeshash-idx", expectedPredicate, "LIMIT", "0", "100"));
         }
-        
+
         [Fact]
         public async Task TestGreaterThanEnumQuery()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object);
 
             var anEnum = AnEnum.two;
 
             await collection.Where(x => (int)x.AnEnumAsInt > 1 ).ToListAsync();
-            
+
             var expectedPredicate = "(@AnEnumAsInt:[(1 inf])";
-            
+
             _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", "objectwithstringlikevaluetypes-idx", expectedPredicate, "LIMIT", "0", "100"));
         }
 
@@ -1734,11 +1734,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await _mock.Object.CreateIndexAsync(typeof(ObjectWithEmbeddedArrayOfObjects));
             _mock.Verify(x=>x.ExecuteAsync("FT.CREATE",
                 "objectwithembeddedarrayofobjects-idx",
-                "ON", 
-                "Json", 
-                "PREFIX", 
-                "1", 
-                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithEmbeddedArrayOfObjects:", 
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithEmbeddedArrayOfObjects:",
                 "SCHEMA",
                 "$.Addresses[*].City", "AS", "Addresses_City", "TAG", "SEPARATOR", "|",
                 "$.Addresses[*].State", "AS", "Addresses_State", "TAG", "SEPARATOR", "|",
@@ -1756,163 +1756,307 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
 
-            await collection.Where(x => 
+            await collection.Where(x =>
                 x.Addresses.Any(a => a.City == "Satellite Beach")).ToListAsync();
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
-                "FT.SEARCH", 
-                "objectwithembeddedarrayofobjects-idx", 
-                "(@Addresses_City:{Satellite\\ Beach})", 
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "(@Addresses_City:{Satellite\\ Beach})",
                 "LIMIT",
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsEnum()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
 
-            await collection.Where(x => 
+            await collection.Where(x =>
                 x.Addresses.Any(a => a.AddressType == AddressType.Home)).ToListAsync();
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
-                "FT.SEARCH", 
-                "objectwithembeddedarrayofobjects-idx", 
-                "(@Addresses_AddressType:{Home})", 
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "(@Addresses_AddressType:{Home})",
                 "LIMIT",
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsExtraPredicate()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
 
-            await collection.Where(x => 
+            await collection.Where(x =>
                x.Numeric == 100 || x.Name == "Bob" && x.Addresses.Any(a => a.City == "Satellite Beach")).ToListAsync();
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
-                "FT.SEARCH", 
-                "objectwithembeddedarrayofobjects-idx", 
-                "((@Numeric:[100 100]) | ((@Name:{Bob}) (@Addresses_City:{Satellite\\ Beach})))", 
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "((@Numeric:[100 100]) | ((@Name:{Bob}) (@Addresses_City:{Satellite\\ Beach})))",
                 "LIMIT",
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultipleAnys()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
 
-            await collection.Where(x => 
+            await collection.Where(x =>
                 x.Addresses.Any(a => a.City == "Satellite Beach") && x.AddressList.Any(x=>x.City == "Newark")).ToListAsync();
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
-                "FT.SEARCH", 
-                "objectwithembeddedarrayofobjects-idx", 
-                "((@Addresses_City:{Satellite\\ Beach}) (@AddressList_City:{Newark}))", 
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "((@Addresses_City:{Satellite\\ Beach}) (@AddressList_City:{Newark}))",
                 "LIMIT",
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultiplePredicatesInsideAny()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
 
-            await collection.Where(x => 
+            await collection.Where(x =>
                 x.Addresses.Any(a => a.City == "Satellite Beach" && a.State == "Florida")).ToListAsync();
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
-                "FT.SEARCH", 
-                "objectwithembeddedarrayofobjects-idx", 
-                "((@Addresses_City:{Satellite\\ Beach}) (@Addresses_State:{Florida}))", 
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "((@Addresses_City:{Satellite\\ Beach}) (@Addresses_State:{Florida}))",
                 "LIMIT",
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsOtherTypes()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var boolean = true;
             var ulid = Ulid.NewUlid();
             var guid = Guid.NewGuid();
-            
+
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
 
-            await collection.Where(x => 
+            await collection.Where(x =>
                 x.Addresses.Any(a => a.Ulid == ulid) && x.Addresses.Any(a=>a.Guid == guid) && x.Addresses.Any(a=>a.Boolean == boolean)).ToListAsync();
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
-                "FT.SEARCH", 
-                "objectwithembeddedarrayofobjects-idx", 
-                $"(((@Addresses_Ulid:{{{ulid}}}) (@Addresses_Guid:{{{ExpressionParserUtilities.EscapeTagField(guid.ToString())}}})) (@Addresses_Boolean:{{{boolean}}}))", 
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                $"(((@Addresses_Ulid:{{{ulid}}}) (@Addresses_Guid:{{{ExpressionParserUtilities.EscapeTagField(guid.ToString())}}})) (@Addresses_Boolean:{{{boolean}}}))",
                 "LIMIT",
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public async Task TestAnyQueryForListOfEmbeddedObjects()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
 
-            await collection.Where(x => 
+            await collection.Where(x =>
                 x.AddressList.Any(a => a.City == "Satellite Beach")).ToListAsync();
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
-                "FT.SEARCH", 
-                "objectwithembeddedarrayofobjects-idx", 
-                "(@AddressList_City:{Satellite\\ Beach})", 
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "(@AddressList_City:{Satellite\\ Beach})",
                 "LIMIT",
                 "0",
                 "100"));
         }
-        
+
         [Fact]
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultiVariat()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
                 .ReturnsAsync(_mockReply);
-            
+
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_mock.Object);
 
-            await collection.Where(x => 
+            await collection.Where(x =>
                 x.Addresses.Any(a => a.City == "Satellite Beach" && a.State == "Florida")).ToListAsync();
-            
+
             _mock.Verify(x=>x.ExecuteAsync(
-                "FT.SEARCH", 
-                "objectwithembeddedarrayofobjects-idx", 
-                "((@Addresses_City:{Satellite\\ Beach}) (@Addresses_State:{Florida}))", 
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "((@Addresses_City:{Satellite\\ Beach}) (@Addresses_State:{Florida}))",
                 "LIMIT",
                 "0",
                 "100"));
+        }
+
+        [Fact]
+        public async Task SearchWithMultipleWhereClauses()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+
+            await collection
+                .Where(x => x.Name == "steve")
+                .Where(x => x.Age == 32)
+                .Where(x=>x.TagField == "foo").ToListAsync();
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "(((@Name:\"steve\") (@Age:[32 32])) (@TagField:{foo}))",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public async Task TestAsyncMaterializationMethodsWithComibnedQueries()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = await collection.Where(x => x.TagField == "CountAsync")
+                .CountAsync(x => x.Age == 32);
+            _ = await collection.Where(x => x.TagField == "AnyAsync")
+                .AnyAsync(x => x.Age == 32);
+            _ = await collection.Where(x => x.TagField == "SingleAsync")
+                .SingleAsync(x => x.Age == 32);
+            _ = await collection.Where(x => x.TagField == "SingleOrDefaultAsync")
+                .SingleOrDefaultAsync(x => x.Age == 32);
+            _ = await collection.Where(x => x.TagField == "FirstAsync")
+                .FirstAsync(x => x.Age == 32);
+            _ = await collection.Where(x => x.TagField == "FirstOrDefaultAsync")
+                .FirstOrDefaultAsync(x => x.Age == 32);
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "((@TagField:{CountAsync}) (@Age:[32 32]))",
+                "LIMIT",
+                "0",
+                "0"));
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "((@TagField:{AnyAsync}) (@Age:[32 32]))",
+                "LIMIT",
+                "0",
+                "0"));
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "((@TagField:{SingleAsync}) (@Age:[32 32]))",
+                "LIMIT",
+                "0",
+                "1"));
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "((@TagField:{FirstAsync}) (@Age:[32 32]))",
+                "LIMIT",
+                "0",
+                "1"));
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "((@TagField:{SingleOrDefaultAsync}) (@Age:[32 32]))",
+                "LIMIT",
+                "0",
+                "1"));
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "((@TagField:{FirstOrDefaultAsync}) (@Age:[32 32]))",
+                "LIMIT",
+                "0",
+                "1"));
+        }
+
+        [Fact]
+        public void TestMaterializationMethodsWithComibnedQueries()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object).Where(x => x.Age == 32);
+            _ = collection.Count(x => x.TagField == "Count");
+            _ = collection.Any(x => x.TagField == "Any");
+            _ = collection.Single(x => x.TagField == "Single");
+            _ = collection.SingleOrDefault(x => x.TagField == "SingleOrDefault");
+            _ = collection.First(x => x.TagField == "First");
+            _ = collection.FirstOrDefault(x => x.TagField == "FirstOrDefault");
+
+            _mock.Verify(x=>x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((@Age:[32 32]) (@TagField:{Count}))",
+                "LIMIT",
+                "0",
+                "0"));
+            _mock.Verify(x=>x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((@Age:[32 32]) (@TagField:{Any}))",
+                "LIMIT",
+                "0",
+                "0"));
+            _mock.Verify(x=>x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((@Age:[32 32]) (@TagField:{Single}))",
+                "LIMIT",
+                "0",
+                "1"));
+            _mock.Verify(x=>x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((@Age:[32 32]) (@TagField:{First}))",
+                "LIMIT",
+                "0",
+                "1"));
+
+            _mock.Verify(x=>x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((@Age:[32 32]) (@TagField:{SingleOrDefault}))",
+                "LIMIT",
+                "0",
+                "1"));
+            _mock.Verify(x=>x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((@Age:[32 32]) (@TagField:{FirstOrDefault}))",
+                "LIMIT",
+                "0",
+                "1"));
         }
     }
 }
