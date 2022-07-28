@@ -24,6 +24,6 @@ namespace Redis.OM
         /// Builds SE connection string.
         /// </summary>
         /// <returns>A connection string.</returns>
-        public string ToStackExchangeConnectionString() => $"{Host}:{Port},password{Password}";
+        public string ToStackExchangeConnectionString() => $"{Host}:{Port},password={Password}";
     }
 }
