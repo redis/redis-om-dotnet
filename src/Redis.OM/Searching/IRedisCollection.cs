@@ -38,8 +38,9 @@ namespace Redis.OM.Searching
         /// Inserts an item into redis.
         /// </summary>
         /// <param name="item">an item.</param>
+        /// <param name="expiry">the expiry time of the key in seconds (TTL).</param>
         /// <returns>the key.</returns>
-        string Insert(T item);
+        string Insert(T item, long? expiry = null);
 
         /// <summary>
         /// Inserts an item into redis.

@@ -468,8 +468,13 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public string Insert(T item)
+        public string Insert(T item, long? expiry = null)
         {
+            if (expiry != null)
+            {
+                return ((RedisQueryProvider)Provider).Connection.Set(item, expiry);
+            }
+
             return ((RedisQueryProvider)Provider).Connection.Set(item);
         }
 

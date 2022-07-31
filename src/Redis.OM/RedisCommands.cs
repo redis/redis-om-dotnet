@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using StackExchange.Redis;
 
 namespace Redis.OM
 {
@@ -156,8 +157,9 @@ namespace Redis.OM
         /// </summary>
         /// <param name="connection">connection to redis.</param>
         /// <param name="obj">the object to save.</param>
+        /// <param name="expiry">the expiry time of the key in seconds (TTL).</param>
         /// <returns>the key for the object.</returns>
-        public static string Set(this IRedisConnection connection, object obj)
+        public static string Set(this IRedisConnection connection, object obj, long? expiry = null)
         {
             var id = obj.SetId();
             var type = obj.GetType();
@@ -175,6 +177,11 @@ namespace Redis.OM
             else
             {
                 connection.JsonSet(id, ".", obj);
+            }
+
+            if (expiry != null)
+            {
+                connection.Execute("EXPIRE", obj.GetKey(), expiry.ToString());
             }
 
             return id;

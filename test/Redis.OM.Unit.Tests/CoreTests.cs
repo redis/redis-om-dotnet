@@ -5,9 +5,11 @@ using System.Linq;
 using System.IO;
 using Redis.OM;
 using Redis.OM.Modeling;
+using System.Threading;
+
 
 namespace Redis.OM.Unit.Tests
-{    
+{
     public class CoreTests
     {
         [Document(IndexName ="jsonexample-idx", StorageType = StorageType.Json)]
@@ -17,7 +19,7 @@ namespace Redis.OM.Unit.Tests
             public int Age { get; set; }
         }
 
-        
+
         [Fact]
         public void SimpleConnectionTest()
         {
@@ -45,10 +47,33 @@ namespace Redis.OM.Unit.Tests
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
-            var connection = provider.Connection;            
+            var connection = provider.Connection;
+
             connection.Set("x", "value");
             var result = connection.Get("x");
             Assert.Equal("value", result);
+        }
+
+        [Fact]
+        public void ExpireTest()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            Person obj = new Person(){Name = "WithoutExpire"};
+            Person objWithExpire = new Person(){Name = "WithExpire"};
+
+            var objId = connection.Set(obj);
+            var objWithExpireId = connection.Set(objWithExpire, 1);
+
+            Thread.Sleep(2000);
+
+            var notExpired = connection.JsonGet(obj.GetKey());
+            var expired = connection.JsonGet(objWithExpire.GetKey());
+
+            Assert.Equal(expired, "");
+            Assert.NotEqual(notExpired, "");
         }
 
         [Fact]
