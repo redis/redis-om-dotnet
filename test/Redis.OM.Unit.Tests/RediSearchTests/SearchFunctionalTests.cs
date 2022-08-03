@@ -630,7 +630,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotEmpty(results);
             results = await collection.Where(x => x.AddressList.Any(x => x.City == "Satellite Beach")).ToListAsync();
             Assert.NotEmpty(results);
-            
+        }
+
+        [Fact]
+        public async Task TestQueryWithNoStopwords()
+        {
+            var obj = new ObjectWithZeroStopwords()
+            {
+                Name = "to be or not to be that is the question"
+            };
+
+            await _connection.SetAsync(obj);
+
+            var collection = new RedisCollection<ObjectWithZeroStopwords>(_connection);
+            var result = await collection.FirstOrDefaultAsync(x => x.Name == "to be or not to be that is the question");
+
+            Assert.NotNull(result);
         }
     }
 }
