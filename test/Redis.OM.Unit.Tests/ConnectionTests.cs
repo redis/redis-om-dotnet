@@ -63,5 +63,23 @@ namespace Redis.OM.Unit.Tests
             var res = connection.Execute("GET", "Foo");
             Assert.Equal("Bar", res);
         }
+
+        [Fact]
+        public void TestPrivateConnection()
+        {
+            var configuration = new RedisConnectionConfiguration()
+            {
+                Host = "localhost",
+                Port = Int32.Parse(Environment.GetEnvironmentVariable("PRIVATE_PORT") ?? "36379"),
+                Password = Environment.GetEnvironmentVariable("PRIVATE_PASSWORD")
+            };
+
+            var provider = new RedisConnectionProvider(configuration);
+
+            var connection = provider.Connection;
+            connection.Execute("SET", "Foo", "Bar");
+            var res = connection.Execute("GET", "Foo");
+            Assert.Equal("Bar",res);
+        }
     }
 }
