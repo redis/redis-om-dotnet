@@ -213,5 +213,13 @@ namespace Redis.OM.Searching
         /// <param name="expression">The expression.</param>
         /// <returns>The single instance.</returns>
         T? SingleOrDefault(Expression<Func<T, bool>> expression);
+
+        /// <summary>
+        /// Retrieves the objects from redis at the given IDs,
+        /// if there is no such Object in Redis, null is returned in the KVP.
+        /// </summary>
+        /// <param name="ids">The Ids to look up.</param>
+        /// <returns>A dictionary correlating the ids provided to the objects in Redis.</returns>
+        Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids);
     }
 }
