@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -633,6 +633,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task TestQueryWithNoStopwords()
+        {
+            var obj = new ObjectWithZeroStopwords()
+            {
+                Name = "to be or not to be that is the question"
+            };
+
+            await _connection.SetAsync(obj);
+
+            var collection = new RedisCollection<ObjectWithZeroStopwords>(_connection);
+            var result = await collection.FirstOrDefaultAsync(x => x.Name == "to be or not to be that is the question");
+
+            Assert.NotNull(result);
+
+        }
+
+        [Fact]
         public async Task FindByIdsAsyncIds()
         {
             var person1 = new Person() {Name = "Alice", Age = 51};
@@ -680,6 +697,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(keys[1].Split(':').Last(), people[keys[1]]!.Id);
             Assert.Equal("Bob", people[keys[1]].Name);
             Assert.Equal(37, people[keys[1]].Age);
+
         }
     }
 }
