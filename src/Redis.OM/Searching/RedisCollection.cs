@@ -407,6 +407,19 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
+        public async Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids)
+        {
+            var tasks = new Dictionary<string, Task<T?>>();
+            foreach (var id in ids)
+            {
+                tasks.Add(id, FindByIdAsync(id));
+            }
+
+            await Task.WhenAll(tasks.Values);
+            return tasks.ToDictionary(x => x.Key, x => x.Value.Result);
+        }
+
+        /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {
             StateManager.Clear();
