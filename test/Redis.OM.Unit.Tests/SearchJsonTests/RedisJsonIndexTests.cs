@@ -196,6 +196,19 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 Assert.Equal(expected[i], indexArr[i]);
             }
         }
-        
+
+        [Fact]
+        public void TestIndexGetInfoHappyPath()
+        {
+            var host = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
+            var conf = new RedisConnectionConfiguration { Host = host };
+            var connection = conf.Connect();
+            connection.CreateIndex(typeof(Person));
+            var indexInfo = connection.GetIndexInfo(typeof(Person));
+
+            Assert.NotNull(indexInfo);
+
+        }
+
     }
 }
