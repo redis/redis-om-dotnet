@@ -67,27 +67,6 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Get index information.
-        /// </summary>
-        /// <param name="connection">the connection.</param>
-        /// <param name="type">the type that maps to the index.</param>
-        /// <returns>Strong-typed result of FT.INFO idx.</returns>
-        public static RedisIndexInfo? GetIndexInfo(this IRedisConnection connection, Type type)
-        {
-            try
-            {
-                var indexName = type.SerializeIndex().First();
-                var redisReply = connection.Execute("FT.INFO", indexName);
-                var redisIndexInfo = new RedisIndexInfo(redisReply);
-                return redisIndexInfo;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
-        /// <summary>
         /// Creates an index.
         /// </summary>
         /// <param name="connection">the connection.</param>
@@ -109,6 +88,48 @@ namespace Redis.OM
                 }
 
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Get index information.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="type">the type that maps to the index.</param>
+        /// <returns>Strong-typed result of FT.INFO idx.</returns>
+        public static RedisIndexInfo? GetIndexInfo(this IRedisConnection connection, Type type)
+        {
+            try
+            {
+                var indexName = type.SerializeIndex().First();
+                var redisReply = connection.Execute("FT.INFO", indexName);
+                var redisIndexInfo = new RedisIndexInfo(redisReply);
+                return redisIndexInfo;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        /// <summary>
+        /// Get index information.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="type">the type that maps to the index.</param>
+        /// <returns>Strong-typed result of FT.INFO idx.</returns>
+        public static async Task<RedisIndexInfo?> GetIndexInfoAsync(this IRedisConnection connection, Type type)
+        {
+            try
+            {
+                var indexName = type.SerializeIndex().First();
+                var redisReply = await connection.ExecuteAsync("FT.INFO", indexName);
+                var redisIndexInfo = new RedisIndexInfo(redisReply);
+                return redisIndexInfo;
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
 

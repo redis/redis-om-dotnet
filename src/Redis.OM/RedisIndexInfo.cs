@@ -44,28 +44,28 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Gets or sets index_name.
+        /// Gets index_name.
         /// </summary>
-        public string? IndexName { get; set; }
+        public string? IndexName { get;  }
 
         /// <summary>
-        /// Gets or sets num_docs.
+        /// Gets num_docs.
         /// </summary>
-        public int? NumDocs { get; set; }
+        public int? NumDocs { get;  }
 
         /// <summary>
-        /// Gets or sets num_terms.
+        /// Gets num_terms.
         /// </summary>
-        public int? NumTerms { get; set; }
+        public int? NumTerms { get;  }
 
         /// <summary>
-        /// Gets or sets num_records.
+        /// Gets num_records.
         /// </summary>
-        public int? NumRecords { get; set; }
+        public int? NumRecords { get;  }
 
         /// <summary>
-        /// Gets or sets indexing.
+        /// Gets indexing.
         /// </summary>
-        public int? Indexing { get; set; }
+        public int? Indexing { get;  }
     }
 }
