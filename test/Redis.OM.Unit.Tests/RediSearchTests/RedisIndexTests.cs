@@ -134,5 +134,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var res = await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
             Assert.False(res);
         }
+
+        [Fact]
+        public void TestIndexGetInfoHappyPath()
+        {
+            var host = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
+            var conf = new RedisConnectionConfiguration { Host = host };
+            var connection = conf.Connect();
+            connection.CreateIndex(typeof(Person));
+            var indexInfo = connection.GetIndexInfo(typeof(Person));
+            Assert.NotNull(indexInfo);
+        }
     }
 }
