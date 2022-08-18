@@ -136,14 +136,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestIndexGetInfoHappyPath()
+        public async Task TestIndexGetInfoHappyPath()
         {
-            var host = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
-            var conf = new RedisConnectionConfiguration { Host = host };
-            var connection = conf.Connect();
-            connection.CreateIndex(typeof(Person));
-            var indexInfo = connection.GetIndexInfo(typeof(Person));
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
+            await connection.CreateIndexAsync(typeof(TestPersonClassHappyPath));
+            var indexInfo = await connection.GetIndexInfoAsync(typeof(TestPersonClassHappyPath));
             Assert.NotNull(indexInfo);
+            await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
         }
     }
 }
