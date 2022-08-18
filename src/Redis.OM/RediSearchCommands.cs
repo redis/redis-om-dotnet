@@ -106,9 +106,14 @@ namespace Redis.OM
                 var redisIndexInfo = new RedisIndexInfo(redisReply);
                 return redisIndexInfo;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw e;
+                if (ex.Message.Contains("Unknown Index name"))
+                {
+                    return null;
+                }
+
+                throw;
             }
         }
 
@@ -127,9 +132,14 @@ namespace Redis.OM
                 var redisIndexInfo = new RedisIndexInfo(redisReply);
                 return redisIndexInfo;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw e;
+                if (ex.Message.Contains("Unknown Index name"))
+                {
+                    return null;
+                }
+
+                throw;
             }
         }
 
