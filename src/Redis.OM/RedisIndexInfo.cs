@@ -37,7 +37,7 @@ namespace Redis.OM
                         NumRecords = int.TryParse(value, out var numRecords) ? numRecords : null;
                         break;
                     case "indexing":
-                        Indexing = int.TryParse(value, out var indexing) ? indexing : null;
+                        Indexing = bool.TryParse(value, out var indexing) ? indexing : null;
                         break;
                 }
             }
@@ -66,6 +66,6 @@ namespace Redis.OM
         /// <summary>
         /// Gets indexing.
         /// </summary>
-        public int? Indexing { get;  }
+        public bool? Indexing { get;  }
     }
 }
