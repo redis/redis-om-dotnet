@@ -28,10 +28,8 @@ namespace Redis.OM
                 switch (key)
                 {
                     case "index_name": IndexName = value.ToString(CultureInfo.InvariantCulture); break; // 1) and 2)
-                    case "index_options": // 3) and 4)
-                        var indexOptionsArray = value.ToArray();
-                        IndexOption = value;
-                        break;
+                    case "index_options": IndexOptions = new RedisIndexInfoIndexOptions(value); break; // 3) and 4)
+                    case "index_definition": IndexDefinition = new RedisIndexInfoIndexDefinition(value); break; // 5) and 6)
                     case "fields": case "attributes": Attributes = value.ToArray().Select(x => new RedisIndexInfoAttribute(x)).ToArray(); break; // 7) and 8)
                     case "num_docs": NumDocs = value.ToString(CultureInfo.InvariantCulture); break; // 9) and 10)
                     case "max_doc_id": MaxDocId = value.ToString(CultureInfo.InvariantCulture); break; // 11) and 12)
@@ -66,7 +64,12 @@ namespace Redis.OM
         /// <summary>
         /// Gets index_options.
         /// </summary>
-        public string? IndexOption { get; }
+        public RedisIndexInfoIndexOptions? IndexOptions { get; }
+
+        /// <summary>
+        /// Gets index_definition.
+        /// </summary>
+        public RedisIndexInfoIndexDefinition? IndexDefinition { get; }
 
         /// <summary>
         /// Gets attributes. Note that it used to be called fields in the documentation.
@@ -186,15 +189,55 @@ namespace Redis.OM
             /// <summary>
             /// Initializes a new instance of the <see cref="RedisIndexInfoIndexOptions"/> class.
             /// </summary>
-            public RedisIndexInfoIndexOptions()
+            /// <param name="redisReply">result form FT.INFO idx line 4).</param>
+            public RedisIndexInfoIndexOptions(RedisReply redisReply)
             {
-                ScoreField = "Test";
+            }
+        }
+
+        /// <summary>
+        /// A strong type for an index_definition.
+        /// </summary>
+        public class RedisIndexInfoIndexDefinition
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RedisIndexInfoIndexDefinition"/> class.
+            /// </summary>
+            /// <param name="redisReply">result form FT.INFO idx line 6).</param>
+            public RedisIndexInfoIndexDefinition(RedisReply redisReply)
+            {
+                var responseArray = redisReply.ToArray();
+                var infoIndex = 0;
+
+                while (infoIndex < responseArray.Length - 1)
+                {
+                    var key = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+                    infoIndex++;
+                    var value = responseArray[infoIndex];
+
+                    switch (key)
+                    {
+                        case "key_type": Identifier = value.ToString(CultureInfo.InvariantCulture); break;
+                        case "prefixes": Prefixes = value.ToArray().Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray(); break;
+                        case "default_score": DefaultScore = value.ToString(CultureInfo.InvariantCulture); break;
+                    }
+                }
             }
 
             /// <summary>
-            /// Gets score_field.
+            /// Gets key_type.
             /// </summary>
-            public string ScoreField { get; }
+            public string? Identifier { get; }
+
+            /// <summary>
+            /// Gets prefixes.
+            /// </summary>
+            public string[]? Prefixes { get; }
+
+            /// <summary>
+            /// Gets default_score.
+            /// </summary>
+            public string? DefaultScore { get; }
         }
 
         /// <summary>
