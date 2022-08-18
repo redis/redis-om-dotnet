@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace Redis.OM
 {
@@ -14,40 +17,43 @@ namespace Redis.OM
         public RedisIndexInfo(RedisReply redisReply)
         {
             var responseArray = redisReply.ToArray();
-            var index = 0;
+            var infoIndex = 0;
 
-            while (index < responseArray.Length - 1)
+            while (infoIndex < responseArray.Length - 1)
             {
-                var key = responseArray[index].ToString(CultureInfo.InvariantCulture);
-                index++;
-                var value = responseArray[index].ToString(CultureInfo.InvariantCulture);
+                var key = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+                infoIndex++;
+                var value = responseArray[infoIndex];
 
                 switch (key)
                 {
-                    case "index_name": IndexName = value; break; // 1) and 2)
-                    case "index_options": IndexOption = value; break; // 3) and 4)
-                    case "fields": Fields = value; break; // 7) and 8)
-                    case "num_docs": NumDocs = value; break; // 9) and 10)
-                    case "max_doc_id": MaxDocId = value; break; // 11) and 12)
-                    case "num_terms": NumTerms = value; break; // 13) and 14)
-                    case "num_records": NumRecords = value; break; // 15) and 16)
-                    case "inverted_sz_mb": InvertedSzMb = value; break; // 17) and 18)
-                    case "vector_index_sz_mb": VectorIndexSzMb = value; break; // 19) and 20)
-                    case "total_inverted_index_blocks": TotalInvertedIndexBlocks = value; break; // 21) and 22)
-                    case "offset_vectors_sz_mb": OffsetVectorsSzMb = value; break; // 23) and 24)
-                    case "doc_table_size_mb": DocTableSizeMb = value; break; // 25) and 26)
-                    case "sortable_values_size_mb": SortableValuesSizeMb = value; break; // 27) and 28)
-                    case "key_table_size_mb": KeyTableSizeMb = value; break; // 29) and 30)
-                    case "records_per_doc_avg": RecordsPerDocAvg = value; break; // 31) and 32)
-                    case "bytes_per_record_avg": BytesPerRecordAvg = value; break; // 33) and 34)
-                    case "offsets_per_term_avg": OffsetsPerTermAvg = value; break; // 35) and 36)
-                    case "offset_bits_per_record_avg": OffsetBitsPerRecordAvg = value; break; // 37) and 38)
-                    case "hash_indexing_failures": HashIndexingFailures = value; break; // 39) and 40)
-                    case "indexing": Indexing = value; break; // 41) and 42)
-                    case "percent_indexed": PercentIndexed = value; break; // 43) and 44)
-                    case "gc_stats": GcStats = value; break; // 45) and 46)
-                    case "cursor_stats": CursorStats = value; break; // 47) and 48)
-                    case "stopwords_list": StopwordsList = value; break; // 49) and 50)
+                    case "index_name": IndexName = value.ToString(CultureInfo.InvariantCulture); break; // 1) and 2)
+                    case "index_options": // 3) and 4)
+                        var indexOptionsArray = value.ToArray();
+                        IndexOption = value;
+                        break;
+                    case "fields": case "attributes": Attributes = value.ToArray().Select(x => new RedisIndexInfoAttribute(x)).ToArray(); break; // 7) and 8)
+                    case "num_docs": NumDocs = value.ToString(CultureInfo.InvariantCulture); break; // 9) and 10)
+                    case "max_doc_id": MaxDocId = value.ToString(CultureInfo.InvariantCulture); break; // 11) and 12)
+                    case "num_terms": NumTerms = value.ToString(CultureInfo.InvariantCulture); break; // 13) and 14)
+                    case "num_records": NumRecords = value.ToString(CultureInfo.InvariantCulture); break; // 15) and 16)
+                    case "inverted_sz_mb": InvertedSzMb = value.ToString(CultureInfo.InvariantCulture); break; // 17) and 18)
+                    case "vector_index_sz_mb": VectorIndexSzMb = value.ToString(CultureInfo.InvariantCulture); break; // 19) and 20)
+                    case "total_inverted_index_blocks": TotalInvertedIndexBlocks = value.ToString(CultureInfo.InvariantCulture); break; // 21) and 22)
+                    case "offset_vectors_sz_mb": OffsetVectorsSzMb = value.ToString(CultureInfo.InvariantCulture); break; // 23) and 24)
+                    case "doc_table_size_mb": DocTableSizeMb = value.ToString(CultureInfo.InvariantCulture); break; // 25) and 26)
+                    case "sortable_values_size_mb": SortableValuesSizeMb = value.ToString(CultureInfo.InvariantCulture); break; // 27) and 28)
+                    case "key_table_size_mb": KeyTableSizeMb = value.ToString(CultureInfo.InvariantCulture); break; // 29) and 30)
+                    case "records_per_doc_avg": RecordsPerDocAvg = value.ToString(CultureInfo.InvariantCulture); break; // 31) and 32)
+                    case "bytes_per_record_avg": BytesPerRecordAvg = value.ToString(CultureInfo.InvariantCulture); break; // 33) and 34)
+                    case "offsets_per_term_avg": OffsetsPerTermAvg = value.ToString(CultureInfo.InvariantCulture); break; // 35) and 36)
+                    case "offset_bits_per_record_avg": OffsetBitsPerRecordAvg = value.ToString(CultureInfo.InvariantCulture); break; // 37) and 38)
+                    case "hash_indexing_failures": HashIndexingFailures = value.ToString(CultureInfo.InvariantCulture); break; // 39) and 40)
+                    case "indexing": Indexing = value.ToString(CultureInfo.InvariantCulture); break; // 41) and 42)
+                    case "percent_indexed": PercentIndexed = value.ToString(CultureInfo.InvariantCulture); break; // 43) and 44)
+                    case "gc_stats": GcStats = new RedisIndexInfoGcStats(value); break; // 45) and 46)
+                    case "cursor_stats": CursorStats = new RedisIndexInfoCursorStats(value); break; // 47) and 48)
+                    case "stopwords_list": StopwordsList = value.ToArray().Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray(); break; // 49) and 50)
                 }
             }
         }
@@ -63,9 +69,9 @@ namespace Redis.OM
         public string? IndexOption { get; }
 
         /// <summary>
-        /// Gets fields.
+        /// Gets attributes. Note that it used to be called fields in the documentation.
         /// </summary>
-        public string? Fields { get; }
+        public RedisIndexInfoAttribute[]? Attributes { get; }
 
         /// <summary>
         /// Gets num_docs.
@@ -160,16 +166,239 @@ namespace Redis.OM
         /// <summary>
         /// Gets gc_stats.
         /// </summary>
-        public string? GcStats { get; }
+        public RedisIndexInfoGcStats? GcStats { get; }
 
         /// <summary>
         /// Gets cursor_stats.
         /// </summary>
-        public string? CursorStats { get; }
+        public RedisIndexInfoCursorStats? CursorStats { get; }
 
         /// <summary>
         /// Gets stopwords_list.
         /// </summary>
-        public string? StopwordsList { get; }
+        public string[]? StopwordsList { get; }
+
+        /// <summary>
+        /// A strong type index_options, which is  4) on the list.
+        /// </summary>
+        public class RedisIndexInfoIndexOptions
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RedisIndexInfoIndexOptions"/> class.
+            /// </summary>
+            public RedisIndexInfoIndexOptions()
+            {
+                ScoreField = "Test";
+            }
+
+            /// <summary>
+            /// Gets score_field.
+            /// </summary>
+            public string ScoreField { get; }
+        }
+
+        /// <summary>
+        /// A strong type for an attribute.
+        /// </summary>
+        public class RedisIndexInfoAttribute
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RedisIndexInfoAttribute"/> class.
+            /// </summary>
+            /// <param name="redisReply">result form FT.INFO idx line 8).</param>
+            public RedisIndexInfoAttribute(RedisReply redisReply)
+            {
+                var responseArray = redisReply.ToArray();
+                var infoIndex = 0;
+
+                while (infoIndex < responseArray.Length - 1)
+                {
+                    var key = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+                    infoIndex++;
+                    var value = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+
+                    switch (key)
+                    {
+                        case "identifier": Identifier = value; break;
+                        case "attribute": Attribute = value; break;
+                        case "type": Type = value; break;
+                        case "SEPARATOR": Separator = value; break;
+                    }
+                }
+
+                if (responseArray.Select(x => x.ToString())
+                    .Any(x => x.Equals("SORTABLE", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    Sortable = true;
+                }
+            }
+
+            /// <summary>
+            /// Gets identifier.
+            /// </summary>
+            public string? Identifier { get; }
+
+            /// <summary>
+            /// Gets attribute.
+            /// </summary>
+            public string? Attribute { get; }
+
+            /// <summary>
+            /// Gets type.
+            /// </summary>
+            public string? Type { get; }
+
+            /// <summary>
+            /// Gets SEPARATOR.
+            /// </summary>
+            public string? Separator { get; }
+
+            /// <summary>
+            /// Gets SORTABLE.
+            /// </summary>
+            public bool? Sortable { get; }
+        }
+
+        /// <summary>
+        /// A strong type for gc_stats, which is  46) on the list.
+        /// </summary>
+        public class RedisIndexInfoGcStats
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RedisIndexInfoGcStats"/> class.
+            /// </summary>
+            /// <param name="redisReply">result form FT.INFO idx line 46).</param>
+            public RedisIndexInfoGcStats(RedisReply redisReply)
+            {
+                var responseArray = redisReply.ToArray();
+                var infoIndex = 0;
+
+                while (infoIndex < responseArray.Length - 1)
+                {
+                    var key = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+                    infoIndex++;
+                    var value = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+
+                    switch (key)
+                    {
+                        case "bytes_collected": // 46) 1) and 48) 2)
+                            BytesCollected = value;
+                            break;
+                        case "total_ms_run": // 46) 3) and 48) 4)
+                            TotalMsRun = value;
+                            break;
+                        case "total_cycles": // 46) 5) and 48) 6)
+                            TotalCycles = value;
+                            break;
+                        case "average_cycle_time_ms": // 46) 7) and 48) 8)
+                            AverageCycleTimeMs = value;
+                            break;
+                        case "last_run_time_ms": // 46) 9) and 48) 10)
+                            LastRunTimeMs = value;
+                            break;
+                        case "gc_numeric_trees_missed": // 46) 11) and 48) 12)
+                            GcNumericTreesMissed = value;
+                            break;
+                        case "gc_blocks_denied": // 46) 13) and 48) 14)
+                            GcBlocksDenied = value;
+                            break;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets bytes_collected.
+            /// </summary>
+            public string? BytesCollected { get; }
+
+            /// <summary>
+            /// Gets total_ms_run.
+            /// </summary>
+            public string? TotalMsRun { get; }
+
+            /// <summary>
+            /// Gets total_cycles.
+            /// </summary>
+            public string? TotalCycles { get; }
+
+            /// <summary>
+            /// Gets average_cycle_time_ms.
+            /// </summary>
+            public string? AverageCycleTimeMs { get; }
+
+            /// <summary>
+            /// Gets last_run_time_ms.
+            /// </summary>
+            public string? LastRunTimeMs { get; }
+
+            /// <summary>
+            /// Gets gc_numeric_trees_missed.
+            /// </summary>
+            public string? GcNumericTreesMissed { get; }
+
+            /// <summary>
+            /// Gets gc_blocks_denied.
+            /// </summary>
+            public string? GcBlocksDenied { get; }
+        }
+
+        /// <summary>
+        /// A strong type for cursor_stats, which is  46) on the list.
+        /// </summary>
+        public class RedisIndexInfoCursorStats
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RedisIndexInfoCursorStats"/> class.
+            /// </summary>
+            /// <param name="redisReply">result form FT.INFO idx line 48).</param>
+            public RedisIndexInfoCursorStats(RedisReply redisReply)
+            {
+                var responseArray = redisReply.ToArray();
+                var infoIndex = 0;
+
+                while (infoIndex < responseArray.Length - 1)
+                {
+                    var key = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+                    infoIndex++;
+                    var value = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+
+                    switch (key)
+                    {
+                        case "global_idle": // 48) 1) and 48) 2)
+                            GlobalIdle = long.TryParse(value, out var globalIdle) ? globalIdle : 0;
+                            break;
+                        case "global_total": // 48) 3) and 48) 4)
+                            GlobalTotal = long.TryParse(value, out var globalTotal) ? globalTotal : 0;
+                            break;
+                        case "index_capacity": // 48) 5) and 48) 6)
+                            IndexCapacity = long.TryParse(value, out var indexCapacity) ? indexCapacity : 0;
+                            break;
+                        case "index_total": // 48) 7) and 48) 8)
+                            IndexTotal = long.TryParse(value, out var indexTotal) ? indexTotal : 0;
+                            break;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets global_idle.
+            /// </summary>
+            public long GlobalIdle { get; }
+
+            /// <summary>
+            /// Gets global_total.
+            /// </summary>
+            public long GlobalTotal { get; }
+
+            /// <summary>
+            /// Gets index_capacity.
+            /// </summary>
+            public long IndexCapacity { get; }
+
+            /// <summary>
+            /// Gets index_total.
+            /// </summary>
+            public long IndexTotal { get; }
+        }
     }
 }
