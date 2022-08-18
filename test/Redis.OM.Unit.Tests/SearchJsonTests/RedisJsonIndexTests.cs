@@ -196,5 +196,6 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 Assert.Equal(expected[i], indexArr[i]);
             }
         }
+
     }
 }
