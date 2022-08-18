@@ -24,21 +24,12 @@ namespace Redis.OM
 
                 switch (key)
                 {
-                    case "index_name":
-                        IndexName = value.ToString(CultureInfo.InvariantCulture);
-                        break;
-                    case "num_docs":
-                        NumDocs = int.TryParse(value, out var numDocs) ? numDocs : null;
-                        break;
-                    case "num_terms":
-                        NumTerms = int.TryParse(value, out var numTerms) ? numTerms : null;
-                        break;
-                    case "num_records":
-                        NumRecords = int.TryParse(value, out var numRecords) ? numRecords : null;
-                        break;
-                    case "indexing":
-                        Indexing = bool.TryParse(value, out var indexing) ? indexing : null;
-                        break;
+                    case "index_name": IndexName = value.ToString(CultureInfo.InvariantCulture); break;
+                    case "num_docs": NumDocs = int.TryParse(value, out var numDocs) ? numDocs : null; break;
+                    case "max_doc_id": MaxDocId = int.TryParse(value, out var maxDocId) ? maxDocId : null; break;
+                    case "num_terms": NumTerms = int.TryParse(value, out var numTerms) ? numTerms : null; break;
+                    case "num_records": NumRecords = int.TryParse(value, out var numRecords) ? numRecords : null; break;
+                    case "indexing": Indexing = bool.TryParse(value, out var indexing) ? indexing : null; break;
                 }
             }
         }
@@ -46,26 +37,31 @@ namespace Redis.OM
         /// <summary>
         /// Gets index_name.
         /// </summary>
-        public string? IndexName { get;  }
+        public string? IndexName { get; }
 
         /// <summary>
         /// Gets num_docs.
         /// </summary>
-        public int? NumDocs { get;  }
+        public int? NumDocs { get; }
+
+        /// <summary>
+        /// Gets max_doc_id.
+        /// </summary>
+        public int? MaxDocId { get; }
 
         /// <summary>
         /// Gets num_terms.
         /// </summary>
-        public int? NumTerms { get;  }
+        public int? NumTerms { get; }
 
         /// <summary>
         /// Gets num_records.
         /// </summary>
-        public int? NumRecords { get;  }
+        public int? NumRecords { get; }
 
         /// <summary>
         /// Gets indexing.
         /// </summary>
-        public bool? Indexing { get;  }
+        public bool? Indexing { get; }
     }
 }
