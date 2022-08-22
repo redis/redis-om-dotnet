@@ -349,6 +349,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * @DanJRWalsh
 * @baldutech
 * @shacharPash
+* @frostshoxx
 
 <!-- Logo -->
 [Logo]: images/logo.svg
