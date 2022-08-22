@@ -7,7 +7,7 @@ using Xunit;
 namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     public class RedisIndexTests
-    {        
+    {
 
         [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash)]
         public class TestPersonClassHappyPath
@@ -19,7 +19,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             public double Height { get; set; }
             public string[] NickNames { get; set; }
         }
-        
+
         [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash, Prefixes = new []{"Person:"})]
         public class TestPersonClassOverridenPrefix
         {
@@ -41,7 +41,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.True(expected.SequenceEqual(indexArr));
         }
-        
+
         [Fact]
         public void TestIndexSerializationOverridenPrefix()
         {
@@ -60,11 +60,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
             connection.DropIndex(typeof(TestPersonClassHappyPath));
-            var res = connection.CreateIndex(typeof(TestPersonClassHappyPath));            
+            var res = connection.CreateIndex(typeof(TestPersonClassHappyPath));
             Assert.True(res);
             connection.DropIndex(typeof(TestPersonClassHappyPath));
         }
-        
+
         [Fact]
         public async Task TestCreateIndexAsync()
         {
@@ -72,7 +72,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
             await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
-            var res = await connection.CreateIndexAsync(typeof(TestPersonClassHappyPath));            
+            var res = await connection.CreateIndexAsync(typeof(TestPersonClassHappyPath));
             Assert.True(res);
             await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
         }
@@ -83,12 +83,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
-            connection.CreateIndex(typeof(TestPersonClassHappyPath));  
+            connection.CreateIndex(typeof(TestPersonClassHappyPath));
             var res = connection.CreateIndex(typeof(TestPersonClassHappyPath));
             Assert.False(res);
             connection.DropIndex(typeof(TestPersonClassHappyPath));
         }
-        
+
         [Fact]
         public void TestDropExistingIndex()
         {
@@ -96,7 +96,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
             connection.DropIndex(typeof(TestPersonClassHappyPath));
-            connection.CreateIndex(typeof(TestPersonClassHappyPath));            
+            connection.CreateIndex(typeof(TestPersonClassHappyPath));
             var res = connection.DropIndex(typeof(TestPersonClassHappyPath));
             Assert.True(res);
         }
@@ -108,7 +108,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
             await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
-            await connection.CreateIndexAsync(typeof(TestPersonClassHappyPath));            
+            await connection.CreateIndexAsync(typeof(TestPersonClassHappyPath));
             var res = await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
             Assert.True(res);
         }
@@ -123,7 +123,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var res = connection.DropIndex(typeof(TestPersonClassHappyPath));
             Assert.False(res);
         }
-        
+
         [Fact]
         public async Task TestDropIndexWhichDoesNotExistAsync()
         {
@@ -145,6 +145,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await connection.CreateIndexAsync(typeof(TestPersonClassHappyPath));
             var indexInfo = await connection.GetIndexInfoAsync(typeof(TestPersonClassHappyPath));
             Assert.NotNull(indexInfo);
+            Assert.True(indexInfo.IndexName == "TestPersonClassHappyPath-idx");
+            Assert.True(indexInfo.IndexDefinition?.Identifier == "HASH");
+            Assert.True(indexInfo.IndexDefinition?.Prefixes?[0] == "Redis.OM.Unit.Tests.RediSearchTests.RedisIndexTests+TestPersonClassHappyPath:");
+            Assert.NotNull(indexInfo.Indexing);
+            var attributes = indexInfo.Attributes.ToList();
+            Assert.Contains(attributes, x => x.Attribute == "Name" && x.Sortable == true);
+            Assert.Contains(attributes, x => x.Attribute == "Age" && x.Sortable == true);
+            Assert.DoesNotContain(attributes, x => x.Attribute == "Height");
             await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
         }
     }
