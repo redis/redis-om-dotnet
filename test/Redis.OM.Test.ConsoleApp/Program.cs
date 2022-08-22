@@ -31,6 +31,9 @@ namespace Redis.OM.Test.ConsoleApp
             // Create index
             connection.CreateIndex(typeof(Customer));
 
+            // Get Index info
+            var indexinfo = connection.GetIndexInfo(typeof(Customer));
+
             // Insert Object
             customers.Insert(new Customer{
                 FirstName = "James",
