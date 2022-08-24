@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -630,7 +630,73 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotEmpty(results);
             results = await collection.Where(x => x.AddressList.Any(x => x.City == "Satellite Beach")).ToListAsync();
             Assert.NotEmpty(results);
+        }
 
+        [Fact]
+        public async Task TestQueryWithNoStopwords()
+        {
+            var obj = new ObjectWithZeroStopwords()
+            {
+                Name = "to be or not to be that is the question"
+            };
+
+            await _connection.SetAsync(obj);
+
+            var collection = new RedisCollection<ObjectWithZeroStopwords>(_connection);
+            var result = await collection.FirstOrDefaultAsync(x => x.Name == "to be or not to be that is the question");
+
+            Assert.NotNull(result);
+
+        }
+
+        [Fact]
+        public async Task FindByIdsAsyncIds()
+        {
+            var person1 = new Person() {Name = "Alice", Age = 51};
+            var person2 = new Person() {Name = "Bob", Age = 37};
+
+            var collection = new RedisCollection<Person>(_connection);
+
+            await collection.InsertAsync(person1);
+            await collection.InsertAsync(person2);
+
+            var ids = new string[] {person1.Id, person2.Id};
+
+            var people = await collection.FindByIdsAsync(ids);
+            Assert.NotNull(people[ids[0]]);
+            Assert.Equal(ids[0], people[ids[0]].Id);
+            Assert.Equal("Alice", people[ids[0]].Name);
+            Assert.Equal(51, people[ids[0]].Age);
+
+            Assert.NotNull(people[ids[1]]);
+            Assert.Equal(ids[1], people[ids[1]].Id);
+            Assert.Equal("Bob", people[ids[1]].Name);
+            Assert.Equal(37, people[ids[1]].Age);
+        }
+
+        [Fact]
+        public async Task FindByIdsAsyncKeys()
+        {
+            var person1 = new Person() {Name = "Alice", Age = 51};
+            var person2 = new Person() {Name = "Bob", Age = 37};
+
+            var collection = new RedisCollection<Person>(_connection);
+
+            var key1 = await collection.InsertAsync(person1);
+            var key2 = await collection.InsertAsync(person2);
+
+            var keys = new string[] {key1, key2};
+
+            var people = await collection.FindByIdsAsync(keys);
+            Assert.NotNull(people[keys[0]]);
+            Assert.Equal(keys[0].Split(':').Last(), people[keys[0]]!.Id);
+            Assert.Equal("Alice", people[keys[0]].Name);
+            Assert.Equal(51, people[keys[0]].Age);
+
+            Assert.NotNull(people[keys[1]]);
+            Assert.Equal(keys[1].Split(':').Last(), people[keys[1]]!.Id);
+            Assert.Equal("Bob", people[keys[1]].Name);
+            Assert.Equal(37, people[keys[1]].Age);
         }
     }
 }

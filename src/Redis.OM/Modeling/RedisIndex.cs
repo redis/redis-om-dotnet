@@ -81,6 +81,13 @@ namespace Redis.OM.Modeling
                 args.Add(objAttribute.LanguageField!);
             }
 
+            if (objAttribute.Stopwords != null)
+            {
+                args.Add("STOPWORDS");
+                args.Add(objAttribute.Stopwords.Length.ToString());
+                args.AddRange(objAttribute.Stopwords);
+            }
+
             args.Add("SCHEMA");
             foreach (var property in type.GetProperties())
             {

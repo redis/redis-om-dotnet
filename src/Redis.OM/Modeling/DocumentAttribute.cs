@@ -52,6 +52,12 @@ namespace Redis.OM.Modeling
         public string? Filter { get; set; }
 
         /// <summary>
+        /// Gets or sets The stopwords to use for this index. If not set, Redis will use the
+        /// <see href="https://redis.io/docs/stack/search/reference/stopwords/#default-stop-word-list">default</see> stopwords for this index.
+        /// </summary>
+        public string[]? Stopwords { get; set; }
+
+        /// <summary>
         /// Gets the IdGenerationStrategy.
         /// </summary>
         internal IIdGenerationStrategy IdGenerationStrategy => _idGenerationStrategies[IdGenerationStrategyName];
