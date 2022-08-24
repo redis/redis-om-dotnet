@@ -227,27 +227,6 @@ namespace Redis.OM
             return (int)connection.Execute("HSET", args.ToArray());
         }
 
-        // /// <summary>
-        // /// Set's values in a hash.
-        // /// </summary>
-        // /// <param name="connection">the connection.</param>
-        // /// <param name="key">the key.</param>
-        // /// <param name="fieldValues">the field value pairs to set.</param>
-        // /// <returns>How many new fields were created.</returns>
-        // public async static int HSetExpireAsync(this IRedisConnection connection, string key, DateTime expire, params KeyValuePair<string, string>[] fieldValues)
-        // {
-        //     var tran = connection.GetTransaction();
-        //     var args = new List<string> { key }
-        //     foreach (var kvp in fieldValues)
-        //     {
-        //         args.Add(kvp.Key);
-        //         args.Add(kvp.Value);
-        //     }
-        //     var temp = (HashEntry[])fieldValues;
-        //     await tran.HashSetAsync(key, );
-        //     return (int)connection.Execute("HSET", args.ToArray());
-        // }
-
         /// <summary>
         /// Sets a value as JSON in redis.
         /// </summary>
