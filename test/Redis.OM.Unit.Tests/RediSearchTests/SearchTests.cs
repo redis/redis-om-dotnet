@@ -1574,6 +1574,47 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task TestCreateIndexWithNoStopwords()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync("OK");
+
+            await _mock.Object.CreateIndexAsync(typeof(ObjectWithZeroStopwords));
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.CREATE",
+                $"{nameof(ObjectWithZeroStopwords).ToLower()}-idx",
+                "ON",
+                "Hash",
+                "PREFIX",
+                "1",
+                $"Redis.OM.Unit.Tests.{nameof(ObjectWithZeroStopwords)}:",
+                "STOPWORDS",
+                "0",
+                "SCHEMA", "Name", "TAG", "SEPARATOR", "|"));
+        }
+
+        [Fact]
+        public async Task TestCreateIndexWithTwoStopwords()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync("OK");
+
+            await _mock.Object.CreateIndexAsync(typeof(ObjectWithTwoStopwords));
+
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.CREATE",
+                $"{nameof(ObjectWithTwoStopwords).ToLower()}-idx",
+                "ON",
+                "Hash",
+                "PREFIX",
+                "1",
+                $"Redis.OM.Unit.Tests.{nameof(ObjectWithTwoStopwords)}:",
+                "STOPWORDS", "2", "foo", "bar",
+                "SCHEMA", "Name", "TAG", "SEPARATOR", "|"));
+        }
+
+        [Fact]
         public async Task TestCreateIndexWithStringlikeValueTypes()
         {
             _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
