@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using StackExchange.Redis;
@@ -36,9 +38,33 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public ITransaction GetTransaction()
+        public RedisReply[] ExecuteInTransaction(Tuple<string, string[]>[] commandArgsTuples)
         {
-            return _db.CreateTransaction();
+            var transaction = _db.CreateTransaction();
+            var tasks = new List<Task<RedisResult>>();
+            foreach (var tuple in commandArgsTuples)
+            {
+                tasks.Add(transaction.ExecuteAsync(tuple.Item1, tuple.Item2));
+            }
+
+            transaction.Execute();
+            Task.WhenAll(tasks).Wait();
+            return tasks.Select(x => new RedisReply(x.Result)).ToArray();
+        }
+
+        /// <inheritdoc/>
+        public async Task<RedisReply[]> ExecuteInTransactionAsync(Tuple<string, string[]>[] commandArgsTuples)
+        {
+            var transaction = _db.CreateTransaction();
+            var tasks = new List<Task<RedisResult>>();
+            foreach (var tuple in commandArgsTuples)
+            {
+                tasks.Add(transaction.ExecuteAsync(tuple.Item1, tuple.Item2));
+            }
+
+            await transaction.ExecuteAsync();
+            await Task.WhenAll(tasks);
+            return tasks.Select(x => new RedisReply(x.Result)).ToArray();
         }
 
         /// <inheritdoc/>

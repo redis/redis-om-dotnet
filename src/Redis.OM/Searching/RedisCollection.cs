@@ -10,6 +10,7 @@ using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching.Query;
+using StackExchange.Redis;
 
 namespace Redis.OM.Searching
 {
@@ -474,11 +475,9 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public string Insert(T item, DateTime expiry)
+        public string Insert(T item, TimeSpan timeSpan)
         {
-            // TODO: fix this:
-            // return ((RedisQueryProvider)Provider).Connection.Set(item, expiry);
-            return "Not Done";
+            return ((RedisQueryProvider)Provider).Connection.Set(item, timeSpan);
         }
 
         /// <inheritdoc/>
@@ -488,9 +487,9 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public async Task<string> InsertAsync(T item, DateTime expiry)
+        public async Task<string> InsertAsync(T item, TimeSpan timeSpan)
         {
-            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, expiry);
+            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan);
         }
 
         /// <inheritdoc/>
