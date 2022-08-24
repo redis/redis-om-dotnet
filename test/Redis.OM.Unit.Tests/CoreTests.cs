@@ -62,11 +62,11 @@ namespace Redis.OM.Unit.Tests
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
 
-            var jsonObj = new Person { Name = "JsonWithoutExpire" };
-            var jsonObjWithExpire = new Person { Name = "JsonWithExpire" };
+            var jsonObj = new BasicJsonObject { Name = "JsonWithoutExpire" };
+            var jsonObjWithExpire = new BasicJsonObject { Name = "JsonWithExpire" };
 
-            var hashObj = new HashPerson { Name = "HashWithoutExpire" };
-            var hashObjWithExpire = new HashPerson { Name = "HashWithExpire" };
+            var hashObj = new BasicHashObject { Name = "HashWithoutExpire" };
+            var hashObjWithExpire = new BasicHashObject { Name = "HashWithExpire" };
 
             connection.Set(jsonObj);
             connection.Set(jsonObjWithExpire, TimeSpan.FromSeconds(1));
@@ -97,11 +97,11 @@ namespace Redis.OM.Unit.Tests
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
 
-            var jsonObj = new Person { Name = "JsonWithoutExpire" };
-            var jsonObjWithExpire = new Person { Name = "JsonWithExpire" };
+            var jsonObj = new BasicJsonObject { Name = "JsonWithoutExpire" };
+            var jsonObjWithExpire = new BasicJsonObject { Name = "JsonWithExpire" };
 
-            var hashObj = new HashPerson { Name = "HashWithoutExpire" };
-            var hashObjWithExpire = new HashPerson { Name = "HashWithExpire" };
+            var hashObj = new BasicHashObject { Name = "HashWithoutExpire" };
+            var hashObjWithExpire = new BasicHashObject { Name = "HashWithExpire" };
 
             await connection.SetAsync(jsonObj);
             await connection.SetAsync(jsonObjWithExpire, TimeSpan.FromSeconds(1));
