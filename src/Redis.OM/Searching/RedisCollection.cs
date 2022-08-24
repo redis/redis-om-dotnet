@@ -10,6 +10,7 @@ using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching.Query;
+using StackExchange.Redis;
 
 namespace Redis.OM.Searching
 {
@@ -487,9 +488,21 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
+        public string Insert(T item, TimeSpan timeSpan)
+        {
+            return ((RedisQueryProvider)Provider).Connection.Set(item, timeSpan);
+        }
+
+        /// <inheritdoc/>
         public async Task<string> InsertAsync(T item)
         {
             return await ((RedisQueryProvider)Provider).Connection.SetAsync(item);
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> InsertAsync(T item, TimeSpan timeSpan)
+        {
+            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan);
         }
 
         /// <inheritdoc/>
