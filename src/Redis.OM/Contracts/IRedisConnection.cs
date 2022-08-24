@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Redis.OM;
 
 namespace Redis.OM.Contracts
 {
@@ -24,5 +23,21 @@ namespace Redis.OM.Contracts
         /// <param name="args">The arguments.</param>
         /// <returns>A redis Reply.</returns>
         Task<RedisReply> ExecuteAsync(string command, params string[] args);
+
+        /// <summary>
+        /// Executes the contained commands within the context of a transaction.
+        /// </summary>
+        /// <param name="commandArgsTuples">each tuple represents a command and
+        ///     it's arguments to execute inside a transaction.</param>
+        /// <returns>A redis Reply.</returns>
+        Task<RedisReply[]> ExecuteInTransactionAsync(Tuple<string, string[]>[] commandArgsTuples);
+
+        /// <summary>
+        /// Executes the contained commands within the context of a transaction.
+        /// </summary>
+        /// <param name="commandArgsTuples">each tuple represents a command and
+        ///     it's arguments to execute inside a transaction.</param>
+        /// <returns>A redis Reply.</returns>
+        RedisReply[] ExecuteInTransaction(Tuple<string, string[]>[] commandArgsTuples);
     }
 }

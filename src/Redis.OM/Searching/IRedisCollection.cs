@@ -45,8 +45,24 @@ namespace Redis.OM.Searching
         /// Inserts an item into redis.
         /// </summary>
         /// <param name="item">an item.</param>
+        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
+        /// <returns>the key.</returns>
+        string Insert(T item, TimeSpan timeSpan);
+
+        /// <summary>
+        /// Inserts an item into redis.
+        /// </summary>
+        /// <param name="item">an item.</param>
         /// <returns>the key.</returns>
         Task<string> InsertAsync(T item);
+
+        /// <summary>
+        /// Inserts an item into redis.
+        /// </summary>
+        /// <param name="item">an item.</param>
+        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
+        /// <returns>the key.</returns>
+        Task<string> InsertAsync(T item, TimeSpan timeSpan);
 
         /// <summary>
         /// finds an item by it's ID or keyname.
