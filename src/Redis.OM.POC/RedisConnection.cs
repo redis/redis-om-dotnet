@@ -9,6 +9,7 @@ using System.IO.Pipelines;
 using Newtonsoft.Json;
 using Redis.OM.Contracts;
 using Redis.OM;
+using StackExchange.Redis;
 
 namespace Redis.OM
 {
@@ -17,14 +18,17 @@ namespace Redis.OM
         private Socket _socket;
         private TcpClient _tcpClient;
         private SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly IDatabase _db;
+
+        //private static var tran = IDatabase.CreateTransaction();
         public RedisConnection(string hostName="localhost")
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _tcpClient = new TcpClient(hostName, 6379);            
+            _tcpClient = new TcpClient(hostName, 6379);
             var entry = Dns.GetHostEntry(hostName);
             if (entry.AddressList.Length > 0)
             {
-                _socket.Connect(entry.AddressList[1], 6379);                
+                _socket.Connect(entry.AddressList[1], 6379);
             }
         }
 
@@ -51,15 +55,20 @@ namespace Redis.OM
             try
             {
                 var commandBytes = new ArraySegment<byte>(RespHelper.BuildCommand(command, args));
-                await _socket.SendAsync(commandBytes, SocketFlags.None);                
+                await _socket.SendAsync(commandBytes, SocketFlags.None);
                 return await RespHelper.GetNextReplyFromSocketAsync(_socket);
             }
             finally
             {
                 _semaphoreSlim.Release();
             }
-            
+
         }
+        public ITransaction GetTransaction()
+        {
+            return _db.CreateTransaction();
+        }
+
 
     }
 }

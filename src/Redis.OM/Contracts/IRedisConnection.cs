@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Redis.OM;
+using StackExchange.Redis;
 
 namespace Redis.OM.Contracts
 {
@@ -24,5 +26,13 @@ namespace Redis.OM.Contracts
         /// <param name="args">The arguments.</param>
         /// <returns>A redis Reply.</returns>
         Task<RedisReply> ExecuteAsync(string command, params string[] args);
+
+        // TODO: check if I need it in the POC
+
+        /// <summary>
+        /// Return a transaction.
+        /// </summary>
+        /// <returns>A transaction.</returns>
+        public ITransaction GetTransaction();
     }
 }

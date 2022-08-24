@@ -38,9 +38,16 @@ namespace Redis.OM.Searching
         /// Inserts an item into redis.
         /// </summary>
         /// <param name="item">an item.</param>
-        /// <param name="expiry">the expiry time of the key in seconds (TTL).</param>
         /// <returns>the key.</returns>
-        string Insert(T item, long? expiry = null);
+        string Insert(T item);
+
+        /// <summary>
+        /// Inserts an item into redis.
+        /// </summary>
+        /// <param name="item">an item.</param>
+        /// <param name="expiry">the expiry date of the key (TTL).</param>
+        /// <returns>the key.</returns>
+        string Insert(T item, DateTime expiry);
 
         /// <summary>
         /// Inserts an item into redis.
@@ -48,6 +55,14 @@ namespace Redis.OM.Searching
         /// <param name="item">an item.</param>
         /// <returns>the key.</returns>
         Task<string> InsertAsync(T item);
+
+        /// <summary>
+        /// Inserts an item into redis.
+        /// </summary>
+        /// <param name="item">an item.</param>
+        /// <param name="expiry">the expiry date of the key (TTL).</param>
+        /// <returns>the key.</returns>
+        Task<string> InsertAsync(T item, DateTime expiry);
 
         /// <summary>
         /// finds an item by it's ID or keyname.

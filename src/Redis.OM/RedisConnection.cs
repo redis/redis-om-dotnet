@@ -36,6 +36,12 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
+        public ITransaction GetTransaction()
+        {
+            return _db.CreateTransaction();
+        }
+
+        /// <inheritdoc/>
         public void Dispose()
         {
         }

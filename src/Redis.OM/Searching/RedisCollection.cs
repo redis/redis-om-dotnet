@@ -468,20 +468,29 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public string Insert(T item, long? expiry = null)
+        public string Insert(T item)
         {
-            if (expiry != null)
-            {
-                return ((RedisQueryProvider)Provider).Connection.Set(item, expiry);
-            }
-
             return ((RedisQueryProvider)Provider).Connection.Set(item);
+        }
+
+        /// <inheritdoc/>
+        public string Insert(T item, DateTime expiry)
+        {
+            // TODO: fix this:
+            // return ((RedisQueryProvider)Provider).Connection.Set(item, expiry);
+            return "Not Done";
         }
 
         /// <inheritdoc/>
         public async Task<string> InsertAsync(T item)
         {
             return await ((RedisQueryProvider)Provider).Connection.SetAsync(item);
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> InsertAsync(T item, DateTime expiry)
+        {
+            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, expiry);
         }
 
         /// <inheritdoc/>
