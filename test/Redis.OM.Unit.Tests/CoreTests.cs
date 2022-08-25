@@ -5,19 +5,22 @@ using System.Linq;
 using System.IO;
 using Redis.OM;
 using Redis.OM.Modeling;
+using System.Threading;
+using System.Threading.Tasks;
+using Redis.OM.Unit.Tests.RediSearchTests;
 
 namespace Redis.OM.Unit.Tests
-{    
+{
     public class CoreTests
     {
-        [Document(IndexName ="jsonexample-idx", StorageType = StorageType.Json)]
+        [Document(IndexName = "jsonexample-idx", StorageType = StorageType.Json)]
         public class ModelExampleJson
         {
             public string Name { get; set; }
             public int Age { get; set; }
         }
 
-        
+
         [Fact]
         public void SimpleConnectionTest()
         {
@@ -45,10 +48,80 @@ namespace Redis.OM.Unit.Tests
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
-            var connection = provider.Connection;            
+            var connection = provider.Connection;
+
             connection.Set("x", "value");
             var result = connection.Get("x");
             Assert.Equal("value", result);
+        }
+
+        [Fact]
+        public void ExpireTest()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            var jsonObj = new BasicJsonObject { Name = "JsonWithoutExpire" };
+            var jsonObjWithExpire = new BasicJsonObject { Name = "JsonWithExpire" };
+
+            var hashObj = new BasicHashObject { Name = "HashWithoutExpire" };
+            var hashObjWithExpire = new BasicHashObject { Name = "HashWithExpire" };
+
+            connection.Set(jsonObj);
+            connection.Set(jsonObjWithExpire, TimeSpan.FromSeconds(1));
+
+            connection.Set(hashObj);
+            connection.Set(hashObjWithExpire, TimeSpan.FromSeconds(1));
+
+
+            Thread.Sleep(1500);
+
+            var hashNotExpired = connection.HGetAll(hashObj.GetKey());
+            var hashExpired = connection.HGetAll(hashObjWithExpire.GetKey());
+
+            var jsonNotExpired = connection.JsonGet(jsonObj.GetKey());
+            var jsonExpired = connection.JsonGet(jsonObjWithExpire.GetKey());
+
+            Assert.Equal( 2, hashNotExpired.Count);
+            Assert.Equal(0, hashExpired.Count);
+
+            Assert.NotEqual("", jsonNotExpired);
+            Assert.Equal("", jsonExpired);
+        }
+
+        [Fact]
+        public async Task ExpireTestAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            var jsonObj = new BasicJsonObject { Name = "JsonWithoutExpire" };
+            var jsonObjWithExpire = new BasicJsonObject { Name = "JsonWithExpire" };
+
+            var hashObj = new BasicHashObject { Name = "HashWithoutExpire" };
+            var hashObjWithExpire = new BasicHashObject { Name = "HashWithExpire" };
+
+            await connection.SetAsync(jsonObj);
+            await connection.SetAsync(jsonObjWithExpire, TimeSpan.FromSeconds(1));
+
+            await connection.SetAsync(hashObj);
+            await connection.SetAsync(hashObjWithExpire, TimeSpan.FromSeconds(1));
+
+            Thread.Sleep(1500);
+
+            var hashNotExpired = await connection.HGetAllAsync(hashObj.GetKey());
+            var hashExpired = await connection.HGetAllAsync(hashObjWithExpire.GetKey());
+
+            var jsonNotExpired = await connection.JsonGetAsync(jsonObj.GetKey());
+            var jsonExpired = await connection.JsonGetAsync(jsonObjWithExpire.GetKey());
+
+            Assert.Equal(2, hashNotExpired.Count);
+            Assert.Equal(0, hashExpired.Count);
+
+            Assert.NotEqual("",jsonNotExpired);
+            Assert.Equal("", jsonExpired);
         }
 
         [Fact]

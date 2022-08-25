@@ -45,11 +45,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             }
             await Task.WhenAll(tasks);
         }
-        
-        
+
+
 
         private async Task Setup()
-        {            
+        {
             var names = new[] { "Steve", "Sarah", "Chris", "Theresa", "Frank", "Mary", "John", "Alice", "Bob" };
             var rand = new Random();
             var tasks = new List<Task>();
@@ -75,13 +75,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var collection = new RedisCollection<Person>(_connection);
             var i = 0;
-            
+
             foreach (var p in collection)
             {
                 i++;
             }
             Assert.True(i >= 500);
-            
+
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var ages = collection.Select(x => x.Age).ToList();
             foreach (var age in ages)
             {
-                Assert.True(age >= 0 || age == null);               
+                Assert.True(age >= 0 || age == null);
             }
         }
 
@@ -126,7 +126,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotNull(firstJohn);
             Assert.Equal("John",firstJohn.Name);
         }
-        
+
         [Fact]
         public void TestAny()
         {
@@ -155,7 +155,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 person.Name = "Steve";
                 person.Mother = new Person {Name = "Diane"};
             }
-            
+
             collection.Save();
             var steves = collection.Where(x => x.Name == "Steve");
             Assert.Equal(count, steves.Count());
@@ -195,7 +195,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.SaveAsync();
             var augustines = collection.Where(x => x.Name == "Thomas");
             Assert.Equal(count, augustines.Count());
-            
+
         }
 
         [Fact]
@@ -238,10 +238,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 throw;
             }
-            
-            
+
+
         }
-        
+
         [Fact]
         public void TestSaveArrayHash()
         {
@@ -260,7 +260,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 Assert.Equal(maryNicknames.ToArray(), mary.NickNames);
             }
-            
+
         }
 
         [Fact]
@@ -281,7 +281,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var collection = new RedisCollection<Person>(_connection);
             Assert.True(collection.Where(x => x.Name == "Steve" && x.Address.City == "Newark").FirstOrDefault() != default);
         }
-        
+
         [Fact]
         public void TestNestedObjectQuery2Levels()
         {
@@ -310,7 +310,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = collection.FirstOrDefault(x => x.NickNames.Contains("Steve@redis.com"));
             Assert.Equal(id.Split(':')[1], steve.Id);
         }
-        
+
         [Fact]
         public void TestListQuery()
         {
@@ -320,7 +320,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = collection.FirstOrDefault(x => x.NickNamesList.Contains("Steve"));
             Assert.Equal(id.Split(':')[1], steve.Id);
         }
-      
+
         [Fact]
         public void TestCountWithEmptyCollection()
         {
@@ -328,7 +328,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var count = collection.Count();
             Assert.Equal(0,count);
         }
-      
+
         [Fact]
         public void TestUpdate()
         {
@@ -341,13 +341,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             collection.Update(queriedP);
 
             var secondQueriedP = collection.FindById(key);
-            
+
             Assert.NotNull(secondQueriedP);
             Assert.Equal(33, secondQueriedP.Age);
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
             Assert.Equal(testP.Id, secondQueriedP.Id);
         }
-        
+
         [Fact]
         public async Task TestUpdateAsync()
         {
@@ -360,7 +360,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
-            
+
             Assert.NotNull(secondQueriedP);
             Assert.Equal(33, secondQueriedP.Age);
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
@@ -380,7 +380,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
-            
+
             Assert.NotNull(secondQueriedP);
             Assert.Equal("Bob", secondQueriedP.Name);
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
@@ -399,7 +399,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.UpdateAsync(queriedP);
 
             var secondQueriedP = await collection.FindByIdAsync(key);
-            
+
             Assert.NotNull(secondQueriedP);
             Assert.Equal(33, secondQueriedP.Age);
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
@@ -411,7 +411,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var collection = new RedisCollection<Person>(_connection,10000);
             var list = await collection.ToListAsync();
-            
+
             Assert.Equal(collection.Count(), list.Count);
         }
 
@@ -447,8 +447,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var res = await collection.SingleAsync(x => x.Id == id);
             Assert.Equal("foo",res.Name);
         }
-        
-        
+
+
         [Fact]
         public async Task TestNonExistentPersonJson()
         {
@@ -456,7 +456,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var result = await collection.FindByIdAsync("NotARealId");
             Assert.Null(result);
         }
-        
+
         [Fact]
         public async Task TestNonExistentHashPerson()
         {
@@ -464,14 +464,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var result = await collection.FindByIdAsync("NotARealId");
             Assert.Null(result);
         }
-        
+
         [Fact]
         public async Task TestNonExistentPersonJsonGet()
         {
             var result = await _connection.GetAsync<Person>("NotARealId");
             Assert.Null(result);
         }
-        
+
         [Fact]
         public async Task TestNonExistentHashPersonGet()
         {
@@ -536,7 +536,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var alsoObj = await collection.FirstOrDefaultAsync(x => x.Ulid == ulid);
             Assert.NotNull(alsoObj);
         }
-        
+
         [Fact]
         public async Task SearchByBoolean()
         {
@@ -551,7 +551,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             alsoObj = await collection.FirstOrDefaultAsync(x => x.Boolean);
             Assert.NotNull(alsoObj);
         }
-        
+
         [Fact]
         public async Task SearchByBooleanFalse()
         {
@@ -592,7 +592,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             result = await collection.Where(x => x.AnEnumAsInt == obj.AnEnumAsInt).ToListAsync();
             Assert.NotEmpty(result);
         }
-        
+
         [Fact]
         public async Task TestSearchByStringEnumHash()
         {
@@ -697,7 +697,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(keys[1].Split(':').Last(), people[keys[1]]!.Id);
             Assert.Equal("Bob", people[keys[1]].Name);
             Assert.Equal(37, people[keys[1]].Age);
-
         }
     }
 }
