@@ -510,7 +510,14 @@ namespace Redis.OM.Searching
         {
             var prefix = typeof(T).GetKeyPrefix();
             string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
-            return _connection.Get<T>(key);
+            var result = _connection.Get<T>(key);
+            if (result != null)
+            {
+                StateManager.InsertIntoData(key, result);
+                StateManager.InsertIntoSnapshot(key, result);
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>

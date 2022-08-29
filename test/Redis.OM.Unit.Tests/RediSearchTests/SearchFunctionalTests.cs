@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
+using Newtonsoft.Json.Linq;
 using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
@@ -499,6 +500,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var alsoBob = collection.FindById(person.Id);
             Assert.NotNull(alsoBob);
             Assert.Equal("Bob",person.Name);
+        }
+
+        [Fact]
+        public void FindByIdSavedToStateManager()
+        {
+            var expectedName = "Bob";
+            var person = new Person { Name = "Bob" };
+            var collection = new RedisCollection<Person>(_connection);
+            collection.Insert(person);
+            var alsoBob = collection.FindById(person.Id);
+            Assert.NotNull(alsoBob);
+            Assert.Equal(expectedName, person.Name);
+            var dataStateManager = collection.StateManager.Data.FirstOrDefault();
+            var snapshotStateManager = collection.StateManager.Snapshot.FirstOrDefault();
+            var personInDataStateManager = (Person)dataStateManager.Value;
+            var personInSnapshotStateManager = (JObject)snapshotStateManager.Value;
+            Assert.Equal(expectedName, personInDataStateManager.Name);
+            Assert.Equal(expectedName, personInSnapshotStateManager.Value<string>("Name"));
         }
 
         [Fact]
