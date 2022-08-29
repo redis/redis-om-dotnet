@@ -237,7 +237,10 @@ namespace Redis.OM.Searching
             var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
-            return res.Documents.Select(x => x.Value).First();
+            var result = res.Documents.First();
+            StateManager.InsertIntoData(result.Key, result.Value);
+            StateManager.InsertIntoSnapshot(result.Key, result.Value);
+            return result.Value;
         }
 
         /// <inheritdoc />
@@ -248,7 +251,10 @@ namespace Redis.OM.Searching
             var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
-            return res.Documents.Select(x => x.Value).First();
+            var result = res.Documents.First();
+            StateManager.InsertIntoData(result.Key, result.Value);
+            StateManager.InsertIntoSnapshot(result.Key, result.Value);
+            return result.Value;
         }
 
         /// <inheritdoc />
@@ -257,7 +263,16 @@ namespace Redis.OM.Searching
             var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
-            return res.Documents.Select(x => x.Value).FirstOrDefault();
+            var key = res.Documents.Keys.FirstOrDefault();
+            if (key == default)
+            {
+                return default;
+            }
+
+            var result = res.Documents[key];
+            StateManager.InsertIntoData(key, result);
+            StateManager.InsertIntoSnapshot(key, result);
+            return result;
         }
 
         /// <inheritdoc />
@@ -268,7 +283,16 @@ namespace Redis.OM.Searching
             var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
-            return res.Documents.Select(x => x.Value).FirstOrDefault();
+            var key = res.Documents.Keys.FirstOrDefault();
+            if (key == default)
+            {
+                return default;
+            }
+
+            var result = res.Documents[key];
+            StateManager.InsertIntoData(key, result);
+            StateManager.InsertIntoSnapshot(key, result);
+            return result;
         }
 
         /// <inheritdoc />
@@ -282,7 +306,11 @@ namespace Redis.OM.Searching
                 throw new InvalidOperationException("Sequence contained more than one element.");
             }
 
-            return res.Documents.Single().Value;
+            var key = res.Documents.Keys.Single();
+            var result = res.Documents[key];
+            StateManager.InsertIntoData(key, result);
+            StateManager.InsertIntoSnapshot(key, result);
+            return result;
         }
 
         /// <inheritdoc />
@@ -298,7 +326,11 @@ namespace Redis.OM.Searching
                 throw new InvalidOperationException("Sequence contained more than one element.");
             }
 
-            return res.Documents.Single().Value;
+            var key = res.Documents.Keys.Single();
+            var result = res.Documents[key];
+            StateManager.InsertIntoData(key, result);
+            StateManager.InsertIntoSnapshot(key, result);
+            return result;
         }
 
         /// <inheritdoc />
@@ -312,7 +344,16 @@ namespace Redis.OM.Searching
                 return default;
             }
 
-            return res.Documents.SingleOrDefault().Value;
+            var key = res.Documents.Keys.SingleOrDefault();
+            if (key != default)
+            {
+                var result = res.Documents[key];
+                StateManager.InsertIntoData(key, result);
+                StateManager.InsertIntoSnapshot(key, result);
+                return result;
+            }
+
+            return default;
         }
 
         /// <inheritdoc />
@@ -328,7 +369,16 @@ namespace Redis.OM.Searching
                 return default;
             }
 
-            return res.Documents.SingleOrDefault().Value;
+            var key = res.Documents.Keys.SingleOrDefault();
+            if (key != null)
+            {
+                var result = res.Documents[key];
+                StateManager.InsertIntoData(key, result);
+                StateManager.InsertIntoSnapshot(key, result);
+                return result;
+            }
+
+            return default;
         }
 
         /// <inheritdoc />
@@ -417,7 +467,17 @@ namespace Redis.OM.Searching
             }
 
             await Task.WhenAll(tasks.Values);
-            return tasks.ToDictionary(x => x.Key, x => x.Value.Result);
+            var result = tasks.ToDictionary(x => x.Key, x => x.Value.Result);
+            foreach (var res in result)
+            {
+                if (res.Value != null)
+                {
+                    StateManager.InsertIntoData(res.Value.GetKey(), res.Value);
+                    StateManager.InsertIntoSnapshot(res.Value.GetKey(), res.Value);
+                }
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -525,7 +585,14 @@ namespace Redis.OM.Searching
         {
             var prefix = typeof(T).GetKeyPrefix();
             string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
-            return await _connection.GetAsync<T>(key);
+            var result = await _connection.GetAsync<T>(key);
+            if (result != null)
+            {
+                StateManager.InsertIntoData(key, result);
+                StateManager.InsertIntoSnapshot(key, result);
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>

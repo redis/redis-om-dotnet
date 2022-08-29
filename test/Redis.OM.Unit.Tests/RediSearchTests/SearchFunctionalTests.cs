@@ -717,5 +717,82 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal("Bob", people[keys[1]].Name);
             Assert.Equal(37, people[keys[1]].Age);
         }
+
+        [Fact]
+        public async Task TestSaveAfterAsyncMethods()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var people = collection.Take(50).ToArray();
+            var i = 0;
+            //byId
+            collection = new RedisCollection<Person>(_connection);
+            var person = people[i];
+            var byId = await collection.FindByIdAsync(person.Id);
+            byId!.Name = "Changed";
+            collection.Save();
+            byId = await collection.FindByIdAsync(person.Id);
+            Assert.Equal("Changed", byId.Name);
+
+            //first
+            i++;
+            collection = new RedisCollection<Person>(_connection);
+            person = people[i];
+            byId = await collection.FirstAsync( x=>x.Id == person.Id);
+            byId!.Name = "Changed";
+            collection.Save();
+            byId = await collection.FindByIdAsync(person.Id);
+            Assert.Equal("Changed", byId.Name);
+            
+            //firstOrDefault
+            i++;
+            collection = new RedisCollection<Person>(_connection);
+            person = people[i];
+            byId = await collection.FirstOrDefaultAsync( x=>x.Id == person.Id);
+            byId!.Name = "Changed";
+            collection.Save();
+            byId = await collection.FindByIdAsync(person.Id);
+            Assert.Equal("Changed", byId.Name);
+            
+            //Single
+            i++;
+            collection = new RedisCollection<Person>(_connection);
+            person = people[i];
+            byId = await collection.SingleAsync( x=>x.Id == person.Id);
+            byId!.Name = "Changed";
+            collection.Save();
+            byId = await collection.FindByIdAsync(person.Id);
+            Assert.Equal("Changed", byId.Name);
+            
+            //SingleOrDefault
+            i++;
+            collection = new RedisCollection<Person>(_connection);
+            person = people[i];
+            byId = await collection.SingleOrDefaultAsync( x=>x.Id == person.Id);
+            byId!.Name = "Changed";
+            collection.Save();
+            byId = await collection.FindByIdAsync(person.Id);
+            Assert.Equal("Changed", byId.Name);
+            
+            //byIds
+            i++;
+            collection = new RedisCollection<Person>(_connection);
+            var thePeople = people.Skip(i).Take(5);
+            var ids = thePeople.Select(x => x.Id);
+            var byIds = (await collection.FindByIdsAsync(ids)).Values;
+            foreach (var p in byIds)
+            {
+                if (p == null)
+                    continue;
+                p.Name = "Changed";
+            }
+
+            collection.Save();
+            
+            byIds = (await collection.FindByIdsAsync(ids)).Values;
+            foreach (var p in byIds)
+            {
+                Assert.Equal("Changed",p.Name);
+            } 
+        }
     }
 }
