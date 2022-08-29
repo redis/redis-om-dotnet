@@ -339,17 +339,18 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 
 ## ❤️ Our Contributors
 
-* @slorello89
-* @banker
-* @simonprickett
-* @BenShapira
-* @satish860
-* @dracco1993
-* @ecortese
-* @DanJRWalsh
-* @baldutech
-* @shacharPash
-* @frostshoxx
+* [@slorello89](https://github.com/slorello89)
+* [@banker](https://github.com/banker)
+* [@simonprickett](https://github.com/simonprickett)
+* [@BenShapira](https://github.com/BenShapira)
+* [@satish860](https://github.com/satish860)
+* [@dracco1993](https://github.com/dracco1993)
+* [@ecortese](https://github.com/ecortese)
+* [@DanJRWalsh](https://github.com/DanJRWalsh)
+* [@baldutech](https://github.com/baldutech)
+* [@shacharPash](https://github.com/shacharPash)
+* [@frostshoxx](https://github.com/frostshoxx)
+* [@berviantoleo](https://github.com/berviantoleo)
 
 <!-- Logo -->
 [Logo]: images/logo.svg
