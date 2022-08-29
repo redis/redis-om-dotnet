@@ -136,7 +136,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public async Task TestIndexGetInfoHappyPath()
+        public void TestGetIndexInfoHappyPath()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            connection.DropIndex(typeof(TestPersonClassHappyPath));
+            connection.CreateIndex(typeof(TestPersonClassHappyPath));
+            var indexInfo = connection.GetIndexInfo(typeof(TestPersonClassHappyPath));
+            Assert.NotNull(indexInfo);
+            Assert.True(indexInfo.IndexName == "TestPersonClassHappyPath-idx");
+            Assert.True(indexInfo.IndexDefinition?.Identifier == "HASH");
+            Assert.True(indexInfo.IndexDefinition?.Prefixes?[0] == "Redis.OM.Unit.Tests.RediSearchTests.RedisIndexTests+TestPersonClassHappyPath:");
+            Assert.NotNull(indexInfo.Indexing);
+            var attributes = indexInfo.Attributes.ToList();
+            Assert.Contains(attributes, x => x.Attribute == "Name" && x.Sortable == true);
+            Assert.Contains(attributes, x => x.Attribute == "Age" && x.Sortable == true);
+            Assert.DoesNotContain(attributes, x => x.Attribute == "Height");
+            connection.DropIndex(typeof(TestPersonClassHappyPath));
+        }
+
+        [Fact]
+        public async Task TestGetIndexInfoHappyPathAsync()
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
@@ -154,6 +175,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Contains(attributes, x => x.Attribute == "Age" && x.Sortable == true);
             Assert.DoesNotContain(attributes, x => x.Attribute == "Height");
             await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
+        }
+
+        [Fact]
+        public void TestGetIndexInfoWhichDoesNotExist()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            connection.DropIndex(typeof(TestPersonClassHappyPath));
+            var indexInfo = connection.GetIndexInfo(typeof(TestPersonClassHappyPath));
+            Assert.Null(indexInfo);
+        }
+
+        [Fact]
+        public async Task TestGetIndexInfoWhichDoesNotExistAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            await connection.DropIndexAsync(typeof(TestPersonClassHappyPath));
+            var indexInfo = await connection.GetIndexInfoAsync(typeof(TestPersonClassHappyPath));
+            Assert.Null(indexInfo);
         }
     }
 }
