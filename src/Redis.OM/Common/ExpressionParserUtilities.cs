@@ -598,16 +598,26 @@ namespace Redis.OM.Common
             {
                 var propertyExpression = (MemberExpression)exp.Arguments.Last();
                 var valuesExpression = (MemberExpression)exp.Arguments.First();
-                type = Nullable.GetUnderlyingType(propertyExpression.Type) ?? propertyExpression.Type;
-                memberName = GetOperandStringForMember(propertyExpression);
-                literal = GetOperandStringForQueryArgs(valuesExpression);
                 var attribute = DetermineSearchAttribute(propertyExpression);
                 if (attribute == null)
                 {
-                    throw new InvalidOperationException("Called contains for a non-indexed property");
+                    attribute = DetermineSearchAttribute(valuesExpression);
+                    if (attribute != null)
+                    {
+                        propertyExpression = (MemberExpression)exp.Arguments.First();
+                        valuesExpression = (MemberExpression)exp.Arguments.Last();
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Called contains for a non-indexed property");
+                    }
                 }
 
-                if (type == typeof(string) && attribute is IndexedAttribute)
+                type = Nullable.GetUnderlyingType(propertyExpression.Type) ?? propertyExpression.Type;
+                memberName = GetOperandStringForMember(propertyExpression);
+                literal = GetOperandStringForQueryArgs(valuesExpression);
+
+                if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>)) && attribute is IndexedAttribute)
                 {
                     return $"{memberName}:{{{EscapeTagField(literal).Replace("\\|", "|")}}}";
                 }
