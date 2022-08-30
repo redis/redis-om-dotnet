@@ -351,6 +351,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@shacharPash](https://github.com/shacharPash)
 * [@frostshoxx](https://github.com/frostshoxx)
 * [@berviantoleo](https://github.com/berviantoleo)
+* [@AmirEsdeki](https://github.com/AmirEsdeki)
 
 <!-- Logo -->
 [Logo]: images/logo.svg

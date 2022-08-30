@@ -384,7 +384,7 @@ namespace Redis.OM
                 return dict.Any() ? (T?)RedisObjectHandler.FromHashSet<T>(dict) : default;
             }
 
-            return connection.JsonGet<T>(keyName, ".");
+            return await connection.JsonGetAsync<T>(keyName, ".");
         }
 
         /// <summary>
@@ -400,6 +400,22 @@ namespace Redis.OM
             var args = new List<string> { key };
             args.AddRange(paths);
             var res = (string)connection.Execute("JSON.GET", args.ToArray());
+            return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, Options) : default;
+        }
+
+        /// <summary>
+        /// Get's an object out of redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key.</param>
+        /// <param name="paths">the paths to retrieve.</param>
+        /// <typeparam name="T">the type to deserialize into.</typeparam>
+        /// <returns>the object pulled out of redis.</returns>
+        public static async Task<T?> JsonGetAsync<T>(this IRedisConnection connection, string key, params string[] paths)
+        {
+            var args = new List<string> { key };
+            args.AddRange(paths);
+            var res = (string)await connection.ExecuteAsync("JSON.GET", args.ToArray());
             return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, Options) : default;
         }
 
