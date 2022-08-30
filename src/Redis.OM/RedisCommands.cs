@@ -373,7 +373,7 @@ namespace Redis.OM
         /// <param name="keyName">the key.</param>
         /// <typeparam name="T">The type to parse the result out to.</typeparam>
         /// <returns>the object out of redis.</returns>
-        public static async Task<T?> GetAsync<T>(this IRedisConnection connection, string keyName)
+        public static async ValueTask<T?> GetAsync<T>(this IRedisConnection connection, string keyName)
             where T : notnull
         {
             var type = typeof(T);
