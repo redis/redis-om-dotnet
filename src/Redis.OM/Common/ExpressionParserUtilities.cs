@@ -296,6 +296,24 @@ namespace Redis.OM.Common
                     resolved = GetValue(expr.Member, resolved);
                 }
 
+                if (resolved is IEnumerable<string> strings)
+                {
+                    return string.Join("|", strings);
+                }
+
+                if (resolved is IEnumerable<int?> ints)
+                {
+                    var sb = new StringBuilder();
+                    sb.Append('|');
+                    foreach (var i in ints)
+                    {
+                        sb.Append($"[{i} {i}]|");
+                    }
+
+                    sb.Remove(sb.Length - 1, 1);
+                    return sb.ToString();
+                }
+
                 return resolved.ToString();
             }
 
@@ -568,13 +586,56 @@ namespace Redis.OM.Common
         private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp)
         {
             MemberExpression? expression = null;
+            Type type;
+            string memberName;
+            string literal;
             if (exp.Object is MemberExpression)
             {
                 expression = exp.Object as MemberExpression;
             }
+            else if (exp.Arguments.LastOrDefault() is MemberExpression &&
+                     exp.Arguments.FirstOrDefault() is MemberExpression)
+            {
+                var propertyExpression = (MemberExpression)exp.Arguments.Last();
+                var valuesExpression = (MemberExpression)exp.Arguments.First();
+                var attribute = DetermineSearchAttribute(propertyExpression);
+                if (attribute == null)
+                {
+                    attribute = DetermineSearchAttribute(valuesExpression);
+                    if (attribute != null)
+                    {
+                        propertyExpression = (MemberExpression)exp.Arguments.First();
+                        valuesExpression = (MemberExpression)exp.Arguments.Last();
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Called contains for a non-indexed property");
+                    }
+                }
+
+                type = Nullable.GetUnderlyingType(propertyExpression.Type) ?? propertyExpression.Type;
+                memberName = GetOperandStringForMember(propertyExpression);
+                literal = GetOperandStringForQueryArgs(valuesExpression);
+
+                if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>)) && attribute is IndexedAttribute)
+                {
+                    return $"{memberName}:{{{EscapeTagField(literal).Replace("\\|", "|")}}}";
+                }
+
+                if (type == typeof(string) && attribute is SearchableAttribute)
+                {
+                    return $"{memberName}:{literal}";
+                }
+
+                var ret = literal.Replace("|", $"{memberName}:");
+                ret = ret.Replace("]", "]|");
+                ret = ret.Substring(0, ret.Length - 1);
+
+                return ret;
+            }
             else if (exp.Arguments.FirstOrDefault() is MemberExpression)
             {
-                expression = exp.Arguments.FirstOrDefault() as MemberExpression;
+                expression = (MemberExpression)exp.Arguments.First();
             }
 
             if (expression == null)
@@ -582,10 +643,10 @@ namespace Redis.OM.Common
                 throw new InvalidOperationException($"Could not parse query for Contains");
             }
 
-            var type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
+            type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
 
-            var memberName = GetOperandStringForMember(expression);
-            var literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
+            memberName = GetOperandStringForMember(expression);
+            literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
             return (type == typeof(string)) ? $"{memberName}:{literal}" : $"{memberName}:{{{EscapeTagField(literal)}}}";
         }
 
