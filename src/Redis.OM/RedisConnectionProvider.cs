@@ -70,5 +70,15 @@ namespace Redis.OM
         /// <returns>A RedisCollection.</returns>
         public IRedisCollection<T> RedisCollection<T>(int chunkSize = 100)
             where T : notnull => new RedisCollection<T>(Connection, chunkSize);
+
+        /// <summary>
+        /// Gets a redis collection.
+        /// </summary>
+        /// <typeparam name="T">The type the collection will be retrieving.</typeparam>
+        /// <param name="saveState">Whether or not the RedisCollection should maintain the state of documents it enumerates.</param>
+        /// <param name="chunkSize">Size of chunks to use during pagination, larger chunks = larger payloads returned but fewer round trips.</param>
+        /// <returns>A RedisCollection.</returns>
+        public IRedisCollection<T> RedisCollection<T>(bool saveState, int chunkSize = 100)
+            where T : notnull => new RedisCollection<T>(Connection, saveState, chunkSize);
     }
 }
