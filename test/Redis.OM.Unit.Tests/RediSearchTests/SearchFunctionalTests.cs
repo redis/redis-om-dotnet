@@ -794,5 +794,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 Assert.Equal("Changed",p.Name);
             } 
         }
+
+        [Fact]
+        public async Task TestShouldFailForSave()
+        {
+            var expectedText = "The RedisCollection has been instructed to not maintain the state of records enumerated by " +
+                               "Redis making the attempt to Save Invalid. Please initialize the RedisCollection with saveState " +
+                               "set to true to Save documents in the RedisCollection";
+            var collection = new RedisCollection<Person>(_connection, false, 100);
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(collection.SaveAsync().AsTask);
+            Assert.Equal(expectedText, ex.Message);
+            ex = Assert.Throws<InvalidOperationException>(() =>collection.Save());
+            Assert.Equal(expectedText, ex.Message);
+        }
+
+        [Fact]
+        public async Task TestStatelessCollection()
+        {
+            var collection = new RedisCollection<Person>(_connection, false, 10000);
+            var res = await collection.ToListAsync();
+            Assert.True(res.Count >= 1);
+            Assert.Equal(0,collection.StateManager.Data.Count);
+            Assert.Equal(0,collection.StateManager.Snapshot.Count);
+        }
     }
 }
