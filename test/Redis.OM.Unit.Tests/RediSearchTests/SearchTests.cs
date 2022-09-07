@@ -312,7 +312,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "@Name:Ste",
+                "(@Name:Ste)",
                 "LIMIT",
                 "0",
                 "100"));
@@ -386,7 +386,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                     "FT.SEARCH",
                     "person-idx",
-                    "-@Name:Ste",
+                    "-(@Name:Ste)",
                     "LIMIT",
                     "0",
                     "100"));
@@ -403,7 +403,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "(@Name:Ste | (@TagField:{John}))",
+                "((@Name:Ste) | (@TagField:{John}))",
                 "LIMIT",
                 "0",
                 "100"));
@@ -420,7 +420,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "(@Name:Ste* | (@TagField:{John}))",
+                "((@Name:Ste*) | (@TagField:{John}))",
                 "LIMIT",
                 "0",
                 "100"));
@@ -704,7 +704,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "@NickNames:{Steve}",
+                "(@NickNames:{Steve})",
                 "LIMIT",
                 "0",
                 "1000"
@@ -722,7 +722,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "@NickNames:{Steve\\@redis\\.com}",
+                "(@NickNames:{Steve\\@redis\\.com})",
                 "LIMIT",
                 "0",
                 "1000"
@@ -741,7 +741,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "@NickNames:{Steve}",
+                "(@NickNames:{Steve})",
                 "LIMIT",
                 "0",
                 "1000"
@@ -759,7 +759,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "@Mother_NickNames:{Di}",
+                "(@Mother_NickNames:{Di})",
                 "LIMIT",
                 "0",
                 "1000"
@@ -2111,7 +2111,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x=>x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "@TagField:{Steve|Alice|Bob}",
+                "(@TagField:{Steve|Alice|Bob})",
                 "LIMIT",
                 "0",
                 "100"));
@@ -2128,7 +2128,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x=>x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "@Name:Steve|Alice|Bob",
+                "(@Name:Steve|Alice|Bob)",
                 "LIMIT",
                 "0",
                 "100"));
