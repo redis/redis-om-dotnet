@@ -737,42 +737,42 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             i++;
             collection = new RedisCollection<Person>(_connection);
             person = people[i];
-            byId = await collection.FirstAsync( x=>x.Id == person.Id);
+            byId = await collection.FirstAsync(x => x.Id == person.Id);
             byId!.Name = "Changed";
             collection.Save();
             byId = await collection.FindByIdAsync(person.Id);
             Assert.Equal("Changed", byId.Name);
-            
+
             //firstOrDefault
             i++;
             collection = new RedisCollection<Person>(_connection);
             person = people[i];
-            byId = await collection.FirstOrDefaultAsync( x=>x.Id == person.Id);
+            byId = await collection.FirstOrDefaultAsync(x => x.Id == person.Id);
             byId!.Name = "Changed";
             collection.Save();
             byId = await collection.FindByIdAsync(person.Id);
             Assert.Equal("Changed", byId.Name);
-            
+
             //Single
             i++;
             collection = new RedisCollection<Person>(_connection);
             person = people[i];
-            byId = await collection.SingleAsync( x=>x.Id == person.Id);
+            byId = await collection.SingleAsync(x => x.Id == person.Id);
             byId!.Name = "Changed";
             collection.Save();
             byId = await collection.FindByIdAsync(person.Id);
             Assert.Equal("Changed", byId.Name);
-            
+
             //SingleOrDefault
             i++;
             collection = new RedisCollection<Person>(_connection);
             person = people[i];
-            byId = await collection.SingleOrDefaultAsync( x=>x.Id == person.Id);
+            byId = await collection.SingleOrDefaultAsync(x => x.Id == person.Id);
             byId!.Name = "Changed";
             collection.Save();
             byId = await collection.FindByIdAsync(person.Id);
             Assert.Equal("Changed", byId.Name);
-            
+
             //byIds
             i++;
             collection = new RedisCollection<Person>(_connection);
@@ -787,12 +787,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             }
 
             collection.Save();
-            
+
             byIds = (await collection.FindByIdsAsync(ids)).Values;
             foreach (var p in byIds)
             {
-                Assert.Equal("Changed",p.Name);
-            } 
+                Assert.Equal("Changed", p.Name);
+            }
+        }
+
+        [Fact]
+        public async Task TestMultipleContains()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person1 = new Person() {Name = "Alice", Age = 51, NickNames = new []{"Ally","Alie","Al"}};
+            var person2 = new Person() {Name = "Robert", Age = 37, NickNames = new []{"Bobby", "Rob", "Bob"}};
+
+            await collection.InsertAsync(person1);
+            await collection.InsertAsync(person2);
+
+            var people = await collection.Where(x => x.NickNames.Contains("Bob") || x.NickNames.Contains("Alie")).ToListAsync();
+            
+            Assert.Contains(people, x =>x.Id == person1.Id);
+            Assert.Contains(people, x =>x.Id == person2.Id);
         }
     }
 }
