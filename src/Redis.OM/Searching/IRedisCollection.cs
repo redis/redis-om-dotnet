@@ -14,6 +14,11 @@ namespace Redis.OM.Searching
     public interface IRedisCollection<T> : IOrderedQueryable<T>, IAsyncEnumerable<T>
     {
         /// <summary>
+        /// Gets a value indicating whether gets whether the collection is meant to save the state of the records enumerated into it.
+        /// </summary>
+        bool SaveState { get; }
+
+        /// <summary>
         /// Gets the collection state manager.
         /// </summary>
         RedisCollectionStateManager StateManager { get; }
