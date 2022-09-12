@@ -619,12 +619,12 @@ namespace Redis.OM.Common
 
                 if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>)) && attribute is IndexedAttribute)
                 {
-                    return $"{memberName}:{{{EscapeTagField(literal).Replace("\\|", "|")}}}";
+                    return $"({memberName}:{{{EscapeTagField(literal).Replace("\\|", "|")}}})";
                 }
 
                 if (type == typeof(string) && attribute is SearchableAttribute)
                 {
-                    return $"{memberName}:{literal}";
+                    return $"({memberName}:{literal})";
                 }
 
                 var ret = literal.Replace("|", $"{memberName}:");
@@ -644,10 +644,9 @@ namespace Redis.OM.Common
             }
 
             type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
-
             memberName = GetOperandStringForMember(expression);
             literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
-            return (type == typeof(string)) ? $"{memberName}:{literal}" : $"{memberName}:{{{EscapeTagField(literal)}}}";
+            return (type == typeof(string)) ? $"({memberName}:{literal})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
         }
 
         private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp)
