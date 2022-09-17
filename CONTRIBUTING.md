@@ -16,21 +16,16 @@ We welcome code contributions from the community, if you want to contribute code
 3. Code changes should be relatively small and well described in the pull request.
 4. Code changes should be accompanied by tests that demonstrate coverage and regression for the issue.
 
-### Test Setup
-
-1. Run a basic Redis container for functional tests: `docker run -d -p 6379:6379 redislabs/redismod`
-2. Set the password environment variable for the private connection tests: `export PRIVATE_PASSWORD="my-cool-password"`
-3. Run an authenticated Redis container for private connection tests: `docker run -d -p 36379:6379 redislabs/redismod --requirepass $PRIVATE_PASSWORD`
-
 ### How to Open a PR
 
 1. Fork this repo.
 2. Make your Code Changes.
 3. Write your tests.
-4. Verify the tests pass (there may be a couple of deployment-specific tests (e.g. Sentinel/Cluster) in Redis.OM which will fail outside of the GH environment we've setup so don't worry about those).
-5. If it's your first time contributing please add your Github handle the the Contributors section in the README.
-6. Push your changes to GitHub.
-7. Open a PR.
+4. Use the `docker run -p 6379:6379 redislabs/redismod` as your local environment for running the functional tests.
+5. Verify the tests pass (there may be a couple of deployment-specific tests (e.g. Sentinel/Cluster) in Redis.OM which will fail outside of the GH environment we've setup so don't worry about those).
+6. If it's your first time contributing please add your Github handle the the Contributors section in the README.
+7. Push your changes to GitHub.
+8. Open a PR.
 
 ## Contributing Docs changes
 
