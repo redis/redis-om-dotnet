@@ -67,11 +67,15 @@ namespace Redis.OM.Unit.Tests
         [Fact]
         public void TestPrivateConnection()
         {
+            var host = Environment.GetEnvironmentVariable("PRIVATE_HOST") ?? "redis-private";
+            var port = Int32.Parse(Environment.GetEnvironmentVariable("PRIVATE_PORT") ?? "6379");
+            var password = Environment.GetEnvironmentVariable("PRIVATE_PASSWORD");
+            Console.WriteLine($"current host info: Host:{host}, port: {port}, password: {password}");
             var configuration = new RedisConnectionConfiguration()
             {
-                Host = "localhost",
-                Port = Int32.Parse(Environment.GetEnvironmentVariable("PRIVATE_PORT") ?? "36379"),
-                Password = Environment.GetEnvironmentVariable("PRIVATE_PASSWORD")
+                Host = host,
+                Port = port,
+                Password = password
             };
 
             var provider = new RedisConnectionProvider(configuration);
