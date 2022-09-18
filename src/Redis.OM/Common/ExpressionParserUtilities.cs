@@ -598,6 +598,13 @@ namespace Redis.OM.Common
             {
                 var propertyExpression = (MemberExpression)exp.Arguments.Last();
                 var valuesExpression = (MemberExpression)exp.Arguments.First();
+                literal = GetOperandStringForQueryArgs(propertyExpression);
+                if (!literal.StartsWith("@"))
+                {
+                    propertyExpression = (MemberExpression)exp.Arguments.First();
+                    valuesExpression = (MemberExpression)exp.Arguments.Last();
+                }
+
                 var attribute = DetermineSearchAttribute(propertyExpression);
                 if (attribute == null)
                 {

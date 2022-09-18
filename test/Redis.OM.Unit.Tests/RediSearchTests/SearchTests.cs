@@ -2150,7 +2150,26 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100"));
         }
-        
+
+        [Fact]
+        public void Issue201()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var p1 = new Person() {Name = "Steve"};
+            var collection = new RedisCollection<Person>(_mock.Object, 1000);
+            collection.Where(x=>x.NickNames.Contains(p1.Name)).ToList();
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNames:{Steve})",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
         
 
     }
