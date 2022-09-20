@@ -188,6 +188,45 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="json">the json.</param>
+        /// <param name="when">XX - set if exist, NX - set if not exist.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, string json, string when, TimeSpan? timeSpan = null)
+        {
+            if (timeSpan != null)
+            {
+                var args = new[] { key, path, json, when };
+                return (await connection.SendCommandWithExpiryAsync("JSON.SET", args, key, (TimeSpan)timeSpan)).First() == "OK";
+            }
+            else
+            {
+                return await connection.ExecuteAsync("JSON.SET", key, path, json, when) == "OK";
+            }
+        }
+
+        /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="obj">the object to serialize to json.</param>
+        /// <param name="when">XX - set if exist, NX - set if not exist.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, string when, TimeSpan? timeSpan = null)
+        {
+            var json = JsonSerializer.Serialize(obj, Options);
+            return await connection.JsonSetAsync(key, path, json, when, timeSpan);
+        }
+
+        /// <summary>
         /// Set's values in a hash.
         /// </summary>
         /// <param name="connection">the connection.</param>
@@ -284,6 +323,45 @@ namespace Redis.OM
         {
             var json = JsonSerializer.Serialize(obj, Options);
             return connection.JsonSet(key, path, json, timeSpan);
+        }
+
+        /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="json">the json.</param>
+        /// <param name="when">XX - set if exist, NX - set if not exist.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, string json, string when, TimeSpan? timeSpan = null)
+        {
+            if (timeSpan != null)
+            {
+                var args = new[] { key, path, json, when };
+                return connection.SendCommandWithExpiry("JSON.SET", args, key, (TimeSpan)timeSpan).First() == "OK";
+            }
+            else
+            {
+                return connection.Execute("JSON.SET", key, path, json, when) == "OK";
+            }
+        }
+
+        /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="obj">the object to serialize to json.</param>
+        /// <param name="when">XX - set if exist, NX - set if not exist.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, string when, TimeSpan? timeSpan = null)
+        {
+            var json = JsonSerializer.Serialize(obj, Options);
+            return connection.JsonSet(key, path, json, when, timeSpan);
         }
 
         /// <summary>

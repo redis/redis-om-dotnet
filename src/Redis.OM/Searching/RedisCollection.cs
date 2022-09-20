@@ -600,6 +600,62 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
+        public string? InsertIfExist(T item, TimeSpan? timeSpan = null)
+        {
+            var id = item.SetId();
+            if (((RedisQueryProvider)Provider).Connection.JsonSet(id, ".", (object)item, "XX", timeSpan))
+            {
+                return id;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<string?> InsertIfExistAsync(T item, TimeSpan? timeSpan = null)
+        {
+            var id = item.SetId();
+            if (await ((RedisQueryProvider)Provider).Connection.JsonSetAsync(id, ".", (object)item, "XX", timeSpan))
+            {
+                return id;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <inheritdoc/>
+        public string? InsertIfNotExist(T item, TimeSpan? timeSpan = null)
+        {
+            var id = item.SetId();
+            if (((RedisQueryProvider)Provider).Connection.JsonSet(id, ".", (object)item, "NX", timeSpan))
+            {
+                return id;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<string?> InsertIfNotExistAsync(T item, TimeSpan? timeSpan = null)
+        {
+            var id = item.SetId();
+            if (await ((RedisQueryProvider)Provider).Connection.JsonSetAsync(id, ".", (object)item, "NX", timeSpan))
+            {
+                return id;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <inheritdoc/>
         public T? FindById(string id)
         {
             var prefix = typeof(T).GetKeyPrefix();

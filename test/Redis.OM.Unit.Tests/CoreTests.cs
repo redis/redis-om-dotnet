@@ -139,6 +139,31 @@ namespace Redis.OM.Unit.Tests
         }
 
         [Fact]
+        public void SimpleJsonSetWhen()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
+
+            Assert.False(connection.JsonSet("test-json", ".", obj, "XX"));
+            Assert.True(connection.JsonSet("test-json", ".", obj, "NX"));
+            var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.Equal("Shachar", reconsitutedObject.Name);
+            Assert.Equal(23, reconsitutedObject.Age);
+
+            obj.Name = "Shachar2";
+            Assert.False(connection.JsonSet("test-json", ".", obj, "NX"));
+            reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.Equal("Shachar", reconsitutedObject.Name);
+
+            Assert.True(connection.JsonSet("test-json", ".", obj, "XX"));
+            reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.Equal("Shachar2", reconsitutedObject.Name);
+        }
+
+        [Fact]
         public void SimpleJsonTestSE()
         {
             var obj = new ModelExampleJson { Name = "Steve", Age = 32 };
