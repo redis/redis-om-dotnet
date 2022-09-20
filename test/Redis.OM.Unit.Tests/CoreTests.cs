@@ -146,7 +146,7 @@ namespace Redis.OM.Unit.Tests
             var connection = provider.Connection;
 
             var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
-
+            connection.Execute("FLUSHALL");
             Assert.False(connection.JsonSet("test-json", ".", obj, "XX"));
             Assert.True(connection.JsonSet("test-json", ".", obj, "NX"));
             var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
@@ -159,6 +159,31 @@ namespace Redis.OM.Unit.Tests
             Assert.Equal("Shachar", reconsitutedObject.Name);
 
             Assert.True(connection.JsonSet("test-json", ".", obj, "XX"));
+            reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.Equal("Shachar2", reconsitutedObject.Name);
+        }
+
+        [Fact]
+        public async Task SimpleJsonSetWhenAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
+            connection.Execute("FLUSHALL");
+            Assert.False(await connection.JsonSetAsync("test-json", ".", obj, "XX"));
+            Assert.True(await connection.JsonSetAsync("test-json", ".", obj, "NX"));
+            var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.Equal("Shachar", reconsitutedObject.Name);
+            Assert.Equal(23, reconsitutedObject.Age);
+
+            obj.Name = "Shachar2";
+            Assert.False(await connection.JsonSetAsync("test-json", ".", obj, "NX"));
+            reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.Equal("Shachar", reconsitutedObject.Name);
+
+            Assert.True(await connection.JsonSetAsync("test-json", ".", obj, "XX"));
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
             Assert.Equal("Shachar2", reconsitutedObject.Name);
         }
