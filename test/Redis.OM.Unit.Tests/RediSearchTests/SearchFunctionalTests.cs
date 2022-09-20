@@ -737,42 +737,42 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             i++;
             collection = new RedisCollection<Person>(_connection);
             person = people[i];
-            byId = await collection.FirstAsync( x=>x.Id == person.Id);
+            byId = await collection.FirstAsync(x => x.Id == person.Id);
             byId!.Name = "Changed";
             collection.Save();
             byId = await collection.FindByIdAsync(person.Id);
             Assert.Equal("Changed", byId.Name);
-            
+
             //firstOrDefault
             i++;
             collection = new RedisCollection<Person>(_connection);
             person = people[i];
-            byId = await collection.FirstOrDefaultAsync( x=>x.Id == person.Id);
+            byId = await collection.FirstOrDefaultAsync(x => x.Id == person.Id);
             byId!.Name = "Changed";
             collection.Save();
             byId = await collection.FindByIdAsync(person.Id);
             Assert.Equal("Changed", byId.Name);
-            
+
             //Single
             i++;
             collection = new RedisCollection<Person>(_connection);
             person = people[i];
-            byId = await collection.SingleAsync( x=>x.Id == person.Id);
+            byId = await collection.SingleAsync(x => x.Id == person.Id);
             byId!.Name = "Changed";
             collection.Save();
             byId = await collection.FindByIdAsync(person.Id);
             Assert.Equal("Changed", byId.Name);
-            
+
             //SingleOrDefault
             i++;
             collection = new RedisCollection<Person>(_connection);
             person = people[i];
-            byId = await collection.SingleOrDefaultAsync( x=>x.Id == person.Id);
+            byId = await collection.SingleOrDefaultAsync(x => x.Id == person.Id);
             byId!.Name = "Changed";
             collection.Save();
             byId = await collection.FindByIdAsync(person.Id);
             Assert.Equal("Changed", byId.Name);
-            
+
             //byIds
             i++;
             collection = new RedisCollection<Person>(_connection);
@@ -787,12 +787,51 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             }
 
             collection.Save();
-            
+
             byIds = (await collection.FindByIdsAsync(ids)).Values;
             foreach (var p in byIds)
             {
-                Assert.Equal("Changed",p.Name);
-            } 
+                Assert.Equal("Changed", p.Name);
+            }
+        }
+
+        [Fact]
+        public async Task TestMultipleContains()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person1 = new Person() {Name = "Alice", Age = 51, NickNames = new []{"Ally","Alie","Al"}};
+            var person2 = new Person() {Name = "Robert", Age = 37, NickNames = new []{"Bobby", "Rob", "Bob"}};
+
+            await collection.InsertAsync(person1);
+            await collection.InsertAsync(person2);
+
+            var people = await collection.Where(x => x.NickNames.Contains("Bob") || x.NickNames.Contains("Alie")).ToListAsync();
+            
+            Assert.Contains(people, x =>x.Id == person1.Id);
+            Assert.Contains(people, x =>x.Id == person2.Id);
+        }
+
+        [Fact]
+        public async Task TestShouldFailForSave()
+        {
+            var expectedText = "The RedisCollection has been instructed to not maintain the state of records enumerated by " +
+                               "Redis making the attempt to Save Invalid. Please initialize the RedisCollection with saveState " +
+                               "set to true to Save documents in the RedisCollection";
+            var collection = new RedisCollection<Person>(_connection, false, 100);
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(collection.SaveAsync().AsTask);
+            Assert.Equal(expectedText, ex.Message);
+            ex = Assert.Throws<InvalidOperationException>(() =>collection.Save());
+            Assert.Equal(expectedText, ex.Message);
+        }
+
+        [Fact]
+        public async Task TestStatelessCollection()
+        {
+            var collection = new RedisCollection<Person>(_connection, false, 10000);
+            var res = await collection.ToListAsync();
+            Assert.True(res.Count >= 1);
+            Assert.Equal(0,collection.StateManager.Data.Count);
+            Assert.Equal(0,collection.StateManager.Snapshot.Count);
         }
     }
 }
