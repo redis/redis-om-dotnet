@@ -141,50 +141,52 @@ namespace Redis.OM.Unit.Tests
         [Fact]
         public void SimpleJsonSetWhen()
         {
+            var keyName = "test-json:SimpleJsonSetWhen";
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
 
+            connection.Unlink(keyName);
             var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
-            connection.Execute("FLUSHALL");
-            Assert.False(connection.JsonSet("test-json", ".", obj, "XX"));
-            Assert.True(connection.JsonSet("test-json", ".", obj, "NX"));
-            var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.False(connection.JsonSet(keyName, ".", obj, "XX"));
+            Assert.True(connection.JsonSet(keyName, ".", obj, "NX"));
+            var reconsitutedObject = connection.JsonGet<ModelExampleJson>(keyName);
             Assert.Equal("Shachar", reconsitutedObject.Name);
             Assert.Equal(23, reconsitutedObject.Age);
 
             obj.Name = "Shachar2";
-            Assert.False(connection.JsonSet("test-json", ".", obj, "NX"));
-            reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.False(connection.JsonSet(keyName, ".", obj, "NX"));
+            reconsitutedObject = connection.JsonGet<ModelExampleJson>(keyName);
             Assert.Equal("Shachar", reconsitutedObject.Name);
 
-            Assert.True(connection.JsonSet("test-json", ".", obj, "XX"));
-            reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.True(connection.JsonSet(keyName, ".", obj, "XX"));
+            reconsitutedObject = connection.JsonGet<ModelExampleJson>(keyName);
             Assert.Equal("Shachar2", reconsitutedObject.Name);
         }
 
         [Fact]
         public async Task SimpleJsonSetWhenAsync()
         {
+            var keyName = "test-json:SimpleJsonSetWhenAsync";
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
 
             var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
-            connection.Execute("FLUSHALL");
-            Assert.False(await connection.JsonSetAsync("test-json", ".", obj, "XX"));
-            Assert.True(await connection.JsonSetAsync("test-json", ".", obj, "NX"));
-            var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            await connection.UnlinkAsync(keyName);
+            Assert.False(await connection.JsonSetAsync(keyName, ".", obj, "XX"));
+            Assert.True(await connection.JsonSetAsync(keyName, ".", obj, "NX"));
+            var reconsitutedObject = connection.JsonGet<ModelExampleJson>(keyName);
             Assert.Equal("Shachar", reconsitutedObject.Name);
             Assert.Equal(23, reconsitutedObject.Age);
 
             obj.Name = "Shachar2";
-            Assert.False(await connection.JsonSetAsync("test-json", ".", obj, "NX"));
-            reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.False(await connection.JsonSetAsync(keyName, ".", obj, "NX"));
+            reconsitutedObject = connection.JsonGet<ModelExampleJson>(keyName);
             Assert.Equal("Shachar", reconsitutedObject.Name);
 
-            Assert.True(await connection.JsonSetAsync("test-json", ".", obj, "XX"));
-            reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+            Assert.True(await connection.JsonSetAsync(keyName, ".", obj, "XX"));
+            reconsitutedObject = connection.JsonGet<ModelExampleJson>(keyName);
             Assert.Equal("Shachar2", reconsitutedObject.Name);
         }
 
