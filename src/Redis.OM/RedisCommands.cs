@@ -622,7 +622,7 @@ namespace Redis.OM
             TimeSpan ts)
         {
             var commandTuple = Tuple.Create(command, args);
-            var expireTuple = Tuple.Create("PEXPIRE", new[] { keyToExpire, ts.TotalMilliseconds.ToString(CultureInfo.InvariantCulture) });
+            var expireTuple = Tuple.Create("PEXPIRE", new[] { keyToExpire, ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
             return connection.ExecuteInTransaction(new[] { commandTuple, expireTuple });
         }
 
@@ -634,7 +634,7 @@ namespace Redis.OM
             TimeSpan ts)
         {
             var commandTuple = Tuple.Create(command, args);
-            var expireTuple = Tuple.Create("PEXPIRE", new[] { keyToExpire, ts.TotalMilliseconds.ToString(CultureInfo.InvariantCulture) });
+            var expireTuple = Tuple.Create("PEXPIRE", new[] { keyToExpire, ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
             return connection.ExecuteInTransactionAsync(new[] { commandTuple, expireTuple });
         }
     }

@@ -56,6 +56,32 @@ namespace Redis.OM.Unit.Tests
         }
 
         [Fact]
+        public async Task ExpireFractionalMillisecondAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            var jsonObjWithExpire = new BasicJsonObject { Name = "JsonWithExpire" };
+            var key = await connection.SetAsync(jsonObjWithExpire, TimeSpan.FromMilliseconds(5000.5));
+            var ttl = (long)await connection.ExecuteAsync("PTTL", key);
+            Assert.True(ttl <= 5000.5);
+            Assert.True(ttl >= 1000);
+        }
+
+        [Fact]
+        public void ExpireFractionalMillisecond()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            var jsonObjWithExpire = new BasicJsonObject { Name = "JsonWithExpire" };
+            var key = connection.Set(jsonObjWithExpire, TimeSpan.FromMilliseconds(5000.5));
+            var ttl = (long)connection.Execute("PTTL", key);
+            Assert.True(ttl <= 5000.5);
+            Assert.True(ttl >= 1000);
+        }
+
+        [Fact]
         public void ExpireTest()
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
