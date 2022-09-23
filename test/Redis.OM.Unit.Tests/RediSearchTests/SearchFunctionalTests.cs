@@ -30,7 +30,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var names = new[] { "Steve", "Sarah", "Chris", "Theresa", "Frank", "Mary", "John", "Alice", "Bob" };
             var rand = new Random();
             var tasks = new List<Task>();
-            for (var i = 0; i < 500; i++)
+            for (var i = 0; i < 50; i++)
             {
                 var person = new HashPerson()
                 {
@@ -54,7 +54,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var names = new[] { "Steve", "Sarah", "Chris", "Theresa", "Frank", "Mary", "John", "Alice", "Bob" };
             var rand = new Random();
             var tasks = new List<Task>();
-            for (var i = 0; i < 500; i++)
+            for (var i = 0; i < 50; i++)
             {
                 var person = new Person
                 {

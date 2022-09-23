@@ -1,4 +1,4 @@
-﻿FROM redislabs/redismod:preview
+﻿FROM redis/redis-stack-server
 
 RUN mkdir -p /redis
 

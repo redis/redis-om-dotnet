@@ -1,4 +1,4 @@
-FROM redislabs/redismod:preview
+FROM redis/redis-stack-server
 
 ENV SENTINEL_QUORUM 2
 ENV SENTINEL_DOWN_AFTER 1000
