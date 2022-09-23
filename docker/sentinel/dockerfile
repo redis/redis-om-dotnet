@@ -11,6 +11,7 @@ WORKDIR /redis
 COPY sentinel.conf .
 COPY startup.sh /usr/local/bin/
 
+RUN useradd redis
 RUN chown redis:redis /redis/* 
 RUN chmod +x /usr/local/bin/startup.sh
 
