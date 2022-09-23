@@ -15,4 +15,4 @@ RUN chmod +x /usr/local/bin/startup_cluster.sh
 
 EXPOSE 6379
 
-ENTRYPOINT [ "startup.sh" ]
+ENTRYPOINT [ "/usr/local/bin/startup.sh" ]

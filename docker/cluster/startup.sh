@@ -1,4 +1,4 @@
 #!/bin/sh
 
-redis-server /redis/redis.conf
+/opt/redis-stack/bin/redis-server /redis/redis.conf
 sleep infinity
