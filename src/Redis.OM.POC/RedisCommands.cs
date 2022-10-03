@@ -443,7 +443,7 @@ namespace Redis.OM
         }
         #endregion
         #region scripting
-        public static int? Eval(this IRedisConnection connection, string script, string[] keys, string[] argv)
+        internal static int? Eval(this IRedisConnection connection, string script, string[] keys, string[] argv)
         {
             var args = new List<string>();
             args.Add(script);
@@ -453,7 +453,7 @@ namespace Redis.OM
             return connection.Execute("EVAL", args.ToArray());
         }
         
-        public static async Task<int?> EvalAsync(this IRedisConnection connection, string script, string[] keys, string[] argv)
+        internal static async Task<int?> EvalAsync(this IRedisConnection connection, string script, string[] keys, string[] argv)
         {
             var args = new List<string>();
             args.Add(script);
@@ -463,7 +463,7 @@ namespace Redis.OM
             return await connection.ExecuteAsync("EVAL", args.ToArray());
         }
 
-        public static async Task<int?> CreateAndEvalAsync(this IRedisConnection connection, string scriptName, string[] keys,
+        internal static async Task<int?> CreateAndEvalAsync(this IRedisConnection connection, string scriptName, string[] keys,
             string[] argv, string fullScript = "")
         {
             string sha;
@@ -494,7 +494,7 @@ namespace Redis.OM
 
         }
         
-        public static int? CreateAndEval(this IRedisConnection connection, string scriptName, string[] keys,
+        internal static int? CreateAndEval(this IRedisConnection connection, string scriptName, string[] keys,
             string[] argv, string fullScript = "")
         {
             string sha;
