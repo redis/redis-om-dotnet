@@ -19,7 +19,7 @@ services:
       cluster-network:
         ipv4_address: 192.168.57.17
   redis-master:
-    image: "redislabs/rejson"
+    image: "redis/redis-stack-server"
     container_name: redis-master
     ports:
       - "6379"
@@ -29,7 +29,7 @@ services:
   redis-replica:
     image: "redis/redis-stack-server"
     container_name: redis-replica
-    command: /opt/redis-stack/bin/redis-server --port 6379 --loadmodule /opt/redis-stack/lib/redisearch.so --loadmodule /opt/redis-stack/lib/redisgraph.so --loadmodule /opt/redis-stack/lib/redistimeseries.so --loadmodule /opt/redis-stack/lib/rejson.so --loadmodule /opt/redis-stack/lib/redisbloom.so --slaveof redis-master 6379
+    command: /opt/redis-stack/bin/redis-server --port 6379 --loadmodule /opt/redis-stack/lib/redisearch.so --loadmodule /opt/redis-stack/lib/redisgraph.so --loadmodule /opt/redis-stack/lib/redistimeseries.so --loadmodule /opt/redis-stack/lib/rejson.so --loadmodule /opt/redis-stack/lib/redisbloom.so --replicaof 192.168.57.18 6379
     ports:
       - "6379"
   redis-sentinel:    

@@ -16,4 +16,5 @@ RUN chown redis:redis /redis/*
 RUN chmod +x /usr/local/bin/startup.sh
 
 EXPOSE 26379
+EXPOSE 6379
 ENTRYPOINT [ "/usr/local/bin/startup.sh" ]
