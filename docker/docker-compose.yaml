@@ -149,7 +149,7 @@ services:
     environment:
       - STANDALONE_HOST_PORT=redis-standalone:6379
       - SENTINLE_HOST_PORT=redis-sentinel:26379
-      - CLUSTER_HOST_PORT=192.168.57.10:6379
+      - CLUSTER_HOST_PORT=redis-cluster1:6379
       - PRIVATE_HOST=redis-private
       - PRIVATE_PORT=6379
       - PRIVATE_PASSWORD=foobar
