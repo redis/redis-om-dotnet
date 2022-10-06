@@ -21,7 +21,7 @@ We welcome code contributions from the community, if you want to contribute code
 1. Fork this repo.
 2. Make your Code Changes.
 3. Write your tests.
-4. Use the `docker run -p 6379:6379 redislabs/redismod` as your local environment for running the functional tests.
+4. Use the `docker run -p 6379:6379 redis/redis-stack-server` as your local environment for running the functional tests.
 5. Verify the tests pass (there may be a couple of deployment-specific tests (e.g. Sentinel/Cluster) in Redis.OM which will fail outside of the GH environment we've setup so don't worry about those).
 6. If it's your first time contributing please add your Github handle the the Contributors section in the README.
 7. Push your changes to GitHub.
