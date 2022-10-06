@@ -34,7 +34,6 @@
 
             people.Insert(new Person
             {
-                Id = "Person1",
                 FirstName = "Son",
                 LastName = "Goku",
                 Age = 43
@@ -54,7 +53,8 @@
 
             // You can also delete document via unlink(key)
             Console.WriteLine($"Person Documents Before unlinking {string.Join(", ", people.Select(x => x.LastName))}");
-            provider.Connection.Unlink($"Person:Person1");
+            var gokuId = people.Where(x => x.LastName == "Goku").Select(x => x.Id).FirstOrDefault();
+            provider.Connection.Unlink($"Person:{gokuId}");
             Console.WriteLine($"Person Documents After unlinking {string.Join(", ", people.Select(x => x.LastName))}");
         }
     }
