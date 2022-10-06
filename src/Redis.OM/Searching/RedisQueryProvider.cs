@@ -18,6 +18,7 @@ namespace Redis.OM.Searching
     internal class RedisQueryProvider : IQueryProvider
     {
         private readonly int _chunkSize;
+        private readonly bool _saveState;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisQueryProvider"/> class.
@@ -26,12 +27,14 @@ namespace Redis.OM.Searching
         /// <param name="stateManager">The state manager.</param>
         /// <param name="documentAttribute">the document attribute for the indexed type.</param>
         /// <param name="chunkSize">The size of chunks to use in pagination.</param>
-        internal RedisQueryProvider(IRedisConnection connection, RedisCollectionStateManager stateManager, DocumentAttribute documentAttribute, int chunkSize)
+        /// <param name="saveState">Whether or not to save state.</param>
+        internal RedisQueryProvider(IRedisConnection connection, RedisCollectionStateManager stateManager, DocumentAttribute documentAttribute, int chunkSize, bool saveState)
         {
             Connection = connection;
             StateManager = stateManager;
             DocumentAttribute = documentAttribute;
             _chunkSize = chunkSize;
+            _saveState = saveState;
         }
 
         /// <summary>
@@ -40,12 +43,14 @@ namespace Redis.OM.Searching
         /// <param name="connection">the connection.</param>
         /// <param name="documentAttribute">The document attribute for the indexed type.</param>
         /// <param name="chunkSize">The size of chunks to use in pagination.</param>
-        internal RedisQueryProvider(IRedisConnection connection, DocumentAttribute documentAttribute, int chunkSize)
+        /// <param name="saveState">Whether or not to Save State.</param>
+        internal RedisQueryProvider(IRedisConnection connection, DocumentAttribute documentAttribute, int chunkSize, bool saveState)
         {
             Connection = connection;
             DocumentAttribute = documentAttribute;
             StateManager = new RedisCollectionStateManager(DocumentAttribute);
             _chunkSize = chunkSize;
+            _saveState = saveState;
         }
 
         /// <summary>
@@ -278,8 +283,7 @@ namespace Redis.OM.Searching
             where TResult : notnull
         {
             var res = ExecuteQuery<TResult>(expression, BooleanExpression).Documents.First();
-            StateManager.InsertIntoData(res.Key, res.Value);
-            StateManager.InsertIntoSnapshot(res.Key, res.Value);
+            SaveToStateManager(res.Key, res.Value);
             return res.Value;
         }
 
@@ -290,12 +294,30 @@ namespace Redis.OM.Searching
             if (res.Documents.Any())
             {
                 var kvp = res.Documents.FirstOrDefault();
-                StateManager.InsertIntoSnapshot(kvp.Key, kvp.Value);
-                StateManager.InsertIntoData(kvp.Key, kvp.Value);
+                SaveToStateManager(kvp.Key, kvp.Value);
                 return kvp.Value;
             }
 
             return default;
+        }
+
+        private void SaveToStateManager(string key, object value)
+        {
+            if (_saveState)
+            {
+                try
+                {
+                    StateManager.InsertIntoData(key, value);
+                    StateManager.InsertIntoSnapshot(key, value);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    throw new Exception(
+                        "Exception encountered while trying to save State. This indicates a possible race condition. " +
+                        "If you do not need to update, consider setting SaveState to false, otherwise, ensure collection is only enumerated on one thread at a time",
+                        ex);
+                }
+            }
         }
     }
 }
