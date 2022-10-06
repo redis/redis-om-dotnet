@@ -32,7 +32,7 @@
                 Age = 69
             });
 
-            people.Insert(new Person
+            var personKey = people.Insert(new Person
             {
                 FirstName = "Son",
                 LastName = "Goku",
@@ -53,8 +53,7 @@
 
             // You can also delete document via unlink(key)
             Console.WriteLine($"Person Documents Before unlinking {string.Join(", ", people.Select(x => x.LastName))}");
-            var gokuId = people.Where(x => x.LastName == "Goku").Select(x => x.Id).FirstOrDefault();
-            provider.Connection.Unlink($"Person:{gokuId}");
+            provider.Connection.Unlink($"{personKey}");
             Console.WriteLine($"Person Documents After unlinking {string.Join(", ", people.Select(x => x.LastName))}");
         }
     }
