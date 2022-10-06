@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32526.322
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redis.OM.DeleteDocument", "Redis.OM.DeleteDocument\Redis.OM.DeleteDocument.csproj", "{01AAAF54-6E92-4559-9064-EE5210E56CFE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01AAAF54-6E92-4559-9064-EE5210E56CFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01AAAF54-6E92-4559-9064-EE5210E56CFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01AAAF54-6E92-4559-9064-EE5210E56CFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01AAAF54-6E92-4559-9064-EE5210E56CFE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {837FFB76-86D7-4EA9-A872-BF85F6AC3D6C}
+	EndGlobalSection
+EndGlobal
