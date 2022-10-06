@@ -18,7 +18,6 @@
             // Insert Object
             customers.Insert(new Customer
             {
-                Id = "Cust1",
                 FirstName = "James",
                 LastName = "Bond",
                 Email = "bondjamesbond@email.com",
@@ -27,7 +26,6 @@
 
             customers.Insert(new Customer
             {
-                Id = "Cust2",
                 FirstName = "Peter",
                 LastName = "Pan",
                 Email = "peterpan@email.com",
@@ -44,7 +42,6 @@
 
             people.Insert(new Person
             {
-                Id = "Person2",
                 FirstName = "Prince",
                 LastName = "Vegeta",
                 Age = 48
