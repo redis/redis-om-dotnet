@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redis.OM.Full-Text_Search_within_an_Index", "Redis.OM.Full-Text_Search_within_an_Index.csproj", "{5F2B8BBC-EB2D-40AC-928E-20DEB3EF873E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5F2B8BBC-EB2D-40AC-928E-20DEB3EF873E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F2B8BBC-EB2D-40AC-928E-20DEB3EF873E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F2B8BBC-EB2D-40AC-928E-20DEB3EF873E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F2B8BBC-EB2D-40AC-928E-20DEB3EF873E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {85C9F500-C5A0-4E74-84F5-C9BA9EFF20D9}
+	EndGlobalSection
+EndGlobal
