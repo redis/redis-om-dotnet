@@ -59,7 +59,7 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
                 Directors = new List<string> { "Colin Trevorrow" },
                 Writers = new List<string> {"Rick Jaffa (screenplay)","Amanda Silver (screenplay)","Colin Trevorrow (screenplay)","Derek Connolly (screenplay)","Rick Jaffa (story)","Amanda Silver (story)","Michael Crichton (characters)"},
                 Runtime = 124,
-                Genres = new List<Genres> { Genres.Crime, Genres.History, Genres.Drama },
+                Genres = new List<Genres> { Genres.Action, Genres.Adventure, Genres.Scifi },
                 Awards = new Awards()
                 {
                     Wins = 0,
@@ -82,7 +82,7 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
                 Directors = new List<string> { "Peter Jackson" },
                 Writers = new List<string> {"J.R.R. Tolkien (novel)","Fran Walsh (screenplay)","Philippa Boyens (screenplay)","Peter Jackson (screenplay)" },
                 Runtime = 201,
-                Genres = new List<Genres> { Genres.Crime, Genres.History, Genres.Drama },
+                Genres = new List<Genres> { Genres.Adventure,Genres.Fantasy },
                 Awards = new Awards()
                 {
                     Wins = 175,
@@ -105,7 +105,7 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
                 Directors = new List<string> { "Peter Jackson" },
                 Writers = new List<string> { "J.R.R. Tolkien (novel)", "Fran Walsh (screenplay)", "Philippa Boyens (screenplay)", "Peter Jackson (screenplay)" },
                 Runtime = 178,
-                Genres = new List<Genres> { Genres.Crime, Genres.History, Genres.Drama },
+                Genres = new List<Genres> { Genres.Adventure, Genres.Fantasy },
                 Awards = new Awards()
                 {
                     Wins = 114,
