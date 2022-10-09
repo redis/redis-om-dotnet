@@ -1,6 +1,6 @@
 ﻿using Redis.OM.Modeling;
 
-namespace Redis.OM.CreateIndexStore
+namespace Redis.OM.CreateIndexStore.Models
 {
     [Document(StorageType = StorageType.Hash)]
     internal record Store

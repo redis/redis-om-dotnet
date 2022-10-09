@@ -1,7 +1,8 @@
 ﻿using Redis.OM;
 using Redis.OM.CreateIndexStore;
+using Redis.OM.CreateIndexStore.Models;
 
-#region Setup provides and indexes
+#region Setup provides,indexes and seed
 
 var provider = new RedisConnectionProvider("redis://172.29.252.187:6379");
 
@@ -13,58 +14,11 @@ var customers = provider.RedisCollection<Customer>();
 var employee = provider.RedisCollection<Employee>();
 var stores = provider.RedisCollection<Store>();
 
-#endregion Setup provides and indexes
+await SeedDataHelpers.SeedEmployess(employee);
+await SeedDataHelpers.SeedCustomers(customers);
+await SeedDataHelpers.SeedStore(stores);
 
-#region Seed for stores
-
-await stores.InsertAsync(new Store() { Name = "CF Toronto Eaton Centre", FullAddress = "220 Yonge St, Toronto, ON M5B 2H1", Id = 599 });
-await stores.InsertAsync(new Store() { Name = "Yorkdale Shopping Centre", FullAddress = "3401 Dufferin St, Toronto, ON M6A 2T9", Id = 600 });
-
-#endregion Seed for stores
-
-#region Seed for customer
-
-await customers.InsertAsync(new Customer()
-{
-    Id = Guid.NewGuid(),
-    Email = "Albert.Einstein@hotmail.com",
-    FullName = "Albert Einstein",
-    Publications = new[] { "Conclusions Drawn from the Phenomena of Capillarity", "Foundations of the General Theory of Relativity", "Investigations of Brownian Motion" },
-    Address = new Address("4891 Island Hwy", "Campbell River")
-});
-await customers.InsertAsync(new Customer()
-{
-    Id = Guid.NewGuid(),
-    Email = "INewton@hotmail.com",
-    FullName = "Isaac Newton",
-    Publications = new[] { "Philosophiæ Naturalis Principia Mathematica", "Opticks", "De mundi systemate" },
-    Address = new Address("2019 90th Avenue", "Delia")
-});
-await customers.InsertAsync(new Customer()
-{
-    Id = Guid.NewGuid(),
-    Email = "Galileo.Galilei@gmail.com",
-    FullName = "Galileo Galilei",
-    Publications = new[] { "Sidereus Nuncius", "The Assayer" }
-});
-await customers.InsertAsync(new Customer()
-{
-    Id = Guid.NewGuid(),
-    Email = "MarieCurie@princeton.edu",
-    FullName = "Marie Curie",
-    Publications = new[] { "Recherches sur les substances radioactives", "Traité de Radioactivité", "L'isotopie et les éléments isotopes" },
-    Address = new Address("1704 rue Ontario Ouest", "Montréal")
-});
-
-#endregion Seed for customer
-
-#region Seed for employees
-
-await employee.InsertAsync(new Employee() { Id = "1", Age = 18, EmploymentType = EmploymentType.PartTime, FullName = "Jean Francois" });
-await employee.InsertAsync(new Employee() { Id = "2", Age = 21, EmploymentType = EmploymentType.PartTime, FullName = "Bowman Sophie" });
-await employee.InsertAsync(new Employee() { Id = "3", Age = 78, EmploymentType = EmploymentType.FullTime, FullName = "Will Quinn" });
-
-#endregion Seed for employees
+#endregion Setup provides,indexes and seed
 
 #region Basic queries
 

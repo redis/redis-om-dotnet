@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Redis.OM.CreateIndexStore
+namespace Redis.OM.CreateIndexStore.Models
 {
     public class Address
     {
@@ -15,8 +15,8 @@ namespace Redis.OM.CreateIndexStore
 
         public Address(string addressLine1, string? city)
         {
-            this.AddressLine1 = addressLine1;
-            this.City = city;
+            AddressLine1 = addressLine1;
+            City = city;
         }
     }
 }
