@@ -2,9 +2,7 @@
 using Redis.OM.CreateIndexStore;
 using Redis.OM.CreateIndexStore.Models;
 
-#region Setup provides,indexes and seed
-
-var provider = new RedisConnectionProvider("redis://172.29.252.187:6379");
+var provider = new RedisConnectionProvider("redis://localhost:6379");
 
 provider.Connection.CreateIndex(typeof(Customer));
 provider.Connection.CreateIndex(typeof(Employee));
@@ -18,25 +16,17 @@ await SeedDataHelpers.SeedEmployess(employee);
 await SeedDataHelpers.SeedCustomers(customers);
 await SeedDataHelpers.SeedStore(stores);
 
-#endregion Setup provides,indexes and seed
+//retrieve all the contents
+var allStores = await stores.ToListAsync();
+var allEmployees = await employee.ToListAsync();
+var allCustomers = await customers.ToListAsync();
 
-#region Basic queries
+//Filter by diffenrent properties
+var store = await stores.Where(x => x.Id == 600).FirstOrDefaultAsync();
+var newton = await customers.Where(x => x.FullName == "Albert Einstein").FirstOrDefaultAsync();
+var fulltimeEmployees = await employee.Where(x => x.EmploymentType == EmploymentType.FullTime).ToListAsync();
 
-IList<Store> allStores = await stores.ToListAsync();
-IList<Employee> allEmployees = await employee.ToListAsync();
-IList<Customer> allCustomers = await customers.ToListAsync();
-
-Store? store = await stores.Where(x => x.Id == 600).FirstOrDefaultAsync();
-Customer? newton = await customers.Where(x => x.FullName == "Albert Einstein").FirstOrDefaultAsync();
-
-IList<Employee> fulltimeEmployees = await employee.Where(x => x.EmploymentType == EmploymentType.FullTime).ToListAsync();
-
-#endregion Basic queries
-
-#region Drop the indexes
-
+//Drop the index
 await provider.Connection.DropIndexAsync(typeof(Employee));
 await provider.Connection.DropIndexAsync(typeof(Customer));
 await provider.Connection.DropIndexAsync(typeof(Store));
-
-#endregion Drop the indexes
