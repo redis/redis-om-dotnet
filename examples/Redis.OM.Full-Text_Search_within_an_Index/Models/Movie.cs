@@ -28,7 +28,7 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.Models
         public List<Genres>  Genres { get; set; }
         [Indexed(CascadeDepth = 2)]
         public Awards Awards { get; set; }
-        [Indexed(Sortable =true)]
+        [Indexed(Sortable = true)]
         public double? ImdbRating { get; set; }
         [Indexed]
         public Country Country { get; set; }

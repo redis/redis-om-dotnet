@@ -6,16 +6,16 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
 {
     public class RedisHelper
     {
-        private readonly IRedisCollection<Movie> _movieCollection;
+        private readonly IRedisCollection<Movie> movieCollection;
 
         public RedisHelper(RedisConnectionProvider provider)
         {
-            _movieCollection = provider.RedisCollection<Movie>();
+            movieCollection = provider.RedisCollection<Movie>();
         }
 
         public void InitializeCustomers()
         {
-            var count = _movieCollection.Count();
+            var count = movieCollection.Count();
             if (count > 0)
             {
                 // not re-add when already initialize
@@ -24,7 +24,7 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
 
             Console.WriteLine("Initialize Customer Data...");
 
-            _movieCollection.Insert(new Movie()
+            movieCollection.Insert(new Movie()
             {
                 Title = "The Manson Family",
                 Year = 2003,
@@ -48,7 +48,7 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
 
 
             }) ;
-            _movieCollection.Insert(new Movie()
+            movieCollection.Insert(new Movie()
             {
                 Title = "Jurassic World",
                 Year = 2015,
@@ -71,7 +71,7 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
                 Country = Country.USA
 
             });
-            _movieCollection.Insert(new Movie()
+            movieCollection.Insert(new Movie()
             {
                 Title = "The Lord of the Rings: The Return of the King",
                 Year = 2003,
@@ -94,7 +94,7 @@ namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
                 Country = Country.USA
 
             });
-            _movieCollection.Insert(new Movie()
+            movieCollection.Insert(new Movie()
             {
                 Title = "The Lord of the Rings: The Fellowship of the Ring",
                 Year = 2001,
