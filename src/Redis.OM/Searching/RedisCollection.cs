@@ -465,7 +465,7 @@ namespace Redis.OM.Searching
         public async Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids)
         {
             var tasks = new Dictionary<string, Task<T?>>();
-            foreach (var id in ids)
+            foreach (var id in ids.Distinct())
             {
                 tasks.Add(id, FindByIdAsync(id));
             }
