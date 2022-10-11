@@ -1,8 +1,8 @@
-﻿using Redis.OM.Full_Text_Search_within_an_Index.Models;
+﻿using Redis.OM.FullTextSearch.Models;
 using Redis.OM.Searching;
 
 
-namespace Redis.OM.Full_Text_Search_within_an_Index.RedisHelper
+namespace Redis.OM.FullTextSearch.RedisHelper
 {
     public class RedisHelper
     {

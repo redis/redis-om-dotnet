@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Redis.OM.Full_Text_Search_within_an_Index.Models
+namespace Redis.OM.FullTextSearch.Models
 {
     public enum Genres
     {

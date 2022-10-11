@@ -1,7 +1,7 @@
 ﻿using Redis.OM.Modeling;
 using System.Text.Json.Serialization;
 
-namespace Redis.OM.Full_Text_Search_within_an_Index.Models
+namespace Redis.OM.FullTextSearch.Models
 {
     [Document(StorageType = StorageType.Json, IndexName = "movie-idx")]
     public class Movie
