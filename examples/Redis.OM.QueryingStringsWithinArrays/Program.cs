@@ -14,5 +14,3 @@ foreach (var item in filteredExperiences)
 {
     Console.WriteLine(item.ToString());
 }
-
-Console.ReadKey();

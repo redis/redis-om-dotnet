@@ -14,6 +14,6 @@ public class Experience
 
     public override string ToString()
     {
-        return string.Join(" ", Skills.Skip(0));
+        return string.Join(" ", Skills);
     }
 }
