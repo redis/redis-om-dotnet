@@ -694,6 +694,31 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task FindByIdsAsyncIdsWithDuplicatedIds()
+        {
+            var person1 = new Person() {Name = "Alice", Age = 51};
+            var person2 = new Person() {Name = "Bob", Age = 37};
+
+            var collection = new RedisCollection<Person>(_connection);
+
+            await collection.InsertAsync(person1);
+            await collection.InsertAsync(person2);
+
+            var ids = new string[] {person1.Id, person2.Id, person1.Id, person2.Id};
+
+            var people = await collection.FindByIdsAsync(ids);
+            Assert.NotNull(people[ids[0]]);
+            Assert.Equal(ids[0], people[ids[0]].Id);
+            Assert.Equal("Alice", people[ids[0]].Name);
+            Assert.Equal(51, people[ids[0]].Age);
+
+            Assert.NotNull(people[ids[1]]);
+            Assert.Equal(ids[1], people[ids[1]].Id);
+            Assert.Equal("Bob", people[ids[1]].Name);
+            Assert.Equal(37, people[ids[1]].Age);
+        }
+
+        [Fact]
         public async Task FindByIdsAsyncKeys()
         {
             var person1 = new Person() {Name = "Alice", Age = 51};
