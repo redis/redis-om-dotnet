@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redis.OM.CreateIndexStore", "Redis.OM.CreateIndexStore\Redis.OM.CreateIndexStore.csproj", "{78B8EF87-5067-45D1-A864-37BC2931FF38}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{78B8EF87-5067-45D1-A864-37BC2931FF38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78B8EF87-5067-45D1-A864-37BC2931FF38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78B8EF87-5067-45D1-A864-37BC2931FF38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78B8EF87-5067-45D1-A864-37BC2931FF38}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {41CDF499-8994-409A-8C71-2278EAB55B83}
+	EndGlobalSection
+EndGlobal
