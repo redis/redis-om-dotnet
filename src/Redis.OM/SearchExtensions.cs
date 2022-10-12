@@ -186,7 +186,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(CountDistinctAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<long>(exp, typeof(T));
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(StandardDeviationAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<double>(exp, typeof(T));
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(FirstValue, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<TResult>(exp, typeof(T));
         }
 
         /// <summary>
@@ -417,7 +417,7 @@ namespace Redis.OM
                 Expression.Quote(expression),
                 Expression.Constant(sortedBy),
                 Expression.Constant(direction));
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<TResult>(exp, typeof(T));
         }
 
         /// <summary>
@@ -435,7 +435,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(FirstValueAsync, source, expression, sortedBy),
                 new[] { source.Expression, Expression.Quote(expression), Expression.Constant(sortedBy) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<TResult>(exp, typeof(T));
         }
 
         /// <summary>
@@ -572,7 +572,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(Quantile, source, expression, quantile),
                 new[] { source.Expression, Expression.Quote(expression), Expression.Constant(quantile) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<TResult>(exp, typeof(T));
         }
 
         /// <summary>
@@ -624,7 +624,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(CountDistinctish, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<long>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1027,7 +1027,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<double>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1043,7 +1043,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<int>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1059,7 +1059,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<long>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1075,7 +1075,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<float>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1091,7 +1091,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<decimal>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1107,7 +1107,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<double?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1123,7 +1123,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<int?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1139,7 +1139,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<long?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1155,7 +1155,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<float?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1171,7 +1171,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(SumAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<decimal?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1187,7 +1187,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<double>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1203,7 +1203,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<double>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1219,7 +1219,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<double>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1235,7 +1235,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<float>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1251,7 +1251,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<decimal>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1267,7 +1267,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<double?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1283,7 +1283,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<int?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1299,7 +1299,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<long?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1315,7 +1315,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<float?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1331,7 +1331,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(AverageAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<decimal?>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1347,7 +1347,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(MaxAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<int>(exp, typeof(T));
         }
 
         /// <summary>
@@ -1363,7 +1363,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(MinAsync, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync(exp, typeof(T));
+            return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<T>(exp, typeof(T));
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f)
