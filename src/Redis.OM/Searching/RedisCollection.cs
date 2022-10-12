@@ -603,7 +603,7 @@ namespace Redis.OM.Searching
         public string? InsertIfExist(T item, TimeSpan? timeSpan = null)
         {
             var id = item.SetId();
-            if (((RedisQueryProvider)Provider).Connection.JsonSet(id, ".", (object)item, "XX", timeSpan))
+            if (((RedisQueryProvider)Provider).Connection.JsonSet(id, ".", (object)item, When.Exists, timeSpan))
             {
                 return id;
             }
@@ -617,7 +617,7 @@ namespace Redis.OM.Searching
         public async Task<string?> InsertIfExistAsync(T item, TimeSpan? timeSpan = null)
         {
             var id = item.SetId();
-            if (await ((RedisQueryProvider)Provider).Connection.JsonSetAsync(id, ".", (object)item, "XX", timeSpan))
+            if (await ((RedisQueryProvider)Provider).Connection.JsonSetAsync(id, ".", (object)item, When.Exists, timeSpan))
             {
                 return id;
             }
@@ -631,7 +631,7 @@ namespace Redis.OM.Searching
         public string? InsertIfNotExist(T item, TimeSpan? timeSpan = null)
         {
             var id = item.SetId();
-            if (((RedisQueryProvider)Provider).Connection.JsonSet(id, ".", (object)item, "NX", timeSpan))
+            if (((RedisQueryProvider)Provider).Connection.JsonSet(id, ".", (object)item, When.NotExists, timeSpan))
             {
                 return id;
             }
@@ -645,7 +645,7 @@ namespace Redis.OM.Searching
         public async Task<string?> InsertIfNotExistAsync(T item, TimeSpan? timeSpan = null)
         {
             var id = item.SetId();
-            if (await ((RedisQueryProvider)Provider).Connection.JsonSetAsync(id, ".", (object)item, "NX", timeSpan))
+            if (await ((RedisQueryProvider)Provider).Connection.JsonSetAsync(id, ".", (object)item, When.NotExists, timeSpan))
             {
                 return id;
             }

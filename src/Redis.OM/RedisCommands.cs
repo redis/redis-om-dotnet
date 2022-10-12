@@ -197,16 +197,22 @@ namespace Redis.OM
         /// <param name="when">XX - set if exist, NX - set if not exist.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>whether the operation succeeded.</returns>
-        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, string json, string when, TimeSpan? timeSpan = null)
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, string json, When when = When.Always, TimeSpan? timeSpan = null)
         {
+            var args = when switch
+            {
+                When.Exists => new[] { key, path, json, "XX" },
+                When.NotExists => new[] { key, path, json, "NX" },
+                _ => new[] { key, path, json }
+            };
+
             if (timeSpan != null)
             {
-                var args = new[] { key, path, json, when };
                 return (await connection.SendCommandWithExpiryAsync("JSON.SET", args, key, (TimeSpan)timeSpan)).First() == "OK";
             }
             else
             {
-                return await connection.ExecuteAsync("JSON.SET", key, path, json, when) == "OK";
+                return await connection.ExecuteAsync("JSON.SET", args) == "OK";
             }
         }
 
@@ -220,7 +226,7 @@ namespace Redis.OM
         /// <param name="when">XX - set if exist, NX - set if not exist.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>whether the operation succeeded.</returns>
-        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, string when, TimeSpan? timeSpan = null)
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, When when = When.Always, TimeSpan? timeSpan = null)
         {
             var json = JsonSerializer.Serialize(obj, Options);
             return await connection.JsonSetAsync(key, path, json, when, timeSpan);
@@ -335,16 +341,22 @@ namespace Redis.OM
         /// <param name="when">XX - set if exist, NX - set if not exist.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>whether the operation succeeded.</returns>
-        public static bool JsonSet(this IRedisConnection connection, string key, string path, string json, string when, TimeSpan? timeSpan = null)
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, string json, When when = When.Always, TimeSpan? timeSpan = null)
         {
+            var args = when switch
+            {
+                When.Exists => new[] { key, path, json, "XX" },
+                When.NotExists => new[] { key, path, json, "NX" },
+                _ => new[] { key, path, json }
+            };
+
             if (timeSpan != null)
             {
-                var args = new[] { key, path, json, when };
                 return connection.SendCommandWithExpiry("JSON.SET", args, key, (TimeSpan)timeSpan).First() == "OK";
             }
             else
             {
-                return connection.Execute("JSON.SET", key, path, json, when) == "OK";
+                return connection.Execute("JSON.SET", args) == "OK";
             }
         }
 
@@ -358,7 +370,7 @@ namespace Redis.OM
         /// <param name="when">XX - set if exist, NX - set if not exist.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>whether the operation succeeded.</returns>
-        public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, string when, TimeSpan? timeSpan = null)
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, When when = When.Always, TimeSpan? timeSpan = null)
         {
             var json = JsonSerializer.Serialize(obj, Options);
             return connection.JsonSet(key, path, json, when, timeSpan);

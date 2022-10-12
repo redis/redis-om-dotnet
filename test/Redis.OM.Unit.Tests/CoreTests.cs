@@ -147,18 +147,18 @@ namespace Redis.OM.Unit.Tests
 
             var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
             connection.Execute("FLUSHALL");
-            Assert.False(connection.JsonSet("test-json", ".", obj, "XX"));
-            Assert.True(connection.JsonSet("test-json", ".", obj, "NX"));
+            Assert.False(connection.JsonSet("test-json", ".", obj, When.Exists));
+            Assert.True(connection.JsonSet("test-json", ".", obj, When.NotExists));
             var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
             Assert.Equal("Shachar", reconsitutedObject.Name);
             Assert.Equal(23, reconsitutedObject.Age);
 
             obj.Name = "Shachar2";
-            Assert.False(connection.JsonSet("test-json", ".", obj, "NX"));
+            Assert.False(connection.JsonSet("test-json", ".", obj, When.NotExists));
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
             Assert.Equal("Shachar", reconsitutedObject.Name);
 
-            Assert.True(connection.JsonSet("test-json", ".", obj, "XX"));
+            Assert.True(connection.JsonSet("test-json", ".", obj, When.Exists));
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
             Assert.Equal("Shachar2", reconsitutedObject.Name);
         }
@@ -172,18 +172,18 @@ namespace Redis.OM.Unit.Tests
 
             var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
             connection.Execute("FLUSHALL");
-            Assert.False(await connection.JsonSetAsync("test-json", ".", obj, "XX"));
-            Assert.True(await connection.JsonSetAsync("test-json", ".", obj, "NX"));
+            Assert.False(await connection.JsonSetAsync("test-json", ".", obj, When.Exists));
+            Assert.True(await connection.JsonSetAsync("test-json", ".", obj, When.NotExists));
             var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
             Assert.Equal("Shachar", reconsitutedObject.Name);
             Assert.Equal(23, reconsitutedObject.Age);
 
             obj.Name = "Shachar2";
-            Assert.False(await connection.JsonSetAsync("test-json", ".", obj, "NX"));
+            Assert.False(await connection.JsonSetAsync("test-json", ".", obj, When.NotExists));
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
             Assert.Equal("Shachar", reconsitutedObject.Name);
 
-            Assert.True(await connection.JsonSetAsync("test-json", ".", obj, "XX"));
+            Assert.True(await connection.JsonSetAsync("test-json", ".", obj, When.Exists));
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
             Assert.Equal("Shachar2", reconsitutedObject.Name);
         }
