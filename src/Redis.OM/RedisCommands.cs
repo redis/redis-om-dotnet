@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using StackExchange.Redis;
 
 namespace Redis.OM
 {
@@ -56,6 +58,37 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
+        /// </summary>
+        /// <param name="connection">connection to redis.</param>
+        /// <param name="obj">the object to save.</param>
+        /// <param name="timeSpan">the expiry date of the key (TTL).</param>
+        /// <returns>the key for the object.</returns>
+        public static async Task<string> SetAsync(this IRedisConnection connection, object obj, TimeSpan timeSpan)
+        {
+            var id = obj.SetId();
+            var type = obj.GetType();
+            var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
+            if (attr == null || attr.StorageType == StorageType.Hash)
+            {
+                if (obj is IRedisHydrateable hydrateable)
+                {
+                    await connection.HSetAsync(id, timeSpan, hydrateable.BuildHashSet().ToArray());
+                }
+                else
+                {
+                    await connection.HSetAsync(id, timeSpan, obj.BuildHashSet().ToArray());
+                }
+            }
+            else
+            {
+                await connection.JsonSetAsync(id, ".", obj, timeSpan);
+            }
+
+            return id;
+        }
+
+        /// <summary>
         /// Set's values in a hash.
         /// </summary>
         /// <param name="connection">the connection.</param>
@@ -72,6 +105,26 @@ namespace Redis.OM
             }
 
             return await connection.ExecuteAsync("HSET", args.ToArray());
+        }
+
+        /// <summary>
+        /// Set's values in a hash.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <param name="fieldValues">the field value pairs to set.</param>
+        /// <returns>How many new fields were created.</returns>
+        public static async Task<int> HSetAsync(this IRedisConnection connection, string key, TimeSpan timeSpan, params KeyValuePair<string, string>[] fieldValues)
+        {
+            var args = new List<string> { key };
+            foreach (var kvp in fieldValues)
+            {
+                args.Add(kvp.Key);
+                args.Add(kvp.Value);
+            }
+
+            return (await connection.SendCommandWithExpiryAsync("HSET", args.ToArray(), key, timeSpan)).First();
         }
 
         /// <summary>
@@ -101,6 +154,58 @@ namespace Redis.OM
             var json = JsonSerializer.Serialize(obj, Options);
             var result = await connection.ExecuteAsync("JSON.SET", key, path, json);
             return result == "OK";
+        }
+
+        /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="json">the json.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, string json, TimeSpan timeSpan)
+        {
+            var args = new[] { key, path, json };
+            return (await connection.SendCommandWithExpiryAsync("JSON.SET", args, key, timeSpan)).First() == "OK";
+        }
+
+        /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="obj">the object to be converted to json.</param>
+        /// <param name="timeSpan">the expiry date of the key (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, TimeSpan timeSpan)
+        {
+            var json = JsonSerializer.Serialize(obj, Options);
+            var result = await connection.JsonSetAsync(key, path, json, timeSpan);
+            return result;
+        }
+
+        /// <summary>
+        /// Set's values in a hash.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <param name="fieldValues">the field value pairs to set.</param>
+        /// <returns>How many new fields were created.</returns>
+        public static int HSet(this IRedisConnection connection, string key, TimeSpan timeSpan, params KeyValuePair<string, string>[] fieldValues)
+        {
+            var args = new List<string>();
+            args.Add(key);
+            foreach (var kvp in fieldValues)
+            {
+                args.Add(kvp.Key);
+                args.Add(kvp.Value);
+            }
+
+            return connection.SendCommandWithExpiry("HSET", args.ToArray(), key, timeSpan).First();
         }
 
         /// <summary>
@@ -152,6 +257,36 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="json">the json.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, string json, TimeSpan timeSpan)
+        {
+            var arr = new[] { key, path, json };
+            return connection.SendCommandWithExpiry("JSON.SET", arr, key, timeSpan).First() == "OK";
+        }
+
+        /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="obj">the object to serialize to json.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, TimeSpan timeSpan)
+        {
+            var json = JsonSerializer.Serialize(obj, Options);
+            return connection.JsonSet(key, path, json, timeSpan);
+        }
+
+        /// <summary>
         /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
         /// </summary>
         /// <param name="connection">connection to redis.</param>
@@ -175,6 +310,36 @@ namespace Redis.OM
             else
             {
                 connection.JsonSet(id, ".", obj);
+            }
+
+            return id;
+        }
+
+        /// <summary>
+        /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
+        /// </summary>
+        /// <param name="connection">connection to redis.</param>
+        /// <param name="obj">the object to save.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>the key for the object.</returns>
+        public static string Set(this IRedisConnection connection, object obj, TimeSpan timeSpan)
+        {
+            var id = obj.SetId();
+            var type = obj.GetType();
+            if (Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) is not DocumentAttribute attr || attr.StorageType == StorageType.Hash)
+            {
+                if (obj is IRedisHydrateable hydrateable)
+                {
+                    connection.HSet(id, timeSpan, hydrateable.BuildHashSet().ToArray());
+                }
+                else
+                {
+                    connection.HSet(id, timeSpan, obj.BuildHashSet().ToArray());
+                }
+            }
+            else
+            {
+                connection.JsonSet(id, ".", obj, timeSpan);
             }
 
             return id;
@@ -216,10 +381,10 @@ namespace Redis.OM
             if (attr == null || attr.StorageType == StorageType.Hash)
             {
                 var dict = await connection.HGetAllAsync(keyName);
-                return (T?)RedisObjectHandler.FromHashSet<T>(dict);
+                return dict.Any() ? (T?)RedisObjectHandler.FromHashSet<T>(dict) : default;
             }
 
-            return connection.JsonGet<T>(keyName, ".");
+            return await connection.JsonGetAsync<T>(keyName, ".");
         }
 
         /// <summary>
@@ -234,8 +399,24 @@ namespace Redis.OM
         {
             var args = new List<string> { key };
             args.AddRange(paths);
-            var res = connection.Execute("JSON.GET", args.ToArray());
-            return JsonSerializer.Deserialize<T>(res, Options);
+            var res = (string)connection.Execute("JSON.GET", args.ToArray());
+            return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, Options) : default;
+        }
+
+        /// <summary>
+        /// Get's an object out of redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key.</param>
+        /// <param name="paths">the paths to retrieve.</param>
+        /// <typeparam name="T">the type to deserialize into.</typeparam>
+        /// <returns>the object pulled out of redis.</returns>
+        public static async Task<T?> JsonGetAsync<T>(this IRedisConnection connection, string key, params string[] paths)
+        {
+            var args = new List<string> { key };
+            args.AddRange(paths);
+            var res = (string)await connection.ExecuteAsync("JSON.GET", args.ToArray());
+            return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, Options) : default;
         }
 
         /// <summary>
@@ -363,5 +544,98 @@ namespace Redis.OM
         /// <param name="key">the key to unlink.</param>
         /// <returns>the status.</returns>
         public static string Unlink(this IRedisConnection connection, string key) => connection.Execute("UNLINK", key);
+
+        /// <summary>
+        /// Unlinks a key.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key to unlink.</param>
+        /// <returns>the status.</returns>
+        public static async Task<string> UnlinkAsync(this IRedisConnection connection, string key) => await connection.ExecuteAsync("UNLINK", key);
+
+        /// <summary>
+        /// Unlinks the key and then adds an updated value of it.
+        /// </summary>
+        /// <param name="connection">The connection to redis.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="storageType">The storage type of the value.</param>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        internal static void UnlinkAndSet<T>(this IRedisConnection connection, string key, T value, StorageType storageType)
+        {
+            _ = value ?? throw new ArgumentNullException(nameof(value));
+            if (storageType == StorageType.Json)
+            {
+                connection.CreateAndEval(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, Options) });
+            }
+            else
+            {
+                var hash = value.BuildHashSet();
+                var args = new List<string>((hash.Keys.Count * 2) + 1);
+                args.Add(hash.Keys.Count.ToString());
+                foreach (var pair in hash)
+                {
+                    args.Add(pair.Key);
+                    args.Add(pair.Value);
+                }
+
+                connection.CreateAndEval(nameof(Scripts.UnlinkAndSetHash), new[] { key }, args.ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Unlinks the key and then adds an updated value of it.
+        /// </summary>
+        /// <param name="connection">The connection to redis.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="storageType">The storage type of the value.</param>
+        /// <typeparam name="T">The type of the value.</typeparam>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        internal static async Task UnlinkAndSetAsync<T>(this IRedisConnection connection, string key, T value, StorageType storageType)
+        {
+            _ = value ?? throw new ArgumentNullException(nameof(value));
+            if (storageType == StorageType.Json)
+            {
+                await connection.CreateAndEvalAsync(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, Options) });
+            }
+            else
+            {
+                var hash = value.BuildHashSet();
+                var args = new List<string>((hash.Keys.Count * 2) + 1);
+                args.Add(hash.Keys.Count.ToString());
+                foreach (var pair in hash)
+                {
+                    args.Add(pair.Key);
+                    args.Add(pair.Value);
+                }
+
+                await connection.CreateAndEvalAsync(nameof(Scripts.UnlinkAndSetHash), new[] { key }, args.ToArray());
+            }
+        }
+
+        private static RedisReply[] SendCommandWithExpiry(
+            this IRedisConnection connection,
+            string command,
+            string[] args,
+            string keyToExpire,
+            TimeSpan ts)
+        {
+            var commandTuple = Tuple.Create(command, args);
+            var expireTuple = Tuple.Create("PEXPIRE", new[] { keyToExpire, ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
+            return connection.ExecuteInTransaction(new[] { commandTuple, expireTuple });
+        }
+
+        private static Task<RedisReply[]> SendCommandWithExpiryAsync(
+            this IRedisConnection connection,
+            string command,
+            string[] args,
+            string keyToExpire,
+            TimeSpan ts)
+        {
+            var commandTuple = Tuple.Create(command, args);
+            var expireTuple = Tuple.Create("PEXPIRE", new[] { keyToExpire, ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
+            return connection.ExecuteInTransactionAsync(new[] { commandTuple, expireTuple });
+        }
     }
 }

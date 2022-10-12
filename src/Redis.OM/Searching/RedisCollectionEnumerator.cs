@@ -22,6 +22,7 @@ namespace Redis.OM.Searching
         private readonly RedisQuery _query;
         private readonly Type? _primitiveType;
         private readonly bool _limited;
+        private readonly bool _saveState;
         private readonly IRedisConnection _connection;
         private readonly RedisCollectionStateManager _stateManager;
         private SearchResponse<T> _records = new (new RedisReply(new RedisReply[] { 0 }));
@@ -35,7 +36,9 @@ namespace Redis.OM.Searching
         /// <param name="connection">the connection to redis.</param>
         /// <param name="chunkSize">the size of a chunk to pull back.</param>
         /// <param name="stateManager">the state manager.</param>
-        public RedisCollectionEnumerator(Expression exp, IRedisConnection connection, int chunkSize, RedisCollectionStateManager stateManager)
+        /// <param name="booleanExpression">The main boolean expression to use to build the filter.</param>
+        /// <param name="saveState">Determins whether the records from the RedisCollection are stored in the StateManager.</param>
+        public RedisCollectionEnumerator(Expression exp, IRedisConnection connection, int chunkSize, RedisCollectionStateManager stateManager, Expression<Func<T, bool>>? booleanExpression, bool saveState)
         {
             Type rootType;
             var t = typeof(T);
@@ -50,7 +53,7 @@ namespace Redis.OM.Searching
                 rootType = t;
             }
 
-            _query = ExpressionTranslator.BuildQueryFromExpression(exp, rootType);
+            _query = ExpressionTranslator.BuildQueryFromExpression(exp, rootType, booleanExpression);
             if (_query.Limit != null)
             {
                 _limited = true;
@@ -62,6 +65,7 @@ namespace Redis.OM.Searching
 
             _connection = connection;
             _stateManager = stateManager;
+            _saveState = saveState;
         }
 
         /// <summary>
@@ -175,6 +179,11 @@ namespace Redis.OM.Searching
 
         private void ConcatenateRecords()
         {
+            if (!_saveState)
+            {
+                return;
+            }
+
             foreach (var record in _records.Documents)
             {
                 if (_stateManager.Data.ContainsKey(record.Key) || _primitiveType != null)
@@ -182,7 +191,7 @@ namespace Redis.OM.Searching
                     continue;
                 }
 
-                _stateManager.Data.Add(record.Key, record.Value);
+                _stateManager.InsertIntoData(record.Key, record.Value);
                 _stateManager.InsertIntoSnapshot(record.Key, record.Value);
             }
         }

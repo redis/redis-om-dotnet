@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Modeling;
@@ -17,15 +18,6 @@ namespace Redis.OM.Common
     /// </summary>
     internal class ExpressionTranslator
     {
-        /// <summary>
-        /// Characters to escape when serializing a tag expression.
-        /// </summary>
-        private static readonly char[] TagEscapeChars =
-        {
-            ',', '.', '<', '>', '{', '}', '[', ']', '"', '\'', ':', ';',
-            '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '~', '|', ' ',
-        };
-
         /// <summary>
         /// Build's an aggregation from an expression.
         /// </summary>
@@ -100,10 +92,10 @@ namespace Redis.OM.Common
                         TranslateAndPushReductionPredicate(exp, ReduceFunction.MAX, aggregation.Predicates);
                         break;
                     case "OrderBy":
-                        aggregation.Predicates.Push(TranslateSortBy(exp, SortDirection.Ascending));
+                        PushAggregateSortBy(exp, SortDirection.Ascending, aggregation.Predicates);
                         break;
                     case "OrderByDescending":
-                        aggregation.Predicates.Push(TranslateSortBy(exp, SortDirection.Descending));
+                        PushAggregateSortBy(exp, SortDirection.Descending, aggregation.Predicates);
                         break;
                     case "Take":
                         if (aggregation.Limit != null)
@@ -131,6 +123,9 @@ namespace Redis.OM.Common
                     case "LongCount":
                     case "CountAsync":
                     case "LongCountAsync":
+                        TranslateAndPushZeroArgumentPredicate(ReduceFunction.COUNT, aggregation.Predicates);
+                        break;
+                    case "CountGroupMembers":
                         TranslateAndPushZeroArgumentPredicate(ReduceFunction.COUNT, aggregation.Predicates);
                         break;
                     case "CountDistinct":
@@ -167,20 +162,27 @@ namespace Redis.OM.Common
                     case "RandomSampleAsync":
                         TranslateAndPushTwoArgumentReductionPredicate(exp, ReduceFunction.RANDOM_SAMPLE, aggregation.Predicates);
                         break;
+                    case "Load":
+                        TranslateAndPushLoad(aggregation.Predicates, exp);
+                        break;
+                    case "LoadAll":
+                        aggregation.Predicates.Push(new LoadAll());
+                        break;
                 }
             }
 
             return aggregation;
         }
 
-         /// <summary>
+        /// <summary>
         /// Build's a query from the given expression.
         /// </summary>
         /// <param name="expression">The expression.</param>
         /// <param name="type">The root type.</param>
+        /// <param name="mainBooleanExpression">The primary boolean expression to build the filter from.</param>
         /// <returns>A Redis query.</returns>
         /// <exception cref="InvalidOperationException">Thrown if type is missing indexing.</exception>
-        internal static RedisQuery BuildQueryFromExpression(Expression expression, Type type)
+        internal static RedisQuery BuildQueryFromExpression(Expression expression, Type type, Expression? mainBooleanExpression)
         {
             var attr = type.GetCustomAttribute<DocumentAttribute>();
             if (attr == null)
@@ -205,9 +207,6 @@ namespace Redis.OM.Common
                     {
                         switch (exp.Method.Name)
                         {
-                            case "Where":
-                                query.QueryText = TranslateWhereMethod(exp);
-                                break;
                             case "OrderBy":
                                 query.SortBy = TranslateOrderByMethod(exp, true);
                                 break;
@@ -230,11 +229,6 @@ namespace Redis.OM.Common
                             case "FirstOrDefault":
                                 query.Limit ??= new SearchLimit { Offset = 0 };
                                 query.Limit.Number = 1;
-                                if (exp.Arguments.Count > 1)
-                                {
-                                    query.QueryText = TranslateFirstMethod(exp);
-                                }
-
                                 break;
                             case "GeoFilter":
                                 query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
@@ -250,6 +244,9 @@ namespace Redis.OM.Common
                     break;
             }
 
+            query.QueryText = mainBooleanExpression == null ? "*" : BuildQueryFromExpression(
+                ((LambdaExpression)mainBooleanExpression).Body);
+
             return query;
         }
 
@@ -260,12 +257,107 @@ namespace Redis.OM.Common
         /// <returns>The index field type.</returns>
         internal static SearchFieldType DetermineIndexFieldsType(MemberInfo member)
         {
-            if (member is PropertyInfo info && TypeDeterminationUtilities.IsNumeric(info.PropertyType))
+            if (member is PropertyInfo info)
             {
-                return SearchFieldType.NUMERIC;
+                if (TypeDeterminationUtilities.IsNumeric(info.PropertyType))
+                {
+                    return SearchFieldType.NUMERIC;
+                }
+
+                if (info.PropertyType.IsEnum)
+                {
+                    return TypeDeterminationUtilities.GetSearchFieldFromEnumProperty(info);
+                }
             }
 
             return SearchFieldType.TAG;
+        }
+
+        /// <summary>
+        /// Translates a binary expression.
+        /// </summary>
+        /// <param name="binExpression">The Binary Expression.</param>
+        /// <returns>The query string formatted from the binary expression.</returns>
+        /// <exception cref="ArgumentException">Thrown if expression is not parsable because of the arguments passed into it.</exception>
+        internal static string TranslateBinaryExpression(BinaryExpression binExpression)
+        {
+            var sb = new StringBuilder();
+            if (binExpression.Left is BinaryExpression leftBin && binExpression.Right is BinaryExpression rightBin)
+            {
+                sb.Append("(");
+                sb.Append(TranslateBinaryExpression(leftBin));
+                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
+                sb.Append(TranslateBinaryExpression(rightBin));
+                sb.Append(")");
+            }
+            else if (binExpression.Left is BinaryExpression left)
+            {
+                sb.Append("(");
+                sb.Append(TranslateBinaryExpression(left));
+                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right));
+                sb.Append(")");
+            }
+            else if (binExpression.Right is BinaryExpression right)
+            {
+                sb.Append("(");
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left));
+                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
+                sb.Append(TranslateBinaryExpression(right));
+                sb.Append(")");
+            }
+            else
+            {
+                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left);
+
+                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right);
+
+                if (binExpression.Left is MemberExpression member)
+                {
+                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
+                    sb.Append("(");
+                    sb.Append(predicate);
+                    sb.Append(")");
+                }
+                else if (binExpression.Left is UnaryExpression uni)
+                {
+                    member = (MemberExpression)uni.Operand;
+                    var attr = member.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() as JsonConverterAttribute;
+                    if (attr != null && attr.ConverterType == typeof(JsonStringEnumConverter))
+                    {
+                        if (int.TryParse(rightContent, out int ordinal))
+                        {
+                            rightContent = Enum.ToObject(member.Type, ordinal).ToString();
+                        }
+                    }
+                    else
+                    {
+                        if (!int.TryParse(rightContent, out _))
+                        {
+                            rightContent = ((int)Enum.Parse(member.Type, rightContent)).ToString();
+                        }
+                    }
+
+                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
+                    sb.Append("(");
+                    sb.Append(predicate);
+                    sb.Append(")");
+                }
+                else if (binExpression.Left is MethodCallExpression)
+                {
+                    sb.Append("(");
+                    sb.Append(leftContent);
+                    sb.Append(SplitPredicateSeporators(binExpression.NodeType));
+                    sb.Append(rightContent);
+                    sb.Append(")");
+                }
+                else
+                {
+                    throw new ArgumentException("Left side of expression must be a member of the search class");
+                }
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -310,7 +402,7 @@ namespace Redis.OM.Common
         /// <param name="exp">The expression.</param>
         /// <returns>The field names.</returns>
         /// <exception cref="ArgumentException">Thrown if the expression is of an unrecognized type.</exception>
-        private static string[] GetFieldNamesGroupBy(Expression exp)
+        private static string[] GetFieldNamesForExpression(Expression exp)
         {
             if (exp is ConstantExpression constExp)
             {
@@ -329,12 +421,12 @@ namespace Redis.OM.Common
 
             if (exp is UnaryExpression unary)
             {
-                return GetFieldNamesGroupBy(unary.Operand);
+                return GetFieldNamesForExpression(unary.Operand);
             }
 
             if (exp is LambdaExpression lambda)
             {
-                return GetFieldNamesGroupBy(lambda.Body);
+                return GetFieldNamesForExpression(lambda.Body);
             }
 
             if (exp is NewExpression newExpression)
@@ -345,6 +437,17 @@ namespace Redis.OM.Common
             throw new ArgumentException("Invalid expression type detected");
         }
 
+        private static void TranslateAndPushLoad(Stack<IAggregationPredicate> predicates, MethodCallExpression expression)
+        {
+            var properties = GetFieldNamesForExpression(expression.Arguments[1]);
+            if (properties.Length < 1)
+            {
+                throw new ArgumentException("Load predicate must contain at least 1 property");
+            }
+
+            predicates.Push(new Load(properties));
+        }
+
         /// <summary>
         /// Translate and push a group by expression.
         /// </summary>
@@ -352,7 +455,7 @@ namespace Redis.OM.Common
         /// <param name="expression">The expression to parse.</param>
         private static void TranslateAndPushGroupBy(Stack<IAggregationPredicate> predicates, MethodCallExpression expression)
         {
-            var properties = GetFieldNamesGroupBy(expression.Arguments[1]);
+            var properties = GetFieldNamesForExpression(expression.Arguments[1]);
             if (predicates.Count > 0 && predicates.Peek() is GroupBy)
             {
                 var gb = (GroupBy)predicates.Pop();
@@ -383,6 +486,21 @@ namespace Redis.OM.Common
             var alias = ((ConstantExpression)exp.Arguments[2]).Value.ToString();
             var lambda = (LambdaExpression)((UnaryExpression)exp.Arguments[1]).Operand;
             return new Apply(lambda.Body, alias);
+        }
+
+        private static void PushAggregateSortBy(MethodCallExpression expression, SortDirection dir, Stack<IAggregationPredicate> operationStack)
+        {
+            var sb = TranslateSortBy(expression, dir);
+            if (operationStack.Any() && operationStack.Peek() is MultiSort ms)
+            {
+                ms.InsertPredicate(sb);
+            }
+            else
+            {
+                ms = new MultiSort();
+                ms.InsertPredicate(sb);
+                operationStack.Push(ms);
+            }
         }
 
         private static AggregateSortBy TranslateSortBy(MethodCallExpression expression, SortDirection dir)
@@ -492,56 +610,13 @@ namespace Redis.OM.Common
                 return operandString;
             }
 
+            if (exp is MemberExpression member && member.Type == typeof(bool))
+            {
+                var property = ExpressionParserUtilities.GetOperandString(exp);
+                return $"{property}:{{true}}";
+            }
+
             throw new ArgumentException("Unparseable Lambda Body detected");
-        }
-
-        private static string TranslateBinaryExpression(BinaryExpression binExpression)
-        {
-            var sb = new StringBuilder();
-            if (binExpression.Left is BinaryExpression leftBin && binExpression.Right is BinaryExpression rightBin)
-            {
-                sb.Append("(");
-                sb.Append(TranslateBinaryExpression(leftBin));
-                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(TranslateBinaryExpression(rightBin));
-                sb.Append(")");
-            }
-            else if (binExpression.Left is BinaryExpression left)
-            {
-                sb.Append("(");
-                sb.Append(TranslateBinaryExpression(left));
-                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right));
-                sb.Append(")");
-            }
-            else if (binExpression.Right is BinaryExpression right)
-            {
-                sb.Append("(");
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left));
-                sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(TranslateBinaryExpression(right));
-                sb.Append(")");
-            }
-            else
-            {
-                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left);
-
-                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right);
-
-                if (binExpression.Left is MemberExpression member)
-                {
-                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member.Member);
-                    sb.Append("(");
-                    sb.Append(predicate);
-                    sb.Append(")");
-                }
-                else
-                {
-                    throw new ArgumentException("Left side of expression must be a member of the search class");
-                }
-            }
-
-            return sb.ToString();
         }
 
         private static string TranslateFirstMethod(MethodCallExpression expression)
@@ -558,7 +633,7 @@ namespace Redis.OM.Common
             return BuildQueryFromExpression(lambda.Body);
         }
 
-        private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberInfo member)
+        private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberExpression memberExpression)
         {
             var queryPredicate = expType switch
             {
@@ -566,17 +641,17 @@ namespace Redis.OM.Common
                 ExpressionType.LessThan => $"{left}:[-inf ({right}]",
                 ExpressionType.GreaterThanOrEqual => $"{left}:[{right} inf]",
                 ExpressionType.LessThanOrEqual => $"{left}:[-inf {right}]",
-                ExpressionType.Equal => BuildEqualityPredicate(member, right),
-                ExpressionType.NotEqual => BuildEqualityPredicate(member, right, true),
+                ExpressionType.Equal => BuildEqualityPredicate(memberExpression, right),
+                ExpressionType.NotEqual => BuildEqualityPredicate(memberExpression, right, true),
                 _ => string.Empty
             };
             return queryPredicate;
         }
 
-        private static string BuildEqualityPredicate(MemberInfo member, string right, bool negated = false)
+        private static string BuildEqualityPredicate(MemberExpression member, string right, bool negated = false)
         {
             var sb = new StringBuilder();
-            var fieldAttribute = member.GetCustomAttribute<SearchFieldAttribute>();
+            var fieldAttribute = ExpressionParserUtilities.DetermineSearchAttribute(member);
             if (fieldAttribute == null)
             {
                 throw new InvalidOperationException("Searches can only be performed on fields marked with a " +
@@ -588,14 +663,14 @@ namespace Redis.OM.Common
                 sb.Append("-");
             }
 
-            sb.Append($"@{member.Name}:");
+            sb.Append($"@{ExpressionParserUtilities.GetSearchFieldNameFromMember(member)}:");
             var searchFieldType = fieldAttribute.SearchFieldType != SearchFieldType.INDEXED
                 ? fieldAttribute.SearchFieldType
-                : DetermineIndexFieldsType(member);
+                : DetermineIndexFieldsType(member.Member);
             switch (searchFieldType)
             {
                 case SearchFieldType.TAG:
-                    sb.Append($"{{{EscapeTagField(right)}}}");
+                    sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(right)}}}");
                     break;
                 case SearchFieldType.TEXT:
                     sb.Append($"\"{right}\"");
@@ -605,22 +680,6 @@ namespace Redis.OM.Common
                     break;
                 default:
                     throw new InvalidOperationException("Could not translate query, equality searches only supported for Tag and numeric fields");
-            }
-
-            return sb.ToString();
-        }
-
-        private static string EscapeTagField(string text)
-        {
-            var sb = new StringBuilder();
-            foreach (var c in text)
-            {
-                if (TagEscapeChars.Contains(c))
-                {
-                    sb.Append("\\");
-                }
-
-                sb.Append(c);
             }
 
             return sb.ToString();

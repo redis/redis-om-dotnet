@@ -1,5 +1,6 @@
 ﻿using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
+using System.Threading.Tasks;
 using System.Linq;
 using Xunit;
 
@@ -8,7 +9,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     [Collection("Redis")]
     public class AggregationFunctionalTests
     {
-        private static IRedisConnection _connection;
         private static readonly object connectionLock = new();
 
         /// <summary>
@@ -17,81 +17,104 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         /// <param name="setup">RedisSetup object instance</param>
         public AggregationFunctionalTests(RedisSetup setup)
         {
-            if (_connection != null)
-                return;
-
-            lock(connectionLock)
-            {
-                _connection = setup.Connection;
-
-                var beaker = new Person
-                {
-                    Name = "Beaker",
-                    Age = 23,
-                    Sales = 500000,
-                    SalesAdjustment = .6,
-                    Height = 15,
-                    DepartmentNumber = 3
-                };
-
-                var bunsen = new Person
-                {
-                    Name = "Dr Bunsen Honeydew",
-                    Age = 63,
-                    Sales = 500000,
-                    SalesAdjustment = .6,
-                    Height = 15,
-                    DepartmentNumber = 3
-                };
-
-                var fozzie = new Person
-                {
-                    Name = "Fozzie Bear",
-                    Age = 45,
-                    Sales = 350000,
-                    SalesAdjustment = .7,
-                    Height = 14,
-                    DepartmentNumber = 2
-                };
-
-                var startler = new Person
-                {
-                    Name = "Statler",
-                    Age = 75,
-                    Sales = 650000,
-                    SalesAdjustment = .8,
-                    Height = 13,
-                    DepartmentNumber = 4
-                };
-
-                var waldorf = new Person
-                {
-                    Name = "Waldorf",
-                    Age = 78,
-                    Sales = 750000,
-                    SalesAdjustment = .8,
-                    Height = 13,
-                    DepartmentNumber = 4
-                };
-
-                var kermit = new Person
-                {
-                    Name = "Kermit the Frog",
-                    Age = 52,
-                    Sales = 1500000,
-                    SalesAdjustment = .8,
-                    Height = 13,
-                    DepartmentNumber = 1
-                };
-
-                _connection.Set(kermit);
-                _connection.Set(waldorf);
-                _connection.Set(startler);
-                _connection.Set(fozzie);
-                _connection.Set(beaker);
-                _connection.Set(bunsen);
-            }
+            _connection = setup.Connection;
         }
+        private IRedisConnection _connection;
+
+        private void Setup()
+        {
+            var beaker = new Person
+            {
+                Name = "Beaker",
+                Age = 23,
+                Sales = 500000,
+                SalesAdjustment = .6,
+                Height = 15,
+                DepartmentNumber = 3                
+            };
+
+            var bunsen = new Person
+            {
+                Name = "Dr Bunsen Honeydew",
+                Age = 63,
+                Sales = 500000,
+                SalesAdjustment = .6,
+                Height = 15,
+                DepartmentNumber = 3
+            };
+
+            var fozzie = new Person
+            {
+                Name = "Fozzie Bear",
+                Age = 45,
+                Sales = 350000,
+                SalesAdjustment = .7,
+                Height = 14,
+                DepartmentNumber = 2
+            };
+
+            var startler = new Person
+            {
+                Name = "Statler",
+                Age = 75,
+                Sales = 650000,
+                SalesAdjustment = .8,
+                Height = 13,
+                DepartmentNumber = 4
+            };
+
+            var waldorf = new Person
+            {
+                Name = "Waldorf",
+                Age = 78,
+                Sales = 750000,
+                SalesAdjustment = .8,
+                Height = 13,
+                DepartmentNumber = 4
+            };
+
+            var kermit = new Person
+            {
+                Name = "Kermit the Frog",
+                Age = 52,
+                Sales = 1500000,
+                SalesAdjustment = .8,
+                Height = 13,
+                DepartmentNumber = 1
+            };
+            
+            var hashWaldorf = new HashPerson
+            {
+                Name = "Waldorf",
+                Email = "Waldorf@muppets.com",
+                Age = 78,
+                Sales = 750000,
+                SalesAdjustment = .8,
+                Height = 13,
+                DepartmentNumber = 4
+            };
+
+            var hashKermit = new HashPerson
+            {
+                Name = "Kermit the Frog",
+                Email = "kermit@muppets.com",
+                Age = 52,
+                Sales = 1500000,
+                SalesAdjustment = .8,
+                Height = 13,
+                DepartmentNumber = 1
+            };
+
+            _connection.Set(kermit);
+            _connection.Set(waldorf);
+            _connection.Set(startler);
+            _connection.Set(fozzie);
+            _connection.Set(beaker);
+            _connection.Set(bunsen);
+            _connection.Set(hashKermit);
+            _connection.Set(hashWaldorf);
+        }
+
 
         [Fact]
         public void GetDepartmentBySales()
@@ -125,8 +148,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public async void GetAdjustedSalesStandardDeviation()
+        public async Task GetAdjustedSalesStandardDeviation()
         {
+            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
             var stddev = await collection.Apply(x => x.RecordShell.Sales
                 * x.RecordShell.SalesAdjustment, "AdjustedSales")
@@ -136,20 +160,89 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+
         public void GetAdjustedSalesStandardDeviationTestingInvariantCultureCompliance()
         {
             Helper.RunTestUnderDifferentCulture("it-IT", x => GetAdjustedSalesStandardDeviation());
         }
 
         [Fact]
-        public async void GetAverageAdjustedSales()
+        public async Task GetAverageAdjustedSales()
         {
             var collection = new RedisAggregationSet<Person>(_connection);
             var average = await collection.Apply(x => x.RecordShell.Sales
-                * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                                                      * x.RecordShell.SalesAdjustment, "AdjustedSales")
                 .AverageAsync(x => x["AdjustedSales"]);
             Assert.Equal(527500, average);
+        }
 
+        [Fact]
+        public async Task TestLoad()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            await foreach (var result in collection.Load(x => x.RecordShell.Name))
+            {
+                Assert.False(string.IsNullOrEmpty(result["Name"]));
+            }
+        }
+        
+        [Fact]
+        public async Task TestLoadAll()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            await foreach (var result in collection.LoadAll())
+            {
+                Assert.NotNull(result.Hydrate().Name);
+            }
+        }
+
+        [Fact]
+        public async Task TestPartialHydration()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            await foreach (var result in collection.Apply(x => x.RecordShell.Sales * x.RecordShell.SalesAdjustment, "AdjustedSales"))
+            {
+                var partialHydration = result.Hydrate();
+                Assert.True(partialHydration.Sales > 0);
+                Assert.True(partialHydration.SalesAdjustment > 0);
+            }
+        }
+
+        [Fact]
+        public async Task TestHydrateHash()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<HashPerson>(_connection);
+            await foreach (var result in collection.LoadAll())
+            {
+                Assert.NotNull(result.Hydrate().Name);
+            }
+        }
+
+        [Fact]
+        public async Task TestPartialHydrationHash()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<HashPerson>(_connection);
+            await foreach (var result in collection.Load(x=>x.RecordShell.Email))
+            {
+                Assert.NotNull(result.Hydrate().Email);
+            }
+        }
+
+        [Fact]
+        public async Task GetGroupCount()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            var results = await collection.GroupBy(x => x.RecordShell.Age).CountGroupMembers().ToListAsync();
+            foreach (var result in results)
+            {
+                Assert.True(1<=result["COUNT"]);
+            }
         }
     }
 }

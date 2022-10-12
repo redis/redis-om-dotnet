@@ -6,8 +6,11 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Searching.Query;
+using StackExchange.Redis;
 
 namespace Redis.OM.Searching
 {
@@ -20,12 +23,26 @@ namespace Redis.OM.Searching
     {
         private readonly IRedisConnection _connection;
 
+        private Expression<Func<T, bool>>? _booleanExpression;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCollection{T}"/> class.
         /// </summary>
         /// <param name="connection">Connection to Redis.</param>
         /// <param name="chunkSize">Size of chunks to pull back during pagination, defaults to 100.</param>
         public RedisCollection(IRedisConnection connection, int chunkSize = 100)
+            : this(connection, true, chunkSize)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisCollection{T}"/> class.
+        /// </summary>
+        /// <param name="saveState">Determines whether or not the Redis Colleciton will maintain it's state internally.</param>
+        /// <param name="connection">Connection to Redis.</param>
+        /// <param name="chunkSize">Size of chunks to pull back during pagination, defaults to 100.</param>
+        /// <exception cref="ArgumentException">Thrown if the root attribute of the Redis Colleciton is not decorated with a DocumentAttribute.</exception>
+        public RedisCollection(IRedisConnection connection, bool saveState, int chunkSize)
         {
             var t = typeof(T);
             DocumentAttribute rootAttribute = t.GetCustomAttribute<DocumentAttribute>();
@@ -36,8 +53,9 @@ namespace Redis.OM.Searching
 
             ChunkSize = chunkSize;
             _connection = connection;
+            SaveState = saveState;
             StateManager = new RedisCollectionStateManager(rootAttribute);
-            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute, ChunkSize), null);
+            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute, ChunkSize, SaveState), null, null);
         }
 
         /// <summary>
@@ -46,13 +64,16 @@ namespace Redis.OM.Searching
         /// <param name="provider">Query Provider.</param>
         /// <param name="expression">Expression to be parsed for the query.</param>
         /// <param name="stateManager">Manager of the internal state of the collection.</param>
+        /// <param name="saveState">Whether or not the StateManager will maintain the state.</param>
         /// <param name="chunkSize">Size of chunks to pull back during pagination, defaults to 100.</param>
-        internal RedisCollection(RedisQueryProvider provider, Expression expression, RedisCollectionStateManager stateManager, int chunkSize = 100)
+        /// <param name="booleanExpression">The expression to build the filter from.</param>
+        internal RedisCollection(RedisQueryProvider provider, Expression expression, RedisCollectionStateManager stateManager, Expression<Func<T, bool>>? booleanExpression, bool saveState, int chunkSize = 100)
         {
             StateManager = stateManager;
             _connection = provider.Connection;
             ChunkSize = chunkSize;
-            Initialize(provider, expression);
+            SaveState = saveState;
+            Initialize(provider, expression, booleanExpression);
         }
 
         /// <inheritdoc/>
@@ -64,6 +85,9 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public IQueryProvider Provider { get; private set; } = default!;
 
+        /// <inheritdoc />
+        public bool SaveState { get; }
+
         /// <summary>
         /// Gets manages the state of the items queried from Redis.
         /// </summary>
@@ -73,21 +97,397 @@ namespace Redis.OM.Searching
         public int ChunkSize { get; }
 
         /// <summary>
+        /// Gets or sets the main boolean expression to be used for building the filter for this collection.
+        /// </summary>
+        internal Expression<Func<T, bool>>? BooleanExpression
+        {
+            get
+            {
+                return _booleanExpression;
+            }
+
+            set
+            {
+                _booleanExpression = value;
+                ((RedisQueryProvider)Provider).BooleanExpression = value;
+            }
+        }
+
+        /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
         /// <param name="expression">the expression to be matched.</param>
         /// <returns>Whether anything matching the expression was found.</returns>
         public bool Any(Expression<Func<T, bool>> expression)
         {
-            var provider = (RedisQueryProvider)Provider;
-            var res = provider.ExecuteQuery<T>(expression);
-            return res.Documents.Values.Any();
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)_connection.Search<T>(query).DocumentCount > 0;
+        }
+
+        /// <inheritdoc />
+        public void Update(T item)
+        {
+            var key = item.GetKey();
+            IList<IObjectDiff>? diff;
+            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+            if (diffConstructed)
+            {
+                if (diff!.Any())
+                {
+                    var args = new List<string>();
+                    var scriptName = diff!.First().Script;
+                    foreach (var update in diff!)
+                    {
+                        args.AddRange(update.SerializeScriptArgs());
+                    }
+
+                    _connection.CreateAndEval(scriptName, new[] { key }, args.ToArray());
+                }
+            }
+            else
+            {
+                _connection.UnlinkAndSet(key, item, StateManager.DocumentAttribute.StorageType);
+            }
+
+            SaveToStateManager(key, item);
+        }
+
+        /// <inheritdoc />
+        public async Task UpdateAsync(T item)
+        {
+            var key = item.GetKey();
+            IList<IObjectDiff>? diff;
+            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+            if (diffConstructed)
+            {
+                if (diff!.Any())
+                {
+                    var args = new List<string>();
+                    var scriptName = diff!.First().Script;
+                    foreach (var update in diff!)
+                    {
+                        args.AddRange(update.SerializeScriptArgs());
+                    }
+
+                    await _connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray());
+                }
+            }
+            else
+            {
+                await _connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType);
+            }
+
+            SaveToStateManager(key, item);
+        }
+
+        /// <inheritdoc />
+        public void Delete(T item)
+        {
+            var key = item.GetKey();
+            _connection.Unlink(key);
+            StateManager.Remove(key);
+        }
+
+        /// <inheritdoc />
+        public async Task DeleteAsync(T item)
+        {
+            var key = item.GetKey();
+            await _connection.UnlinkAsync(key);
+            StateManager.Remove(key);
+        }
+
+        /// <inheritdoc />
+        public async Task<IList<T>> ToListAsync()
+        {
+            var list = new List<T>();
+            await foreach (var item in this)
+            {
+                list.Add(item);
+            }
+
+            return list;
+        }
+
+        /// <inheritdoc />
+        public async Task<int> CountAsync()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
+        }
+
+        /// <inheritdoc />
+        public async Task<int> CountAsync(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> AnyAsync()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
+        }
+
+        /// <inheritdoc />
+        public async Task<T> FirstAsync()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            var result = res.Documents.First();
+            SaveToStateManager(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc />
+        public async Task<T> FirstAsync(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            var result = res.Documents.First();
+            SaveToStateManager(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc />
+        public async Task<T?> FirstOrDefaultAsync()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            var key = res.Documents.Keys.FirstOrDefault();
+            if (key == default)
+            {
+                return default;
+            }
+
+            var result = res.Documents[key];
+            SaveToStateManager(key, result);
+            return result;
+        }
+
+        /// <inheritdoc />
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            var key = res.Documents.Keys.FirstOrDefault();
+            if (key == default)
+            {
+                return default;
+            }
+
+            var result = res.Documents[key];
+            SaveToStateManager(key, result);
+            return result;
+        }
+
+        /// <inheritdoc />
+        public async Task<T> SingleAsync()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            if (res.DocumentCount > 1)
+            {
+                throw new InvalidOperationException("Sequence contained more than one element.");
+            }
+
+            var key = res.Documents.Keys.Single();
+            var result = res.Documents[key];
+            SaveToStateManager(key, result);
+            return result;
+        }
+
+        /// <inheritdoc />
+        public async Task<T> SingleAsync(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            if (res.DocumentCount > 1)
+            {
+                throw new InvalidOperationException("Sequence contained more than one element.");
+            }
+
+            var key = res.Documents.Keys.Single();
+            var result = res.Documents[key];
+            SaveToStateManager(key, result);
+            return result;
+        }
+
+        /// <inheritdoc />
+        public async Task<T?> SingleOrDefaultAsync()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            if (res.DocumentCount != 1)
+            {
+                return default;
+            }
+
+            var key = res.Documents.Keys.SingleOrDefault();
+            if (key != default)
+            {
+                var result = res.Documents[key];
+                SaveToStateManager(key, result);
+                return result;
+            }
+
+            return default;
+        }
+
+        /// <inheritdoc />
+        public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = await _connection.SearchAsync<T>(query);
+            if (res.DocumentCount != 1)
+            {
+                return default;
+            }
+
+            var key = res.Documents.Keys.SingleOrDefault();
+            if (key != null)
+            {
+                var result = res.Documents[key];
+                SaveToStateManager(key, result);
+                return result;
+            }
+
+            return default;
+        }
+
+        /// <inheritdoc />
+        public int Count(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)_connection.Search<T>(query).DocumentCount;
+        }
+
+        /// <inheritdoc />
+        public T First(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = _connection.Search<T>(query);
+            var result = res.Documents.First();
+            SaveToStateManager(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc />
+        public T? FirstOrDefault(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = _connection.Search<T>(query);
+            var result = res.Documents.FirstOrDefault();
+            SaveToStateManager(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc />
+        public T Single(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = _connection.Search<T>(query);
+            if (res.DocumentCount > 1)
+            {
+                throw new InvalidOperationException("Sequence contained more than one element.");
+            }
+
+            var result = res.Documents.Single();
+            SaveToStateManager(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc />
+        public T? SingleOrDefault(Expression<Func<T, bool>> expression)
+        {
+            var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
+            var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            query.Limit = new SearchLimit { Number = 1, Offset = 0 };
+            var res = _connection.Search<T>(query);
+            if (res.DocumentCount != 1)
+            {
+                return default;
+            }
+
+            var result = res.Documents.SingleOrDefault();
+            SaveToStateManager(result.Key, result.Value);
+            return result.Value;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids)
+        {
+            var tasks = new Dictionary<string, Task<T?>>();
+            foreach (var id in ids)
+            {
+                tasks.Add(id, FindByIdAsync(id));
+            }
+
+            await Task.WhenAll(tasks.Values);
+            var result = tasks.ToDictionary(x => x.Key, x => x.Value.Result);
+            foreach (var res in result)
+            {
+                if (res.Value != null)
+                {
+                    SaveToStateManager(res.Value.GetKey(), res.Value);
+                }
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {
-            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager);
+            StateManager.Clear();
+            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager, BooleanExpression, SaveState);
         }
 
         /// <inheritdoc/>
@@ -99,6 +499,14 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public void Save()
         {
+            if (!SaveState)
+            {
+                throw new InvalidOperationException(
+                    "The RedisCollection has been instructed to not maintain the state of records enumerated by " +
+                    "Redis making the attempt to Save Invalid. Please initialize the RedisCollection with saveState " +
+                    "set to true to Save documents in the RedisCollection");
+            }
+
             var diff = StateManager.DetectDifferences();
             foreach (var item in diff)
             {
@@ -119,8 +527,15 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public async ValueTask SaveAsync()
         {
+            if (!SaveState)
+            {
+                throw new InvalidOperationException(
+                    "The RedisCollection has been instructed to not maintain the state of records enumerated by " +
+                    "Redis making the attempt to Save Invalid. Please initialize the RedisCollection with saveState " +
+                    "set to true to Save documents in the RedisCollection");
+            }
+
             var diff = StateManager.DetectDifferences();
-            Console.WriteLine(diff);
             var tasks = new List<Task<int?>>();
             foreach (var item in diff)
             {
@@ -152,25 +567,65 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
+        public string Insert(T item, TimeSpan timeSpan)
+        {
+            return ((RedisQueryProvider)Provider).Connection.Set(item, timeSpan);
+        }
+
+        /// <inheritdoc/>
         public async Task<string> InsertAsync(T item)
         {
             return await ((RedisQueryProvider)Provider).Connection.SetAsync(item);
         }
 
         /// <inheritdoc/>
-        public T? FindById(string id) => _connection.Get<T>(id);
+        public async Task<string> InsertAsync(T item, TimeSpan timeSpan)
+        {
+            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan);
+        }
 
         /// <inheritdoc/>
-        public async Task<T?> FindByIdAsync(string id) => await _connection.GetAsync<T>(id);
+        public T? FindById(string id)
+        {
+            var prefix = typeof(T).GetKeyPrefix();
+            string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
+            var result = _connection.Get<T>(key);
+            if (result != null)
+            {
+                SaveToStateManager(key, result);
+            }
+
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task<T?> FindByIdAsync(string id)
+        {
+            var prefix = typeof(T).GetKeyPrefix();
+            string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
+            var result = await _connection.GetAsync<T>(key);
+            if (result != null)
+            {
+                SaveToStateManager(key, result);
+            }
+
+            return result;
+        }
 
         /// <inheritdoc/>
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             var provider = (RedisQueryProvider)Provider;
-            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager);
+            StateManager.Clear();
+            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
         }
 
-        private void Initialize(RedisQueryProvider provider, Expression? expression)
+        private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
+        {
+            return f.Method;
+        }
+
+        private void Initialize(RedisQueryProvider provider, Expression? expression, Expression<Func<T, bool>>? booleanExpression)
         {
             if (expression != null && !typeof(IQueryable<T>).IsAssignableFrom(expression.Type))
             {
@@ -179,6 +634,26 @@ namespace Redis.OM.Searching
 
             Provider = provider ?? throw new ArgumentNullException(nameof(provider));
             Expression = expression ?? Expression.Constant(this);
+            BooleanExpression = booleanExpression;
+        }
+
+        private void SaveToStateManager(string key, object value)
+        {
+            if (SaveState)
+            {
+                try
+                {
+                    StateManager.InsertIntoData(key, value);
+                    StateManager.InsertIntoSnapshot(key, value);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    throw new Exception(
+                        "Exception encountered while trying to save State. This indicates a possible race condition. " +
+                        "If you do not need to update, consider setting SaveState to false, otherwise, ensure collection is only enumerated on one thread at a time",
+                        ex);
+                }
+            }
         }
     }
 }

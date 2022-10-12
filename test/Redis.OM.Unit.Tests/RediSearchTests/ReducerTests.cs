@@ -532,7 +532,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestCountDistinctIshNoGroupPredicateAsync()
+        public async Task TestCountDistinctIshNoGroupPredicateAsync()
         {
             var mockReply = new RedisReply[]
             {
@@ -558,13 +558,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Age_COUNT_DISTINCTISH"))
                 .ReturnsAsync(mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
-            Task.Run(async () =>
-            {
-                var res = await collection
+            var res = await collection
                 .CountDistinctishAsync(x => x.RecordShell.Age);
 
-                Assert.Equal(5, res);
-            }).GetAwaiter().GetResult();
+            Assert.Equal(5, res);
             
         }
 
@@ -639,7 +636,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestStandardDeviationNoGroupPredicateAsync()
+        public async Task TestStandardDeviationNoGroupPredicateAsync()
         {
             var mockReply = new RedisReply[]
             {
@@ -665,14 +662,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Age_STDDEV"))
                 .ReturnsAsync(mockReply);
 
-            Task.Run(async () =>
-            {
-                var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
 
-                var res = await collection.StandardDeviationAsync(x => x.RecordShell.Age);
+            var res = await collection.StandardDeviationAsync(x => x.RecordShell.Age);
 
-                Assert.Equal(5, res);
-            }).GetAwaiter().GetResult();            
+            Assert.Equal(5, res);            
         }
 
         [Fact]
@@ -753,7 +747,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestQuantileNoGroupPredicateAsync()
+        public async Task TestQuantileNoGroupPredicateAsync()
+
         {
             var mockReply = new RedisReply[]
             {
@@ -766,26 +761,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             };
 
             _mock.Setup(x => x.ExecuteAsync(
-                "FT.AGGREGATE",
-                "person-idx",
-                "*",
-                "GROUPBY",
-                "0",
-                "REDUCE",
-                "QUANTILE",
-                "2",
-                "@Age",
-                "0.7",
-                "AS",
-                "Age_QUANTILE_0.7"))
+                    "FT.AGGREGATE",
+                    "person-idx",
+                    "*",
+                    "GROUPBY",
+                    "0",
+                    "REDUCE",
+                    "QUANTILE",
+                    "2",
+                    "@Age",
+                    "0.7",
+                    "AS",
+                    "Age_QUANTILE_0.7"))
                 .ReturnsAsync(mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
 
-            Task.Run(async () =>
-            {
-                var res = await collection.QuantileAsync(x => x.RecordShell.Age, .7);
-                Assert.Equal(5, res);
-            }).GetAwaiter().GetResult();
+            var res = await collection.QuantileAsync(x => x.RecordShell.Age, .7);
+            Assert.Equal(5, res);
         }
 
         [Fact]
@@ -941,7 +933,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestFirstValueNoGroupPredicateAsync()
+        public async Task TestFirstValueNoGroupPredicateAsync()
         {
             var mockReply = new RedisReply[]
             {
@@ -968,11 +960,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ReturnsAsync(mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
 
-            Task.Run(async () =>
-            {
-                var res = await collection.FirstValueAsync(x => x.RecordShell.Age);
-                Assert.Equal(5, (int)res);
-            }).GetAwaiter().GetResult();
+            var res = await collection.FirstValueAsync(x => x.RecordShell.Age);
+            Assert.Equal(5, (int)res);
             
         }
 
@@ -1254,7 +1243,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestMaxAsyncNoGroupPredicate()
+        public async Task TestMaxAsyncNoGroupPredicate()
         {
             var mockReply = new RedisReply[]
             {
@@ -1280,11 +1269,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Age_MAX"))
                 .ReturnsAsync(mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
-            Task.Run(async () =>
-            {
-                var res = await collection.MaxAsync(x => x.RecordShell.Age);
-                Assert.Equal(5, (int)res);
-            }).GetAwaiter().GetResult();
+            var res = await collection.MaxAsync(x => x.RecordShell.Age);
+            Assert.Equal(5, (int)res);
             
         }
 
@@ -1323,6 +1309,36 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .ToArray();
 
             Assert.Equal(5, (int)res[0]["Age_MAX"]);
+        }
+
+        [Fact]
+        public void TestCountMembers()
+        {
+            var mockReply = new RedisReply[]
+            {
+                new RedisReply(1),
+            };
+            
+            _mock.Setup(x => x.Execute(
+                    It.IsAny<string>(),
+                    It.IsAny<string[]>()))
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            collection.GroupBy(x => x.RecordShell.Height).CountGroupMembers().ToList();
+            
+            _mock.Verify(x=>x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "GROUPBY",
+                "1",
+                "@Height",
+                "REDUCE",
+                "COUNT",
+                "0",
+                "AS",
+                "COUNT"));
         }
     }
 }

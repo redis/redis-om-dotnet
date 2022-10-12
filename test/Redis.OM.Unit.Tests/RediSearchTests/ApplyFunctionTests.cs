@@ -10,8 +10,8 @@ using Xunit;
 namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     public class ApplyFunctionTests
-    {        
-        
+    {
+
         Mock<IRedisConnection> _mock = new Mock<IRedisConnection>();
         RedisReply _mockReply = new RedisReply[]
         {
@@ -99,9 +99,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var collection = new RedisAggregationSet<Person>(_mock.Object);
 
             var res = collection
-                .Apply(x => string.Format("Hello My Name is {1} and I'm {0}", 
-                x.RecordShell.Age, 
-                x.RecordShell.Name), 
+                .Apply(x => string.Format("Hello My Name is {1} and I'm {0}",
+                x.RecordShell.Age,
+                x.RecordShell.Name),
                 "NamePlease")
                 .ToArray();
 
@@ -127,11 +127,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
-        
+
         [Fact]
-        public void TestTooLower()
+        public void TestToLower()
         {
-            var expectedPredicate = "lower(@Name)";            
+            var expectedPredicate = "lower(@Name)";
             _mock.Setup(x => x.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
@@ -143,13 +143,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisAggregationSet<Person>(_mock.Object);
-            var res = collection.Apply(x => x.RecordShell.Name.ToLower(),"Name").ToArray();
+            var res = collection.Apply(x => x.RecordShell.Name.ToLower(), "Name").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
 
         [Fact]
-        public void TestTooUpper()
+        public void TestToUpper()
         {
             var expectedPredicate = "upper(@Name)";
             _mock.Setup(x => x.Execute(
@@ -243,7 +243,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisAggregationSet<Person>(_mock.Object);
-            var res = collection.Apply(x => x.RecordShell.Name.Substring(0,5), "Name").ToArray();
+            var res = collection.Apply(x => x.RecordShell.Name.Substring(0, 5), "Name").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
@@ -283,7 +283,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisAggregationSet<Person>(_mock.Object);
-            var res = collection.Apply(x => x.RecordShell.Name.Split('e','g'), "Name").ToArray();
+            var res = collection.Apply(x => x.RecordShell.Name.Split('e', 'g'), "Name").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
@@ -331,7 +331,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestLog10()
         {
             var expectedPredicate = "log(@Age)";
-            
+
             _mock.Setup(x => x.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
@@ -341,9 +341,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "AS",
                 "num"))
                 .Returns(_mockReply);
-            
-            var collection = new RedisAggregationSet<Person>(_mock.Object);                        
-            var res = collection.Apply(x => Math.Log10((int)x.RecordShell.Age), "num").ToArray();            
+
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var res = collection.Apply(x => Math.Log10((int)x.RecordShell.Age), "num").ToArray();
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
 
@@ -577,7 +577,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
-        
+
         [Fact]
         public void TestMonthOfYear()
         {
@@ -610,7 +610,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 expectedPredicate,
                 "AS",
                 "time"))
-                .Returns(_mockReply);            
+                .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
             var res = collection.Apply(
                 x => ApplyFunctions.Hour((long)x.RecordShell.LastTimeOnline), "time").ToArray();
@@ -677,7 +677,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
-        
+
         [Fact]
         public void TestDayOfYear()
         {
@@ -697,7 +697,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
-        
+
         [Fact]
         public void TestYear()
         {
@@ -813,7 +813,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
             var res = collection.Apply(
-                x => ApplyFunctions.GeoDistance((GeoLoc)x.RecordShell.Home, 1.5,3.2), "geo").ToArray();
+                x => ApplyFunctions.GeoDistance((GeoLoc)x.RecordShell.Home, 1.5, 3.2), "geo").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
@@ -842,7 +842,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 x => ApplyFunctions.GeoDistance("1.5,3.2", (GeoLoc)x.RecordShell.Work), "geo").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
-        }        
+        }
 
         [Fact]
         public void TestGeoDistance1String2String()
@@ -879,7 +879,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
             var res = collection.Apply(
-                x => ApplyFunctions.GeoDistance("1.5,3.2", 1.5,3.2), "geo").ToArray();
+                x => ApplyFunctions.GeoDistance("1.5,3.2", 1.5, 3.2), "geo").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
@@ -905,7 +905,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
             var res = collection.Apply(
-                x => ApplyFunctions.GeoDistance(1.5,3.2, (GeoLoc)x.RecordShell.Work), "geo").ToArray();
+                x => ApplyFunctions.GeoDistance(1.5, 3.2, (GeoLoc)x.RecordShell.Work), "geo").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
@@ -957,7 +957,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
             var res = collection.Apply(
-                x => ApplyFunctions.GeoDistance(1.5, 3.2, 1.5,3.2), "geo").ToArray();
+                x => ApplyFunctions.GeoDistance(1.5, 3.2, 1.5, 3.2), "geo").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
@@ -1000,19 +1000,21 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var expectedPredicate = "geodistance(1.5,3.2,1.5,3.2)";
             _mock.Setup(x => x.Execute(
                 "FT.AGGREGATE",
-                "person-idx",
-                "*",
-                "APPLY",
-                expectedPredicate,
-                "AS",
-                "geo"))
+                It.IsAny<string[]>()))
                 .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_mock.Object);
             var lon1 = 1.5;
             var lat1 = 3.2;
             var res = collection.Apply(
                 x => ApplyFunctions.GeoDistance(lon1, lat1, 1.5, 3.2), "geo").ToArray();
-
+            _mock.Verify(x=>x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "APPLY",
+                expectedPredicate,
+                "AS",
+                "geo"));
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
 
@@ -1055,7 +1057,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "AS",
                 "exist"))
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);       
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
             var res = collection.Apply(
                 x => ApplyFunctions.Exists(x["blah"]), "exist").ToArray();
 
@@ -1126,5 +1128,91 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
+
+        [Fact]
+        public void TestNestedStringFormat()
+        {
+            var expectedPredicate = "format(\"Hello My State is %s\",@Address_State)";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",
+                    It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            collection.Apply(x => string.Format("Hello My State is {0}", x.RecordShell.Address.State), "StateText").ToArray();
+
+            _mock.Verify(x => x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "APPLY",
+                expectedPredicate,
+                "AS",
+                "StateText"));
+        }
+
+        [Fact]
+        public void TestNestedNumericApply()
+        {
+            var expectedPredicate = "@Address_HouseNumber + 4";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",
+                    It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+
+            collection.Apply(x => x.RecordShell.Address.HouseNumber + 4, "HouseNumPlus4").ToArray();
+
+            _mock.Verify(x => x.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "APPLY",
+                expectedPredicate,
+                "AS",
+                "HouseNumPlus4"));
+        }
+
+        [Fact]
+        public void TestGeoDistanceNested()
+        {
+            var expectedPredicate = "geodistance(@Home,@Address_Location)";
+            _mock.Setup(x => x.Execute(
+                    "FT.AGGREGATE",
+                    "person-idx",
+                    "*",
+                    "APPLY",
+                    expectedPredicate,
+                    "AS",
+                    "geo"))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var res = collection.Apply(
+                x => ApplyFunctions.GeoDistance((GeoLoc)x.RecordShell.Home, (GeoLoc)x.RecordShell.Address.Location), "geo").ToArray();
+
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+        
+        [Fact]
+        public void TestMultipleOperations()
+        {
+            var expectedPredicate = "@Age + 5 - 6";
+            _mock.Setup(x => x.Execute(It.IsAny<string>(),
+                    It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var res = collection.Apply(
+                x=>x.RecordShell.Age + 5 - 6, "res").ToArray();
+
+            _mock.Verify(x => x.Execute(
+                    "FT.AGGREGATE",
+                    "person-idx",
+                    "*",
+                    "APPLY",
+                    expectedPredicate,
+                    "AS",
+                    "res"));
+        }
+        
     }
 }

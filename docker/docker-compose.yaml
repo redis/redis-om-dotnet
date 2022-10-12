@@ -11,7 +11,7 @@ networks:
 
 services:  
   redis-standalone:
-    image: "redislabs/redismod:preview"
+    image: "redis/redis-stack-server"
     container_name: redis-standalone
     ports:
       - "6379"
@@ -19,7 +19,7 @@ services:
       cluster-network:
         ipv4_address: 192.168.57.17
   redis-master:
-    image: "redislabs/rejson"
+    image: "redis/redis-stack-server"
     container_name: redis-master
     ports:
       - "6379"
@@ -27,9 +27,9 @@ services:
       cluster-network:
         ipv4_address: 192.168.57.18
   redis-replica:
-    image: "redislabs/redismod:preview"
+    image: "redis/redis-stack-server"
     container_name: redis-replica
-    command: --port 6379 --loadmodule /usr/lib/redis/modules/redisai.so --loadmodule /usr/lib/redis/modules/redisearch.so --loadmodule /usr/lib/redis/modules/redisgraph.so --loadmodule /usr/lib/redis/modules/redistimeseries.so --loadmodule /usr/lib/redis/modules/rejson.so --loadmodule /usr/lib/redis/modules/redisbloom.so --loadmodule /var/opt/redislabs/lib/modules/redisgears.so Plugin /var/opt/redislabs/modules/rg/plugin/gears_python.so --slaveof redis-master 6379
+    command: /opt/redis-stack/bin/redis-server --port 6379 --loadmodule /opt/redis-stack/lib/redisearch.so --loadmodule /opt/redis-stack/lib/redisgraph.so --loadmodule /opt/redis-stack/lib/redistimeseries.so --loadmodule /opt/redis-stack/lib/rejson.so --loadmodule /opt/redis-stack/lib/redisbloom.so --replicaof 192.168.57.18 6379
     ports:
       - "6379"
   redis-sentinel:    
@@ -116,7 +116,7 @@ services:
   redis-cluster6:
     build:
       context: ./cluster
-    entrypoint: ["startup_cluster.sh"]
+    entrypoint: ["/usr/local/bin/startup_cluster.sh"]
     ports:
       - '6379:6379'
       - '16379'
@@ -129,6 +129,14 @@ services:
       - redis-cluster3
       - redis-cluster4
       - redis-cluster5
+  redis-private:
+    image: redis
+    ports:
+      - "6379"
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.35
+    command: --port 6379 --requirepass foobar
   dotnet:
     networks:
       cluster-network:
@@ -137,10 +145,14 @@ services:
       - redis-standalone      
       - redis-sentinel      
       - redis-cluster1
+      - redis-private
     environment:
       - STANDALONE_HOST_PORT=redis-standalone:6379
       - SENTINLE_HOST_PORT=redis-sentinel:26379
       - CLUSTER_HOST_PORT=redis-cluster1:6379
+      - PRIVATE_HOST=redis-private
+      - PRIVATE_PORT=6379
+      - PRIVATE_PASSWORD=foobar
     build:
       context: ../
     depends_on:
@@ -156,3 +168,4 @@ services:
       - redis-cluster4
       - redis-cluster5
       - redis-cluster6
+      - redis-private

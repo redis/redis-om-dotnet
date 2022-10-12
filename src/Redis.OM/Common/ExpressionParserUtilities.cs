@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Modeling;
 using Redis.OM.Searching.Query;
@@ -17,6 +18,15 @@ namespace Redis.OM.Common
     /// </summary>
     internal static class ExpressionParserUtilities
     {
+        /// <summary>
+        /// Characters to escape when serializing a tag expression.
+        /// </summary>
+        private static readonly char[] TagEscapeChars =
+        {
+            ',', '.', '<', '>', '{', '}', '[', ']', '"', '\'', ':', ';',
+            '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '~', '|', ' ',
+        };
+
         /// <summary>
         /// Get's the operand string.
         /// </summary>
@@ -68,7 +78,7 @@ namespace Redis.OM.Common
             {
                 ConstantExpression constExp => $"{constExp.Value}",
                 MemberExpression member => GetOperandStringForMember(member),
-                MethodCallExpression method => TranslateContainsStandardQuerySyntax(method),
+                MethodCallExpression method => TranslateMethodStandardQuerySyntax(method),
                 UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
@@ -117,7 +127,7 @@ namespace Redis.OM.Common
 
                 operationStack.Push(right);
                 operationStack.Push(GetOperatorFromNodeType(expression.NodeType));
-                if (!string.IsNullOrEmpty(left))
+                if (!string.IsNullOrEmpty(left) && !(expression.Left is BinaryExpression))
                 {
                     operationStack.Push(left);
                 }
@@ -137,6 +147,7 @@ namespace Redis.OM.Common
             return exp.Method.Name switch
             {
                 "Contains" => TranslateContainsStandardQuerySyntax(exp),
+                "Any" => TranslateAnyForEmbeddedObjects(exp),
                 _ => throw new ArgumentException($"Unrecognized method for query translation:{exp.Method.Name}")
             };
         }
@@ -156,21 +167,165 @@ namespace Redis.OM.Common
             return new RedisGeoFilter(memberOperand, longitude, latitude, radius, unit);
         }
 
-        private static string GetOperandStringForMember(MemberExpression member)
+        /// <summary>
+        /// Gets the search field name from member expression. Will climb back up to the parent node and build the alias.
+        /// Which will be all the names in the path to the expression seperated by an underscore. e.g. Address_City.
+        /// </summary>
+        /// <param name="member">The member expression to pull the serach field name from.</param>
+        /// <returns>The alias to search for.</returns>
+        internal static string GetSearchFieldNameFromMember(MemberExpression member)
         {
-            var searchField = member.Member.GetCustomAttribute<SearchFieldAttribute>();
-            if (searchField == null)
-            {
-                if (member.Expression is not ConstantExpression c)
-                {
-                    return Expression.Lambda(member).Compile().DynamicInvoke().ToString();
-                }
+            var stack = GetMemberChain(member);
+            var topMember = stack.Peek();
+            var memberPath = stack.Select(x => x.Name).ToArray();
 
-                return ValueToString(GetValue(member.Member, c.Value));
+            if (topMember == member.Member)
+            {
+                var searchField = member.Member.GetCustomAttributes().Where(x => x is SearchFieldAttribute).Cast<SearchFieldAttribute>().FirstOrDefault();
+                if (searchField != null && !string.IsNullOrEmpty(searchField.PropertyName))
+                {
+                    return searchField.PropertyName;
+                }
             }
 
-            var propertyName = string.IsNullOrEmpty(searchField.PropertyName) ? member.Member.Name : searchField.PropertyName;
-            return $"@{propertyName}";
+            return string.Join("_", memberPath);
+        }
+
+        /// <summary>
+        /// Gets the chain of members down to the currently accessed member.
+        /// </summary>
+        /// <param name="memberExpression">The member expression being accessed.</param>
+        /// <returns>The chain of members down to the currently accessed member, e.g. if a Person's
+        /// Address.City was being accessed a stack with Address at the top and City at the bottom would be returned.</returns>
+        internal static Stack<MemberInfo> GetMemberChain(MemberExpression memberExpression)
+        {
+            var memberStack = new Stack<MemberInfo>();
+            memberStack.Push(memberExpression.Member);
+
+            var parentExpression = memberExpression.Expression;
+            while (parentExpression is MemberExpression parentMember)
+            {
+                if (parentMember.Member.Name == nameof(AggregationResult<object>.RecordShell))
+                {
+                    break;
+                }
+
+                memberStack.Push(parentMember.Member);
+                parentExpression = parentMember.Expression;
+            }
+
+            return memberStack;
+        }
+
+        /// <summary>
+        /// Gets the Search Field type for the member.
+        /// </summary>
+        /// <param name="memberExpression">the member expression.</param>
+        /// <returns>the <see cref="SearchFieldAttribute"/>.</returns>
+        internal static SearchFieldAttribute? DetermineSearchAttribute(MemberExpression memberExpression)
+        {
+            var memberChain = GetMemberChain(memberExpression);
+            SearchFieldAttribute? attr;
+            do
+            {
+                var memberInfo = memberChain.Pop();
+                attr = memberInfo
+                    .GetCustomAttributes()
+                    .Where(x => x is SearchFieldAttribute)
+                    .Cast<SearchFieldAttribute>()
+                    .FirstOrDefault(x => x.JsonPath?.Split('.').Last() == memberExpression.Member.Name);
+            }
+            while (attr == null && memberChain.Any());
+
+            if (attr == null)
+            {
+                attr = memberExpression.Member.GetCustomAttributes().Where(x => x is SearchFieldAttribute).Cast<SearchFieldAttribute>().FirstOrDefault();
+            }
+
+            return attr;
+        }
+
+        /// <summary>
+        /// Escapes a tag field string.
+        /// </summary>
+        /// <param name="text">the text toe escape.</param>
+        /// <returns>The Escaped Text.</returns>
+        internal static string EscapeTagField(string text)
+        {
+            var sb = new StringBuilder();
+            foreach (var c in text)
+            {
+                if (TagEscapeChars.Contains(c))
+                {
+                    sb.Append("\\");
+                }
+
+                sb.Append(c);
+            }
+
+            return sb.ToString();
+        }
+
+        private static string GetOperandStringForMember(MemberExpression member)
+        {
+            var memberPath = new List<string>();
+            var parentExpression = member.Expression;
+            while (parentExpression is MemberExpression parentMember)
+            {
+                memberPath.Add(parentMember.Member.Name);
+                parentExpression = parentMember.Expression;
+            }
+
+            memberPath.Add(member.Member.Name);
+
+            var searchField = member.Member.GetCustomAttributes().Where(x => x is SearchFieldAttribute).Cast<SearchFieldAttribute>().FirstOrDefault();
+
+            var dependencyChain = new List<MemberExpression>();
+            var pointingExpression = member;
+            while (pointingExpression != null)
+            {
+                dependencyChain.Add(pointingExpression);
+                pointingExpression = pointingExpression.Expression as MemberExpression;
+            }
+
+            if (dependencyChain.Last().Expression is ConstantExpression c)
+            {
+                var resolved = c.Value;
+                for (var i = dependencyChain.Count; i > 0; i--)
+                {
+                    var expr = dependencyChain[i - 1];
+                    resolved = GetValue(expr.Member, resolved);
+                }
+
+                if (resolved is IEnumerable<string> strings)
+                {
+                    return string.Join("|", strings);
+                }
+
+                if (resolved is IEnumerable<int?> ints)
+                {
+                    var sb = new StringBuilder();
+                    sb.Append('|');
+                    foreach (var i in ints)
+                    {
+                        sb.Append($"[{i} {i}]|");
+                    }
+
+                    sb.Remove(sb.Length - 1, 1);
+                    return sb.ToString();
+                }
+
+                return ValueToString(resolved);
+            }
+
+            if (searchField != null)
+            {
+                var propertyName = GetSearchFieldNameFromMember(member);
+                return $"@{propertyName}";
+            }
+
+            throw new InvalidOperationException(
+                $"Could not retrieve value from {member.Member.Name}, most likely, it is not properly decorated in the model defining the index.");
         }
 
         private static string GetOperandStringStringArgs(Expression exp)
@@ -396,16 +551,117 @@ namespace Redis.OM.Common
             while (true);
         }
 
-        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp)
+        private static string TranslateMethodStandardQuerySyntax(MethodCallExpression exp)
         {
-            if (exp.Object is not MemberExpression member)
+            return exp.Method.Name switch
             {
-                throw new ArgumentException("String that Contains is called on must be a member of an indexed class");
+                nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
+                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp),
+                "Any" => TranslateAnyForEmbeddedObjects(exp),
+                _ => throw new InvalidOperationException($"Unable to parse method {exp.Method.Name}")
+            };
+        }
+
+        private static string TranslateFormatMethodStandardQuerySyntax(MethodCallExpression exp)
+        {
+            var format = GetOperandString(exp.Arguments[0]);
+            string[] args;
+            if (exp.Arguments[1] is NewArrayExpression newArrayExpression)
+            {
+                args = newArrayExpression.Expressions.Select(GetOperandString).ToArray();
+            }
+            else
+            {
+                args = new string[exp.Arguments.Count - 1];
+                for (var i = 1; i < exp.Arguments.Count; i++)
+                {
+                    args[i - 1] = GetOperandString(exp.Arguments[i]);
+                }
             }
 
-            var memberName = GetOperandStringForMember(member);
-            var literal = GetOperandStringForQueryArgs(exp.Arguments[0]);
-            return $"{memberName}:{literal}";
+            return string.Format(format, args);
+        }
+
+        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp)
+        {
+            MemberExpression? expression = null;
+            Type type;
+            string memberName;
+            string literal;
+            if (exp.Object is MemberExpression)
+            {
+                expression = exp.Object as MemberExpression;
+            }
+            else if (exp.Arguments.LastOrDefault() is MemberExpression &&
+                     exp.Arguments.FirstOrDefault() is MemberExpression)
+            {
+                var propertyExpression = (MemberExpression)exp.Arguments.Last();
+                var valuesExpression = (MemberExpression)exp.Arguments.First();
+                literal = GetOperandStringForQueryArgs(propertyExpression);
+                if (!literal.StartsWith("@"))
+                {
+                    propertyExpression = (MemberExpression)exp.Arguments.First();
+                    valuesExpression = (MemberExpression)exp.Arguments.Last();
+                }
+
+                var attribute = DetermineSearchAttribute(propertyExpression);
+                if (attribute == null)
+                {
+                    attribute = DetermineSearchAttribute(valuesExpression);
+                    if (attribute != null)
+                    {
+                        propertyExpression = (MemberExpression)exp.Arguments.First();
+                        valuesExpression = (MemberExpression)exp.Arguments.Last();
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Called contains for a non-indexed property");
+                    }
+                }
+
+                type = Nullable.GetUnderlyingType(propertyExpression.Type) ?? propertyExpression.Type;
+                memberName = GetOperandStringForMember(propertyExpression);
+                literal = GetOperandStringForQueryArgs(valuesExpression);
+
+                if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>)) && attribute is IndexedAttribute)
+                {
+                    return $"({memberName}:{{{EscapeTagField(literal).Replace("\\|", "|")}}})";
+                }
+
+                if (type == typeof(string) && attribute is SearchableAttribute)
+                {
+                    return $"({memberName}:{literal})";
+                }
+
+                var ret = literal.Replace("|", $"{memberName}:");
+                ret = ret.Replace("]", "]|");
+                ret = ret.Substring(0, ret.Length - 1);
+
+                return ret;
+            }
+            else if (exp.Arguments.FirstOrDefault() is MemberExpression)
+            {
+                expression = (MemberExpression)exp.Arguments.First();
+            }
+
+            if (expression == null)
+            {
+                throw new InvalidOperationException($"Could not parse query for Contains");
+            }
+
+            type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
+            memberName = GetOperandStringForMember(expression);
+            literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
+            return (type == typeof(string)) ? $"({memberName}:{literal})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
+        }
+
+        private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp)
+        {
+            var type = exp.Arguments.Last().Type;
+            var prefix = GetOperandString(exp.Arguments[0]);
+            var lambda = (LambdaExpression)exp.Arguments.Last();
+            var tempQuery = ExpressionTranslator.TranslateBinaryExpression((BinaryExpression)lambda.Body);
+            return tempQuery.Replace("@", $"{prefix}_");
         }
 
         private static string ValueToString(object value)
