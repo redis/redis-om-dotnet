@@ -141,15 +141,19 @@ namespace Redis.OM.Unit.Tests
         [Fact]
         public void SimpleJsonSetWhen()
         {
+            var keyName = "test-json:SimpleJsonSetWhen";
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
 
+            connection.Unlink(keyName);
             var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
+
             connection.Execute("FLUSHALL");
             Assert.False(connection.JsonSet("test-json", ".", obj, When.Exists));
             Assert.True(connection.JsonSet("test-json", ".", obj, When.NotExists));
             var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+
             Assert.Equal("Shachar", reconsitutedObject.Name);
             Assert.Equal(23, reconsitutedObject.Age);
 
@@ -160,12 +164,14 @@ namespace Redis.OM.Unit.Tests
 
             Assert.True(connection.JsonSet("test-json", ".", obj, When.Exists));
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+
             Assert.Equal("Shachar2", reconsitutedObject.Name);
         }
 
         [Fact]
         public async Task SimpleJsonSetWhenAsync()
         {
+            var keyName = "test-json:SimpleJsonSetWhenAsync";
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
@@ -185,6 +191,7 @@ namespace Redis.OM.Unit.Tests
 
             Assert.True(await connection.JsonSetAsync("test-json", ".", obj, When.Exists));
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+
             Assert.Equal("Shachar2", reconsitutedObject.Name);
         }
 
