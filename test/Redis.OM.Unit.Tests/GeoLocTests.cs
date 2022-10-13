@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json;
+using Redis.OM.Modeling;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests
@@ -38,6 +39,19 @@ namespace Redis.OM.Unit.Tests
         public void TestInvariantCultureParsingFromFormattedHash()
         {
             Helper.RunTestUnderDifferentCulture("it-IT", x => TestParsingFromFormattedHash());
+        }
+
+        [Theory]
+        [InlineData("en-DE")]
+        [InlineData("it-IT")]
+        public void TestToStringInOtherCultures(string lcid)
+        {
+            Helper.RunTestUnderDifferentCulture(lcid, o =>
+            {
+                var geoLoc = new GeoLoc(45.2, 11.9);
+                var geoLocStr = geoLoc.ToString();
+                Assert.Equal("45.2,11.9", geoLocStr);
+            });
         }
     }
 }
