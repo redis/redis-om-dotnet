@@ -6,7 +6,7 @@ const string CONNECTION_URI= "redis://localhost:6379";
 // create test data
 var coffee  = new Product() {
     Name = "coffee",
-    Description = "a hot drink made from the roasted and ground offee beans",
+    Description = "a hot drink made from the roasted and ground coffee beans",
     Price = 2.00,
     DateAdded = DateTime.UtcNow,
     InStock = false
