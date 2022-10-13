@@ -7,6 +7,7 @@ using Redis.OM;
 using Redis.OM.Modeling;
 using System.Threading;
 using System.Threading.Tasks;
+using Redis.OM.Searching;
 using Redis.OM.Unit.Tests.RediSearchTests;
 
 namespace Redis.OM.Unit.Tests
@@ -196,6 +197,207 @@ namespace Redis.OM.Unit.Tests
 
             Assert.Equal("Shachar2", reconsitutedObject.Name);
             connection.Unlink(keyName);
+        }
+        
+        [Fact]
+        public async Task SimpleHashInsertWhenAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            var collection = new RedisCollection<HashPerson>(provider.Connection);
+
+            var obj = new HashPerson() { Name = "Steve", Age = 33, Email = "foo@bar.com"};
+            var key = await collection.InsertAsync(obj, WhenKey.NotExists);
+            Assert.NotNull(key);
+            var reconstituted = await collection.FindByIdAsync(key);
+            Assert.NotNull(reconstituted);
+            Assert.Equal("Steve", reconstituted.Name);
+            Assert.Equal(33, reconstituted.Age);
+            obj.Name = "Shachar";
+            obj.Age = null;
+
+            var res = await collection.InsertAsync(obj, WhenKey.NotExists); // this should fail 
+            Assert.Null(res);
+            res = await collection.InsertAsync(obj, WhenKey.Exists); // this should work
+            Assert.NotNull(res);
+            Assert.Equal(key,res);
+            reconstituted = await collection.FindByIdAsync(key);
+            Assert.NotNull(reconstituted);
+            Assert.Null(reconstituted.Age);
+            Assert.Equal("Shachar" , reconstituted.Name);
+
+            await connection.UnlinkAsync(key);
+            await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            var expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            Assert.True(expiration>4000);
+            await Task.Delay(1000);
+            res = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            Assert.Null(res);
+            expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            Assert.True(expiration < 4000);
+            res = await collection.InsertAsync(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
+            expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            Assert.NotNull(res);
+            Assert.True(expiration > 4000);
+
+            await connection.UnlinkAsync(key);
+            res = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            Assert.NotNull(res);
+            await connection.UnlinkAsync(key);
+        }
+        
+        [Fact]
+        public void SimpleHashInsertWhen()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            var collection = new RedisCollection<HashPerson>(provider.Connection);
+
+            var obj = new HashPerson() { Name = "Steve", Age = 33, Email = "foo@bar.com"};
+            var key = collection.Insert(obj, WhenKey.NotExists);
+            Assert.NotNull(key);
+            var reconstituted = collection.FindById(key);
+            Assert.NotNull(reconstituted);
+            Assert.Equal("Steve", reconstituted.Name);
+            Assert.Equal(33, reconstituted.Age);
+            obj.Name = "Shachar";
+            obj.Age = null;
+
+            var res = collection.Insert(obj, WhenKey.NotExists); // this should fail 
+            Assert.Null(res);
+            res = collection.Insert(obj, WhenKey.Exists); // this should work
+            Assert.NotNull(res);
+            Assert.Equal(key,res);
+            reconstituted = collection.FindById(key);
+            Assert.NotNull(reconstituted);
+            Assert.Null(reconstituted.Age);
+            Assert.Equal("Shachar" , reconstituted.Name);
+
+            connection.Unlink(key);
+            collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            var expiration = (long)connection.Execute("PTTL", key);
+            Assert.True(expiration>4000);
+            Thread.Sleep(1100);
+            res = collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            Assert.Null(res);
+            expiration = (long)connection.Execute("PTTL", key);
+            Assert.True(expiration < 4000);
+            res = collection.Insert(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
+            expiration = (long)connection.Execute("PTTL", key);
+            Assert.NotNull(res);
+            Assert.True(expiration > 4000);
+
+            connection.Unlink(key);
+            res = collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            Assert.NotNull(res);
+            connection.Unlink(key);
+        }
+        
+        [Fact]
+        public async Task SimpleJsonInsertWhenAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            var collection = new RedisCollection<Person>(provider.Connection);
+
+            var obj = new Person { Name = "Steve", Age = 33 };
+            var key = await collection.InsertAsync(obj, WhenKey.NotExists);
+            Assert.NotNull(key);
+            var reconstituted = await collection.FindByIdAsync(key);
+            Assert.NotNull(reconstituted);
+            Assert.Equal("Steve", reconstituted.Name);
+            Assert.Equal(33, reconstituted.Age);
+            obj.Name = "Shachar";
+            obj.Age = null;
+
+            var res = await collection.InsertAsync(obj, WhenKey.NotExists); // this should fail 
+            Assert.Null(res);
+            res = await collection.InsertAsync(obj, WhenKey.Exists); // this should work
+            Assert.NotNull(res);
+            Assert.Equal(key,res);
+            reconstituted = await collection.FindByIdAsync(key);
+            Assert.NotNull(reconstituted);
+            Assert.Null(reconstituted.Age);
+            Assert.Equal("Shachar" , reconstituted.Name);
+
+            await connection.UnlinkAsync(key);
+            await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            var expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            Assert.True(expiration>4000);
+            await Task.Delay(1000);
+            res = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            Assert.Null(res);
+            expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            Assert.True(expiration < 4000);
+            res = await collection.InsertAsync(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
+            expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            Assert.NotNull(res);
+            Assert.True(expiration > 4000);
+            res = collection.Insert(obj, WhenKey.Always, TimeSpan.FromMilliseconds(6000));
+            expiration = (long)connection.Execute("PTTL", key);
+            Assert.NotNull(res);
+            Assert.True(expiration>5000);
+            res = collection.Insert(obj, WhenKey.Always);
+            expiration = (long)connection.Execute("PTTL", key);
+            Assert.NotNull(res);
+            Assert.True(-1 == expiration, $"expiry was: {expiration}");
+            connection.Unlink(key);
+            await connection.UnlinkAsync(key);
+        }
+        
+        [Fact]
+        public void SimpleJsonInsertWhen()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            var collection = new RedisCollection<Person>(provider.Connection);
+
+            var obj = new Person { Name = "Steve", Age = 33 };
+            var key = collection.Insert(obj, WhenKey.NotExists);
+            Assert.NotNull(key);
+            var reconstituted = collection.FindById(key);
+            Assert.NotNull(reconstituted);
+            Assert.Equal("Steve", reconstituted.Name);
+            Assert.Equal(33, reconstituted.Age);
+            obj.Name = "Shachar";
+            obj.Age = null;
+
+            var res = collection.Insert(obj, WhenKey.NotExists); // this should fail 
+            Assert.Null(res);
+            res = collection.Insert(obj, WhenKey.Exists); // this should work
+            Assert.NotNull(res);
+            Assert.Equal(key,res);
+            reconstituted = collection.FindById(key);
+            Assert.NotNull(reconstituted);
+            Assert.Null(reconstituted.Age);
+            Assert.Equal("Shachar" , reconstituted.Name);
+
+            connection.Unlink(key);
+            collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            var expiration = (long)connection.Execute("PTTL", key);
+            Assert.True(expiration>4000);
+            Thread.Sleep(1100);
+            res = collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            Assert.Null(res);
+            expiration = (long)connection.Execute("PTTL", key);
+            Assert.True(expiration < 4000, $"Expiration: {expiration}");
+            res = collection.Insert(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
+            expiration = (long)connection.Execute("PTTL", key);
+            Assert.NotNull(res);
+            Assert.True(expiration > 4000);
+            res = collection.Insert(obj, WhenKey.Always, TimeSpan.FromMilliseconds(6000));
+            expiration = (long)connection.Execute("PTTL", key);
+            Assert.NotNull(res);
+            Assert.True(expiration>5000);
+            res = collection.Insert(obj, WhenKey.Always);
+            expiration = (long)connection.Execute("PTTL", key);
+            Assert.NotNull(res);
+            Assert.True(-1 == expiration, $"expiry was: {expiration}");
+            connection.Unlink(key);
         }
 
         [Fact]

@@ -600,59 +600,15 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public string? InsertIfExist(T item, TimeSpan? timeSpan = null)
+        public Task<string?> InsertAsync(T item, WhenKey when, TimeSpan? timeSpan = null)
         {
-            var id = item.SetId();
-            if (((RedisQueryProvider)Provider).Connection.JsonSet(id, ".", (object)item, WhenKey.Exists, timeSpan))
-            {
-                return id;
-            }
-            else
-            {
-                return null;
-            }
+            return ((RedisQueryProvider)Provider).Connection.SetAsync(item, when, timeSpan);
         }
 
         /// <inheritdoc/>
-        public async Task<string?> InsertIfExistAsync(T item, TimeSpan? timeSpan = null)
+        public string? Insert(T item, WhenKey when, TimeSpan? timeSpan = null)
         {
-            var id = item.SetId();
-            if (await ((RedisQueryProvider)Provider).Connection.JsonSetAsync(id, ".", (object)item, WhenKey.Exists, timeSpan))
-            {
-                return id;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        /// <inheritdoc/>
-        public string? InsertIfNotExist(T item, TimeSpan? timeSpan = null)
-        {
-            var id = item.SetId();
-            if (((RedisQueryProvider)Provider).Connection.JsonSet(id, ".", (object)item, WhenKey.NotExists, timeSpan))
-            {
-                return id;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<string?> InsertIfNotExistAsync(T item, TimeSpan? timeSpan = null)
-        {
-            var id = item.SetId();
-            if (await ((RedisQueryProvider)Provider).Connection.JsonSetAsync(id, ".", (object)item, WhenKey.NotExists, timeSpan))
-            {
-                return id;
-            }
-            else
-            {
-                return null;
-            }
+            return ((RedisQueryProvider)Provider).Connection.Set(item, when, timeSpan);
         }
 
         /// <inheritdoc/>

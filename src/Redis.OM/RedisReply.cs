@@ -197,7 +197,7 @@ namespace Redis.OM
         /// </summary>
         /// <param name="v">The redis reply.</param>
         /// <returns>the integer.</returns>
-        public static implicit operator int?(RedisReply v) => v._internalInt;
+        public static implicit operator int?(RedisReply v) => v._internalInt ?? (int?)v._internalLong;
 
         /// <summary>
         /// Converts an integer to a reply.

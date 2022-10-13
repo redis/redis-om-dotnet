@@ -70,36 +70,22 @@ namespace Redis.OM.Searching
         Task<string> InsertAsync(T item, TimeSpan timeSpan);
 
         /// <summary>
-        /// Inserts an item into redis only if it already exists. Valid for Json StorageType only.
+        /// Inserts an item into redis.
         /// </summary>
-        /// <param name="item">an item.</param>
-        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
-        /// <returns>the key. or null if the key did not exist.</returns>
-        string? InsertIfExist(T item, TimeSpan? timeSpan = null);
+        /// <param name="item">The item.</param>
+        /// <param name="when">Condition to insert the document under.</param>
+        /// <param name="timeSpan">The expiration time of the document (TTL).</param>
+        /// <returns>the Id of the newly inserted item, or null if not inserted.</returns>
+        Task<string?> InsertAsync(T item, WhenKey when, TimeSpan? timeSpan = null);
 
         /// <summary>
-        /// Inserts an item into redis only if it already exists. Valid for Json StorageType only.
+        /// Inserts an item into redis.
         /// </summary>
-        /// <param name="item">an item.</param>
-        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
-        /// <returns>the key. or null if the key did not exist.</returns>
-        Task<string?> InsertIfExistAsync(T item, TimeSpan? timeSpan = null);
-
-        /// <summary>
-        /// Inserts an item into redis only if it does not already exist. Valid for Json StorageType only.
-        /// </summary>
-        /// <param name="item">an item.</param>
-        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
-        /// <returns>the key. or null if the key existed.</returns>
-        string? InsertIfNotExist(T item, TimeSpan? timeSpan = null);
-
-        /// <summary>
-        /// Inserts an item into redis only if it does not already exist. Valid for Json StorageType only.
-        /// </summary>
-        /// <param name="item">an item.</param>
-        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
-        /// <returns>the key. or null if the key existed.</returns>
-        Task<string?> InsertIfNotExistAsync(T item, TimeSpan? timeSpan = null);
+        /// <param name="item">The item.</param>
+        /// <param name="when">Condition to insert the document under.</param>
+        /// <param name="timeSpan">The expiration time of the document (TTL).</param>
+        /// <returns>the Id of the newly inserted item, or null if not inserted.</returns>
+        string? Insert(T item, WhenKey when, TimeSpan? timeSpan = null);
 
         /// <summary>
         /// finds an item by it's ID or keyname.
