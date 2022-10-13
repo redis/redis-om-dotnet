@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
-using StackExchange.Redis;
 
 namespace Redis.OM
 {
@@ -197,12 +196,12 @@ namespace Redis.OM
         /// <param name="when">XX - set if exist, NX - set if not exist.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>whether the operation succeeded.</returns>
-        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, string json, When when = When.Always, TimeSpan? timeSpan = null)
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, string json, WhenKey when = WhenKey.Always, TimeSpan? timeSpan = null)
         {
             var args = when switch
             {
-                When.Exists => new[] { key, path, json, "XX" },
-                When.NotExists => new[] { key, path, json, "NX" },
+                WhenKey.Exists => new[] { key, path, json, "XX" },
+                WhenKey.NotExists => new[] { key, path, json, "NX" },
                 _ => new[] { key, path, json }
             };
 
@@ -226,7 +225,7 @@ namespace Redis.OM
         /// <param name="when">XX - set if exist, NX - set if not exist.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>whether the operation succeeded.</returns>
-        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, When when = When.Always, TimeSpan? timeSpan = null)
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, WhenKey when = WhenKey.Always, TimeSpan? timeSpan = null)
         {
             var json = JsonSerializer.Serialize(obj, Options);
             return await connection.JsonSetAsync(key, path, json, when, timeSpan);
@@ -341,12 +340,12 @@ namespace Redis.OM
         /// <param name="when">XX - set if exist, NX - set if not exist.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>whether the operation succeeded.</returns>
-        public static bool JsonSet(this IRedisConnection connection, string key, string path, string json, When when = When.Always, TimeSpan? timeSpan = null)
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, string json, WhenKey when = WhenKey.Always, TimeSpan? timeSpan = null)
         {
             var args = when switch
             {
-                When.Exists => new[] { key, path, json, "XX" },
-                When.NotExists => new[] { key, path, json, "NX" },
+                WhenKey.Exists => new[] { key, path, json, "XX" },
+                WhenKey.NotExists => new[] { key, path, json, "NX" },
                 _ => new[] { key, path, json }
             };
 
@@ -370,7 +369,7 @@ namespace Redis.OM
         /// <param name="when">XX - set if exist, NX - set if not exist.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>whether the operation succeeded.</returns>
-        public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, When when = When.Always, TimeSpan? timeSpan = null)
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, WhenKey when = WhenKey.Always, TimeSpan? timeSpan = null)
         {
             var json = JsonSerializer.Serialize(obj, Options);
             return connection.JsonSet(key, path, json, when, timeSpan);
