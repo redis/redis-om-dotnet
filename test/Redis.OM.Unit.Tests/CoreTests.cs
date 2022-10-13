@@ -166,6 +166,7 @@ namespace Redis.OM.Unit.Tests
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
 
             Assert.Equal("Shachar2", reconsitutedObject.Name);
+            connection.Unlink(keyName);
         }
 
         [Fact]
@@ -176,11 +177,13 @@ namespace Redis.OM.Unit.Tests
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
 
+            connection.Unlink(keyName);
             var obj = new ModelExampleJson { Name = "Shachar", Age = 23 };
             connection.Execute("FLUSHALL");
             Assert.False(await connection.JsonSetAsync("test-json", ".", obj, WhenKey.Exists));
             Assert.True(await connection.JsonSetAsync("test-json", ".", obj, WhenKey.NotExists));
             var reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
+
             Assert.Equal("Shachar", reconsitutedObject.Name);
             Assert.Equal(23, reconsitutedObject.Age);
 
@@ -193,6 +196,7 @@ namespace Redis.OM.Unit.Tests
             reconsitutedObject = connection.JsonGet<ModelExampleJson>("test-json");
 
             Assert.Equal("Shachar2", reconsitutedObject.Name);
+            connection.Unlink(keyName);
         }
 
         [Fact]
