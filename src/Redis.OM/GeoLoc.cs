@@ -53,7 +53,7 @@ namespace Redis.OM.Modeling
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Longitude},{Latitude}";
+            return $"{Longitude.ToString(CultureInfo.InvariantCulture)},{Latitude.ToString(CultureInfo.InvariantCulture)}";
         }
     }
 }
