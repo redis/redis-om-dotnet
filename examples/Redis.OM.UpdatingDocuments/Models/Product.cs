@@ -10,9 +10,9 @@ public class Product
     public Ulid Id { get; set; }
 
     [Indexed]
-    public string Name { get; set; }
+    public string? Name { get; set; }
     
-    public string Description { get; set; } 
+    public string? Description { get; set; } 
 
     [Indexed(Sortable = true)]        
     public double Price { get; set; }
