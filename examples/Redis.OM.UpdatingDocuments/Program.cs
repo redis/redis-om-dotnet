@@ -1,10 +1,11 @@
 ﻿using Redis.OM;
 using Redis.OM.UpdatingDocuments.Models;
 
-const string CONNECTION_URI= "redis://localhost:6379";
+const string CONNECTION_URI = "redis://localhost:6379";
 
 // create test data
-var coffee  = new Product() {
+var coffee = new Product()
+{
     Name = "coffee",
     Description = "a hot drink made from the roasted and ground coffee beans",
     Price = 2.00,
@@ -30,15 +31,25 @@ coffee.Price = 2.50;
 await products.UpdateAsync(coffee);
 
 // update using IRedisCollection.Save
+var updatedCoffee = await products.FindByIdAsync(productId);
+if (updatedCoffee != null)
+{
+    updatedCoffee.InStock = true;
+}
 coffee.InStock = true;
-products.Save(coffee);
+products.Save();
 
 // update using IRedisCollection.SaveAsync
+updatedCoffee = await products.FindByIdAsync(productId);
+if (updatedCoffee != null)
+{
+    updatedCoffee.DateAdded = DateTime.UtcNow.AddDays(-7);
+}
 coffee.DateAdded = DateTime.UtcNow.AddDays(-7);
-await products.SaveAsync(coffee);
+await products.SaveAsync();
 
 // query and validate results
-var updatedCoffee = await products.FindByIdAsync(productId);
+updatedCoffee = await products.FindByIdAsync(productId);
 
 Console.WriteLine($"{nameof(Product.Name)} - Expected: {coffee.Name} Actual: {updatedCoffee?.Name}");
 Console.WriteLine($"{nameof(Product.Description)} - Expected: {coffee.Description} Actual: {updatedCoffee?.Description}");
