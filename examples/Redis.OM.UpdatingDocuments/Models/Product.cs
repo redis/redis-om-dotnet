@@ -17,9 +17,8 @@ public class Product
     [Indexed(Sortable = true)]        
     public double Price { get; set; }
 
-    [Indexed(Sortable = true)]  
     public DateTime DateAdded { get; set; }
 
-    [Indexed(Sortable = true)]  
+    [Indexed]
     public bool InStock { get; set; }
 }

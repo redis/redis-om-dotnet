@@ -54,5 +54,5 @@ updatedCoffee = await products.FindByIdAsync(productId);
 Console.WriteLine($"{nameof(Product.Name)} - Expected: {coffee.Name} Actual: {updatedCoffee?.Name}");
 Console.WriteLine($"{nameof(Product.Description)} - Expected: {coffee.Description} Actual: {updatedCoffee?.Description}");
 Console.WriteLine($"{nameof(Product.Price)} - Expected: {coffee.Price} Actual: {updatedCoffee?.Price}");
-Console.WriteLine($"{nameof(Product.DateAdded)} - Expected: {coffee.DateAdded} Actual: {updatedCoffee?.DateAdded}");
+Console.WriteLine($"{nameof(Product.DateAdded)} - Expected: {coffee.DateAdded.ToUniversalTime()} Actual: {updatedCoffee?.DateAdded.ToUniversalTime()}");
 Console.WriteLine($"{nameof(Product.InStock)} - Expected: {coffee.InStock} Actual: {updatedCoffee?.InStock}");
