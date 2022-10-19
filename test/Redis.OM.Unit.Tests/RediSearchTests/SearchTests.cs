@@ -1666,6 +1666,40 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "TAG", "SEPARATOR", "|", "Guid", "TAG", "SEPARATOR", "|", "AnEnum","NUMERIC"
             ));
         }
+        
+        [Fact]
+        public async Task TestCreateIndexWithDatetimeValue()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync("OK");
+
+            await _mock.Object.CreateIndexAsync(typeof(ObjectWithDateTime));
+            await _mock.Object.CreateIndexAsync(typeof(ObjectWithDateTimeHash));
+
+            _mock.Verify(x=>x.ExecuteAsync("FT.CREATE",
+                "objectwithdatetime-idx",
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithDateTime:",
+                "SCHEMA",
+                "$.Timestamp", "AS", "Timestamp", "NUMERIC",
+                "$.NullableTimestamp", "AS", "NullableTimestamp", "NUMERIC"
+            ));
+            
+            _mock.Verify(x=>x.ExecuteAsync("FT.CREATE",
+                "objectwithdatetimehash-idx",
+                "ON",
+                "Hash",
+                "PREFIX",
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithDateTimeHash:",
+                "SCHEMA",
+                "Timestamp", "NUMERIC",
+                "NullableTimestamp", "NUMERIC"
+            ));
+        }
 
         [Fact]
         public async Task TestQueryOfUlid()
@@ -2170,7 +2204,286 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
-        
 
+        [Fact]
+        public void RangeOnDatetime()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var timestamp = DateTime.Now;
+            var timeAnHourAgo = timestamp.Subtract(TimeSpan.FromHours(1));
+            var timeAnHourAgoMilliseconds = new DateTimeOffset(timeAnHourAgo).ToUnixTimeMilliseconds();
+            DateTime? timeTwoHoursAgoNullable = timestamp.Subtract(TimeSpan.FromHours(2));
+            var timeTwoHoursAgoMilliseconds = new DateTimeOffset(timeTwoHoursAgoNullable.Value).ToUnixTimeMilliseconds();
+            
+            var collection = new RedisCollection<ObjectWithDateTime>(_mock.Object, 1000);
+
+            var mockObj = new ObjectWithDateTime { Timestamp = timestamp.Subtract(TimeSpan.FromHours(3)) };
+            var timeThreeHoursAgoMilliseconds = new DateTimeOffset(mockObj.Timestamp).ToUnixTimeMilliseconds();
+            collection.Where(x => x.Timestamp == timeAnHourAgo).ToList();
+            collection.Where(x => x.Timestamp > timeAnHourAgo).ToList();
+            collection.Where(x => x.NullableTimestamp > timeAnHourAgo).ToList();
+            
+            collection.Where(x => x.Timestamp > timeTwoHoursAgoNullable).ToList();
+            collection.Where(x => x.NullableTimestamp > timeTwoHoursAgoNullable).ToList();
+            
+            collection.Where(x => x.Timestamp > mockObj.Timestamp).ToList();
+            collection.Where(x => x.NullableTimestamp > mockObj.Timestamp).ToList();
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@Timestamp:[{timeAnHourAgoMilliseconds} {timeAnHourAgoMilliseconds}])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@Timestamp:[({timeAnHourAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@NullableTimestamp:[({timeAnHourAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@Timestamp:[({timeTwoHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@NullableTimestamp:[({timeTwoHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@Timestamp:[({timeThreeHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@NullableTimestamp:[({timeThreeHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+
+        [Fact]
+        public async Task RangeOnDatetimeAsync()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var timestamp = DateTime.Now;
+            var timeAnHourAgo = timestamp.Subtract(TimeSpan.FromHours(1));
+            DateTime? timeTwoHoursAgoNullable = timestamp.Subtract(TimeSpan.FromHours(2));
+            var timeTwoHoursAgoMilliseconds = new DateTimeOffset(timeTwoHoursAgoNullable.Value).ToUnixTimeMilliseconds();
+            var timeAnHourAgoMilliseconds = new DateTimeOffset(timeAnHourAgo).ToUnixTimeMilliseconds();
+            var collection = new RedisCollection<ObjectWithDateTime>(_mock.Object, 1000);
+
+            var mockObj = new ObjectWithDateTime { Timestamp = timestamp.Subtract(TimeSpan.FromHours(3)) };
+            var timeThreeHoursAgoMilliseconds = new DateTimeOffset(mockObj.Timestamp).ToUnixTimeMilliseconds();
+            await collection.Where(x => x.Timestamp == timeAnHourAgo).ToListAsync();
+            await collection.Where(x => x.Timestamp > timeAnHourAgo).ToListAsync();
+            await collection.Where(x => x.NullableTimestamp > timeAnHourAgo).ToListAsync();
+
+            await collection.Where(x => x.Timestamp > timeTwoHoursAgoNullable).ToListAsync();
+            await collection.Where(x => x.NullableTimestamp > timeTwoHoursAgoNullable).ToListAsync();
+
+            await collection.Where(x => x.Timestamp > mockObj.Timestamp).ToListAsync();
+            await collection.Where(x => x.NullableTimestamp > mockObj.Timestamp).ToListAsync();
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@Timestamp:[{timeAnHourAgoMilliseconds} {timeAnHourAgoMilliseconds}])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@Timestamp:[({timeAnHourAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@NullableTimestamp:[({timeAnHourAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@Timestamp:[({timeTwoHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@NullableTimestamp:[({timeTwoHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@Timestamp:[({timeThreeHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"(@NullableTimestamp:[({timeThreeHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+
+        [Fact]
+        public async Task RangeOnDatetimeAsyncHash()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+
+            var timestamp = DateTime.Now;
+            var timeAnHourAgo = timestamp.Subtract(TimeSpan.FromHours(1));
+            DateTime? timeTwoHoursAgoNullable = timestamp.Subtract(TimeSpan.FromHours(2));
+            var timeTwoHoursAgoMilliseconds = new DateTimeOffset(timeTwoHoursAgoNullable.Value).ToUnixTimeMilliseconds();
+            var timeAnHourAgoMilliseconds = new DateTimeOffset(timeAnHourAgo).ToUnixTimeMilliseconds();
+            var collection = new RedisCollection<ObjectWithDateTimeHash>(_mock.Object, 1000);
+
+            var mockObj = new ObjectWithDateTimeHash { Timestamp = timestamp.Subtract(TimeSpan.FromHours(3)) };
+            var timeThreeHoursAgoMilliseconds = new DateTimeOffset(mockObj.Timestamp).ToUnixTimeMilliseconds();
+            await collection.Where(x => x.Timestamp == timeAnHourAgo).ToListAsync();
+            await collection.Where(x => x.Timestamp == timeAnHourAgo).OrderBy(x=>x.Timestamp).ToListAsync();
+            await collection.Where(x => x.Timestamp > timeAnHourAgo).ToListAsync();
+            await collection.Where(x => x.NullableTimestamp > timeAnHourAgo).ToListAsync();
+
+            await collection.Where(x => x.Timestamp > timeTwoHoursAgoNullable).ToListAsync();
+            await collection.Where(x => x.NullableTimestamp > timeTwoHoursAgoNullable).ToListAsync();
+
+            await collection.Where(x => x.Timestamp > mockObj.Timestamp).ToListAsync();
+            await collection.Where(x => x.NullableTimestamp > mockObj.Timestamp).ToListAsync();
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetimehash-idx",
+                $"(@Timestamp:[{timeAnHourAgoMilliseconds} {timeAnHourAgoMilliseconds}])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetimehash-idx",
+                $"(@Timestamp:[{timeAnHourAgoMilliseconds} {timeAnHourAgoMilliseconds}])",
+                "LIMIT",
+                "0",
+                "1000",
+                "SORTBY",
+                "Timestamp",
+                "ASC"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetimehash-idx",
+                $"(@Timestamp:[({timeAnHourAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetimehash-idx",
+                $"(@NullableTimestamp:[({timeAnHourAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetimehash-idx",
+                $"(@Timestamp:[({timeTwoHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetimehash-idx",
+                $"(@NullableTimestamp:[({timeTwoHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetimehash-idx",
+                $"(@Timestamp:[({timeThreeHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithdatetimehash-idx",
+                $"(@NullableTimestamp:[({timeThreeHoursAgoMilliseconds} inf])",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
     }
 }
