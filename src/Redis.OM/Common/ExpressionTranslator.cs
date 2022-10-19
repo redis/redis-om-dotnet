@@ -332,7 +332,7 @@ namespace Redis.OM.Common
                     }
                     else
                     {
-                        if (!int.TryParse(rightContent, out _))
+                        if (!int.TryParse(rightContent, out _) && !long.TryParse(rightContent, out _))
                         {
                             rightContent = ((int)Enum.Parse(member.Type, rightContent)).ToString();
                         }

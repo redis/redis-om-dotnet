@@ -24,6 +24,7 @@ namespace Redis.OM.Modeling
             typeof(uint),
             typeof(ushort),
             typeof(float),
+            typeof(DateTime),
         };
 
         /// <summary>
