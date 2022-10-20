@@ -1684,7 +1684,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithDateTime:",
                 "SCHEMA",
-                "$.Timestamp", "AS", "Timestamp", "NUMERIC",
+                "$.Timestamp", "AS", "Timestamp", "NUMERIC", "SORTABLE",
                 "$.NullableTimestamp", "AS", "NullableTimestamp", "NUMERIC"
             ));
             
