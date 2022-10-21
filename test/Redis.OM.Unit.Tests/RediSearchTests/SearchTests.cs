@@ -1630,17 +1630,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypes:",
                 "SCHEMA",
-                "$.Ulid",
-                "AS",
-                "Ulid",
-                "TAG", "SEPARATOR", "|",
-                "$.Boolean",
-                "AS",
-                "Boolean",
-                "TAG", "SEPARATOR", "|",
-                "$.Guid",
-                "AS", "Guid", "TAG", "SEPARATOR", "|", "$.AnEnum", "AS", "AnEnum", "TAG",
-                "$.AnEnumAsInt", "AS", "AnEnumAsInt","NUMERIC"
+                "$.Ulid", "AS", "Ulid", "TAG", "SEPARATOR", "|",
+                "$.Boolean", "AS", "Boolean", "TAG", "SEPARATOR", "|",
+                "$.Guid", "AS", "Guid", "TAG", "SEPARATOR", "|",
+                "$.AnEnum", "AS", "AnEnum", "TAG",
+                "$.AnEnumAsInt", "AS", "AnEnumAsInt","NUMERIC",
+                "$.Flags", "AS", "Flags", "TAG", "SEPARATOR", ","
                 ));
         }
 
