@@ -22,6 +22,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         
         [Indexed]
         public AnEnum AnEnumAsInt { get; set; }
+
+        [Indexed]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public EnumFlags Flags { get; set; }
     }
     
     [Document]

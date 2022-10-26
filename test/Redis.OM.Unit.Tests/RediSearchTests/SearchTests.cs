@@ -792,7 +792,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = collection.First(x => x.Name == "Steve");
             steve.Name = "Bob";
             await collection.UpdateAsync(steve);
-            _mock.Verify(x=>x.ExecuteAsync("EVALSHA","42","1","Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET","$.Name","\"Bob\""));
+            _mock.Verify(x=>x.ExecuteAsync("EVALSHA",It.IsAny<string>(),"1","Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET","$.Name","\"Bob\""));
             Scripts.ShaCollection.Clear();
         }
 
@@ -1630,17 +1630,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypes:",
                 "SCHEMA",
-                "$.Ulid",
-                "AS",
-                "Ulid",
-                "TAG", "SEPARATOR", "|",
-                "$.Boolean",
-                "AS",
-                "Boolean",
-                "TAG", "SEPARATOR", "|",
-                "$.Guid",
-                "AS", "Guid", "TAG", "SEPARATOR", "|", "$.AnEnum", "AS", "AnEnum", "TAG",
-                "$.AnEnumAsInt", "AS", "AnEnumAsInt","NUMERIC"
+                "$.Ulid", "AS", "Ulid", "TAG", "SEPARATOR", "|",
+                "$.Boolean", "AS", "Boolean", "TAG", "SEPARATOR", "|",
+                "$.Guid", "AS", "Guid", "TAG", "SEPARATOR", "|",
+                "$.AnEnum", "AS", "AnEnum", "TAG",
+                "$.AnEnumAsInt", "AS", "AnEnumAsInt","NUMERIC",
+                "$.Flags", "AS", "Flags", "TAG", "SEPARATOR", ","
                 ));
         }
 
