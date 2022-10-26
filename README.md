@@ -188,6 +188,10 @@ Once the index is created, we can:
 
 Let's see how!
 
+### Indexing DateTimes
+
+As of version 0.4.0, all DateTime objects are indexed as numerics, and they are inserted as numerics into JSON documents. Because of this, you can query them as if they were numerics!
+
 ### 🔑 Keys and Ids
 
 #### ULIDs and strings

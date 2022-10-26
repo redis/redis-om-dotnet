@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
@@ -859,6 +860,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(0,collection.StateManager.Snapshot.Count);
         }
 
+
         [Fact]
         public async Task TestFlagEnumQuery()
         {
@@ -867,6 +869,45 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.InsertAsync(obj);
             var res = await collection.FirstOrDefaultAsync(x => x.Flags == EnumFlags.One);
             Assert.NotNull(res);
+        }
+
+        public void CompareTimestamps(DateTime ts1, DateTime ts2)
+        {
+            Assert.Equal(ts1.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fff", CultureInfo.InvariantCulture), ts2.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fff", CultureInfo.InvariantCulture));
+        }
+
+        [Fact]
+        public async Task TestTimeStampRanges()
+        {
+            var collection = new RedisCollection<ObjectWithDateTime>(_connection, false, 10000);
+            var timestamp = DateTime.Now;
+            var greaterThanTimestamp = DateTime.Now.Subtract(TimeSpan.FromHours(1));
+            var unixTimestamp = new DateTimeOffset(timestamp).ToUnixTimeMilliseconds();
+            var obj = new ObjectWithDateTime { Timestamp = timestamp, NullableTimestamp = timestamp };
+            var id = await collection.InsertAsync(obj);
+            var first = await collection.FirstOrDefaultAsync(x => x.Timestamp > greaterThanTimestamp);
+            Assert.NotNull(first);
+            Assert.NotNull(first.NullableTimestamp);
+            CompareTimestamps(timestamp, first.Timestamp);
+            CompareTimestamps(timestamp, first.NullableTimestamp.Value);
+            Assert.Equal(obj.Id, first.Id);
+        }
+
+        [Fact]
+        public async Task TestTimeStampRangesHash()
+        {
+            var collection = new RedisCollection<ObjectWithDateTimeHash>(_connection, false, 10000);
+            var timestamp = DateTime.Now;
+            var greaterThanTimestamp = DateTime.Now.Subtract(TimeSpan.FromHours(1));
+            var unixTimestamp = new DateTimeOffset(timestamp).ToUnixTimeMilliseconds();
+            var obj = new ObjectWithDateTimeHash { Timestamp = timestamp, NullableTimestamp = timestamp };
+            var id = await collection.InsertAsync(obj);
+            var first = await collection.FirstOrDefaultAsync(x => x.Timestamp > greaterThanTimestamp);
+            Assert.NotNull(first);
+            Assert.NotNull(first.NullableTimestamp);
+            CompareTimestamps(timestamp, first.Timestamp);
+            CompareTimestamps(timestamp, first.NullableTimestamp.Value);
+            Assert.Equal(obj.Id, first.Id);
         }
     }
 }

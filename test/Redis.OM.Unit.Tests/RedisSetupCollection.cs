@@ -22,6 +22,8 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(ObjectWithEmbeddedArrayOfObjects));
             Connection.CreateIndex(typeof(ObjectWithZeroStopwords));
             Connection.CreateIndex(typeof(ObjectWithTwoStopwords));
+            Connection.CreateIndex(typeof(ObjectWithDateTime));
+            Connection.CreateIndex(typeof(ObjectWithDateTimeHash));
         }
 
         private IRedisConnection _connection = null;
@@ -53,6 +55,9 @@ namespace Redis.OM.Unit.Tests
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithZeroStopwords));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithTwoStopwords));
             Connection.DropIndexAndAssociatedRecords(typeof(ClassForEmptyRedisCollection));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithDateTime));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithDateTimeHash));
+            
         }
     }
 }
