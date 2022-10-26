@@ -97,7 +97,7 @@ namespace Redis.OM
                    null,
                    GetMethodInfo(Where, source, expression),
                    new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, combined, source.SaveState, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, combined, source.SaveState, source.Prefix, source.ChunkSize);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Redis.OM
                    null,
                    GetMethodInfo(Select, source, expression),
                    new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<TR>((RedisQueryProvider)source.Provider, exp, source.StateManager, null, source.SaveState, source.ChunkSize);
+            return new RedisCollection<TR>((RedisQueryProvider)source.Provider, exp, source.StateManager, null, source.SaveState, source.Prefix, source.ChunkSize);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(Skip, source, count),
                 new[] { source.Expression, Expression.Constant(count) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.Prefix, source.ChunkSize);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(Take, source, count),
                 new[] { source.Expression, Expression.Constant(count) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.Prefix, source.ChunkSize);
         }
 
         /// <summary>
@@ -480,7 +480,7 @@ namespace Redis.OM
                 Expression.Constant(lat),
                 Expression.Constant(radius),
                 Expression.Constant(unit));
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.Prefix, source.ChunkSize);
         }
 
         /// <summary>
@@ -499,7 +499,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(OrderBy, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.Prefix, source.ChunkSize);
         }
 
         /// <summary>
@@ -518,7 +518,7 @@ namespace Redis.OM
                 null,
                 GetMethodInfo(OrderByDescending, source, expression),
                 new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.ChunkSize);
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.Prefix, source.ChunkSize);
         }
 
         /// <summary>

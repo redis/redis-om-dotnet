@@ -20,6 +20,7 @@ namespace Redis.OM.Searching
     {
         private readonly int _chunkSize;
         private readonly bool _saveState;
+        private readonly string _prefix;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisQueryProvider"/> class.
@@ -29,13 +30,15 @@ namespace Redis.OM.Searching
         /// <param name="documentAttribute">the document attribute for the indexed type.</param>
         /// <param name="chunkSize">The size of chunks to use in pagination.</param>
         /// <param name="saveState">Whether or not to save state.</param>
-        internal RedisQueryProvider(IRedisConnection connection, RedisCollectionStateManager stateManager, DocumentAttribute documentAttribute, int chunkSize, bool saveState)
+        /// <param name="prefix">The prefix to use along with the data type.</param>
+        internal RedisQueryProvider(IRedisConnection connection, RedisCollectionStateManager stateManager, DocumentAttribute documentAttribute, int chunkSize, bool saveState, string prefix)
         {
             Connection = connection;
             StateManager = stateManager;
             DocumentAttribute = documentAttribute;
             _chunkSize = chunkSize;
             _saveState = saveState;
+            _prefix = prefix;
         }
 
         /// <summary>
@@ -45,13 +48,15 @@ namespace Redis.OM.Searching
         /// <param name="documentAttribute">The document attribute for the indexed type.</param>
         /// <param name="chunkSize">The size of chunks to use in pagination.</param>
         /// <param name="saveState">Whether or not to Save State.</param>
-        internal RedisQueryProvider(IRedisConnection connection, DocumentAttribute documentAttribute, int chunkSize, bool saveState)
+        /// <param name="prefix">The prefix to use along with the data type.</param>
+        internal RedisQueryProvider(IRedisConnection connection, DocumentAttribute documentAttribute, int chunkSize, bool saveState, string prefix)
         {
             Connection = connection;
             DocumentAttribute = documentAttribute;
             StateManager = new RedisCollectionStateManager(DocumentAttribute);
             _chunkSize = chunkSize;
             _saveState = saveState;
+            _prefix = prefix;
         }
 
         /// <summary>
@@ -102,7 +107,7 @@ namespace Redis.OM.Searching
             where TElement : notnull
         {
             var booleanExpression = expression as Expression<Func<TElement, bool>>;
-            return new RedisCollection<TElement>(this, expression, StateManager, booleanExpression, true);
+            return new RedisCollection<TElement>(this, expression, StateManager, booleanExpression, true, string.Empty);
         }
 
         /// <inheritdoc/>
@@ -135,7 +140,7 @@ namespace Redis.OM.Searching
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
-            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression, _prefix);
             var response = Connection.SearchRawResult(query);
             return new SearchResponse<T>(response);
         }
@@ -164,7 +169,7 @@ namespace Redis.OM.Searching
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
-            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression, _prefix);
             var response = await Connection.SearchRawResultAsync(query);
             return new SearchResponse<T>(response);
         }

@@ -26,9 +26,10 @@ namespace Redis.OM.Modeling
         /// Serialize the Index.
         /// </summary>
         /// <param name="type">The type to be indexed.</param>
+        /// <param name="prefix">The Prefix to use for the index. If this is set, the prefixes property in the DocumentAttribute will be ignored.</param>
         /// <exception cref="InvalidOperationException">Thrown if type provided is not decorated with a RedisObjectDefinitionAttribute.</exception>
         /// <returns>An array of strings (the serialized args for redis).</returns>
-        internal static string[] SerializeIndex(this Type type)
+        internal static string[] SerializeIndex(this Type type, string prefix = "")
         {
             var objAttribute = Attribute.GetCustomAttribute(
                 type,
@@ -40,19 +41,25 @@ namespace Redis.OM.Modeling
             }
 
             var args = new List<string>();
+            var prefixAddendum = string.IsNullOrEmpty(prefix) ? string.Empty : $"-{prefix}";
             if (string.IsNullOrEmpty(objAttribute.IndexName))
             {
-                args.Add($"{type.Name.ToLower()}-idx");
+                args.Add($"{type.Name.ToLower()}{prefixAddendum}-idx");
             }
             else
             {
-                args.Add(objAttribute.IndexName!);
+                args.Add($"{objAttribute.IndexName!}{prefixAddendum}");
             }
 
             args.Add("ON");
             args.Add(objAttribute.StorageType.ToString());
             args.Add("PREFIX");
-            if (objAttribute.Prefixes.Length > 0)
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                args.Add("1");
+                args.Add($"{prefix}:");
+            }
+            else if (objAttribute.Prefixes.Length > 0)
             {
                 args.Add(objAttribute.Prefixes.Length.ToString());
                 args.AddRange(objAttribute.Prefixes);

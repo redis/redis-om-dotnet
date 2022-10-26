@@ -2480,5 +2480,114 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
+
+        [Fact]
+        public async Task QueryIndexesWithDynamicIndexes()
+        {
+            var prefix = "arbitraryPrefix";
+            var expectedIndexName = $"{nameof(SimpleObject).ToLower()}-{prefix}-idx";
+            var expectedIndexNameHash = $"{nameof(SimpleObjectHash).ToLower()}-{prefix}-idx";
+            var collectionJson = new RedisCollection<SimpleObject>(_mock.Object, false, 100, prefix: prefix);
+            var collectionHash = new RedisCollection<SimpleObjectHash>(_mock.Object, false, 100, prefix: prefix);
+
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync(_mockReply);
+            
+            _ = await collectionJson.Where(x => x.Name == "Steve").ToListAsync();
+            _ = await collectionHash.Where(x => x.Name == "Steve").ToListAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", new []
+            {
+                expectedIndexName,
+                "(@Name:{Steve})",
+                "LIMIT",
+                "0",
+                "100"
+            }));
+            
+            expectedIndexName = $"{nameof(SimpleObjectHash).ToLower()}-{prefix}-idx";
+            _mock.Verify(x=>x.ExecuteAsync("FT.SEARCH", new []
+            {
+                expectedIndexName,
+                "(@Name:{Steve})",
+                "LIMIT",
+                "0",
+                "100"
+            }));
+        }
+
+        [Fact]
+        public async Task SerializeIndexWithDynamicPrefix()
+        {
+            var prefix = "prefix:simpleObject:postfix";
+            var expectedIndexName = $"{nameof(SimpleObject).ToLower()}-{prefix}-idx"; 
+            var collectionJson = new RedisCollection<SimpleObject>(_mock.Object, false, 100, prefix: prefix);
+            var collectionHash = new RedisCollection<SimpleObjectHash>(_mock.Object, false, 100, prefix: prefix);
+            await collectionJson.CreateIndexAsync();
+            await collectionHash.CreateIndexAsync();
+            
+            await collectionJson.DropIndexAsync();
+            await collectionHash.DropIndexAsync();
+            
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.CREATE",
+                $"{nameof(SimpleObject).ToLower()}-{prefix}-idx",
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                $"{prefix}:",
+                "SCHEMA", "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|"));
+            expectedIndexName = $"{nameof(SimpleObjectHash).ToLower()}-{prefix}-idx";
+            _mock.Verify(x=>x.ExecuteAsync(
+                "FT.CREATE",
+                $"{nameof(SimpleObjectHash).ToLower()}-{prefix}-idx",
+                "ON",
+                "Hash",
+                "PREFIX",
+                "1",
+                $"{prefix}:",
+                "SCHEMA", "Name", "TAG", "SEPARATOR", "|"));
+
+            _mock.Verify(x=>x.ExecuteAsync("FT.DROPINDEX", $"{nameof(SimpleObject).ToLower()}-{prefix}-idx"));
+            _mock.Verify(x=>x.ExecuteAsync("FT.DROPINDEX", $"{nameof(SimpleObjectHash).ToLower()}-{prefix}-idx"));
+        }
+        
+        [Fact]
+        public void SerializeIndexWithDynamic()
+        {
+            var prefix = "prefix:simpleObject:postfix";
+            var expectedIndexName = $"{nameof(SimpleObject).ToLower()}-{prefix}-idx"; 
+            var collectionJson = new RedisCollection<SimpleObject>(_mock.Object, false, 100, prefix: prefix);
+            var collectionHash = new RedisCollection<SimpleObjectHash>(_mock.Object, false, 100, prefix: prefix);
+            collectionJson.CreateIndex();
+            collectionHash.CreateIndex();
+            
+            collectionJson.DropIndex();
+            collectionHash.DropIndex();
+            
+            _mock.Verify(x=>x.Execute(
+                "FT.CREATE",
+                $"{nameof(SimpleObject).ToLower()}-{prefix}-idx",
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                $"{prefix}:",
+                "SCHEMA", "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|"));
+            expectedIndexName = $"{nameof(SimpleObjectHash).ToLower()}-{prefix}-idx";
+            _mock.Verify(x=>x.Execute(
+                "FT.CREATE",
+                $"{nameof(SimpleObjectHash).ToLower()}-{prefix}-idx",
+                "ON",
+                "Hash",
+                "PREFIX",
+                "1",
+                $"{prefix}:",
+                "SCHEMA", "Name", "TAG", "SEPARATOR", "|"));
+
+            _mock.Verify(x=>x.Execute("FT.DROPINDEX", $"{nameof(SimpleObject).ToLower()}-{prefix}-idx"));
+            _mock.Verify(x=>x.Execute("FT.DROPINDEX", $"{nameof(SimpleObjectHash).ToLower()}-{prefix}-idx"));
+        }
     }
 }

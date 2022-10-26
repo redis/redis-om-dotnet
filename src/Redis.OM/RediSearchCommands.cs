@@ -71,12 +71,64 @@ namespace Redis.OM
         /// </summary>
         /// <param name="connection">the connection.</param>
         /// <param name="type">the type to use for creating the index.</param>
+        /// <param name="prefix">The prefix for the index, this will override the prefix property in the type's DocumentAttribute.</param>
+        /// <returns>whether the index was created or not.</returns>
+        public static bool CreateIndex(this IRedisConnection connection, Type type, string prefix)
+        {
+            try
+            {
+                var serializedParams = type.SerializeIndex(prefix);
+                connection.Execute("FT.CREATE", serializedParams);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Index already exists"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Creates an index.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="type">the type to use for creating the index.</param>
         /// <returns>whether the index was created or not.</returns>
         public static async Task<bool> CreateIndexAsync(this IRedisConnection connection, Type type)
         {
             try
             {
                 var serializedParams = type.SerializeIndex();
+                await connection.ExecuteAsync("FT.CREATE", serializedParams);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Index already exists"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Creates an index.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="type">the type to use for creating the index.</param>
+        /// <param name="prefix">The prefix for the index, this will override the prefix property in the type's DocumentAttribute.</param>
+        /// <returns>whether the index was created or not.</returns>
+        public static async Task<bool> CreateIndexAsync(this IRedisConnection connection, Type type, string prefix)
+        {
+            try
+            {
+                var serializedParams = type.SerializeIndex(prefix);
                 await connection.ExecuteAsync("FT.CREATE", serializedParams);
                 return true;
             }
@@ -173,12 +225,64 @@ namespace Redis.OM
         /// </summary>
         /// <param name="connection">the connection.</param>
         /// <param name="type">the type to drop the index for.</param>
+        /// <param name="prefix">The prefix used to create the index.</param>
+        /// <returns>whether the index was dropped or not.</returns>
+        public static async Task<bool> DropIndexAsync(this IRedisConnection connection, Type type, string prefix)
+        {
+            try
+            {
+                var indexName = type.SerializeIndex(prefix).First();
+                await connection.ExecuteAsync("FT.DROPINDEX", indexName);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Unknown Index name"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes an index.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="type">the type to drop the index for.</param>
         /// <returns>whether the index was dropped or not.</returns>
         public static bool DropIndex(this IRedisConnection connection, Type type)
         {
             try
             {
                 var indexName = type.SerializeIndex().First();
+                connection.Execute("FT.DROPINDEX", indexName);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Unknown Index name"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes an index.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="type">the type to drop the index for.</param>
+        /// <param name="prefix">The prefix used to create the index.</param>
+        /// <returns>whether the index was dropped or not.</returns>
+        public static bool DropIndex(this IRedisConnection connection, Type type, string prefix)
+        {
+            try
+            {
+                var indexName = type.SerializeIndex(prefix).First();
                 connection.Execute("FT.DROPINDEX", indexName);
                 return true;
             }
@@ -205,6 +309,58 @@ namespace Redis.OM
             {
                 var indexName = type.SerializeIndex().First();
                 connection.Execute("FT.DROPINDEX", indexName, "DD");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Unknown Index name"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes an index. And drops associated records.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="type">the type to drop the index for.</param>
+        /// <param name="prefix">The prefix associated with the index.</param>
+        /// <returns>whether the index was dropped or not.</returns>
+        public static bool DropIndexAndAssociatedRecords(this IRedisConnection connection, Type type, string prefix)
+        {
+            try
+            {
+                var indexName = type.SerializeIndex(prefix).First();
+                connection.Execute("FT.DROPINDEX", indexName, "DD");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Unknown Index name"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes an index. And drops associated records.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="type">the type to drop the index for.</param>
+        /// <param name="prefix">The prefix associated with the index.</param>
+        /// <returns>whether the index was dropped or not.</returns>
+        public static async Task<bool> DropIndexAndAssociatedRecordsAsync(this IRedisConnection connection, Type type, string prefix)
+        {
+            try
+            {
+                var indexName = type.SerializeIndex(prefix).First();
+                await connection.ExecuteAsync("FT.DROPINDEX", indexName, "DD");
                 return true;
             }
             catch (Exception ex)

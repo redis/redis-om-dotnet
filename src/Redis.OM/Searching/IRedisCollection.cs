@@ -29,6 +29,47 @@ namespace Redis.OM.Searching
         int ChunkSize { get; }
 
         /// <summary>
+        /// Gets the prefix that the collection uses when generating indexes, keys, and querying.
+        /// </summary>
+        string Prefix { get; }
+
+        /// <summary>
+        /// Creates an index from the collection's type and prefix.
+        /// </summary>
+        /// <returns>Whether or not the index was created.</returns>
+        bool CreateIndex();
+
+        /// <summary>
+        /// Drops the index associated with the collection.
+        /// </summary>
+        /// <returns>Whether or not the index was dropped.</returns>
+        bool DropIndex();
+
+        /// <summary>
+        /// Drops the index associated with the collection AS WELL AS ALL THE RECORDS IT INDEXES.
+        /// </summary>
+        /// <returns>Whether or not the index was dropped.</returns>
+        bool DropIndexWithAssociatedRecords();
+
+        /// <summary>
+        /// Creates an index from the collection's type and prefix.
+        /// </summary>
+        /// <returns>Whether or not the index was created.</returns>
+        Task<bool> CreateIndexAsync();
+
+        /// <summary>
+        /// Drops the index associated with the collection.
+        /// </summary>
+        /// <returns>Whether or not the index was dropped.</returns>
+        Task<bool> DropIndexAsync();
+
+        /// <summary>
+        /// Drops the index associated with the collection AS WELL AS ALL THE RECORDS IT INDEXES.
+        /// </summary>
+        /// <returns>Whether or not the index was dropped.</returns>
+        Task<bool> DropIndexWithAssociatedRecordsAsync();
+
+        /// <summary>
         /// Saves the current state of the collection, overriding what was initially materialized.
         /// </summary>
         void Save();

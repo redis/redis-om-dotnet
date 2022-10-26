@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Searching;
 using Redis.OM.Unit.Tests.RediSearchTests;
 using Xunit;
 
@@ -112,6 +114,68 @@ namespace Redis.OM.Unit.Tests
 
             var id = _connection.Set(obj);
             _connection.Get<HashObjectWithTwoPropertiesWithMatchingPrefixes>(id);
+        }
+
+        [Fact]
+        public void TestDynamicPrefixes()
+        {
+            var obj = new SimpleObject() { Name = "Steve" };
+            var prefix = "AnArbitraryPrefix";
+            var collection = new RedisCollection<SimpleObject>(_connection,true, 100, prefix);
+            var keyName = collection.Insert(obj);
+            var reconstituded = collection.FindById(keyName);
+            Assert.NotNull(reconstituded);
+            Assert.Equal($"{keyName.Split($"{prefix}:")[1]}", reconstituded.Id);
+            Assert.Equal("Steve", reconstituded.Name);
+
+            reconstituded.Name = "Bob";
+            collection.Save();
+            reconstituded = collection.FindById(keyName);
+
+            Assert.NotNull(reconstituded);
+            Assert.Equal("Bob", reconstituded.Name);
+
+            reconstituded.Name = "Fred";
+            collection.Update(reconstituded);
+            reconstituded = collection.FindById(keyName);
+
+            Assert.NotNull(reconstituded);
+            Assert.Equal("Fred", reconstituded.Name);
+
+            collection.Delete(reconstituded);
+            reconstituded = collection.FindById(keyName);
+            Assert.Null(reconstituded);
+        }
+
+        [Fact]
+        public async Task TestDynamicPrefixesAsync()
+        {
+            var obj = new SimpleObject() { Name = "Steve" };
+            var prefix = "AnArbitraryPrefix";
+            var collection = new RedisCollection<SimpleObject>(_connection,true, 100, prefix);
+            var keyName = await collection.InsertAsync(obj);
+            var reconstituded = await collection.FindByIdAsync(keyName);
+            Assert.NotNull(reconstituded);
+            Assert.Equal($"{keyName.Split($"{prefix}:")[1]}", reconstituded.Id);
+            Assert.Equal("Steve", reconstituded.Name);
+
+            reconstituded.Name = "Bob";
+            await collection.SaveAsync();
+            reconstituded = await collection.FindByIdAsync(keyName);
+
+            Assert.NotNull(reconstituded);
+            Assert.Equal("Bob", reconstituded.Name);
+
+            reconstituded.Name = "Fred";
+            await collection.UpdateAsync(reconstituded);
+            reconstituded = await collection.FindByIdAsync(keyName);
+
+            Assert.NotNull(reconstituded);
+            Assert.Equal("Fred", reconstituded.Name);
+
+            collection.Delete(reconstituded);
+            reconstituded = await collection.FindByIdAsync(keyName);
+            Assert.Null(reconstituded);
         }
     }
 }

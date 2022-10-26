@@ -54,8 +54,34 @@ namespace Redis.OM.Searching
             ChunkSize = chunkSize;
             _connection = connection;
             SaveState = saveState;
+            Prefix = string.Empty;
             StateManager = new RedisCollectionStateManager(rootAttribute);
-            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute, ChunkSize, SaveState), null, null);
+            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute, ChunkSize, SaveState, Prefix), null, null);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisCollection{T}"/> class.
+        /// </summary>
+        /// <param name="saveState">Determines whether or not the Redis Colleciton will maintain it's state internally.</param>
+        /// <param name="connection">Connection to Redis.</param>
+        /// <param name="chunkSize">Size of chunks to pull back during pagination, defaults to 100.</param>
+        /// <param name="prefix">The Prefix to use when creating index, as well as for inserting keys and querying them.</param>
+        /// <exception cref="ArgumentException">Thrown if the root attribute of the Redis Colleciton is not decorated with a DocumentAttribute.</exception>
+        public RedisCollection(IRedisConnection connection, bool saveState, int chunkSize, string prefix)
+        {
+            var t = typeof(T);
+            DocumentAttribute rootAttribute = t.GetCustomAttribute<DocumentAttribute>();
+            if (rootAttribute == null)
+            {
+                throw new ArgumentException("The root attribute of a Redis Collection must be decorated with a DocumentAttribute");
+            }
+
+            ChunkSize = chunkSize;
+            _connection = connection;
+            SaveState = saveState;
+            Prefix = prefix;
+            StateManager = new RedisCollectionStateManager(rootAttribute);
+            Initialize(new RedisQueryProvider(connection, StateManager, rootAttribute, ChunkSize, SaveState, Prefix), null, null);
         }
 
         /// <summary>
@@ -65,14 +91,16 @@ namespace Redis.OM.Searching
         /// <param name="expression">Expression to be parsed for the query.</param>
         /// <param name="stateManager">Manager of the internal state of the collection.</param>
         /// <param name="saveState">Whether or not the StateManager will maintain the state.</param>
+        /// <param name="prefix">The Prefix to use when creating index, as well as for inserting keys and querying them.</param>
         /// <param name="chunkSize">Size of chunks to pull back during pagination, defaults to 100.</param>
         /// <param name="booleanExpression">The expression to build the filter from.</param>
-        internal RedisCollection(RedisQueryProvider provider, Expression expression, RedisCollectionStateManager stateManager, Expression<Func<T, bool>>? booleanExpression, bool saveState, int chunkSize = 100)
+        internal RedisCollection(RedisQueryProvider provider, Expression expression, RedisCollectionStateManager stateManager, Expression<Func<T, bool>>? booleanExpression, bool saveState, string prefix, int chunkSize = 100)
         {
             StateManager = stateManager;
             _connection = provider.Connection;
             ChunkSize = chunkSize;
             SaveState = saveState;
+            Prefix = prefix;
             Initialize(provider, expression, booleanExpression);
         }
 
@@ -87,6 +115,9 @@ namespace Redis.OM.Searching
 
         /// <inheritdoc />
         public bool SaveState { get; }
+
+        /// <inheritdoc />
+        public string Prefix { get; }
 
         /// <summary>
         /// Gets manages the state of the items queried from Redis.
@@ -113,6 +144,30 @@ namespace Redis.OM.Searching
             }
         }
 
+        /// <inheritdoc />
+        public bool CreateIndex() => _connection.CreateIndex(typeof(T), Prefix);
+
+        /// <inheritdoc />
+        public bool DropIndex() => _connection.DropIndex(typeof(T), Prefix);
+
+        /// <inheritdoc />
+        public bool DropIndexWithAssociatedRecords()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<bool> CreateIndexAsync() => _connection.CreateIndexAsync(typeof(T), Prefix);
+
+        /// <inheritdoc />
+        public Task<bool> DropIndexAsync() => _connection.DropIndexAsync(typeof(T), Prefix);
+
+        /// <inheritdoc />
+        public Task<bool> DropIndexWithAssociatedRecordsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
@@ -122,7 +177,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)_connection.Search<T>(query).DocumentCount > 0;
         }
@@ -130,7 +185,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public void Update(T item)
         {
-            var key = item.GetKey();
+            var key = item.GetKey(Prefix);
             IList<IObjectDiff>? diff;
             var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
             if (diffConstructed)
@@ -158,7 +213,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task UpdateAsync(T item)
         {
-            var key = item.GetKey();
+            var key = item.GetKey(Prefix);
             IList<IObjectDiff>? diff;
             var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
             if (diffConstructed)
@@ -186,7 +241,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public void Delete(T item)
         {
-            var key = item.GetKey();
+            var key = item.GetKey(Prefix);
             _connection.Unlink(key);
             StateManager.Remove(key);
         }
@@ -194,7 +249,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task DeleteAsync(T item)
         {
-            var key = item.GetKey();
+            var key = item.GetKey(Prefix);
             await _connection.UnlinkAsync(key);
             StateManager.Remove(key);
         }
@@ -214,7 +269,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<int> CountAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, Prefix);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
         }
@@ -224,7 +279,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
         }
@@ -232,7 +287,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<bool> AnyAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, Prefix);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
         }
@@ -242,7 +297,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
         }
@@ -250,7 +305,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T> FirstAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             var result = res.Documents.First();
@@ -263,7 +318,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             var result = res.Documents.First();
@@ -274,7 +329,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T?> FirstOrDefaultAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             var key = res.Documents.Keys.FirstOrDefault();
@@ -293,7 +348,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             var key = res.Documents.Keys.FirstOrDefault();
@@ -310,7 +365,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T> SingleAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount > 1)
@@ -329,7 +384,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount > 1)
@@ -346,7 +401,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T?> SingleOrDefaultAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount != 1)
@@ -370,7 +425,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount != 1)
@@ -394,7 +449,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)_connection.Search<T>(query).DocumentCount;
         }
@@ -404,7 +459,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             var result = res.Documents.First();
@@ -417,7 +472,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             var result = res.Documents.FirstOrDefault();
@@ -430,7 +485,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             if (res.DocumentCount > 1)
@@ -448,7 +503,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, Prefix);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             if (res.DocumentCount != 1)
@@ -476,7 +531,7 @@ namespace Redis.OM.Searching
             {
                 if (res.Value != null)
                 {
-                    SaveToStateManager(res.Value.GetKey(), res.Value);
+                    SaveToStateManager(res.Value.GetKey(Prefix), res.Value);
                 }
             }
 
@@ -487,7 +542,7 @@ namespace Redis.OM.Searching
         public IEnumerator<T> GetEnumerator()
         {
             StateManager.Clear();
-            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager, BooleanExpression, SaveState);
+            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager, BooleanExpression, SaveState, Prefix);
         }
 
         /// <inheritdoc/>
@@ -563,31 +618,31 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public string Insert(T item)
         {
-            return ((RedisQueryProvider)Provider).Connection.Set(item);
+            return ((RedisQueryProvider)Provider).Connection.Set(item, Prefix);
         }
 
         /// <inheritdoc/>
         public string Insert(T item, TimeSpan timeSpan)
         {
-            return ((RedisQueryProvider)Provider).Connection.Set(item, timeSpan);
+            return ((RedisQueryProvider)Provider).Connection.Set(item, timeSpan, Prefix);
         }
 
         /// <inheritdoc/>
         public async Task<string> InsertAsync(T item)
         {
-            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item);
+            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, Prefix);
         }
 
         /// <inheritdoc/>
         public async Task<string> InsertAsync(T item, TimeSpan timeSpan)
         {
-            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan);
+            return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan, Prefix);
         }
 
         /// <inheritdoc/>
         public T? FindById(string id)
         {
-            var prefix = typeof(T).GetKeyPrefix();
+            var prefix = !string.IsNullOrEmpty(Prefix) ? Prefix : typeof(T).GetKeyPrefix();
             string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
             var result = _connection.Get<T>(key);
             if (result != null)
@@ -601,7 +656,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public async Task<T?> FindByIdAsync(string id)
         {
-            var prefix = typeof(T).GetKeyPrefix();
+            var prefix = string.IsNullOrEmpty(Prefix) ? typeof(T).GetKeyPrefix() : Prefix;
             string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
             var result = await _connection.GetAsync<T>(key);
             if (result != null)
@@ -617,7 +672,7 @@ namespace Redis.OM.Searching
         {
             var provider = (RedisQueryProvider)Provider;
             StateManager.Clear();
-            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
+            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState, Prefix);
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
