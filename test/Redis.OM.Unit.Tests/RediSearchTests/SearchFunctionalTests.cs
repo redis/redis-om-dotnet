@@ -860,6 +860,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(0,collection.StateManager.Snapshot.Count);
         }
 
+
+        [Fact]
+        public async Task TestFlagEnumQuery()
+        {
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection, false, 10000);
+            var obj = new ObjectWithStringLikeValueTypes { Flags = EnumFlags.One | EnumFlags.Two };
+            await collection.InsertAsync(obj);
+            var res = await collection.FirstOrDefaultAsync(x => x.Flags == EnumFlags.One);
+            Assert.NotNull(res);
+        }
+
         public void CompareTimestamps(DateTime ts1, DateTime ts2)
         {
             Assert.Equal(ts1.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fff", CultureInfo.InvariantCulture), ts2.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fff", CultureInfo.InvariantCulture));
