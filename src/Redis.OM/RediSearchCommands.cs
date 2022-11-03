@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
@@ -216,6 +217,41 @@ namespace Redis.OM
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Add suggestions for the given string.
+        /// </summary>
+        /// <param name="connection">the connection to redis.</param>
+        /// <param name="key">is suggestion dictionary key.</param>
+        /// <param name="value">is suggestion string to index.</param>
+        /// <param name="score">is floating point number of the suggestion string's weight.</param>
+        /// <returns>A type return long.</returns>
+        public static long SuggestionAdd(this IRedisConnection connection, string key, string value, float score)
+        {
+            string stringScore = score.ToString();
+            var args = new[] { key, value, stringScore };
+            return connection.Execute("FT.SUGADD", args);
+        }
+
+        /// <summary>
+        /// Get completion suggestions for a prefix.
+        /// </summary>
+        /// <param name="connection">the connection to redis.</param>
+        /// <param name="key">is suggestion dictionary key.</param>
+        /// <param name="prefix">prefix to complete on.</param>
+        /// <returns>List of string suggestions for prefix.</returns>
+        public static List<string> SuggestionGet(this IRedisConnection connection, string key, string prefix)
+        {
+            var args = new[] { key, prefix };
+            var ret = new List<string>();
+            var res = connection.Execute("FT.SUGGET", args).ToArray();
+            for (var i = 0; i < res.Length; i++)
+            {
+                ret.Add(res[i]);
+            }
+
+            return ret;
         }
 
         /// <summary>

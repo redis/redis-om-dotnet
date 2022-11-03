@@ -909,5 +909,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             CompareTimestamps(timestamp, first.NullableTimestamp.Value);
             Assert.Equal(obj.Id, first.Id);
         }
+
+       [Fact]
+        public void TestAddSuggestion()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person1 = new Person() { Name = "Robert Bob", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" } };
+            var person2 = new Person() { Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" } };
+            collection.Insert(person1); 
+            collection.Insert(person2);
+            collection.AddSuggestion(person2,"Robert", 1);
+            collection.AddSuggestion(person2, "Rob", 1);
+            collection.AddSuggestion(person2, "Bob", 1);
+            var addedSuggestionCount = collection.AddSuggestion(person2, "Bobby", 1);
+            var listOfSuggestions = collection.GetSuggetion(person2, "Ro");
+            Assert.Equal(4, addedSuggestionCount);
+            Assert.Contains(listOfSuggestions, x => x == person2.NickNames.ElementAtOrDefault(1));
+            Assert.Contains(listOfSuggestions, x => x == person2.Name);
+        }
     }
 }

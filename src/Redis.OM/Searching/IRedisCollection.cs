@@ -242,5 +242,22 @@ namespace Redis.OM.Searching
         /// <param name="ids">The Ids to look up.</param>
         /// <returns>A dictionary correlating the ids provided to the objects in Redis.</returns>
         Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids);
+
+        /// <summary>
+        /// Add suggestion for the given text.
+        /// </summary>
+        /// <param name="item">for same key.</param>
+        /// <param name="value">is suggestion string to index.</param>
+        /// <param name="score">floating point number of the suggestion string's weight.</param>
+        /// <returns>First or default result.</returns>
+        long AddSuggestion(T item, string value, float score);
+
+       /// <summary>
+       /// Get suggestion for the given text.
+       /// </summary>
+       /// <param name="item">for same key.</param>
+       /// <param name="prefix">is suggestion string to index.</param>
+       /// <returns>First or default result.</returns>
+        List<string> GetSuggetion(T item, string prefix);
     }
 }

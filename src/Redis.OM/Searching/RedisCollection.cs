@@ -620,6 +620,25 @@ namespace Redis.OM.Searching
             return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
         }
 
+        /// <inheritdoc/>
+        public long AddSuggestion(T item, string value, float score)
+        {
+            var key = item.GetId();
+            if (key == default)
+            {
+                return default;
+            }
+
+            return _connection.SuggestionAdd(key, value, score);
+        }
+
+        /// <inheritdoc/>
+        public List<string> GetSuggetion(T item, string prefix)
+        {
+            var key = item.GetId();
+            return _connection.SuggestionGet(key, prefix);
+        }
+
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
         {
             return f.Method;
