@@ -158,6 +158,8 @@ namespace Redis.OM.Modeling
             return TypeDeterminationUtilities.IsNumeric(declaredType) ? "NUMERIC" : "TAG";
         }
 
+        private static bool IsEnumTypeFlags(Type type) => type.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
+
         private static string[] CommonSerialization(SearchFieldAttribute attr, Type declaredType, PropertyInfo propertyInfo)
         {
             var searchFieldType = GetSearchFieldType(declaredType, attr, propertyInfo);
@@ -188,6 +190,11 @@ namespace Redis.OM.Modeling
                 {
                     ret.Add("SEPARATOR");
                     ret.Add(tag.Separator.ToString());
+                }
+                else if (declaredType.IsEnum && IsEnumTypeFlags(declaredType))
+                {
+                    ret.Add("SEPARATOR");
+                    ret.Add(",");
                 }
 
                 if (tag.CaseSensitive)

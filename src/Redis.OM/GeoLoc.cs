@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace Redis.OM.Modeling
 {
@@ -39,7 +40,8 @@ namespace Redis.OM.Modeling
             var arr = geolocString.Split(',');
             if (arr.Length == 2)
             {
-                if (double.TryParse(arr[0], out var lon) && double.TryParse(arr[1], out var lat))
+                if (double.TryParse(arr[0], NumberStyles.Number, CultureInfo.InvariantCulture, out var lon) &&
+                    double.TryParse(arr[1], NumberStyles.Number, CultureInfo.InvariantCulture, out var lat))
                 {
                     return new GeoLoc(lon, lat);
                 }
@@ -51,7 +53,7 @@ namespace Redis.OM.Modeling
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Longitude},{Latitude}";
+            return $"{Longitude.ToString(CultureInfo.InvariantCulture)},{Latitude.ToString(CultureInfo.InvariantCulture)}";
         }
     }
 }

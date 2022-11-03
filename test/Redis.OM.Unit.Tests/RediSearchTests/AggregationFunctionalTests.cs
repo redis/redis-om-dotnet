@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Redis.OM.Aggregation;
+﻿using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
+using System.Threading.Tasks;
+using System.Linq;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -12,6 +9,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     [Collection("Redis")]
     public class AggregationFunctionalTests
     {
+        private static readonly object connectionLock = new();
+
+        /// <summary>
+        /// Init the database taking care to do it only once so that the test processes performed in parallel can count on an immutable database
+        /// </summary>
+        /// <param name="setup">RedisSetup object instance</param>
         public AggregationFunctionalTests(RedisSetup setup)
         {
             _connection = setup.Connection;
@@ -112,10 +115,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _connection.Set(hashWaldorf);
         }
 
+
         [Fact]
         public void GetDepartmentBySales()
         {
-            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
             var departments = collection
                 .Apply(x => x.RecordShell.Sales * x.RecordShell.SalesAdjustment, "AdjustedSales")
@@ -132,7 +135,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void GetHandicappedSales()
         {
-            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
             var employees = collection.Apply(x => x.RecordShell.Sales 
                 * x.RecordShell.SalesAdjustment, "AdjustedSales")
@@ -151,15 +153,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
             var stddev = await collection.Apply(x => x.RecordShell.Sales
-                                                     * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                * x.RecordShell.SalesAdjustment, "AdjustedSales")
                 .StandardDeviationAsync(x => x["AdjustedSales"]);
+
             Assert.Equal(358018.854252, stddev);
+        }
+
+        [Fact]
+
+        public void GetAdjustedSalesStandardDeviationTestingInvariantCultureCompliance()
+        {
+            Helper.RunTestUnderDifferentCulture("it-IT", x => GetAdjustedSalesStandardDeviation());
         }
 
         [Fact]
         public async Task GetAverageAdjustedSales()
         {
-            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
             var average = await collection.Apply(x => x.RecordShell.Sales
                                                       * x.RecordShell.SalesAdjustment, "AdjustedSales")
