@@ -26,15 +26,29 @@ namespace Redis.OM
         /// <inheritdoc/>
         public RedisReply Execute(string command, params string[] args)
         {
-            var result = _db.Execute(command, args);
-            return new RedisReply(result);
+            try
+            {
+                var result = _db.Execute(command, args);
+                return new RedisReply(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed on {command} {string.Join(" ", args)}", ex);
+            }
         }
 
         /// <inheritdoc/>
         public async Task<RedisReply> ExecuteAsync(string command, params string[] args)
         {
-            var result = await _db.ExecuteAsync(command, args);
-            return new RedisReply(result);
+            try
+            {
+                var result = await _db.ExecuteAsync(command, args);
+                return new RedisReply(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed on {command} {string.Join(" ", args)}", ex);
+            }
         }
 
         /// <inheritdoc/>
