@@ -242,5 +242,20 @@ namespace Redis.OM.Searching
         /// <param name="ids">The Ids to look up.</param>
         /// <returns>A dictionary correlating the ids provided to the objects in Redis.</returns>
         Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids);
+
+        /// <summary>
+        /// Inserts list of items into redis.
+        /// </summary>
+        /// <param name="items">The items to insert.</param>
+        /// <returns>The list of Keys.</returns>
+        Task<List<string>> Insert(IEnumerable<T> items);
+
+        /// <summary>
+        /// Inserts list of items into redis.
+        /// </summary>
+        /// <param name="items">The items to insert.</param>
+        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
+        /// /// <returns>The list of Keys.</returns>
+        Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan);
     }
 }
