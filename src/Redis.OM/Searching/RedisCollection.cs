@@ -620,6 +620,34 @@ namespace Redis.OM.Searching
             return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
         }
 
+        /// <inheritdoc/>
+        public async Task<List<string>> Insert(IEnumerable<T> items)
+        {
+            var tasks = new List<Task<string>>();
+            foreach (var item in items.Distinct())
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            }
+
+            await Task.WhenAll(tasks);
+            var result = tasks.Select(x => x.Result).ToList();
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
+        {
+            var tasks = new List<Task<string>>();
+            foreach (var item in items.Distinct())
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
+            }
+
+            await Task.WhenAll(tasks);
+            var result = tasks.Select(x => x.Result).ToList();
+            return result;
+        }
+
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
         {
             return f.Method;
