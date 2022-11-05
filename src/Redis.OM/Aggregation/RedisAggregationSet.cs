@@ -37,7 +37,7 @@ namespace Redis.OM.Aggregation
             }
 
             _chunkSize = chunkSize;
-            Initialize(new RedisQueryProvider(connection, rootAttribute, _chunkSize, true), null, useCursor);
+            Initialize(new RedisQueryProvider(connection, rootAttribute, _chunkSize, true, string.Empty), null, useCursor);
         }
 
         /// <summary>

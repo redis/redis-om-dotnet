@@ -33,9 +33,18 @@ namespace Redis.OM
         /// <param name="connection">connection to redis.</param>
         /// <param name="obj">the object to save.</param>
         /// <returns>the key for the object.</returns>
-        public static async Task<string> SetAsync(this IRedisConnection connection, object obj)
+        public static Task<string> SetAsync(this IRedisConnection connection, object obj) => connection.SetAsync(obj, null);
+
+        /// <summary>
+        /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
+        /// </summary>
+        /// <param name="connection">connection to redis.</param>
+        /// <param name="obj">the object to save.</param>
+        /// <param name="prefix">The prefix to use when generating the keyname for the object inserted.</param>
+        /// <returns>the key for the object.</returns>
+        public static async Task<string> SetAsync(this IRedisConnection connection, object obj, string? prefix)
         {
-            var id = obj.SetId();
+            var id = obj.SetId(prefix);
             var type = obj.GetType();
             var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
             if (attr == null || attr.StorageType == StorageType.Hash)
@@ -64,9 +73,19 @@ namespace Redis.OM
         /// <param name="obj">the object to save.</param>
         /// <param name="timeSpan">the expiry date of the key (TTL).</param>
         /// <returns>the key for the object.</returns>
-        public static async Task<string> SetAsync(this IRedisConnection connection, object obj, TimeSpan timeSpan)
+        public static Task<string> SetAsync(this IRedisConnection connection, object obj, TimeSpan timeSpan) => connection.SetAsync(obj, timeSpan, null);
+
+        /// <summary>
+        /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
+        /// </summary>
+        /// <param name="connection">connection to redis.</param>
+        /// <param name="obj">the object to save.</param>
+        /// <param name="timeSpan">the expiry date of the key (TTL).</param>
+        /// /// <param name="prefix">The prefix to use when generating the keyname for the object inserted.</param>
+        /// <returns>the key for the object.</returns>
+        public static async Task<string> SetAsync(this IRedisConnection connection, object obj, TimeSpan timeSpan, string? prefix)
         {
-            var id = obj.SetId();
+            var id = obj.SetId(prefix);
             var type = obj.GetType();
             var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
             if (attr == null || attr.StorageType == StorageType.Hash)
@@ -292,9 +311,18 @@ namespace Redis.OM
         /// <param name="connection">connection to redis.</param>
         /// <param name="obj">the object to save.</param>
         /// <returns>the key for the object.</returns>
-        public static string Set(this IRedisConnection connection, object obj)
+        public static string Set(this IRedisConnection connection, object obj) => connection.Set(obj, null);
+
+        /// <summary>
+        /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
+        /// </summary>
+        /// <param name="connection">connection to redis.</param>
+        /// <param name="obj">the object to save.</param>
+        /// <param name="prefix">The overriding prefix to use for the keyname.</param>
+        /// <returns>the key for the object.</returns>
+        public static string Set(this IRedisConnection connection, object obj, string? prefix)
         {
-            var id = obj.SetId();
+            var id = obj.SetId(prefix);
             var type = obj.GetType();
             if (Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) is not DocumentAttribute attr || attr.StorageType == StorageType.Hash)
             {
@@ -322,9 +350,19 @@ namespace Redis.OM
         /// <param name="obj">the object to save.</param>
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <returns>the key for the object.</returns>
-        public static string Set(this IRedisConnection connection, object obj, TimeSpan timeSpan)
+        public static string Set(this IRedisConnection connection, object obj, TimeSpan timeSpan) => connection.Set(obj, timeSpan, null);
+
+        /// <summary>
+        /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
+        /// </summary>
+        /// <param name="connection">connection to redis.</param>
+        /// <param name="obj">the object to save.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <param name="prefix">The overriden prefix to use for the keyname.</param>
+        /// <returns>the key for the object.</returns>
+        public static string Set(this IRedisConnection connection, object obj, TimeSpan timeSpan, string? prefix)
         {
-            var id = obj.SetId();
+            var id = obj.SetId(prefix);
             var type = obj.GetType();
             if (Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) is not DocumentAttribute attr || attr.StorageType == StorageType.Hash)
             {

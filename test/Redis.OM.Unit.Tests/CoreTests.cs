@@ -103,11 +103,11 @@ namespace Redis.OM.Unit.Tests
 
             Thread.Sleep(1500);
 
-            var hashNotExpired = connection.HGetAll(hashObj.GetKey());
-            var hashExpired = connection.HGetAll(hashObjWithExpire.GetKey());
+            var hashNotExpired = connection.HGetAll(hashObj.GetKey(null));
+            var hashExpired = connection.HGetAll(hashObjWithExpire.GetKey(null));
 
-            var jsonNotExpired = connection.JsonGet(jsonObj.GetKey());
-            var jsonExpired = connection.JsonGet(jsonObjWithExpire.GetKey());
+            var jsonNotExpired = connection.JsonGet(jsonObj.GetKey(null));
+            var jsonExpired = connection.JsonGet(jsonObjWithExpire.GetKey(null));
 
             Assert.Equal( 2, hashNotExpired.Count);
             Assert.Equal(0, hashExpired.Count);
@@ -137,11 +137,11 @@ namespace Redis.OM.Unit.Tests
 
             Thread.Sleep(1500);
 
-            var hashNotExpired = await connection.HGetAllAsync(hashObj.GetKey());
-            var hashExpired = await connection.HGetAllAsync(hashObjWithExpire.GetKey());
+            var hashNotExpired = await connection.HGetAllAsync(hashObj.GetKey(null));
+            var hashExpired = await connection.HGetAllAsync(hashObjWithExpire.GetKey(null));
 
-            var jsonNotExpired = await connection.JsonGetAsync(jsonObj.GetKey());
-            var jsonExpired = await connection.JsonGetAsync(jsonObjWithExpire.GetKey());
+            var jsonNotExpired = await connection.JsonGetAsync(jsonObj.GetKey(null));
+            var jsonExpired = await connection.JsonGetAsync(jsonObjWithExpire.GetKey(null));
 
             Assert.Equal(2, hashNotExpired.Count);
             Assert.Equal(0, hashExpired.Count);

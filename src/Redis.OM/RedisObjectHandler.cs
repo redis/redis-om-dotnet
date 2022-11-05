@@ -135,9 +135,10 @@ namespace Redis.OM
         /// Gets the fully formed key name for the given object.
         /// </summary>
         /// <param name="obj">the object to pull the key from.</param>
+        /// <param name="prefix">The Prefix to which overloads the DocumentAttribute's prefix.</param>
         /// <returns>The key.</returns>
         /// <exception cref="ArgumentException">Thrown if type is invalid or there's no id present on the key.</exception>
-        internal static string GetKey(this object obj)
+        internal static string GetKey(this object obj, string? prefix)
         {
             var type = obj.GetType();
             var documentAttribute = (DocumentAttribute)type.GetCustomAttribute(typeof(DocumentAttribute));
@@ -153,7 +154,7 @@ namespace Redis.OM
             }
 
             var sb = new StringBuilder();
-            sb.Append(GetKeyPrefix(type));
+            sb.Append(string.IsNullOrEmpty(prefix) ? GetKeyPrefix(type) : prefix);
             sb.Append(":");
             sb.Append(id);
 
@@ -185,10 +186,11 @@ namespace Redis.OM
         /// Set's the id of the given field based off the objects id strategy.
         /// </summary>
         /// <param name="obj">The object to set the field of.</param>
+        /// <param name="prefix">The prefix to use for they key, this will overload the prefixes within the type definition.</param>
         /// <returns>The id.</returns>
         /// <exception cref="InvalidOperationException">Thrown if Id property is of invalid type.</exception>
         /// <exception cref="MissingMemberException">Thrown if class is missing a document attribute decoration.</exception>
-        internal static string SetId(this object obj)
+        internal static string SetId(this object obj, string? prefix)
         {
             var type = obj.GetType();
             var attr = Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) as DocumentAttribute;
@@ -234,6 +236,11 @@ namespace Redis.OM
                         idProperty.SetValue(obj, id);
                     }
                 }
+            }
+
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                return $"{prefix}:{id}";
             }
 
             if (attr.Prefixes == null || string.IsNullOrEmpty(attr.Prefixes.FirstOrDefault()))

@@ -180,9 +180,10 @@ namespace Redis.OM.Common
         /// <param name="expression">The expression.</param>
         /// <param name="type">The root type.</param>
         /// <param name="mainBooleanExpression">The primary boolean expression to build the filter from.</param>
+        /// <param name="prefix">The index to use when creating the indexName.</param>
         /// <returns>A Redis query.</returns>
         /// <exception cref="InvalidOperationException">Thrown if type is missing indexing.</exception>
-        internal static RedisQuery BuildQueryFromExpression(Expression expression, Type type, Expression? mainBooleanExpression)
+        internal static RedisQuery BuildQueryFromExpression(Expression expression, Type type, Expression? mainBooleanExpression, string prefix)
         {
             var attr = type.GetCustomAttribute<DocumentAttribute>();
             if (attr == null)
@@ -190,7 +191,8 @@ namespace Redis.OM.Common
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
-            var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}-idx" : attr.IndexName;
+            var prefixAddendum = string.IsNullOrEmpty(prefix) ? string.Empty : $"-{prefix}";
+            var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}{prefixAddendum}-idx" : $"{attr.IndexName}{prefixAddendum}";
             var query = new RedisQuery(indexName!) { QueryText = "*" };
             switch (expression)
             {
