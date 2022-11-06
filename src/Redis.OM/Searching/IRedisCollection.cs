@@ -259,5 +259,12 @@ namespace Redis.OM.Searching
        /// <param name="prefix">is suggestion string to index.</param>
        /// <returns>First or default result.</returns>
         List<string> GetSuggetion(T item, string prefix);
+
+        /// <summary>
+        /// Add suggestion for the given text.
+        /// </summary>
+        /// <param name="entity">is suggestion string to index.</param>
+        /// <returns>First or default result.</returns>
+        long AddSuggestion(Type entity);
     }
 }

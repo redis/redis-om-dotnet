@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
 using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
@@ -623,20 +626,22 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public long AddSuggestion(T item, string value, float score)
         {
-            var key = item.GetId();
-            if (key == default)
-            {
-                return default;
-            }
-
-            return _connection.SuggestionAdd(key, value, score);
+            var key = item.GetType().SerializeSuggestions().First();
+            var result = item.GetType().GetDefaultMembers();
+            return ((RedisQueryProvider)Provider).Connection.SuggestionAdd(key, value, score);
         }
 
         /// <inheritdoc/>
         public List<string> GetSuggetion(T item, string prefix)
         {
-            var key = item.GetId();
-            return _connection.SuggestionGet(key, prefix);
+            var indexName = item.GetType().SerializeSuggestions().First();
+            return ((RedisQueryProvider)Provider).Connection.SuggestionGet(indexName, prefix);
+        }
+
+        /// <inheritdoc/>
+        public long AddSuggestion(Type entity)
+        {
+           return ((RedisQueryProvider)Provider).Connection.SuggestionAdd(entity);
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
