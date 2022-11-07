@@ -243,15 +243,6 @@ namespace Redis.OM.Searching
         /// <returns>A dictionary correlating the ids provided to the objects in Redis.</returns>
         Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids);
 
-        /// <summary>
-        /// Add suggestion for the given text.
-        /// </summary>
-        /// <param name="item">for same key.</param>
-        /// <param name="value">is suggestion string to index.</param>
-        /// <param name="score">floating point number of the suggestion string's weight.</param>
-        /// <returns>First or default result.</returns>
-        long AddSuggestion(T item, string value, float score);
-
        /// <summary>
        /// Get suggestion for the given text.
        /// </summary>
@@ -263,8 +254,27 @@ namespace Redis.OM.Searching
         /// <summary>
         /// Add suggestion for the given text.
         /// </summary>
-        /// <param name="entity">is suggestion string to index.</param>
+        /// <param name="item">for same key.</param>
+        /// <param name="value">is suggestion string to index.</param>
+        /// <param name="score">floating point number of the suggestion string's weight.</param>
+        /// <param name="increment">increment the score value.</param>
+        /// <param name="payload">adding jsontype payload with suggestion string.</param>
         /// <returns>First or default result.</returns>
-        long AddSuggestion(Type entity);
+        int AddSuggestion(T item, string value, float score, bool increment = false, object? payload = null);
+
+        /// <summary>
+        /// Delete a string from a suggestion index.
+        /// </summary>
+        /// <param name="item">for same key.</param>
+        /// <param name="sugstring">is suggestion string to index.</param>
+        /// <returns>First or default result.</returns>
+        bool DelSuggestion(T item, string sugstring);
+
+        /// <summary>
+        /// Get the size of an auto-complete suggestion dictionary.
+        /// </summary>
+        /// <param name="key">for same key.</param>
+        /// <returns>First or default result.</returns>
+        long LengthOfSuggestion(string key);
     }
 }

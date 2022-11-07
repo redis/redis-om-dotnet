@@ -222,21 +222,6 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Add suggestions for the given string.
-        /// </summary>
-        /// <param name="connection">the connection to redis.</param>
-        /// <param name="key">is suggestion dictionary key.</param>
-        /// <param name="value">is suggestion string to index.</param>
-        /// <param name="score">is floating point number of the suggestion string's weight.</param>
-        /// <returns>A type return long.</returns>
-        public static RedisReply SuggestionAdd(this IRedisConnection connection, string key, string value, float score)
-        {
-            string stringScore = score.ToString();
-            var args = new[] { key, value, stringScore };
-            return connection.Execute("FT.SUGADD", args);
-        }
-
-        /// <summary>
         /// Get completion suggestions for a prefix.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
@@ -245,7 +230,7 @@ namespace Redis.OM
         /// <returns>List of string suggestions for prefix.</returns>
         public static List<string> SuggestionGet(this IRedisConnection connection, string key, string prefix)
         {
-            var args = new[] { key, prefix };
+            var args = new[] { key, prefix, "FUZZY" };
             var ret = new List<string>();
             var res = connection.Execute("FT.SUGGET", args).ToArray();
             for (var i = 0; i < res.Length; i++)
@@ -261,31 +246,53 @@ namespace Redis.OM
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
         /// <param name="item">the type to use for creating the index.</param>
+        /// <param name="value">is suggestion string to index.</param>
+        /// <param name="score">is floating point number of the suggestion string's weight.</param>
+        /// <param name="increment">increment score value.</param>
+        /// <param name="payload">jsonpayload.</param>
         /// <returns>A type return long.</returns>
-        public static RedisReply SuggestionAdd(this IRedisConnection connection, object item)
+        public static RedisReply SuggestionAdd(this IRedisConnection connection, object item, string value, float score, bool increment = false, object? payload = null)
         {
-            var args = item.GetType().SerializeSuggestions();
+            var args = item.GetType().SerializeSuggestions(value, score, increment, payload);
             return connection.Execute("FT.SUGADD", args);
         }
 
-         /// <summary>
+        /// <summary>
         /// Get completion suggestions for a prefix.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
         /// <param name="key">is suggestion dictionary key.</param>
-        /// <param name="prefix">prefix to complete on.</param>
-        /// <returns>List of string suggestions for prefix.</returns>
-        public static List<string> SuggestionGet(this IRedisConnection connection, object key, string prefix)
+        /// <param name="suggestionstring">suggestion string to index.</param>
+        /// <returns>.</returns>
+        public static bool SuggestionDelete(this IRedisConnection connection, string key, string suggestionstring)
         {
-            var args = new[] { key, prefix };
-            var ret = new List<string>();
-            var res = connection.Execute("FT.SUGGET", (string[])args).ToArray();
-            for (var i = 0; i < res.Length; i++)
+            try
             {
-                ret.Add(res[i]);
+                var args = new[] { key, suggestionstring };
+                connection.Execute("FT.SUGDEL", args);
+                return true;
             }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Suggestion dictionary key not created"))
+                {
+                    return false;
+                }
 
-            return ret;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get completion suggestions for a prefix.
+        /// </summary>
+        /// <param name="connection">the connection to redis.</param>
+        /// <param name="key">is suggestion dictionary key.</param>
+        /// <returns>.</returns>
+        public static long SuggestionStringLength(this IRedisConnection connection, string key)
+        {
+            var args = new[] { key };
+            return connection.Execute("FT.SUGLEN", args);
         }
 
         /// <summary>

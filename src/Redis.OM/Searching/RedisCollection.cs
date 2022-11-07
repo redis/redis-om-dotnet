@@ -624,14 +624,6 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public long AddSuggestion(T item, string value, float score)
-        {
-            var key = item.GetType().SerializeSuggestions().First();
-            var result = item.GetType().GetDefaultMembers();
-            return ((RedisQueryProvider)Provider).Connection.SuggestionAdd(key, value, score);
-        }
-
-        /// <inheritdoc/>
         public List<string> GetSuggetion(T item, string prefix)
         {
             var indexName = item.GetType().SerializeSuggestions().First();
@@ -639,9 +631,22 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public long AddSuggestion(Type entity)
+        public int AddSuggestion(T item, string value, float score, bool increment = false,  object? payload = null)
         {
-           return ((RedisQueryProvider)Provider).Connection.SuggestionAdd(entity);
+            return ((RedisQueryProvider)Provider).Connection.SuggestionAdd(item, value, score, increment, payload);
+        }
+
+        /// <inheritdoc/>
+        public bool DelSuggestion(T item, string sugstring)
+        {
+            var indexName = item.GetType().SerializeSuggestions().First();
+            return ((RedisQueryProvider)Provider).Connection.SuggestionDelete(indexName, sugstring);
+        }
+
+        /// <inheritdoc/>
+        public long LengthOfSuggestion(string key)
+        {
+            return ((RedisQueryProvider)Provider).Connection.SuggestionStringLength(key);
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)

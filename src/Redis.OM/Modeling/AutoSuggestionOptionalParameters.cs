@@ -28,10 +28,5 @@ namespace Redis.OM.Modeling
         /// Returns optional payloads saved along with the suggestions.
         /// </summary>
         WITHPAYLOADS = 3,
-
-        /// <summary>
-        /// Limits the results to a maximum of num (default: 5)..
-        /// </summary>
-        MAX = 4,
     }
 }

@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Redis.OM.Modeling
 {
@@ -11,35 +14,10 @@ namespace Redis.OM.Modeling
     /// </summary>
     internal static class AutoSuggestionSchemaFields
     {
-        /// <summary>
-        /// Gets or sets the string value for the AutoSuggestion.
-        /// </summary>
-        public static string? IndexKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets the string value for the AutoSuggestion.
-        /// </summary>
-        public static string? String { get; set; }
-
-        /// <summary>
-        /// Gets or sets the float Score for the AutoSuggestion.
-        /// </summary>
-        public static string? Score { get; set; }
-
-        /// <summary>
-        /// Gets or sets the float Score for the AutoSuggestion.
-        /// </summary>
-        public static AutoSuggestionOptionalParameters? OptionalParameters { get; set; }
-
-        /// <summary>
-        /// Gets or sets the float Score for the AutoSuggestion.
-        /// </summary>
-        public static string? Prefix { get; set; }
-
-        /// <summary>
-        /// Gets or sets the float Score for the AutoSuggestion.
-        /// </summary>
-        public static string? Payload { get; set; }
+        private static readonly JsonSerializerOptions Options = new ()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
 
         /// <summary>
         /// Pull out the AutoSuggestion attribute from a Type.
@@ -57,9 +35,13 @@ namespace Redis.OM.Modeling
         /// Serialize the Index.
         /// </summary>
         /// <param name="type">The type to be indexed.</param>
+        /// <param name="value">string value for suggestion.</param>
+        /// <param name="score">score for the given string.</param>
+        /// <param name="increment">whether increment the score value.</param>
+        /// <param name="jsonpayload">jsonpayload.</param>
         /// <exception cref="InvalidOperationException">Thrown if type provided is not decorated with a RedisObjectDefinitionAttribute.</exception>
         /// <returns>An array of strings (the serialized args for redis).</returns>
-        internal static string[] SerializeSuggestions(this Type type)
+        internal static string[] SerializeSuggestions(this Type type, string value = "", float? score = null, bool increment = false, object? jsonpayload = null)
         {
             var objAttribute = Attribute.GetCustomAttribute(
                 type,
@@ -73,36 +55,25 @@ namespace Redis.OM.Modeling
             var args = new List<string>();
             if (string.IsNullOrEmpty(objAttribute.Key))
             {
-                args.Add($"SUG:{type.Name.ToLower()}:{type.ReflectedType}");
+                args.Add($"SUG:{type.Name.ToLower()}");
             }
             else
             {
                 args.Add(objAttribute.Key!);
             }
 
-            foreach (FieldInfo field in type.GetFields())
-            {
-                if (field.Attributes.Equals(typeof(AutoSuggestionAttribute)))
-                {
-                    IList<PropertyInfo> props = new List<PropertyInfo>(type.GetProperties());
-
-                    foreach (PropertyInfo prop in props)
-                    {
-                        object propValue = prop.GetValue(type, null);
-                        args.Add(propValue.ToString());
-                    }
-                }
-            }
-
-            args.Add("1.0");
-            if (objAttribute.OptionalParameters == AutoSuggestionOptionalParameters.INCR)
+            args.Add(value);
+            args.Add(score.ToString());
+            if (increment is true)
             {
                 args.Add("INCR");
             }
 
-            if (objAttribute.Payload != null)
+            if (objAttribute.Payload && jsonpayload != null)
             {
                 args.Add("PAYLOAD");
+                var json = JsonSerializer.Serialize(jsonpayload, Options);
+                args.Add(json);
             }
 
             return args.ToArray();
