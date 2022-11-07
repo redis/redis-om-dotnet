@@ -225,13 +225,17 @@ namespace Redis.OM
         /// Get completion suggestions for a prefix.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
-        /// <param name="key">is suggestion dictionary key.</param>
+        /// <param name="item">is suggestion dictionary key.</param>
         /// <param name="prefix">prefix to complete on.</param>
+        /// <param name="fuzzy">Optional type performs a fuzzy prefix search.</param>
+        /// <param name="max">Optional type limits the results to a maximum of num (default: 5).</param>
+        /// <param name="withscores">Optional type also returns the score of each suggestion.</param>
+        /// <param name="withpayloads">Optional type returns optional payloads saved along with the suggestions.</param>
         /// <returns>List of string suggestions for prefix.</returns>
-        public static List<string> SuggestionGet(this IRedisConnection connection, string key, string prefix)
+        public static List<string> SuggestionGet(this IRedisConnection connection, object item, string prefix, bool? fuzzy = false, int? max = 0, bool? withscores = false, bool? withpayloads = false)
         {
-            var args = new[] { key, prefix, "FUZZY" };
             var ret = new List<string>();
+            var args = item.GetType().SerializeGetSuggestions(prefix, fuzzy, max, withscores, withpayloads);
             var res = connection.Execute("FT.SUGGET", args).ToArray();
             for (var i = 0; i < res.Length; i++)
             {

@@ -7,8 +7,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using Newtonsoft.Json.Linq;
 using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
@@ -624,13 +622,6 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public List<string> GetSuggetion(T item, string prefix)
-        {
-            var indexName = item.GetType().SerializeSuggestions().First();
-            return ((RedisQueryProvider)Provider).Connection.SuggestionGet(indexName, prefix);
-        }
-
-        /// <inheritdoc/>
         public int AddSuggestion(T item, string value, float score, bool increment = false,  object? payload = null)
         {
             return ((RedisQueryProvider)Provider).Connection.SuggestionAdd(item, value, score, increment, payload);
@@ -647,6 +638,12 @@ namespace Redis.OM.Searching
         public long LengthOfSuggestion(string key)
         {
             return ((RedisQueryProvider)Provider).Connection.SuggestionStringLength(key);
+        }
+
+        /// <inheritdoc/>
+        public List<string> GetSuggetion(T item, string prefix, bool fuzzy = false, int? max = 0, bool withscores = false, bool withpayloads = false)
+        {
+            return ((RedisQueryProvider)Provider).Connection.SuggestionGet(item, prefix, fuzzy, max, withscores, withpayloads);
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)

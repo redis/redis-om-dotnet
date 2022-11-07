@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 
 namespace Redis.OM.Searching
@@ -243,13 +244,17 @@ namespace Redis.OM.Searching
         /// <returns>A dictionary correlating the ids provided to the objects in Redis.</returns>
         Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids);
 
-       /// <summary>
-       /// Get suggestion for the given text.
-       /// </summary>
-       /// <param name="item">for same key.</param>
-       /// <param name="prefix">is suggestion string to index.</param>
-       /// <returns>First or default result.</returns>
-        List<string> GetSuggetion(T item, string prefix);
+        /// <summary>
+        /// Get completion suggestions for a prefix.
+        /// </summary>
+        /// <param name="item">for same key.</param>
+        /// <param name="prefix">prefix to complete on.</param>
+        /// <param name="fuzzy">Optional type performs a fuzzy prefix search.</param>
+        /// <param name="max">Optional type limits the results to a maximum of num (default: 5).</param>
+        /// <param name="withscores">Optional type also returns the score of each suggestion.</param>
+        /// <param name="withpayloads">Optional type returns optional payloads saved along with the suggestions.</param>
+        /// <returns>List of string suggestions for prefix.</returns>
+        List<string> GetSuggetion(T item, string prefix, bool fuzzy = false, int? max = 0, bool withscores = false, bool withpayloads = false);
 
         /// <summary>
         /// Add suggestion for the given text.

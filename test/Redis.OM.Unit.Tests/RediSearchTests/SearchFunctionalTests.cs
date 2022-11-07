@@ -918,11 +918,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var person2 = new Person() { Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" } };
             collection.Insert(person1); 
             collection.Insert(person2);
-            collection.AddSuggestion(person2,person2.Name, 1, false, person1);
+            collection.AddSuggestion(person2,person2.Name, 1);
             collection.AddSuggestion(person2, "Rob", 1 , true);
             collection.AddSuggestion(person2, "Bob", 1);
             var addedSuggestionCount = collection.AddSuggestion(person2, "Bobby", 1);
             var listOfSuggestions = collection.GetSuggetion(person2, "Ro");
+            Assert.Equal(4, addedSuggestionCount);
+            Assert.Contains(listOfSuggestions, x => x == person2.NickNames.ElementAtOrDefault(1));
+            Assert.Contains(listOfSuggestions, x => x == person2.Name);
+        }
+        [Fact]
+        public void TestAddSuggestionWithOptionalParameters()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person1 = new Person() { Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" } };
+            var person2 = new Person() { Name = "Robert", Age = 21, NickNames = new[] { "Bobby", "Rob", "Bob" } };
+            collection.Insert(person1);
+            collection.Insert(person2);
+            collection.AddSuggestion(person2, person2.Name, 1, false, person1);
+            collection.AddSuggestion(person2, "Rob", 1, true);
+            collection.AddSuggestion(person2, "Bob", 1);
+            var addedSuggestionCount = collection.AddSuggestion(person2, "Bobby", 1);
+            var listOfSuggestions = collection.GetSuggetion(person2, "Ro", true, 3, false, true);
             Assert.Equal(4, addedSuggestionCount);
             Assert.Contains(listOfSuggestions, x => x == person2.NickNames.ElementAtOrDefault(1));
             Assert.Contains(listOfSuggestions, x => x == person2.Name);
