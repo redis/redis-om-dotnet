@@ -622,7 +622,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public int AddSuggestion(T item, string value, float score, bool increment = false,  object? payload = null)
+        public long AddSuggestion(T item, string value, float score, bool increment = false,  object? payload = null)
         {
             return ((RedisQueryProvider)Provider).Connection.SuggestionAdd(item, value, score, increment, payload);
         }
@@ -635,9 +635,10 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public long LengthOfSuggestion(string key)
+        public long LengthOfSuggestion(T item)
         {
-            return ((RedisQueryProvider)Provider).Connection.SuggestionStringLength(key);
+            var indexName = item.GetType().SerializeSuggestions().First();
+            return ((RedisQueryProvider)Provider).Connection.SuggestionStringLength(indexName);
         }
 
         /// <inheritdoc/>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -262,37 +263,32 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Get completion suggestions for a prefix.
+        /// Delete suggestion with given suggestion string.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
         /// <param name="key">is suggestion dictionary key.</param>
         /// <param name="suggestionstring">suggestion string to index.</param>
-        /// <returns>.</returns>
+        /// <returns>if the string was found and deleted.</returns>
         public static bool SuggestionDelete(this IRedisConnection connection, string key, string suggestionstring)
         {
-            try
+            var args = new[] { key, suggestionstring };
+            var result = connection.Execute("FT.SUGDEL", args);
+            if (result == 0)
             {
-                var args = new[] { key, suggestionstring };
-                connection.Execute("FT.SUGDEL", args);
-                return true;
+                throw new RedisIndexingException("Given SuggestionString is added to suggestion index");
             }
-            catch (Exception ex)
+            else
             {
-                if (ex.Message.Contains("Suggestion dictionary key not created"))
-                {
-                    return false;
-                }
-
-                throw;
+                return true;
             }
         }
 
         /// <summary>
-        /// Get completion suggestions for a prefix.
+        /// Get suggestions length added in redis.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
         /// <param name="key">is suggestion dictionary key.</param>
-        /// <returns>.</returns>
+        /// <returns>length of the given key which is added to suggestions.</returns>
         public static long SuggestionStringLength(this IRedisConnection connection, string key)
         {
             var args = new[] { key };

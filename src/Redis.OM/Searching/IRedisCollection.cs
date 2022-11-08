@@ -264,22 +264,22 @@ namespace Redis.OM.Searching
         /// <param name="score">floating point number of the suggestion string's weight.</param>
         /// <param name="increment">increment the score value.</param>
         /// <param name="payload">adding jsontype payload with suggestion string.</param>
-        /// <returns>First or default result.</returns>
-        int AddSuggestion(T item, string value, float score, bool increment = false, object? payload = null);
+        /// <returns>A type return long.</returns>
+        long AddSuggestion(T item, string value, float score, bool increment = false, object? payload = null);
 
         /// <summary>
         /// Delete a string from a suggestion index.
         /// </summary>
         /// <param name="item">for same key.</param>
         /// <param name="sugstring">is suggestion string to index.</param>
-        /// <returns>First or default result.</returns>
+        /// <returns>if the string was found and deleted.</returns>
         bool DelSuggestion(T item, string sugstring);
 
         /// <summary>
         /// Get the size of an auto-complete suggestion dictionary.
         /// </summary>
-        /// <param name="key">for same key.</param>
-        /// <returns>First or default result.</returns>
-        long LengthOfSuggestion(string key);
+        /// <param name="item">for same key.</param>
+        /// <returns>length of the given key which is added to suggestions.</returns>
+        long LengthOfSuggestion(T item);
     }
 }
