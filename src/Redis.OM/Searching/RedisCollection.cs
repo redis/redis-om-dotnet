@@ -621,32 +621,6 @@ namespace Redis.OM.Searching
             return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
         }
 
-        /// <inheritdoc/>
-        public long AddSuggestion(T item, string value, float score, bool increment = false,  object? payload = null)
-        {
-            return ((RedisQueryProvider)Provider).Connection.SuggestionAdd(item, value, score, increment, payload);
-        }
-
-        /// <inheritdoc/>
-        public bool DelSuggestion(T item, string sugstring)
-        {
-            var indexName = item.GetType().SerializeSuggestions().First();
-            return ((RedisQueryProvider)Provider).Connection.SuggestionDelete(indexName, sugstring);
-        }
-
-        /// <inheritdoc/>
-        public long LengthOfSuggestion(T item)
-        {
-            var indexName = item.GetType().SerializeSuggestions().First();
-            return ((RedisQueryProvider)Provider).Connection.SuggestionStringLength(indexName);
-        }
-
-        /// <inheritdoc/>
-        public List<string> GetSuggetion(T item, string prefix, bool fuzzy = false, int? max = 0, bool withscores = false, bool withpayloads = false)
-        {
-            return ((RedisQueryProvider)Provider).Connection.SuggestionGet(item, prefix, fuzzy, max, withscores, withpayloads);
-        }
-
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
         {
             return f.Method;
