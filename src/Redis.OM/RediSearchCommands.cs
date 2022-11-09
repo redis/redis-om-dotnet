@@ -223,7 +223,7 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Get completion suggestions for a prefix.
+        /// Get a list of suggestions for a string.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
         /// <param name="type">the type to get suggestion dictionary key.</param>
@@ -247,7 +247,7 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Add suggestions for the given string.
+        /// Adds a suggestion string to an auto-suggestion dictionary.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
         /// <param name="type">the type to get suggestion dictionary key.</param>
@@ -263,7 +263,7 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Delete suggestion with given suggestion string.
+        /// Deletes a suggestion string from an auto-suggestion dictionary.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
         /// <param name="type">the type to get suggestion dictionary key.</param>
@@ -285,11 +285,11 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Get suggestions length added in redis.
+        /// Get auto-suggestion dictionary length.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
         /// <param name="type">the type to get suggestion dictionary key.</param>
-        /// <returns>length of the given key which is added to suggestions.</returns>
+        /// <returns>Returns the size of an auto-suggestion dictionary.</returns>
         public static long SuggestionStringLength(this IRedisConnection connection, Type type)
         {
             var indexName = type.SerializeSuggestions().First();
