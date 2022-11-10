@@ -1,7 +1,10 @@
 ﻿using Redis.OM.Contracts;
 using System;
+using Redis.OM.Modeling;
 using Redis.OM.Unit.Tests.RediSearchTests;
 using Xunit;
+using System.Linq;
+using Redis.OM.Unit.Tests.AutoSuggestionTest;
 
 namespace Redis.OM.Unit.Tests
 {
@@ -24,6 +27,7 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(ObjectWithTwoStopwords));
             Connection.CreateIndex(typeof(ObjectWithDateTime));
             Connection.CreateIndex(typeof(ObjectWithDateTimeHash));
+            Connection.CreateIndex(typeof(Airport));
         }
 
         private IRedisConnection _connection = null;
@@ -57,7 +61,8 @@ namespace Redis.OM.Unit.Tests
             Connection.DropIndexAndAssociatedRecords(typeof(ClassForEmptyRedisCollection));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithDateTime));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithDateTimeHash));
-            
+            Connection.DropIndexAndAssociatedRecords(typeof(Airport));
+            Connection.Unlink(typeof(Airport).SerializeGetSuggestions().First());
         }
     }
 }

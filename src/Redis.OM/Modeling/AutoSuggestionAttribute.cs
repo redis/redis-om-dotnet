@@ -9,14 +9,9 @@ namespace Redis.OM.Modeling
     public class AutoSuggestionAttribute : Attribute
     {
         /// <summary>
-        /// Gets or sets the string value for the AutoSuggestion.
+        /// Gets or sets the name of the index, will default to sugg:className.
         /// </summary>
         public string? Key { get; set; }
-
-        /// <summary>
-        /// Gets or sets the float Score for the AutoSuggestion.
-        /// </summary>
-        public AutoSuggestionOptionalParameters? OptionalParameters { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether gets or sets payload for the AutoSuggestion.

@@ -5,11 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json.Linq;
-using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
-using Redis.OM.Searching.Query;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -908,64 +906,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             CompareTimestamps(timestamp, first.Timestamp);
             CompareTimestamps(timestamp, first.NullableTimestamp.Value);
             Assert.Equal(obj.Id, first.Id);
-        }
-
-       [Fact]
-        public void TestAddSuggestion()
-        {
-            var collection = new RedisCollection<Person>(_connection);
-            var person1 = new Person() { Name = "Robert Bob", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" } };
-            var person2 = new Person() { Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" } };
-            collection.Insert(person1); 
-            collection.Insert(person2);
-            var type = typeof(Person);
-            _connection.SuggestionAdd(type, person2.Name, 1);
-            _connection.SuggestionAdd(type, "Rob", 1);
-            _connection.SuggestionAdd(type, "Bob", 1);
-            var addedSuggestionCount = _connection.SuggestionAdd(type, "Bobby", 1);
-            var listOfSuggestions = _connection.SuggestionGet(type, "Ro");
-            _connection.Unlink(typeof(Person).SerializeGetSuggestions().First());
-            Assert.Equal(4, addedSuggestionCount);
-            Assert.Contains(listOfSuggestions, x => x == person2.NickNames.ElementAtOrDefault(1));
-            Assert.Contains(listOfSuggestions, x => x == person2.Name);
-        }
-
-        [Fact]
-        public void TestSuggestionWithOptionalParameters()
-        {
-            var collection = new RedisCollection<Person>(_connection);
-            var person1 = new Person() { Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" } };
-            var person2 = new Person() { Name = "Robert", Age = 21, NickNames = new[] { "Bobby", "Rob", "Bob" } };
-            collection.Insert(person1);
-            collection.Insert(person2);
-            var type = typeof(Person);
-            _connection.SuggestionAdd(type, person2.Name, 1, false, person2);
-            _connection.SuggestionAdd(type, "Rob", 1, true);
-            _connection.SuggestionAdd(type, "Bob", 1);
-            var addedSuggestionCount = _connection.SuggestionAdd(type, "Bobby", 1);
-            var listOfSuggestions = _connection.SuggestionGet(type, "Ro", true, 3, false, true);
-            _connection.Unlink(typeof(Person).SerializeGetSuggestions().First());
-            Assert.Equal(4, addedSuggestionCount);
-            Assert.Contains(listOfSuggestions, x => x == person2.NickNames.ToString());
-        }
-
-        [Fact]
-        public void TestDeleteAndLengthOfSuggestion()
-        {
-            var collection = new RedisCollection<Person>(_connection);
-            var person1 = new Person() { Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" } };
-            var person2 = new Person() { Name = "Robert", Age = 21, NickNames = new[] { "Bobby", "Rob", "Bob" } };
-            collection.Insert(person1);
-            collection.Insert(person2);
-            var type = typeof(Person);
-            _connection.SuggestionAdd(type, person2.Name, 1, false, person2);
-            _connection.SuggestionAdd(type, "Rob", 1, true);
-            _connection.SuggestionAdd(type, "Bob", 1);
-            _connection.SuggestionDelete(type, "Bob");
-            var addedSuggestionCount = _connection.SuggestionAdd(type, "Bobby", 1);
-            var lengthOfSuggestionAdded = _connection.SuggestionStringLength(type);
-            _connection.Unlink(typeof(Person).SerializeGetSuggestions().First());
-            Assert.Equal(lengthOfSuggestionAdded, addedSuggestionCount);
         }
     }
 }

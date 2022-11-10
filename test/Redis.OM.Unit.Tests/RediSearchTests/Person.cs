@@ -5,7 +5,6 @@ using Redis.OM.Modeling;
 namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     [Document(StorageType = StorageType.Json, IndexName = "person-idx")]
-    [AutoSuggestion(Payload= true)]
     public partial class Person
     {
         [RedisIdField]

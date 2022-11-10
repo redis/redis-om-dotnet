@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
 using Redis.OM.Searching.Query;
-using StackExchange.Redis;
 
 namespace Redis.OM
 {
@@ -233,7 +230,7 @@ namespace Redis.OM
         /// <param name="withscores">Optional type also returns the score of each suggestion.</param>
         /// <param name="withpayloads">Optional type returns optional payloads saved along with the suggestions.</param>
         /// <returns>List of string suggestions for prefix.</returns>
-        public static List<string> SuggestionGet(this IRedisConnection connection, Type type, string prefix, bool? fuzzy = false, int? max = 0, bool? withscores = false, bool? withpayloads = false)
+        public static List<string> GetSuggestion(this IRedisConnection connection, Type type, string prefix, bool? fuzzy = false, int? max = 0, bool? withscores = false, bool? withpayloads = false)
         {
             var ret = new List<string>();
             var args = type.SerializeGetSuggestions(prefix, fuzzy, max, withscores, withpayloads);
@@ -256,7 +253,7 @@ namespace Redis.OM
         /// <param name="increment">increment score value.</param>
         /// <param name="payload">jsonpayload.</param>
         /// <returns>A type return long.</returns>
-        public static long SuggestionAdd(this IRedisConnection connection, Type type, string value, float score, bool increment = false, object? payload = null)
+        public static long AddSuggestion(this IRedisConnection connection, Type type, string value, float score, bool increment = false, object? payload = null)
         {
             var args = type.SerializeSuggestions(value, score, increment, payload);
             return connection.Execute("FT.SUGADD", args);
@@ -269,7 +266,7 @@ namespace Redis.OM
         /// <param name="type">the type to get suggestion dictionary key.</param>
         /// <param name="suggestionstring">suggestion string to index.</param>
         /// <returns>if the string was found and deleted.</returns>
-        public static bool SuggestionDelete(this IRedisConnection connection, Type type, string suggestionstring)
+        public static bool DeleteSuggestion(this IRedisConnection connection, Type type, string suggestionstring)
         {
             var key = type.SerializeSuggestions().First();
             var args = new[] { key, suggestionstring };
@@ -290,7 +287,7 @@ namespace Redis.OM
         /// <param name="connection">the connection to redis.</param>
         /// <param name="type">the type to get suggestion dictionary key.</param>
         /// <returns>Returns the size of an auto-suggestion dictionary.</returns>
-        public static long SuggestionStringLength(this IRedisConnection connection, Type type)
+        public static long GetSuggestionLength(this IRedisConnection connection, Type type)
         {
             var indexName = type.SerializeSuggestions().First();
             return connection.Execute("FT.SUGLEN", indexName);
