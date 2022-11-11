@@ -19,7 +19,7 @@ namespace Redis.OM.Modeling
         /// Pull out the AutoSuggestion attribute from a Type.
         /// </summary>
         /// <param name="type">The type to pull the attribute out from.</param>
-        /// <returns>A documentation attribute.</returns>
+        /// <returns>A AutoSuggestion attribute.</returns>
         internal static AutoSuggestionAttribute? GetObjectDefinition(this Type type)
         {
             return Attribute.GetCustomAttribute(
@@ -30,7 +30,7 @@ namespace Redis.OM.Modeling
         /// <summary>
         /// Serialize .
         /// </summary>
-        /// <param name="type">The type to be indexed.</param>
+        /// <param name="type">The type to get suggestion dictionary key.</param>
         /// <param name="value">string value for suggestion.</param>
         /// <param name="score">score for the given string.</param>
         /// <param name="increment">whether increment the score value.</param>
@@ -78,7 +78,7 @@ namespace Redis.OM.Modeling
         /// <summary>
         /// Serialize .
         /// </summary>
-        /// <param name="type">The type to be indexed.</param>
+        /// <param name="type">the type to get suggestion dictionary key.</param>
         /// <param name="prefix">prefix to complete on.</param>
         /// <param name="fuzzy">Optional type performs a fuzzy prefix search.</param>
         /// <param name="max">Optional type limits the results to a maximum of num (default: 5).</param>
@@ -86,7 +86,7 @@ namespace Redis.OM.Modeling
         /// <param name="withpayloads">Optional type returns optional payloads saved along with the suggestions.</param>
         /// <exception cref="InvalidOperationException">Thrown if type provided is not decorated with a RedisObjectDefinitionAttribute.</exception>
         /// <returns>An array of strings (the serialized args for redis).</returns>
-        internal static string[] SerializeGetSuggestions(this Type type, string prefix = " ", bool? fuzzy = false, int? max = 0, bool? withscores = false, bool? withpayloads = false)
+        internal static string[] SerializeGetSuggestions(this Type type, string prefix = " ", bool fuzzy = false, int? max = 0, bool withscores = false, bool withpayloads = false)
         {
             var objAttribute = Attribute.GetCustomAttribute(
                 type,

@@ -16,7 +16,7 @@ namespace Redis.OM.Unit.Tests.AutoSuggestionTest
         private readonly IRedisConnection _connection = null;
 
         [Fact]
-        public void TestAddSuggestion()
+        public void TestAddAndGetSuggestion()
         {
             var collection = new RedisCollection<Airport>(_connection);
             var airport1 = new Airport() { Name = "Indira Gandhi International Airport", Code = "DEL", State = "Delhi" };

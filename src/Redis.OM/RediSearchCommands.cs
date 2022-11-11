@@ -268,16 +268,28 @@ namespace Redis.OM
         /// <returns>if the string was found and deleted.</returns>
         public static bool DeleteSuggestion(this IRedisConnection connection, Type type, string suggestionstring)
         {
-            var key = type.SerializeSuggestions().First();
-            var args = new[] { key, suggestionstring };
-            var result = connection.Execute("FT.SUGDEL", args);
-            if (result == 0)
+            try
             {
-                throw new RedisIndexingException("Given SuggestionString is added to suggestion index");
+                var key = type.SerializeSuggestions().First();
+                var args = new[] { key, suggestionstring };
+                var result = connection.Execute("FT.SUGDEL", args);
+                if (result == 0)
+                {
+                    throw new Exception("Given suggestionString is not added to suggestion dictionary");
+                }
+                else
+                {
+                    return true;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return true;
+                if (ex.Message.Contains("Given suggestionString is not added to suggestion dictionary"))
+                {
+                    return false;
+                }
+
+                throw;
             }
         }
 
