@@ -230,7 +230,7 @@ namespace Redis.OM
         /// <param name="withscores">Optional type also returns the score of each suggestion.</param>
         /// <param name="withpayloads">Optional type returns optional payloads saved along with the suggestions.</param>
         /// <returns>List of string suggestions for prefix.</returns>
-        public static List<string> GetSuggestion(this IRedisConnection connection, Type type, string prefix, bool? fuzzy = false, int? max = 0, bool? withscores = false, bool? withpayloads = false)
+        public static List<string> GetSuggestion(this IRedisConnection connection, Type type, string prefix, bool fuzzy = false, int? max = 0, bool withscores = false, bool withpayloads = false)
         {
             var ret = new List<string>();
             var args = type.SerializeGetSuggestions(prefix, fuzzy, max, withscores, withpayloads);
