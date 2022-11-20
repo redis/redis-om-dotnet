@@ -33,7 +33,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed on {command} {string.Join(" ", args)}", ex);
+                throw new Exception($"{ex.Message}\r\nFailed on {command} {string.Join(" ", args)}", ex);
             }
         }
 
@@ -47,7 +47,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed on {command} {string.Join(" ", args)}", ex);
+                throw new Exception($"{ex.Message}\r\nFailed on {command} {string.Join(" ", args)}", ex);
             }
         }
 
