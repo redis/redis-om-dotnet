@@ -2480,5 +2480,39 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1000"
             ));
         }
+
+        [Fact]
+        public void SearchNumericFieldContainsList()
+        {
+            var potentialTagFieldValues = new List<int?> { 35, 50, 60 };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object).Where(x => potentialTagFieldValues.Contains(x.Age));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+               "FT.SEARCH",
+               "person-idx",
+               "@Age:[35 35]|@Age:[50 50]|@Age:[60 60]",
+               "LIMIT",
+               "0",
+               "100"));
+        }
+
+        [Fact]
+        public void SearchTagFieldContainsList()
+        {
+            var potentialTagFieldValues = new List<string> { "Steve", "Alice", "Bob" };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object).Where(x => potentialTagFieldValues.Contains(x.TagField));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{Steve|Alice|Bob})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
     }
 }

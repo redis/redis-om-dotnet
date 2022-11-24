@@ -588,7 +588,7 @@ namespace Redis.OM.Common
             Type type;
             string memberName;
             string literal;
-            if (exp.Object is MemberExpression)
+            if (exp.Object is MemberExpression && exp.Object.ToString().Contains("x."))
             {
                 expression = exp.Object as MemberExpression;
             }
@@ -602,6 +602,11 @@ namespace Redis.OM.Common
                 {
                     propertyExpression = (MemberExpression)exp.Arguments.First();
                     valuesExpression = (MemberExpression)exp.Arguments.Last();
+                }
+                else if (propertyExpression == valuesExpression)
+                {
+                    propertyExpression = (MemberExpression)exp.Arguments.First();
+                    valuesExpression = (MemberExpression)exp.Object;
                 }
 
                 var attribute = DetermineSearchAttribute(propertyExpression);
