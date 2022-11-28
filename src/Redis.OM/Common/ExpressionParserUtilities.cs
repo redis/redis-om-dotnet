@@ -588,7 +588,7 @@ namespace Redis.OM.Common
             Type type;
             string memberName;
             string literal;
-            if (exp.Object is MemberExpression && exp.Object.ToString().Contains("x."))
+            if (exp.Object is MemberExpression && exp.Object.ToString().StartsWith("x."))
             {
                 expression = exp.Object as MemberExpression;
             }
