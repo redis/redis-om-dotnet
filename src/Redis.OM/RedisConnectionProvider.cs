@@ -8,7 +8,7 @@ namespace Redis.OM
     /// <summary>
     /// Provides a connection to redis.
     /// </summary>
-    public class RedisConnectionProvider
+    public class RedisConnectionProvider : IRedisConnectionProvider
     {
         private readonly IConnectionMultiplexer _mux;
 
