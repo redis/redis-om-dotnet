@@ -966,5 +966,40 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var countPeople = collection.Where(x => x.Age >= 17 && x.Age <= 21).ToList().Count;
             Assert.Equal(people.Count, countPeople);
         }
+
+        [Fact]
+        public async Task TestListContains()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person1 = new Person() { Name = "Ferb", Age = 14, NickNames = new[] { "Feb", "Fee" } };
+            var person2 = new Person() { Name = "Phineas", Age = 14, NickNames = new[] { "Phineas", "Triangle Head", "Phine" } };
+
+            await collection.InsertAsync(person1);
+            await collection.InsertAsync(person2);
+
+            var names = new List<string> { "Ferb", "Phineas" };
+            var people = await collection.Where(x => names.Contains(x.Name)).ToListAsync();
+
+            Assert.Contains(people, x => x.Id == person1.Id);
+            Assert.Contains(people, x => x.Id == person2.Id);
+        }
+
+        [Fact]
+        public async Task TestListMultipleContains()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person1 = new Person() { Name = "Ferb", Age = 14, NickNames = new[] { "Feb", "Fee" }, TagField = "Ferb"  };
+            var person2 = new Person() { Name = "Phineas", Age = 14, NickNames = new[] { "Phineas", "Triangle Head", "Phine" }, TagField = "Phineas" };
+
+            await collection.InsertAsync(person1);
+            await collection.InsertAsync(person2);
+
+            var names = new List<string> { "Ferb", "Phineas" };
+            var ages = new List<int?> { 14, 50, 60 };
+            var people = await collection.Where(x => names.Contains(x.Name) && names.Contains(x.TagField) && ages.Contains(x.Age)).ToListAsync();
+
+            Assert.Contains(people, x => x.Id == person1.Id);
+            Assert.Contains(people, x => x.Id == person2.Id);
+        }
     }
 }
