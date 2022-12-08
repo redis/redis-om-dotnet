@@ -588,12 +588,7 @@ namespace Redis.OM.Common
             Type type;
             string memberName;
             string literal;
-            if (exp.Object is MemberExpression && exp.Object.ToString().StartsWith("x."))
-            {
-                expression = exp.Object as MemberExpression;
-            }
-            else if (exp.Arguments.LastOrDefault() is MemberExpression &&
-                     exp.Arguments.FirstOrDefault() is MemberExpression)
+            if (exp.Arguments.LastOrDefault() is MemberExpression && exp.Arguments.FirstOrDefault() is MemberExpression)
             {
                 var propertyExpression = (MemberExpression)exp.Arguments.Last();
                 var valuesExpression = (MemberExpression)exp.Arguments.First();
@@ -643,6 +638,11 @@ namespace Redis.OM.Common
                 ret = ret.Substring(0, ret.Length - 1);
 
                 return ret;
+            }
+
+            if (exp.Object is MemberExpression)
+            {
+                expression = exp.Object as MemberExpression;
             }
             else if (exp.Arguments.FirstOrDefault() is MemberExpression)
             {

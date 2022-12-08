@@ -2514,5 +2514,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100"));
         }
+        
+        [Fact]
+        public void SearchTagFieldAndTextListContainsWithEscapes()
+        {
+            var potentialTagFieldValues = new List<string> { "steve@example.com", "alice@example.com", "bob@example.com" };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object).Where(x => potentialTagFieldValues.Contains(x.TagField) || potentialTagFieldValues.Contains(x.Name));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((@TagField:{steve\\@example\\.com|alice\\@example\\.com|bob\\@example\\.com}) | (@Name:steve@example.com|alice@example.com|bob@example.com))",
+                "LIMIT",
+                "0",
+                "100"));
+        }
     }
 }
