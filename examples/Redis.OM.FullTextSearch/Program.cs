@@ -19,7 +19,7 @@ connection.CreateIndex(typeof(Movie));
 connection.CreateIndex(typeof(Awards));
 
 var redisHelper = new RedisHelper(provider);
-redisHelper.InitializeCustomers();
+redisHelper.InitializeMovies();
 
 //BasicFirstOrDefaultQuery
 // get first or default null value from movies redis limit set to 0 to 1

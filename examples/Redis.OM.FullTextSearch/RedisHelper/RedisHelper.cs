@@ -13,7 +13,7 @@ namespace Redis.OM.FullTextSearch.RedisHelper
             movieCollection = provider.RedisCollection<Movie>();
         }
 
-        public void InitializeCustomers()
+        public void InitializeMovies()
         {
             var count = movieCollection.Count();
             if (count > 0)
@@ -22,7 +22,7 @@ namespace Redis.OM.FullTextSearch.RedisHelper
                 return;
             }
 
-            Console.WriteLine("Initialize Customer Data...");
+            Console.WriteLine("Initialize Movie Data...");
 
             movieCollection.Insert(new Movie()
             {
