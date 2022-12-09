@@ -70,6 +70,24 @@ namespace Redis.OM.Searching
         Task<string> InsertAsync(T item, TimeSpan timeSpan);
 
         /// <summary>
+        /// Inserts an item into redis.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <param name="when">Condition to insert the document under.</param>
+        /// <param name="timeSpan">The expiration time of the document (TTL).</param>
+        /// <returns>the Id of the newly inserted item, or null if not inserted.</returns>
+        Task<string?> InsertAsync(T item, WhenKey when, TimeSpan? timeSpan = null);
+
+        /// <summary>
+        /// Inserts an item into redis.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <param name="when">Condition to insert the document under.</param>
+        /// <param name="timeSpan">The expiration time of the document (TTL).</param>
+        /// <returns>the Id of the newly inserted item, or null if not inserted.</returns>
+        string? Insert(T item, WhenKey when, TimeSpan? timeSpan = null);
+
+        /// <summary>
         /// finds an item by it's ID or keyname.
         /// </summary>
         /// <param name="id">the id to lookup.</param>

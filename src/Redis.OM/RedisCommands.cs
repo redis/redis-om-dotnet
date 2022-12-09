@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
-using StackExchange.Redis;
 
 namespace Redis.OM
 {
@@ -188,6 +187,48 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="json">the json.</param>
+        /// <param name="when">XX - set if exist, NX - set if not exist.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, string json, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            var argList = new List<string> { timeSpan != null ? ((long)timeSpan.Value.TotalMilliseconds).ToString() : "-1", path, json };
+            switch (when)
+            {
+                case WhenKey.Exists:
+                    argList.Add("XX");
+                    break;
+                case WhenKey.NotExists:
+                    argList.Add("NX");
+                    break;
+            }
+
+            return await connection.CreateAndEvalAsync(nameof(Scripts.JsonSetWithExpire), new[] { key }, argList.ToArray()) == 1;
+        }
+
+        /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="obj">the object to serialize to json.</param>
+        /// <param name="when">XX - set if exist, NX - set if not exist.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            var json = JsonSerializer.Serialize(obj, Options);
+            return await connection.JsonSetAsync(key, path, json, when, timeSpan);
+        }
+
+        /// <summary>
         /// Set's values in a hash.
         /// </summary>
         /// <param name="connection">the connection.</param>
@@ -287,6 +328,48 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="json">the json.</param>
+        /// <param name="when">XX - set if exist, NX - set if not exist.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, string json, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            var argList = new List<string> { timeSpan != null ? ((long)timeSpan.Value.TotalMilliseconds).ToString() : "-1", path, json };
+            switch (when)
+            {
+                case WhenKey.Exists:
+                    argList.Add("XX");
+                    break;
+                case WhenKey.NotExists:
+                    argList.Add("NX");
+                    break;
+            }
+
+            return connection.CreateAndEval(nameof(Scripts.JsonSetWithExpire), new[] { key }, argList.ToArray()) == 1;
+        }
+
+        /// <summary>
+        /// Sets a value as JSON in redis.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="key">the key for the object.</param>
+        /// <param name="path">the path within the json to set.</param>
+        /// <param name="obj">the object to serialize to json.</param>
+        /// <param name="when">XX - set if exist, NX - set if not exist.</param>
+        /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
+        /// <returns>whether the operation succeeded.</returns>
+        public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            var json = JsonSerializer.Serialize(obj, Options);
+            return connection.JsonSet(key, path, json, when, timeSpan);
+        }
+
+        /// <summary>
         /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
         /// </summary>
         /// <param name="connection">connection to redis.</param>
@@ -313,6 +396,108 @@ namespace Redis.OM
             }
 
             return id;
+        }
+
+        /// <summary>
+        /// Serializes an object to either hash or json (depending on how it's decorated, and saves it to redis conditionally based on the WhenKey,
+        /// NOTE: <see cref="WhenKey.Exists"/> will replace the object in redis if it exists.
+        /// </summary>
+        /// <param name="connection">The connection to redis.</param>
+        /// <param name="obj">The object to save.</param>
+        /// <param name="when">The condition for when to set the object.</param>
+        /// <param name="timespan">The length of time before the key expires.</param>
+        /// <returns>the key for the object, null if nothing was set.</returns>
+        public static string? Set(this IRedisConnection connection, object obj, WhenKey when, TimeSpan? timespan = null)
+        {
+            var id = obj.SetId();
+            var type = obj.GetType();
+
+            if (Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) is not DocumentAttribute attr || attr.StorageType == StorageType.Hash)
+            {
+                if (when == WhenKey.Always)
+                {
+                    if (timespan.HasValue)
+                    {
+                        return connection.Set(obj, timespan.Value);
+                    }
+
+                    return connection.Set(obj);
+                }
+
+                var kvps = obj.BuildHashSet();
+                var argsList = new List<string>();
+                int? res = null;
+                argsList.Add(timespan != null ? ((long)timespan.Value.TotalMilliseconds).ToString() : "-1");
+                foreach (var kvp in kvps)
+                {
+                    argsList.Add(kvp.Key);
+                    argsList.Add(kvp.Value);
+                }
+
+                if (when == WhenKey.Exists)
+                {
+                    res = connection.CreateAndEval(nameof(Scripts.ReplaceHashIfExists), new[] { id }, argsList.ToArray());
+                }
+                else if (when == WhenKey.NotExists)
+                {
+                    res = connection.CreateAndEval(nameof(Scripts.HsetIfNotExists), new[] { id }, argsList.ToArray());
+                }
+
+                return res == 1 ? id : null;
+            }
+
+            return connection.JsonSet(id, "$", obj, when, timespan) ? id : null;
+        }
+
+        /// <summary>
+        /// Serializes an object to either hash or json (depending on how it's decorated, and saves it to redis conditionally based on the WhenKey,
+        /// NOTE: <see cref="WhenKey.Exists"/> will replace the object in redis if it exists.
+        /// </summary>
+        /// <param name="connection">The connection to redis.</param>
+        /// <param name="obj">The object to save.</param>
+        /// <param name="when">The condition for when to set the object.</param>
+        /// <param name="timespan">The length of time before the key expires.</param>
+        /// <returns>the key for the object, null if nothing was set.</returns>
+        public static async Task<string?> SetAsync(this IRedisConnection connection, object obj, WhenKey when, TimeSpan? timespan = null)
+        {
+            var id = obj.SetId();
+            var type = obj.GetType();
+
+            if (Attribute.GetCustomAttribute(type, typeof(DocumentAttribute)) is not DocumentAttribute attr || attr.StorageType == StorageType.Hash)
+            {
+                if (when == WhenKey.Always)
+                {
+                    if (timespan.HasValue)
+                    {
+                        return await connection.SetAsync(obj, timespan.Value);
+                    }
+
+                    return await connection.SetAsync(obj);
+                }
+
+                var kvps = obj.BuildHashSet();
+                var argsList = new List<string>();
+                int? res = null;
+                argsList.Add(timespan != null ? ((long)timespan.Value.TotalMilliseconds).ToString() : "-1");
+                foreach (var kvp in kvps)
+                {
+                    argsList.Add(kvp.Key);
+                    argsList.Add(kvp.Value);
+                }
+
+                if (when == WhenKey.Exists)
+                {
+                    res = await connection.CreateAndEvalAsync(nameof(Scripts.ReplaceHashIfExists), new[] { id }, argsList.ToArray());
+                }
+                else if (when == WhenKey.NotExists)
+                {
+                    res = await connection.CreateAndEvalAsync(nameof(Scripts.HsetIfNotExists), new[] { id }, argsList.ToArray());
+                }
+
+                return res == 1 ? id : null;
+            }
+
+            return await connection.JsonSetAsync(id, "$", obj, when, timespan) ? id : null;
         }
 
         /// <summary>
