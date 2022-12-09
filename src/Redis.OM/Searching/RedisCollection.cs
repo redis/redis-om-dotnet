@@ -585,6 +585,18 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
+        public Task<string?> InsertAsync(T item, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            return ((RedisQueryProvider)Provider).Connection.SetAsync(item, when, timeSpan);
+        }
+
+        /// <inheritdoc/>
+        public string? Insert(T item, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            return ((RedisQueryProvider)Provider).Connection.Set(item, when, timeSpan);
+        }
+
+        /// <inheritdoc/>
         public T? FindById(string id)
         {
             var prefix = typeof(T).GetKeyPrefix();
