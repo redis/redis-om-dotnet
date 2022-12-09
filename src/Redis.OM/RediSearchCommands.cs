@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
@@ -239,6 +240,46 @@ namespace Redis.OM
         /// Get a list of suggestions for a string.
         /// </summary>
         /// <param name="connection">the connection to redis.</param>
+        /// <param name="key">key for dic.</param>
+        /// <param name="prefix">prefix to complete on.</param>
+        /// <param name="suggestion">Suggestionoptions.</param>
+        /// <returns>List of string suggestions for prefix.</returns>
+        public static List<string> GetSuggestion(this IRedisConnection connection, string key, string prefix, Suggestion suggestion)
+        {
+            var ret = new List<string>();
+            var args = new List<string> { key, prefix };
+            suggestion.SerializeGetSuggestions(args);
+            var res = connection.Execute("FT.SUGGET", args.ToArray()).ToArray();
+            for (int i = 0; i < res.Length; i++)
+            {
+                ret.Add(res[i]);
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Get a list of suggestions for a string.
+        /// </summary>
+        /// <param name="connection">the connection to redis.</param>
+        /// <param name="args">.</param>
+        /// <returns>List of string suggestions for prefix.</returns>
+        public static List<string> GetSuggestion(this IRedisConnection connection, string[] args)
+        {
+            var ret = new List<string>();
+            var res = connection.Execute("FT.SUGGET", args).ToArray();
+            for (int i = 0; i < res.Length; i++)
+            {
+                ret.Add(res[i]);
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Get a list of suggestions for a string.
+        /// </summary>
+        /// <param name="connection">the connection to redis.</param>
         /// <param name="type">the type to get suggestion dictionary key.</param>
         /// <param name="prefix">prefix to complete on.</param>
         /// <param name="fuzzy">Optional type performs a fuzzy prefix search.</param>
@@ -296,6 +337,39 @@ namespace Redis.OM
             try
             {
                 var key = type.SerializeSuggestions().First();
+                var args = new[] { key, suggestionstring };
+                var result = connection.Execute("FT.SUGDEL", args);
+                if (result == 0)
+                {
+                    throw new Exception($"Given {suggestionstring} is not added to suggestion dictionary");
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains($"Given {suggestionstring} is not added to suggestion dictionary"))
+                {
+                    return false;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes a suggestion string from an auto-suggestion dictionary.
+        /// </summary>
+        /// <param name="connection">the connection to redis.</param>
+        /// <param name="key">the type to get suggestion dictionary key.</param>
+        /// <param name="suggestionstring">suggestion string to index.</param>
+        /// <returns>if the string was found and deleted.</returns>
+        public static bool DeleteSuggestion(this IRedisConnection connection, string key, string suggestionstring)
+        {
+            try
+            {
                 var args = new[] { key, suggestionstring };
                 var result = connection.Execute("FT.SUGDEL", args);
                 if (result == 0)

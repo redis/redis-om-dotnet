@@ -1,4 +1,5 @@
 ﻿using Redis.OM.Contracts;
+using Redis.OM.Modeling;
 using Redis.OM.Searching;
 using System;
 using System.Linq;
@@ -29,10 +30,10 @@ namespace Redis.OM.Unit.Tests.AutoSuggestionTest
             collection.Insert(airport2);
             collection.Insert(airport3);
             _connection.AddSuggestion(type, airport1.Name, 1);
-            _connection.AddSuggestion(type, airport1.Code, 1);
-            _connection.AddSuggestion(type, airport1.State, 1);
-            var listOfSuggestions = _connection.GetSuggestion(type, "De");
-            Assert.Equal(2, listOfSuggestions.Length);
+            _connection.AddSuggestion(type, airport1.Code, 1, false, airport1);
+            _connection.AddSuggestion(type, airport1.State, 1, false, airport1);
+            var listOfSuggestions = collection.GetSuggestions("De",sugg: Suggestion.Get().SetFuzzy().SetMax(1).SetWithPayload());
+            Assert.Equal(2, listOfSuggestions.Count());
         }
 
         [Fact]
@@ -48,7 +49,7 @@ namespace Redis.OM.Unit.Tests.AutoSuggestionTest
             _connection.AddSuggestion(type, "International Airport1", 1, false, airport1);
             _connection.AddSuggestion(type, "International Airport2", 1, false, airport2);
             _connection.AddSuggestion(type, "International Airport3", 1.0f, false, airport3);
-            var listOfSuggestions = _connection.GetSuggestion(type, "International", true, 3, false, true);
+            var listOfSuggestions = collection.GetSuggestions("International", true, 3, false, true);
             var query1 = listOfSuggestions.Skip(1).First();
             var query2 = listOfSuggestions.Skip(3).First();
             var query3 = listOfSuggestions.Skip(5).First();
@@ -73,7 +74,7 @@ namespace Redis.OM.Unit.Tests.AutoSuggestionTest
             _connection.AddSuggestion(type, airport3.Name, 1);
             _connection.AddSuggestion(type, airport3.State, 1);
             _connection.AddSuggestion(type, airport2.Code, 1);
-            _connection.DeleteSuggestion(type, "MAA");
+            collection.DeleteSuggestions("AAA");
             var addedSuggestionCount = _connection.AddSuggestion(type, "BLR", 1);
             var lengthOfAddSuggestioned = _connection.GetSuggestionLength(type);
             Assert.Equal(lengthOfAddSuggestioned, addedSuggestionCount);
@@ -140,5 +141,21 @@ namespace Redis.OM.Unit.Tests.AutoSuggestionTest
             var lengthOfAddSuggestioned = await _connection.GetSuggestionLengthAsync(type);
             Assert.Equal(lengthOfAddSuggestioned, addedSuggestionCount);
         }
+
+        /*[Fact]
+        public async Task DeleteEntityShouldDeleteSuggestion()
+        {
+            var collection = new RedisCollection<Airport>(_connection);
+            var airport1 = new Airport() { Name = "Indira Gandhi International Airport", Code = "DEL", State = "Delhi" };
+            var airport2 = new Airport() { Name = "Chennai International Airport", Code = "MAA", State = "Tamil Nadu" };
+            var airport3 = new Airport() { Name = "Kempegowda International Airport", Code = "BLR", State = "Karnataka" };
+            await collection.InsertAsync(airport1);
+            await collection.InsertAsync(airport2);
+            await collection.InsertAsync(airport3);
+            await _connection.AddSuggestionAsync(type, airport3.Name, 1);
+            await _connection.AddSuggestionAsync(type, airport3.State, 1);
+            await _connection.AddSuggestionAsync(type, airport2.Code, 1);
+            collection.Delete(airport1);
+        }*/
     }
 }

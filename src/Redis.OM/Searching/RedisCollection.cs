@@ -620,6 +620,27 @@ namespace Redis.OM.Searching
             return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
         }
 
+        /// <inheritdoc/>
+        public List<string> GetSuggestions(string suggestionString, bool fuzzy = false, int? max = 0, bool withscores = false, bool withpayloads = false)
+        {
+            var args = typeof(T).SerializeGetSuggestions(suggestionString, fuzzy, max, withscores, withpayloads);
+            return _connection.GetSuggestion(args);
+        }
+
+        /// <inheritdoc/>
+        public bool DeleteSuggestions(string suggestionString)
+        {
+            var key = typeof(T).SerializeSuggestions().First();
+            return _connection.DeleteSuggestion(key, suggestionString);
+        }
+
+        /// <inheritdoc/>
+        public List<string> GetSuggestions(string suggestionString, Suggestion sugg)
+        {
+            var key = typeof(T).SerializeSuggestions().First();
+            return _connection.GetSuggestion(key, suggestionString, sugg);
+        }
+
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
         {
             return f.Method;

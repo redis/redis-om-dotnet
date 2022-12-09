@@ -242,5 +242,31 @@ namespace Redis.OM.Searching
         /// <param name="ids">The Ids to look up.</param>
         /// <returns>A dictionary correlating the ids provided to the objects in Redis.</returns>
         Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids);
+
+        /// <summary>
+        /// Get list of suggestion for given string.
+        /// </summary>
+        /// <param name="suggestionString">.</param>
+        /// <param name="fuzzy">Optional type performs a fuzzy prefix search.</param>
+        /// <param name="max">Optional type limits the results to a maximum of num (default: 5).</param>
+        /// <param name="withscores">Optional type also returns the score of each suggestion.</param>
+        /// <param name="withpayloads">Optional type returns optional payloads saved along with the suggestions.</param>
+        /// <returns> the objects in Redis.</returns>
+        List<string> GetSuggestions(string suggestionString, bool fuzzy = false, int? max = 0, bool withscores = false, bool withpayloads = false);
+
+        /// <summary>
+        /// Deletes a suggestion string from an auto-suggestion dictionary.
+        /// </summary>
+        /// <param name="suggestionString">suggestion string to index.</param>
+        /// <returns>if the string was found and deleted.</returns>
+        bool DeleteSuggestions(string suggestionString);
+
+        /// <summary>
+        /// Get list of suggestion for given string.
+        /// </summary>
+        /// <param name="suggestionString">.</param>
+        /// <param name="sugg">Optional sugg.</param>
+        /// <returns> the objects in Redis.</returns>
+        List<string> GetSuggestions(string suggestionString, Suggestion sugg);
     }
 }
