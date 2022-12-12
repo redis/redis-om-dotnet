@@ -2547,5 +2547,33 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100"));
         }
+
+        [Fact]
+        public void SearchWithEmptyAny()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var any = collection.Any();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "0"));
+            Assert.True(any);
+
+            any = collection.Where(x => x.TagField == "foo").Any();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{foo})",
+                "LIMIT",
+                "0",
+                "0"));
+            
+            Assert.True(any);
+        }
     }
 }

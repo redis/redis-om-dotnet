@@ -113,6 +113,14 @@ namespace Redis.OM.Searching
             }
         }
 
+        /// <inheritdoc />
+        public bool Any()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)_connection.Search<T>(query).DocumentCount > 0;
+        }
+
         /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
