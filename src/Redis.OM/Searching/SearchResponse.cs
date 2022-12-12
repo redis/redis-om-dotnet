@@ -67,6 +67,7 @@ namespace Redis.OM.Searching
     /// </summary>
     /// <typeparam name="T">The type.</typeparam>
 #pragma warning disable SA1402
+
     public class SearchResponse<T>
 #pragma warning restore SA1402
         where T : notnull
@@ -101,13 +102,16 @@ namespace Redis.OM.Searching
                     var docId = (string)vals[i];
                     var documentHash = new Dictionary<string, string>();
                     var docArray = vals[i + 1].ToArray();
-                    for (var j = 0; j < docArray.Length; j += 2)
+                    if (docArray.Length > 1)
                     {
-                        documentHash.Add(docArray[j], docArray[j + 1]);
-                    }
+                        for (var j = 0; j < docArray.Length; j += 2)
+                        {
+                            documentHash.Add(docArray[j], docArray[j + 1]);
+                        }
 
-                    var obj = RedisObjectHandler.FromHashSet<T>(documentHash);
-                    Documents.Add(docId, obj);
+                        var obj = RedisObjectHandler.FromHashSet<T>(documentHash);
+                        Documents.Add(docId, obj);
+                    }
                 }
             }
         }
