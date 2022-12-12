@@ -327,17 +327,15 @@ namespace Redis.OM.Unit.Tests
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
-            var collection = new RedisCollection<Person>(provider.Connection);
+            var collection = new RedisCollection<BasicJsonObject>(provider.Connection);
 
-            var obj = new Person { Name = "Steve", Age = 33 };
+            var obj = new BasicJsonObject { Name = "Steve" };
             var key = await collection.InsertAsync(obj, WhenKey.NotExists);
             Assert.NotNull(key);
             var reconstituted = await collection.FindByIdAsync(key);
             Assert.NotNull(reconstituted);
             Assert.Equal("Steve", reconstituted.Name);
-            Assert.Equal(33, reconstituted.Age);
             obj.Name = "Shachar";
-            obj.Age = null;
 
             var res = await collection.InsertAsync(obj, WhenKey.NotExists); // this should fail 
             Assert.Null(res);
@@ -346,14 +344,17 @@ namespace Redis.OM.Unit.Tests
             Assert.Equal(key,res);
             reconstituted = await collection.FindByIdAsync(key);
             Assert.NotNull(reconstituted);
-            Assert.Null(reconstituted.Age);
             Assert.Equal("Shachar" , reconstituted.Name);
 
             await connection.UnlinkAsync(key);
-            await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            var k2 = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
+            Assert.NotNull(k2);
+            Assert.Equal(key, k2);
             var expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            Assert.Equal(key.Split(":")[1], obj.Id);
             Assert.True(expiration>4000);
             await Task.Delay(1000);
+            Assert.True(connection.Execute("EXISTS", key) == 1, $"Expected: {key} to exist, it did not.");
             res = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
             Assert.Null(res);
             expiration = (long)await connection.ExecuteAsync("PTTL", key);
@@ -380,17 +381,15 @@ namespace Redis.OM.Unit.Tests
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
             var provider = new RedisConnectionProvider($"redis://{host}");
             var connection = provider.Connection;
-            var collection = new RedisCollection<Person>(provider.Connection);
+            var collection = new RedisCollection<BasicJsonObject>(provider.Connection);
 
-            var obj = new Person { Name = "Steve", Age = 33 };
+            var obj = new BasicJsonObject { Name = "Steve" };
             var key = collection.Insert(obj, WhenKey.NotExists);
             Assert.NotNull(key);
             var reconstituted = collection.FindById(key);
             Assert.NotNull(reconstituted);
             Assert.Equal("Steve", reconstituted.Name);
-            Assert.Equal(33, reconstituted.Age);
             obj.Name = "Shachar";
-            obj.Age = null;
 
             var res = collection.Insert(obj, WhenKey.NotExists); // this should fail 
             Assert.Null(res);
@@ -399,7 +398,6 @@ namespace Redis.OM.Unit.Tests
             Assert.Equal(key,res);
             reconstituted = collection.FindById(key);
             Assert.NotNull(reconstituted);
-            Assert.Null(reconstituted.Age);
             Assert.Equal("Shachar" , reconstituted.Name);
 
             connection.Unlink(key);
