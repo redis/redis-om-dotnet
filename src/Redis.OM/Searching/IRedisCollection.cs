@@ -102,6 +102,12 @@ namespace Redis.OM.Searching
         T? FindById(string id);
 
         /// <summary>
+        /// Checks to see if the collection contains any.
+        /// </summary>
+        /// <returns>Whether anything matching the expression was found.</returns>
+        bool Any();
+
+        /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
         /// <param name="expression">the expression to be matched.</param>
