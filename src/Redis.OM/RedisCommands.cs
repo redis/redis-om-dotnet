@@ -678,7 +678,19 @@ namespace Redis.OM
             };
             args.AddRange(keys);
             args.AddRange(argv);
-            return await connection.ExecuteAsync("EVALSHA", args.ToArray());
+            try
+            {
+                return await connection.ExecuteAsync("EVALSHA", args.ToArray());
+            }
+            catch (Exception)
+            {
+                args[0] = Scripts.ScriptCollection[scriptName];
+                Scripts.ShaCollection.Clear(); // we don't know what the state of the scripts are in Redis anymore, clear the sha collection and start again
+
+                // if an EVALSHA fails it's probably because the sha hasn't been loaded (Redis has probably restarted or flushed)
+                // We'll Run an EVAL this time, and force all scripts to be reloaded on subsequent attempts
+                return await connection.ExecuteAsync("EVAL", args.ToArray());
+            }
         }
 
         /// <summary>
@@ -719,7 +731,19 @@ namespace Redis.OM
             };
             args.AddRange(keys);
             args.AddRange(argv);
-            return connection.Execute("EVALSHA", args.ToArray());
+            try
+            {
+                return connection.Execute("EVALSHA", args.ToArray());
+            }
+            catch (Exception)
+            {
+                args[0] = Scripts.ScriptCollection[scriptName];
+                Scripts.ShaCollection.Clear(); // we don't know what the state of the scripts are in Redis anymore, clear the sha collection and start again
+
+                // if an EVALSHA fails it's probably because the sha hasn't been loaded (Redis has probably restarted or flushed)
+                // We'll Run an EVAL this time, and force all scripts to be reloaded on subsequent attempts
+                return connection.Execute("EVAL", args.ToArray());
+            }
         }
 
         /// <summary>
