@@ -605,6 +605,34 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
+        public List<string> Insert(IEnumerable<T> items)
+        {
+            return items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.Set(item)).ToList();
+        }
+
+        /// <inheritdoc/>
+        public List<string> Insert(IEnumerable<T> items, TimeSpan timeSpan)
+        {
+            return items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.Set(item, timeSpan)).ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<string>> InsertAsync(IEnumerable<T> items)
+        {
+            var tasks = items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            var result = await Task.WhenAll(tasks);
+            return result.ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<string>> InsertAsync(IEnumerable<T> items, TimeSpan timeSpan)
+        {
+            var tasks = items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            var result = await Task.WhenAll(tasks);
+            return result.ToList();
+        }
+
+        /// <inheritdoc/>
         public T? FindById(string id)
         {
             var prefix = typeof(T).GetKeyPrefix();
@@ -638,34 +666,6 @@ namespace Redis.OM.Searching
             var provider = (RedisQueryProvider)Provider;
             StateManager.Clear();
             return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
-        }
-
-        /// <inheritdoc/>
-        public async Task<List<string>> Insert(IEnumerable<T> items)
-        {
-            var tasks = new List<Task<string>>();
-            foreach (var item in items.Distinct())
-            {
-                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
-            }
-
-            await Task.WhenAll(tasks);
-            var result = tasks.Select(x => x.Result).ToList();
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
-        {
-            var tasks = new List<Task<string>>();
-            foreach (var item in items.Distinct())
-            {
-                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
-            }
-
-            await Task.WhenAll(tasks);
-            var result = tasks.Select(x => x.Result).ToList();
-            return result;
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
