@@ -75,7 +75,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestBulkInsertHashWithExpiration()
+        public void TestBulkInsertHashesWithExpiration()
         {
             var collection = new RedisCollection<HashPerson>(_connection);
             var PhineasFerb = new List<HashPerson>() {
@@ -102,6 +102,42 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var ttl = (long)_connection.Execute("PTTL", PhineasFerb[0].GetKey());
             Assert.True(ttl <= 8000);
             Assert.True(ttl >= 1000);
+        }
+
+        [Fact]
+        public void TestBulk_InsertAndDel()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var PhineasFerbShow = new List<Person>() {
+                new Person() { Name = "Ferb", Age = 14, IsEngineer = true, TagField = "SummerVacation" , Address = new Address { State = "Tri-State Area"} },
+                new Person() { Name = "Phineas", Age = 14, IsEngineer = true, TagField = "SummerVacation", Address = new Address { State = "Tri-State Area"} },
+                new Person() { Name = "Dr.Doofenshmirtz", Age = 38, IsEngineer = true, TagField = "Villain", Address = new Address { State = "Tri-State Area"} },
+                new Person() { Name = "Perry", Age = 5, IsEngineer = false, TagField = "Agent", Address = new Address { State = "Tri-State Area "} }
+            };
+
+            collection.Insert(PhineasFerbShow);
+            var searchByState = collection.Where(x => x.Address.State == "Tri-State Area").ToList();
+            collection.Delete(searchByState);
+            var searchByTag = collection.FindById(searchByState[0].GetKey());
+            Assert.Null(searchByTag);
+        }
+
+        [Fact]
+        public async Task TestBulk_InsertAsyncAndDelAsyncForHashes()
+        {
+            var collection = new RedisCollection<HashPerson>(_connection);
+            var PhineasFerbShow = new List<HashPerson>() {
+                new HashPerson() { Name = "Ferb", Age = 14, IsEngineer = true, TagField = "SummerVacation" , Address = new Address { State = "Tri-State Area"} },
+                new HashPerson() { Name = "Phineas", Age = 14, IsEngineer = true, TagField = "SummerVacation", Address = new Address { State = "Tri-State Area"} },
+                new HashPerson() { Name = "Dr.Doofenshmirtz", Age = 38, IsEngineer = true, TagField = "Villain", Address = new Address { State = "Tri-State Area"} },
+                new HashPerson() { Name = "Perry", Age = 5, IsEngineer = false, TagField = "Agent", Address = new Address { State = "Tri-State Area "} }
+            };
+
+            await collection.InsertAsync(PhineasFerbShow);
+            var searchByName = await collection.Where(x => x.Name == "Dr.Doofenshmirtz" || x.Name == "Perry").ToListAsync();
+            await collection.DeleteAsync(searchByName);
+            var searchByTag = await collection.FindByIdAsync(searchByName[0].GetKey());
+            Assert.Null(searchByTag);
         }
     }   
 }

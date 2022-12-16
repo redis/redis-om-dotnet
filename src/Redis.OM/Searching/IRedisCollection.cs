@@ -164,11 +164,24 @@ namespace Redis.OM.Searching
         void Delete(T item);
 
         /// <summary>
+        /// Deletes the List of items from Redis.
+        /// </summary>
+        /// <param name="items">The items to be deleted.</param>
+        void Delete(IEnumerable<T> items);
+
+        /// <summary>
         /// Deletes the item from Redis.
         /// </summary>
         /// <param name="item">The item to be deleted.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task DeleteAsync(T item);
+
+        /// <summary>
+        /// Deletes the List of items from Redis.
+        /// </summary>
+        /// <param name="items">The items to be deleted.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task DeleteAsync(IEnumerable<T> items);
 
         /// <summary>
         /// Async method for enumerating the collection to a list.

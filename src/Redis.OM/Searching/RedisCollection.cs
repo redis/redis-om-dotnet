@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Redis.OM.Common;
@@ -200,11 +201,41 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
+        public void Delete(IEnumerable<T> items)
+        {
+            var keys = new StringBuilder();
+            foreach (var item in items)
+            {
+                var key = item.GetKey();
+                keys.Append(key);
+                keys.Append(" ");
+                StateManager.Remove(key);
+            }
+
+            _connection.Unlink(keys.ToString().Trim(' ').Split(' ')); // here atlast it produces ("") so I used trim it but it can be replaceble with .net2.1 upgrade with SkipLast().
+        }
+
+        /// <inheritdoc />
         public async Task DeleteAsync(T item)
         {
             var key = item.GetKey();
             await _connection.UnlinkAsync(key);
             StateManager.Remove(key);
+        }
+
+        /// <inheritdoc />
+        public async Task DeleteAsync(IEnumerable<T> items)
+        {
+            var keys = new StringBuilder();
+            foreach (var item in items)
+            {
+                var key = item.GetKey();
+                keys.Append(key);
+                keys.Append(" ");
+                StateManager.Remove(key);
+            }
+
+            await _connection.UnlinkAsync(keys.ToString().Trim(' ').Split(' '));
         }
 
         /// <inheritdoc />
