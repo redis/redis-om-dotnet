@@ -2609,5 +2609,42 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.True(any);
         }
+
+        [Fact]
+        public void TestContainsFromLocal()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var steve = "steve";
+            collection.Where(x => x.NickNamesList.Contains(steve)).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNamesList:{steve})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestContainsFromProperty()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var steve = new Person
+            {
+                Name = "steve"
+            };
+            collection.Where(x => x.NickNamesList.Contains(steve.Name)).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNamesList:{steve})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
     }
 }
