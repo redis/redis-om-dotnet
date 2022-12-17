@@ -165,6 +165,37 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
+        public void Update(IEnumerable<T> items)
+        {
+            foreach (var item in items)
+            {
+                var key = item.GetKey();
+                IList<IObjectDiff>? diff;
+                var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+                if (diffConstructed)
+                {
+                    if (diff!.Any())
+                    {
+                        var args = new List<string>();
+                        var scriptName = diff!.First().Script;
+                        foreach (var update in diff!)
+                        {
+                            args.AddRange(update.SerializeScriptArgs());
+                        }
+
+                        _connection.CreateAndEval(scriptName, new[] { key }, args.ToArray());
+                    }
+                }
+                else
+                {
+                    _connection.UnlinkAndSet(key, item, StateManager.DocumentAttribute.StorageType);
+                }
+
+                SaveToStateManager(key, item);
+            }
+        }
+
+        /// <inheritdoc />
         public async Task UpdateAsync(T item)
         {
             var key = item.GetKey();
@@ -190,6 +221,40 @@ namespace Redis.OM.Searching
             }
 
             SaveToStateManager(key, item);
+        }
+
+        /// <inheritdoc />
+        public async ValueTask UpdateAsync(IEnumerable<T> items)
+        {
+            var tasks = new List<Task>();
+            foreach (var item in items)
+            {
+                var key = item.GetKey();
+                IList<IObjectDiff>? diff;
+                var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+                if (diffConstructed)
+                {
+                    if (diff!.Any())
+                    {
+                        var args = new List<string>();
+                        var scriptName = diff!.First().Script;
+                        foreach (var update in diff!)
+                        {
+                            args.AddRange(update.SerializeScriptArgs());
+                        }
+
+                        tasks.Add(_connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray()));
+                    }
+                }
+                else
+                {
+                    tasks.Add(_connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType));
+                }
+
+                SaveToStateManager(key, item);
+            }
+
+            await Task.WhenAll(tasks);
         }
 
         /// <inheritdoc />

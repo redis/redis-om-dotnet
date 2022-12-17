@@ -22,14 +22,40 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var collection = new RedisCollection<Person>(_connection);
             var persons = new List<Person>() {
-                new Person() { Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" }, },
-                new Person() { Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" }, },
-                new Person() { Name = "Jeeva", Age = 22, NickNames = new[] { "Jee", "Jeev", "J" }, },
-                new Person() { Name = "Martin", Age = 60, NickNames = new[] { "Mart", "Mat", "tin" }, }
+                new Person() { Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" } },
+                new Person() { Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" } },
+                new Person() { Name = "Jeeva", Age = 22, NickNames = new[] { "Jee", "Jeev", "J" } },
+                new Person() { Name = "Martin", Age = 60, NickNames = new[] { "Mart", "Mat", "tin" } }
                 };
             var keys = await collection.InsertAsync(persons);
+
             var people = collection.Where(x => x.NickNames.Contains("Bob") || x.NickNames.Contains("Alie")).ToList();
             Assert.Contains(people, x => x.Name == persons.First().Name);
+        }
+
+        [Fact]
+        public async Task TestInsertsTwiceWithSaveDataWithExactFields()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var persons = new List<Person>() {
+                new Person() { Name = "Alice", Age = 14, NickNames = new[] { "Ally", "Alie", "Al" } },
+                new Person() { Name = "Robert", Age = 30, NickNames = new[] { "Bobby", "Rob", "Bob" } },
+                new Person() { Name = "Jeeva", Age = 22, NickNames = new[] { "Jee", "Jeev", "J" } },
+                new Person() { Name = "Martin", Age = 61, NickNames = new[] { "Mart", "Mat", "tin" } }
+                };
+            var keys = await collection.InsertAsync(persons); //performs JSON.SET create keys and emit the list of keys.
+
+            var persons2 = new List<Person>() {
+                new Person() { Name = "Alice", Age = 14, NickNames = new[] { "Ally", "Alie", "Al" }, IsEngineer = true },
+                new Person() { Name = "Robert", Age = 30, NickNames = new[] { "Bobby", "Rob", "Bob" }, IsEngineer = false },
+                new Person() { Name = "Jeeva", Age = 22, NickNames = new[] { "Jee", "Jeev", "J" }, DepartmentNumber = 201 },
+                new Person() { Name = "Martin", Age = 61, NickNames = new[] { "Mart", "Mat", "tin" }, TagField = "Martin" }
+                };
+
+            var keys2 = await collection.InsertAsync(persons2); //create keys and emit the list of keys.
+
+            var people = collection.Where(x => x.Age >= 20 && x.Age <=30).ToList();
+            Assert.NotEqual(keys, keys2); //not performs any re-indexing because keys are not same.
         }
 
         [Fact]
@@ -37,8 +63,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var collection = new RedisCollection<Person>(_connection);
             var persons = new List<Person>() {
-                new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" }, },
-                new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" }, },
+                new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" } },
+                new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" } },
                 new Person() { Name = "Jeeva", Age = 22, NickNames = new[] { "Jee", "Jeev", "J" }, },
                 new Person() { Name = "Martin", Age = 60, NickNames = new[] { "Mart", "Mat", "tin" }, }
                 };
@@ -135,6 +161,125 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             await collection.InsertAsync(PhineasFerbShow);
             var searchByName = await collection.Where(x => x.Name == "Dr.Doofenshmirtz" || x.Name == "Perry").ToListAsync();
+            await collection.DeleteAsync(searchByName);
+            var searchByTag = await collection.FindByIdAsync(searchByName[0].GetKey());
+            Assert.Null(searchByTag);
+        }
+
+        [Fact]
+        public async Task TestBulk_UpdateAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var onepiece = new List<Person>() {
+                new Person() { Name = "Monkey D.Luffy", Age = 22, NickNames = new[] { "Luffy", "Straw Hat", "GumGum" }, TagField = "The Straw Hat Pirates" },
+                new Person() { Name = "Roronano Zoro", Age = 26, NickNames = new[] { "Zoro", "Roronano", "Pirate Hunter" } , TagField = "The Straw Hat Pirates" },
+                new Person() { Name = "Monkey D. Garp", Age = 70, NickNames = new[] { "Garp", "Garps", "Hero of the Navy" }, TagField = "Navy" },
+                new Person() { Name = "Shanks", Age = 50, NickNames = new[] { "Shanks", "Red-Hair" }, TagField = "Red-Haired Pirates" }
+                };
+            var keys = await collection.InsertAsync(onepiece);
+            var people = collection.Where(x => x.NickNames.Contains("Luffy") || x.NickNames.Contains("Shanks")).ToList();
+            Assert.Equal(onepiece[0].Age, people[0].Age);
+            people[0].Age = 25;
+            people[1].Age = 52;
+            await collection.UpdateAsync(people);
+            Assert.NotEqual(onepiece[0].Age, people[0].Age);
+        }
+
+        [Fact]
+        public void TestBulk_UpdateSyncWithHashesNumeric()
+        {
+            var collection = new RedisCollection<HashPerson>(_connection);
+            var onepiece = new List<HashPerson>() {
+                new HashPerson() { Name = "Monkey D.Luffy", Age = 22, NickNames = new List<string> { "Luffy", "Straw Hat", "GumGum" }, TagField = "The Straw Hat Pirates" },
+                new HashPerson() { Name = "Roronano Zoro", Age = 26, NickNames = new List<string> { "Zoro", "Roronano", "Pirate Hunter" } , TagField = "The Straw Hat Pirates" },
+                new HashPerson() { Name = "Monkey D. Garp", Age = 70, NickNames = new List<string> { "Garp", "Garps", "Hero of the Navy" }, TagField = "Navy" },
+                new HashPerson() { Name = "Shanks", Age = 50, NickNames = new List<string> { "Shanks", "Red-Hair" }, TagField = "Red-Haired Pirates" }
+                };
+            var keys = collection.Insert(onepiece);
+            var people = collection.Where(x => x.Name.Contains("Luffy") || x.Name.Contains("Shanks")).ToList();
+            Assert.Equal(onepiece[0].Age, people[0].Age);
+            people[0].Height = 20.2;
+            people[0].Age = 25;
+            people[1].Age = 52;
+            collection.Update(people);
+            Assert.NotEqual(onepiece[0].Age, people[0].Age);
+        }
+
+
+        [Fact]
+        public void TestBulk_UpdateWithEmbbedObject()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var onepiece = new List<Person>() {
+                new Person() { Name = "Monkey D.Luffy", Age = 22, NickNames = new[] { "Luffy", "Straw Hat", "GumGum" }, TagField = "The Straw Hat Pirates" },
+                new Person() { Name = "Roronano Zoro", Age = 26, NickNames = new[] { "Zoro", "Roronano", "Pirate Hunter" } , TagField = "The Straw Hat Pirates" },
+                new Person() { Name = "Monkey D. Garp", Age = 70, NickNames = new[] { "Garp", "Garps", "Hero of the Navy" }, TagField = "Navy" },
+                new Person() { Name = "Shanks", Age = 50, NickNames = new[] { "Shanks", "Red-Hair" }, TagField = "Red-Haired Pirates" }
+                };
+            var keys =  collection.Insert(onepiece);
+            var people = collection.Where(x => x.NickNames.Contains("Luffy") || x.NickNames.Contains("Shanks")).ToList();
+            people[0].Address = new Address { City = "Goa Kingdom" };
+            people[1].Address = new Address { City = "Goa Kingdom" };
+            collection.Update(people);
+            Assert.Contains(people, x => x.Name == onepiece.First().Name);
+        }
+
+        [Fact]
+        public async Task TestBulk50_RecordsInsertAndUpdateAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection, false, 10000); // consider using SaveState = false to avoid Concurrent issue
+
+            var names = new[] { "Hassein", "Zoro", "Aegorn", "Jeeva", "Ajith", "Joe", "Mark", "Otto" };
+            var rand = new Random();
+            var people = new List<Person>();
+            for (var i = 0; i < 50; i++)
+            {
+                people.Add(new Person
+                {
+                    Name = names[rand.Next(0, names.Length)],
+                    DepartmentNumber = rand.Next(1, 4),
+                    Sales = rand.Next(50000, 1000000),
+                    Age = rand.Next(17, 21),
+                    Height = 58.0 + rand.NextDouble() * 15,
+                    SalesAdjustment = rand.NextDouble()
+                }
+                );
+            }
+            var keys = await collection.InsertAsync(people); // 1000 records in an avg of 200ms.
+            var listofPeople = (await collection.FindByIdsAsync(keys)).Values.ToList();
+            for (int i = 0; i < keys.Count; i++)
+            {
+                listofPeople[i].Name = names[rand.Next(0, names.Length)];
+                listofPeople[i].DepartmentNumber = rand.Next(5, 9);
+                listofPeople[i].Sales = rand.Next(10000, 20000);
+                listofPeople[i].Age = rand.Next(30, 50);
+                listofPeople[i].Height = 50.0 + rand.NextDouble() * 15;
+                listofPeople[i].SalesAdjustment = rand.NextDouble();
+            }
+            await collection.UpdateAsync(listofPeople); // 1000 records in an avg of 300ms.
+            var oldPeople = collection.Where(x => x.Age >= 17 && x.Age <= 21).ToList();
+            var newPeople = collection.Where(x => x.Age >= 30 && x.Age <= 50).ToList();
+            Assert.Equal(people.Count, newPeople.Count);
+            Assert.Empty(oldPeople);
+            Assert.DoesNotContain(people[0], newPeople);
+        }
+
+        [Fact]
+        public async Task TestBulk_InsertUpdateDelSync()
+        {
+            var collection = new RedisCollection<HashPerson>(_connection);
+            var PhineasFerbShow = new List<HashPerson>() {
+                new HashPerson() { Name = "Ferb", Age = 14, IsEngineer = true, TagField = "SummerVacation" , Address = new Address { State = "Tri-State Area"} },
+                new HashPerson() { Name = "Phineas", Age = 14, IsEngineer = true, TagField = "SummerVacation", Address = new Address { State = "Tri-State Area"} },
+                new HashPerson() { Name = "Dr.Doofenshmirtz", Age = 38, IsEngineer = true, TagField = "Villain", Address = new Address { State = "Tri-State Area"} },
+                new HashPerson() { Name = "Perry", Age = 5, IsEngineer = false, TagField = "Agent", Address = new Address { State = "Tri-State Area "} }
+            };
+
+            await collection.InsertAsync(PhineasFerbShow);
+            var searchByName = await collection.Where(x => x.Name == "Dr.Doofenshmirtz" || x.Name == "Perry").ToListAsync(); 
+            searchByName[0].TagField = "Vacation";
+            searchByName[1].DepartmentNumber = 2;
+            await collection.UpdateAsync(searchByName);
             await collection.DeleteAsync(searchByName);
             var searchByTag = await collection.FindByIdAsync(searchByName[0].GetKey());
             Assert.Null(searchByTag);
