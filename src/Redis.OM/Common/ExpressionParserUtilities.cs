@@ -302,6 +302,11 @@ namespace Redis.OM.Common
                     return string.Join("|", strings);
                 }
 
+                if (resolved is IEnumerable<Guid> guids)
+                {
+                    return string.Join("|", guids);
+                }
+
                 if (resolved is IEnumerable<int?> ints)
                 {
                     var sb = new StringBuilder();
@@ -623,7 +628,7 @@ namespace Redis.OM.Common
                 memberName = GetOperandStringForMember(propertyExpression);
                 literal = GetOperandStringForQueryArgs(valuesExpression);
 
-                if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>)) && attribute is IndexedAttribute)
+                if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>) || type == typeof(Guid)) && attribute is IndexedAttribute)
                 {
                     return $"({memberName}:{{{EscapeTagField(literal).Replace("\\|", "|")}}})";
                 }
