@@ -75,32 +75,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public async Task BulkInsertAsync50Records()
-        {
-            var collection = new RedisCollection<Person>(_connection);
-
-            var names = new[] { "Stever", "Martin", "Aegorn", "Robert", "Mary", "Joe", "Mark", "Otto" };
-            var rand = new Random();
-            var people = new List<Person>();
-            for (var i = 0; i < 50; i++) // performance improment 1000 records in an avg of 200ms
-            {
-                people.Add(new Person
-                {
-                    Name = names[rand.Next(0, names.Length)],
-                    DepartmentNumber = rand.Next(1, 4),
-                    Sales = rand.Next(50000, 1000000),
-                    Age = rand.Next(17, 21),
-                    Height = 58.0 + rand.NextDouble() * 15,
-                    SalesAdjustment = rand.NextDouble()
-                }
-                );
-            }
-            await collection.InsertAsync(people);
-            var countPeople = collection.Where(x => x.Age >= 17 && x.Age <= 21).ToList().Count;
-            Assert.Equal(people.Count, countPeople);
-        }
-
-        [Fact]
         public void TestBulkInsertHashesWithExpiration()
         {
             var collection = new RedisCollection<HashPerson>(_connection);
@@ -225,7 +199,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public async Task TestBulk50_RecordsInsertAndUpdateAsync()
+        public async Task TestBulk50_RecordsInsertUpdateAndDelAsync()
         {
             var collection = new RedisCollection<Person>(_connection, false, 100); // consider using SaveState = false to avoid Concurrent issue
 
@@ -259,11 +233,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.UpdateAsync(listofPeople); // 1000 records in an avg of 300ms.
             var oldPeople = collection.Where(x => x.Age >= 17 && x.Age <= 21).ToList();
             var newPeople = collection.Where(x => x.Age >= 30 && x.Age <= 50).ToList();
+            await collection.DeleteAsync(newPeople); // del
+            Assert.Empty(oldPeople);
             Assert.DoesNotContain(people[0], newPeople);
         }
 
         [Fact]
-        public async Task TestBulk_InsertUpdateDelSync()
+        public async Task TestBulk_InsertUpdateDelSyncWithHashes()
         {
             var collection = new RedisCollection<HashPerson>(_connection);
             var PhineasFerbShow = new List<HashPerson>() {
