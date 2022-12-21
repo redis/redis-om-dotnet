@@ -2609,5 +2609,175 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.True(any);
         }
+
+        [Fact]
+        public void SearchGuidFieldContains()
+        {
+            var guid1 = Guid.NewGuid();
+            var guid2 = Guid.NewGuid();
+            var guid3 = Guid.NewGuid();
+            var guid1Str = ExpressionParserUtilities.EscapeTagField(guid1.ToString());
+            var guid2Str = ExpressionParserUtilities.EscapeTagField(guid2.ToString());
+            var guid3Str = ExpressionParserUtilities.EscapeTagField(guid3.ToString());
+            var potentialFieldValues = new Guid[] { guid1, guid2, guid3 };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.Contains(x.Guid));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                $"(@Guid:{{{guid1Str}|{guid2Str}|{guid3Str}}})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void SearchUlidFieldContains()
+        {
+            var ulid1 = Ulid.NewUlid();
+            var ulid2 = Ulid.NewUlid();
+            var ulid3 = Ulid.NewUlid();
+
+            var potentialFieldValues = new Ulid[] { ulid1, ulid2, ulid3 };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.Contains(x.Ulid));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                $"(@Ulid:{{{ulid1}|{ulid2}|{ulid3}}})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void SearchEnumFieldContains()
+        {
+            var enum1 = AnEnum.one;
+            var enum2 = AnEnum.two;
+            var enum3 = AnEnum.three;
+
+            var potentialFieldValues = new AnEnum[] { enum1, enum2, enum3 };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.Contains(x.AnEnum));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                $"(@AnEnum:{{one|two|three}})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void SearchNumericEnumFieldContains()
+        {
+            var enum1 = AnEnum.one;
+            var enum2 = AnEnum.two;
+            var enum3 = AnEnum.three;
+
+            var potentialFieldValues = new AnEnum[] { enum1, enum2, enum3 };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.Contains(x.AnEnumAsInt));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                "@AnEnumAsInt:[0 0]|@AnEnumAsInt:[1 1]|@AnEnumAsInt:[2 2]",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void SearchEnumFieldContainsList()
+        {
+            var enum1 = AnEnum.one;
+            var enum2 = AnEnum.two;
+            var enum3 = AnEnum.three;
+
+            var potentialFieldValues = new List<AnEnum> { enum1, enum2, enum3 };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.Contains(x.AnEnum));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                $"(@AnEnum:{{one|two|three}})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void SearchNumericEnumFieldContainsList()
+        {
+            var enum1 = AnEnum.one;
+            var enum2 = AnEnum.two;
+            var enum3 = AnEnum.three;
+
+            var potentialFieldValues = new List<AnEnum> { enum1, enum2, enum3 };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.Contains(x.AnEnumAsInt));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                "@AnEnumAsInt:[0 0]|@AnEnumAsInt:[1 1]|@AnEnumAsInt:[2 2]",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void SearchEnumFieldContainsListAsProperty()
+        {
+            var enum1 = AnEnum.one;
+            var enum2 = AnEnum.two;
+            var enum3 = AnEnum.three;
+
+            var potentialFieldValues = new {list = new List<AnEnum> { enum1, enum2, enum3 }};
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.list.Contains(x.AnEnum));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                $"(@AnEnum:{{one|two|three}})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void SearchNumericEnumFieldContainsListAsProperty()
+        {
+            var enum1 = AnEnum.one;
+            var enum2 = AnEnum.two;
+            var enum3 = AnEnum.three;
+
+            var potentialFieldValues = new {list = new List<AnEnum> { enum1, enum2, enum3 }};
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.list.Contains(x.AnEnumAsInt));
+            collection.ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                "@AnEnumAsInt:[0 0]|@AnEnumAsInt:[1 1]|@AnEnumAsInt:[2 2]",
+                "LIMIT",
+                "0",
+                "100"));
+        }
     }
 }

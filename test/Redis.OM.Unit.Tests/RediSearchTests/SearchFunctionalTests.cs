@@ -838,6 +838,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task TestMultipleContainsGuid()
+        {
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection);
+            var objectList = Enumerable.Range(1, 10).Select(x => new ObjectWithStringLikeValueTypes() { Guid = Guid.NewGuid() }).ToList();
+            foreach (var item in objectList)
+            {
+                await collection.InsertAsync(item);
+            }
+
+            var ids = objectList.Select(x => x.Guid);
+            var objects = await collection.Where(x => ids.Contains(x.Guid)).ToListAsync();
+
+            Assert.Equal(ids, objects.Select(x => x.Guid));
+        }
+
+        [Fact]
         public async Task TestShouldFailForSave()
         {
             var expectedText = "The RedisCollection has been instructed to not maintain the state of records enumerated by " +
