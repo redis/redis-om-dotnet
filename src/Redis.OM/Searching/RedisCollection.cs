@@ -167,6 +167,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public void Update(IEnumerable<T> items)
         {
+            var tasks = new List<Task>();
             foreach (var item in items)
             {
                 var key = item.GetKey();
@@ -183,16 +184,18 @@ namespace Redis.OM.Searching
                             args.AddRange(update.SerializeScriptArgs());
                         }
 
-                        _connection.CreateAndEval(scriptName, new[] { key }, args.ToArray());
+                        tasks.Add(_connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray()));
                     }
                 }
                 else
                 {
-                    _connection.UnlinkAndSet(key, item, StateManager.DocumentAttribute.StorageType);
+                    tasks.Add(_connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType));
                 }
 
                 SaveToStateManager(key, item);
             }
+
+            Task.WhenAll(tasks).Wait();
         }
 
         /// <inheritdoc />
@@ -703,13 +706,29 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public List<string> Insert(IEnumerable<T> items)
         {
-            return items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.Set(item)).ToList();
+            var tasks = new List<Task<string>>();
+            foreach (var item in items.Distinct())
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            }
+
+            Task.WhenAll(tasks).Wait();
+            var result = tasks.Select(x => x.Result).ToList();
+            return result;
         }
 
         /// <inheritdoc/>
         public List<string> Insert(IEnumerable<T> items, TimeSpan timeSpan)
         {
-            return items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.Set(item, timeSpan)).ToList();
+            var tasks = new List<Task<string>>();
+            foreach (var item in items.Distinct())
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
+            }
+
+            Task.WhenAll(tasks).Wait();
+            var result = tasks.Select(x => x.Result).ToList();
+            return result;
         }
 
         /// <inheritdoc/>
@@ -723,7 +742,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public async Task<List<string>> InsertAsync(IEnumerable<T> items, TimeSpan timeSpan)
         {
-            var tasks = items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            var tasks = items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
             var result = await Task.WhenAll(tasks);
             return result.ToList();
         }
