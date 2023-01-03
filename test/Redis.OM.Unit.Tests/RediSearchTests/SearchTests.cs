@@ -2622,6 +2622,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "FT.SEARCH",
                 "person-idx",
                 "(@NickNamesList:{steve})",
+                "LIMIT",
+                "0",
+                "100"));
         }
 
         [Fact]
@@ -2662,6 +2665,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "FT.SEARCH",
                 "person-idx",
                 "(@NickNamesList:{steve})",
+                "LIMIT",
+                "0",
+                "100"));
         }
 
         [Fact]
