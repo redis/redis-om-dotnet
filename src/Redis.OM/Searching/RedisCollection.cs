@@ -165,40 +165,6 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
-        public void Update(IEnumerable<T> items)
-        {
-            var tasks = new List<Task>();
-            foreach (var item in items)
-            {
-                var key = item.GetKey();
-                IList<IObjectDiff>? diff;
-                var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
-                if (diffConstructed)
-                {
-                    if (diff!.Any())
-                    {
-                        var args = new List<string>();
-                        var scriptName = diff!.First().Script;
-                        foreach (var update in diff!)
-                        {
-                            args.AddRange(update.SerializeScriptArgs());
-                        }
-
-                        tasks.Add(_connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray()));
-                    }
-                }
-                else
-                {
-                    tasks.Add(_connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType));
-                }
-
-                SaveToStateManager(key, item);
-            }
-
-            Task.WhenAll(tasks).Wait();
-        }
-
-        /// <inheritdoc />
         public async Task UpdateAsync(T item)
         {
             var key = item.GetKey();
@@ -704,35 +670,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public List<string> Insert(IEnumerable<T> items)
-        {
-            var tasks = new List<Task<string>>();
-            foreach (var item in items.Distinct())
-            {
-                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
-            }
-
-            Task.WhenAll(tasks).Wait();
-            var result = tasks.Select(x => x.Result).ToList();
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public List<string> Insert(IEnumerable<T> items, TimeSpan timeSpan)
-        {
-            var tasks = new List<Task<string>>();
-            foreach (var item in items.Distinct())
-            {
-                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
-            }
-
-            Task.WhenAll(tasks).Wait();
-            var result = tasks.Select(x => x.Result).ToList();
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public async Task<List<string>> InsertAsync(IEnumerable<T> items)
+        public async Task<List<string>> Insert(IEnumerable<T> items)
         {
             var tasks = items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.SetAsync(item));
             var result = await Task.WhenAll(tasks);
@@ -740,7 +678,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public async Task<List<string>> InsertAsync(IEnumerable<T> items, TimeSpan timeSpan)
+        public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
         {
             var tasks = items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
             var result = await Task.WhenAll(tasks);

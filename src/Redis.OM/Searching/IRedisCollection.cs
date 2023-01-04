@@ -92,22 +92,7 @@ namespace Redis.OM.Searching
         /// </summary>
         /// <param name="items">The items to insert.</param>
         /// <returns>The list of Keys.</returns>
-        List<string> Insert(IEnumerable<T> items);
-
-        /// <summary>
-        /// Inserts list of items into redis.
-        /// </summary>
-        /// <param name="items">The items to insert.</param>
-        /// <param name="timeSpan">The expiration time of the document (TTL).</param>
-        /// <returns>The list of Keys.</returns>
-        List<string> Insert(IEnumerable<T> items, TimeSpan timeSpan);
-
-        /// <summary>
-        /// Inserts list of items into redis.
-        /// </summary>
-        /// <param name="items">The items to insert.</param>
-        /// <returns>The list of Keys.</returns>
-        Task<List<string>> InsertAsync(IEnumerable<T> items);
+        Task<List<string>> Insert(IEnumerable<T> items);
 
         /// <summary>
         /// Inserts list of items into redis.
@@ -115,7 +100,7 @@ namespace Redis.OM.Searching
         /// <param name="items">The items to insert.</param>
         /// <param name="timeSpan">The timespan of the document's (TTL).</param>
         /// /// <returns>The list of Keys.</returns>
-        Task<List<string>> InsertAsync(IEnumerable<T> items, TimeSpan timeSpan);
+        Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan);
 
         /// <summary>
         /// finds an item by it's ID or keyname.
@@ -149,12 +134,6 @@ namespace Redis.OM.Searching
         /// </summary>
         /// <param name="item">The item to update.</param>
         void Update(T item);
-
-        /// <summary>
-        /// Updates the provided items in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
-        /// </summary>
-        /// <param name="items">The items to update.</param>
-        void Update(IEnumerable<T> items);
 
         /// <summary>
         /// Updates the provided item in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
