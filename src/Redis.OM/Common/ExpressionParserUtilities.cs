@@ -648,8 +648,16 @@ namespace Redis.OM.Common
                 literal = GetOperandStringForQueryArgs(propertyExpression);
                 if (!literal.StartsWith("@"))
                 {
-                    propertyExpression = (MemberExpression)exp.Arguments.First();
-                    valuesExpression = (MemberExpression)exp.Arguments.Last();
+                    if (exp.Arguments.Count == 1 && exp.Object != null)
+                    {
+                        propertyExpression = (MemberExpression)exp.Object;
+                        valuesExpression = (MemberExpression)exp.Arguments.Single();
+                    }
+                    else
+                    {
+                        propertyExpression = (MemberExpression)exp.Arguments.First();
+                        valuesExpression = (MemberExpression)exp.Arguments.Last();
+                    }
                 }
                 else if (propertyExpression == valuesExpression)
                 {
