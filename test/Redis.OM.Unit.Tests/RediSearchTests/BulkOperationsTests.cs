@@ -64,12 +64,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var collection = new RedisCollection<Person>(_connection);
             var persons = new List<Person>() {
                 new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" } },
-                new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Steve", Age = 37, NickNames = new[] { "Steve", "ST"} },
+                new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Jeevananthan", Age = 37, NickNames = new[] { "Jeeva", "Jee"} },
                 new Person() { Name = "Jeeva", Age = 22, NickNames = new[] { "Jee", "Jeev", "J" }, },
                 new Person() { Name = "Martin", Age = 60, NickNames = new[] { "Mart", "Mat", "tin" }, }
                 };
              await collection.Insert(persons);
-            var people = collection.Where(x => x.NickNames.Contains("ST") || x.NickNames.Contains("Alie")).ToList();
+            var people = collection.Where(x => x.NickNames.Contains("Jeeva") || x.NickNames.Contains("Alie")).ToList();
             Assert.False(people.First().Name == persons.First().Name); // this fails because the Name field of people doesn't contains the Name value Alice
         }
 
@@ -116,7 +116,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             await collection.Insert(PhineasFerbShow);
             var searchByState = collection.Where(x => x.Address.State == "Tri-State Area").ToList();
-            collection.Delete(searchByState);
+            await collection.DeleteAsync(searchByState);
             var searchByTag = collection.FindById(searchByState[0].GetKey());
             Assert.Null(searchByTag);
         }
@@ -256,6 +256,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.DeleteAsync(searchByName);
             var searchByTag = await collection.FindByIdAsync(searchByName[0].GetKey());
             Assert.Null(searchByTag);
+        }
+
+        [Fact]
+        public async Task Test_BulkDelete_ShouldThrowExpectionIfItemsAreEmpty()
+        {
+            var collection = new RedisCollection<HashPerson>(_connection);
+            var people = Array.Empty<HashPerson>();
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>  collection.Delete(people));
+        }
+
+        [Fact]
+        public async Task Test_BulkInsert_ShouldThrowExpectionIfItemsAreEmpty()
+        {
+            var collection = new RedisCollection<HashPerson>(_connection);
+            var people = Array.Empty<HashPerson>();
+            await Assert.ThrowsAsync<ArgumentNullException>(() => collection.Insert(people));
         }
     }   
 }

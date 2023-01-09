@@ -237,6 +237,11 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public void Delete(IEnumerable<T> items)
         {
+            if (!items.Any())
+            {
+                throw new ArgumentNullException("items cannot be null. Please provide a non-null list of items.");
+            }
+
             var keys = new StringBuilder();
             foreach (var item in items)
             {
@@ -246,7 +251,7 @@ namespace Redis.OM.Searching
                 StateManager.Remove(key);
             }
 
-            _connection.Unlink(keys.ToString().Trim(' ').Split(' ')); // here atlast it produces ("") so I used trim it but it can be replaceble with .net2.1 upgrade with SkipLast().
+            _connection.Unlink(keys.ToString().Trim(' ').Split(' '));
         }
 
         /// <inheritdoc />
@@ -260,6 +265,11 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task DeleteAsync(IEnumerable<T> items)
         {
+            if (!items.Any())
+            {
+                throw new ArgumentNullException("items cannot be null. Please provide a non-null list of items.");
+            }
+
             var keys = new StringBuilder();
             foreach (var item in items)
             {
@@ -672,7 +682,17 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public async Task<List<string>> Insert(IEnumerable<T> items)
         {
-            var tasks = items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            if (!items.Any())
+            {
+                throw new ArgumentNullException("items cannot be null. Please provide a non-null list of items.");
+            }
+
+            var tasks = new List<Task<string>>();
+            foreach (var item in items.Distinct())
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            }
+
             var result = await Task.WhenAll(tasks);
             return result.ToList();
         }
@@ -680,7 +700,17 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
         {
-            var tasks = items.Distinct().Select(item => ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
+            if (!items.Any())
+            {
+                throw new ArgumentNullException("items cannot be null. Please provide a non-null list of items.");
+            }
+
+            var tasks = new List<Task<string>>();
+            foreach (var item in items.Distinct())
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
+            }
+
             var result = await Task.WhenAll(tasks);
             return result.ToList();
         }
