@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Redis.OM.Common;
@@ -192,6 +193,14 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
+        public async ValueTask UpdateAsync(IEnumerable<T> items)
+        {
+            var tasks = items.Select(UpdateAsync);
+
+            await Task.WhenAll(tasks);
+        }
+
+        /// <inheritdoc />
         public void Delete(T item)
         {
             var key = item.GetKey();
@@ -200,11 +209,45 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
+        public void Delete(IEnumerable<T> items)
+        {
+            var keys = items.Select(x => x.GetKey()).ToArray();
+            if (!keys.Any())
+            {
+                return;
+            }
+
+            foreach (var key in keys)
+            {
+                StateManager.Remove(key);
+            }
+
+            _connection.Unlink(keys);
+        }
+
+        /// <inheritdoc />
         public async Task DeleteAsync(T item)
         {
             var key = item.GetKey();
             await _connection.UnlinkAsync(key);
             StateManager.Remove(key);
+        }
+
+        /// <inheritdoc />
+        public async Task DeleteAsync(IEnumerable<T> items)
+        {
+            var keys = items.Select(x => x.GetKey()).ToArray();
+            if (!keys.Any())
+            {
+                return;
+            }
+
+            foreach (var key in keys)
+            {
+                StateManager.Remove(key);
+            }
+
+            await _connection.UnlinkAsync(keys);
         }
 
         /// <inheritdoc />
@@ -605,6 +648,44 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
+        public async Task<List<string>> Insert(IEnumerable<T> items)
+        {
+            var distinct = items.Distinct().ToArray();
+            if (!distinct.Any())
+            {
+                return new List<string>();
+            }
+
+            var tasks = new List<Task<string>>();
+            foreach (var item in distinct)
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            }
+
+            var result = await Task.WhenAll(tasks);
+            return result.ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
+        {
+            var distinct = items.Distinct().ToArray();
+            if (!distinct.Any())
+            {
+                return new List<string>();
+            }
+
+            var tasks = new List<Task<string>>();
+            foreach (var item in distinct)
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
+            }
+
+            var result = await Task.WhenAll(tasks);
+            return result.ToList();
+        }
+
+        /// <inheritdoc/>
         public T? FindById(string id)
         {
             var prefix = typeof(T).GetKeyPrefix();
@@ -638,34 +719,6 @@ namespace Redis.OM.Searching
             var provider = (RedisQueryProvider)Provider;
             StateManager.Clear();
             return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
-        }
-
-        /// <inheritdoc/>
-        public async Task<List<string>> Insert(IEnumerable<T> items)
-        {
-            var tasks = new List<Task<string>>();
-            foreach (var item in items.Distinct())
-            {
-                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
-            }
-
-            await Task.WhenAll(tasks);
-            var result = tasks.Select(x => x.Result).ToList();
-            return result;
-        }
-
-        /// <inheritdoc/>
-        public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
-        {
-            var tasks = new List<Task<string>>();
-            foreach (var item in items.Distinct())
-            {
-                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
-            }
-
-            await Task.WhenAll(tasks);
-            var result = tasks.Select(x => x.Result).ToList();
-            return result;
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)

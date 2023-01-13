@@ -88,6 +88,21 @@ namespace Redis.OM.Searching
         string? Insert(T item, WhenKey when, TimeSpan? timeSpan = null);
 
         /// <summary>
+        /// Inserts list of items into redis.
+        /// </summary>
+        /// <param name="items">The items to insert.</param>
+        /// <returns>The list of Keys.</returns>
+        Task<List<string>> Insert(IEnumerable<T> items);
+
+        /// <summary>
+        /// Inserts list of items into redis.
+        /// </summary>
+        /// <param name="items">The items to insert.</param>
+        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
+        /// /// <returns>The list of Keys.</returns>
+        Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan);
+
+        /// <summary>
         /// finds an item by it's ID or keyname.
         /// </summary>
         /// <param name="id">the id to lookup.</param>
@@ -128,10 +143,23 @@ namespace Redis.OM.Searching
         Task UpdateAsync(T item);
 
         /// <summary>
+        /// Updates the provided items in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
+        /// </summary>
+        /// <param name="items">The items to update.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        ValueTask UpdateAsync(IEnumerable<T> items);
+
+        /// <summary>
         /// Deletes the item from Redis.
         /// </summary>
         /// <param name="item">The item to be deleted.</param>
         void Delete(T item);
+
+        /// <summary>
+        /// Deletes the List of items from Redis.
+        /// </summary>
+        /// <param name="items">The items to be deleted.</param>
+        void Delete(IEnumerable<T> items);
 
         /// <summary>
         /// Deletes the item from Redis.
@@ -139,6 +167,13 @@ namespace Redis.OM.Searching
         /// <param name="item">The item to be deleted.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task DeleteAsync(T item);
+
+        /// <summary>
+        /// Deletes the List of items from Redis.
+        /// </summary>
+        /// <param name="items">The items to be deleted.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task DeleteAsync(IEnumerable<T> items);
 
         /// <summary>
         /// Async method for enumerating the collection to a list.
@@ -266,20 +301,5 @@ namespace Redis.OM.Searching
         /// <param name="ids">The Ids to look up.</param>
         /// <returns>A dictionary correlating the ids provided to the objects in Redis.</returns>
         Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids);
-
-        /// <summary>
-        /// Inserts list of items into redis.
-        /// </summary>
-        /// <param name="items">The items to insert.</param>
-        /// <returns>The list of Keys.</returns>
-        Task<List<string>> Insert(IEnumerable<T> items);
-
-        /// <summary>
-        /// Inserts list of items into redis.
-        /// </summary>
-        /// <param name="items">The items to insert.</param>
-        /// <param name="timeSpan">The timespan of the document's (TTL).</param>
-        /// /// <returns>The list of Keys.</returns>
-        Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan);
     }
 }
