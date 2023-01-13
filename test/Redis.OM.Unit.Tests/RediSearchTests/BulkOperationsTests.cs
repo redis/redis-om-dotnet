@@ -257,21 +257,5 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var searchByTag = await collection.FindByIdAsync(searchByName[0].GetKey());
             Assert.Null(searchByTag);
         }
-
-        [Fact]
-        public async Task Test_BulkDelete_ShouldThrowExpectionIfItemsAreEmpty()
-        {
-            var collection = new RedisCollection<HashPerson>(_connection);
-            var people = Array.Empty<HashPerson>();
-            await Assert.ThrowsAsync<ArgumentNullException>(async () =>  collection.Delete(people));
-        }
-
-        [Fact]
-        public async Task Test_BulkInsert_ShouldThrowExpectionIfItemsAreEmpty()
-        {
-            var collection = new RedisCollection<HashPerson>(_connection);
-            var people = Array.Empty<HashPerson>();
-            await Assert.ThrowsAsync<ArgumentNullException>(() => collection.Insert(people));
-        }
     }   
 }

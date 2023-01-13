@@ -195,33 +195,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async ValueTask UpdateAsync(IEnumerable<T> items)
         {
-            var tasks = new List<Task>();
-            foreach (var item in items)
-            {
-                var key = item.GetKey();
-                IList<IObjectDiff>? diff;
-                var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
-                if (diffConstructed)
-                {
-                    if (diff!.Any())
-                    {
-                        var args = new List<string>();
-                        var scriptName = diff!.First().Script;
-                        foreach (var update in diff!)
-                        {
-                            args.AddRange(update.SerializeScriptArgs());
-                        }
-
-                        tasks.Add(_connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray()));
-                    }
-                }
-                else
-                {
-                    tasks.Add(_connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType));
-                }
-
-                SaveToStateManager(key, item);
-            }
+            var tasks = items.Select(UpdateAsync);
 
             await Task.WhenAll(tasks);
         }
@@ -237,21 +211,18 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public void Delete(IEnumerable<T> items)
         {
-            if (!items.Any())
+            var keys = items.Select(x => x.GetKey()).ToArray();
+            if (!keys.Any())
             {
-                throw new ArgumentNullException("items cannot be null. Please provide a non-null list of items.");
+                return;
             }
 
-            var keys = new StringBuilder();
-            foreach (var item in items)
+            foreach (var key in keys)
             {
-                var key = item.GetKey();
-                keys.Append(key);
-                keys.Append(" ");
                 StateManager.Remove(key);
             }
 
-            _connection.Unlink(keys.ToString().Trim(' ').Split(' '));
+            _connection.Unlink(keys);
         }
 
         /// <inheritdoc />
@@ -265,21 +236,18 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task DeleteAsync(IEnumerable<T> items)
         {
-            if (!items.Any())
+            var keys = items.Select(x => x.GetKey()).ToArray();
+            if (!keys.Any())
             {
-                throw new ArgumentNullException("items cannot be null. Please provide a non-null list of items.");
+                return;
             }
 
-            var keys = new StringBuilder();
-            foreach (var item in items)
+            foreach (var key in keys)
             {
-                var key = item.GetKey();
-                keys.Append(key);
-                keys.Append(" ");
                 StateManager.Remove(key);
             }
 
-            await _connection.UnlinkAsync(keys.ToString().Trim(' ').Split(' '));
+            await _connection.UnlinkAsync(keys);
         }
 
         /// <inheritdoc />
@@ -682,13 +650,14 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public async Task<List<string>> Insert(IEnumerable<T> items)
         {
-            if (!items.Any())
+            var distinct = items.Distinct().ToArray();
+            if (!distinct.Any())
             {
-                throw new ArgumentNullException("items cannot be null. Please provide a non-null list of items.");
+                return new List<string>();
             }
 
             var tasks = new List<Task<string>>();
-            foreach (var item in items.Distinct())
+            foreach (var item in distinct)
             {
                 tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
             }
@@ -700,13 +669,14 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
         {
-            if (!items.Any())
+            var distinct = items.Distinct().ToArray();
+            if (!distinct.Any())
             {
-                throw new ArgumentNullException("items cannot be null. Please provide a non-null list of items.");
+                return new List<string>();
             }
 
             var tasks = new List<Task<string>>();
-            foreach (var item in items.Distinct())
+            foreach (var item in distinct)
             {
                 tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
             }
