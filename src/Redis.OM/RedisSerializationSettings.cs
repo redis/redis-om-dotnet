@@ -6,12 +6,12 @@ using Redis.OM.Modeling;
 namespace Redis.OM
 {
     /// <summary>
-    /// Configurable settings for how redis handles serialization.
+    /// Configurable settings for how serialization and deserialization is handled.
     /// </summary>
     public static class RedisSerializationSettings
     {
         /// <summary>
-        /// <see cref="JsonSerializerOptions"/> used by redis.
+        /// <see cref="JsonSerializerOptions"/> used when serializing.
         /// </summary>
         public static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
         {
