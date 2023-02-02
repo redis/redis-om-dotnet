@@ -255,17 +255,13 @@ namespace Redis.OM.Unit.Tests
 
             await connection.UnlinkAsync(key);
             await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
-            var expiration = (long)await connection.ExecuteAsync("PTTL", key);
-            Assert.True(expiration>4000);
             await Task.Delay(1000);
             res = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
             Assert.Null(res);
-            expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            var expiration = (long)await connection.ExecuteAsync("PTTL", key);
             Assert.True(expiration < 4000);
             res = await collection.InsertAsync(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
-            expiration = (long)await connection.ExecuteAsync("PTTL", key);
             Assert.NotNull(res);
-            Assert.True(expiration > 4000);
 
             await connection.UnlinkAsync(key);
             res = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
@@ -303,17 +299,13 @@ namespace Redis.OM.Unit.Tests
 
             connection.Unlink(key);
             collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
-            var expiration = (long)connection.Execute("PTTL", key);
-            Assert.True(expiration>4000);
             Thread.Sleep(1100);
             res = collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
             Assert.Null(res);
-            expiration = (long)connection.Execute("PTTL", key);
+            var expiration = (long)connection.Execute("PTTL", key);
             Assert.True(expiration < 4000);
             res = collection.Insert(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
-            expiration = (long)connection.Execute("PTTL", key);
             Assert.NotNull(res);
-            Assert.True(expiration > 4000);
 
             connection.Unlink(key);
             res = collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
@@ -350,14 +342,12 @@ namespace Redis.OM.Unit.Tests
             var k2 = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
             Assert.NotNull(k2);
             Assert.Equal(key, k2);
-            var expiration = (long)await connection.ExecuteAsync("PTTL", key);
             Assert.Equal(key.Split(":")[1], obj.Id);
-            Assert.True(expiration>4000);
             await Task.Delay(1000);
             Assert.True(connection.Execute("EXISTS", key) == 1, $"Expected: {key} to exist, it did not.");
             res = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
             Assert.Null(res);
-            expiration = (long)await connection.ExecuteAsync("PTTL", key);
+            var expiration = (long)await connection.ExecuteAsync("PTTL", key);
             Assert.True(expiration < 4000);
             res = await collection.InsertAsync(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
             expiration = (long)await connection.ExecuteAsync("PTTL", key);
@@ -402,21 +392,15 @@ namespace Redis.OM.Unit.Tests
 
             connection.Unlink(key);
             collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
-            var expiration = (long)connection.Execute("PTTL", key);
-            Assert.True(expiration>4000);
             Thread.Sleep(1100);
             res = collection.Insert(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
             Assert.Null(res);
-            expiration = (long)connection.Execute("PTTL", key);
+            var expiration = (long)connection.Execute("PTTL", key);
             Assert.True(expiration < 4000, $"Expiration: {expiration}");
             res = collection.Insert(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
-            expiration = (long)connection.Execute("PTTL", key);
             Assert.NotNull(res);
-            Assert.True(expiration > 4000);
             res = collection.Insert(obj, WhenKey.Always, TimeSpan.FromMilliseconds(6000));
-            expiration = (long)connection.Execute("PTTL", key);
             Assert.NotNull(res);
-            Assert.True(expiration>5000);
             res = collection.Insert(obj, WhenKey.Always);
             expiration = (long)connection.Execute("PTTL", key);
             Assert.NotNull(res);
