@@ -5,11 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json.Linq;
-using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
-using Redis.OM.Searching.Query;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
