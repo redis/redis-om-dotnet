@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Redis.OM.Common;
@@ -113,6 +114,14 @@ namespace Redis.OM.Searching
             }
         }
 
+        /// <inheritdoc />
+        public bool Any()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)_connection.Search<T>(query).DocumentCount > 0;
+        }
+
         /// <summary>
         /// Checks to see if anything matching the expression exists.
         /// </summary>
@@ -184,6 +193,14 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
+        public async ValueTask UpdateAsync(IEnumerable<T> items)
+        {
+            var tasks = items.Select(UpdateAsync);
+
+            await Task.WhenAll(tasks);
+        }
+
+        /// <inheritdoc />
         public void Delete(T item)
         {
             var key = item.GetKey();
@@ -192,11 +209,45 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
+        public void Delete(IEnumerable<T> items)
+        {
+            var keys = items.Select(x => x.GetKey()).ToArray();
+            if (!keys.Any())
+            {
+                return;
+            }
+
+            foreach (var key in keys)
+            {
+                StateManager.Remove(key);
+            }
+
+            _connection.Unlink(keys);
+        }
+
+        /// <inheritdoc />
         public async Task DeleteAsync(T item)
         {
             var key = item.GetKey();
             await _connection.UnlinkAsync(key);
             StateManager.Remove(key);
+        }
+
+        /// <inheritdoc />
+        public async Task DeleteAsync(IEnumerable<T> items)
+        {
+            var keys = items.Select(x => x.GetKey()).ToArray();
+            if (!keys.Any())
+            {
+                return;
+            }
+
+            foreach (var key in keys)
+            {
+                StateManager.Remove(key);
+            }
+
+            await _connection.UnlinkAsync(keys);
         }
 
         /// <inheritdoc />
@@ -582,6 +633,56 @@ namespace Redis.OM.Searching
         public async Task<string> InsertAsync(T item, TimeSpan timeSpan)
         {
             return await ((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan);
+        }
+
+        /// <inheritdoc/>
+        public Task<string?> InsertAsync(T item, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            return ((RedisQueryProvider)Provider).Connection.SetAsync(item, when, timeSpan);
+        }
+
+        /// <inheritdoc/>
+        public string? Insert(T item, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            return ((RedisQueryProvider)Provider).Connection.Set(item, when, timeSpan);
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<string>> Insert(IEnumerable<T> items)
+        {
+            var distinct = items.Distinct().ToArray();
+            if (!distinct.Any())
+            {
+                return new List<string>();
+            }
+
+            var tasks = new List<Task<string>>();
+            foreach (var item in distinct)
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item));
+            }
+
+            var result = await Task.WhenAll(tasks);
+            return result.ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
+        {
+            var distinct = items.Distinct().ToArray();
+            if (!distinct.Any())
+            {
+                return new List<string>();
+            }
+
+            var tasks = new List<Task<string>>();
+            foreach (var item in distinct)
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
+            }
+
+            var result = await Task.WhenAll(tasks);
+            return result.ToList();
         }
 
         /// <inheritdoc/>

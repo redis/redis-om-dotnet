@@ -836,6 +836,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task TestMultipleContainsGuid()
+        {
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection);
+            var objectList = Enumerable.Range(1, 10).Select(x => new ObjectWithStringLikeValueTypes() { Guid = Guid.NewGuid() }).ToList();
+            foreach (var item in objectList)
+            {
+                await collection.InsertAsync(item);
+            }
+
+            var ids = objectList.Select(x => x.Guid);
+            var objects = await collection.Where(x => ids.Contains(x.Guid)).ToListAsync();
+
+            Assert.Equal(ids, objects.Select(x => x.Guid));
+        }
+
+        [Fact]
         public async Task TestShouldFailForSave()
         {
             var expectedText = "The RedisCollection has been instructed to not maintain the state of records enumerated by " +
@@ -906,6 +922,41 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             CompareTimestamps(timestamp, first.Timestamp);
             CompareTimestamps(timestamp, first.NullableTimestamp.Value);
             Assert.Equal(obj.Id, first.Id);
+        }
+
+        [Fact]
+        public async Task TestListContains()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person1 = new Person() { Name = "Ferb", Age = 14, NickNames = new[] { "Feb", "Fee" } };
+            var person2 = new Person() { Name = "Phineas", Age = 14, NickNames = new[] { "Phineas", "Triangle Head", "Phine" } };
+
+            await collection.InsertAsync(person1);
+            await collection.InsertAsync(person2);
+
+            var names = new List<string> { "Ferb", "Phineas" };
+            var people = await collection.Where(x => names.Contains(x.Name)).ToListAsync();
+
+            Assert.Contains(people, x => x.Id == person1.Id);
+            Assert.Contains(people, x => x.Id == person2.Id);
+        }
+
+        [Fact]
+        public async Task TestListMultipleContains()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person1 = new Person() { Name = "Ferb", Age = 14, NickNames = new[] { "Feb", "Fee" }, TagField = "Ferb"  };
+            var person2 = new Person() { Name = "Phineas", Age = 14, NickNames = new[] { "Phineas", "Triangle Head", "Phine" }, TagField = "Phineas" };
+
+            await collection.InsertAsync(person1);
+            await collection.InsertAsync(person2);
+
+            var names = new List<string> { "Ferb", "Phineas" };
+            var ages = new List<int?> { 14, 50, 60 };
+            var people = await collection.Where(x => names.Contains(x.Name) && names.Contains(x.TagField) && ages.Contains(x.Age)).ToListAsync();
+
+            Assert.Contains(people, x => x.Id == person1.Id);
+            Assert.Contains(people, x => x.Id == person2.Id);
         }
     }
 }

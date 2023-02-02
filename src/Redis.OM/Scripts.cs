@@ -86,6 +86,68 @@ return 0
 ";
 
         /// <summary>
+        /// Conditionally calls a hset if a key doesn't exist.
+        /// </summary>
+        internal const string HsetIfNotExists = @"
+local exists = redis.call('EXISTS', KEYS[1])
+if exists ~= 1 then
+    local hashArgs = {}
+    local expiry = tonumber(ARGV[1])
+    for i = 2, table.getn(ARGV) do
+        hashArgs[i-1] = ARGV[i]
+    end
+    redis.call('HSET', KEYS[1], unpack(hashArgs))
+    if expiry > 0 then
+        redis.call('PEXPIRE', KEYS[1], expiry)
+    end 
+    return 1    
+end
+return 0
+";
+
+        /// <summary>
+        /// replaces hash if key exists.
+        /// </summary>
+        internal const string ReplaceHashIfExists = @"
+local exists = redis.call('EXISTS', KEYS[1])
+if exists == 1 then
+    local hashArgs = {}
+    local expiry = tonumber(ARGV[1])
+    for i = 2, table.getn(ARGV) do
+        hashArgs[i-1] = ARGV[i]
+    end
+    redis.call('UNLINK', KEYS[1])
+    redis.call('HSET', KEYS[1], unpack(hashArgs))
+    if expiry > 0 then
+        redis.call('PEXPIRE', KEYS[1], expiry)
+    end
+    return 1
+end
+return 0
+";
+
+        /// <summary>
+        /// Sets a Json object, if the object is set, and there is an expiration, also set expiration.
+        /// </summary>
+        internal const string JsonSetWithExpire = @"
+local expiry = tonumber(ARGV[1])
+local jsonArgs = {}
+for i = 2, table.getn(ARGV) do
+    jsonArgs[i-1] = ARGV[i]
+end
+local wasAdded = redis.call('JSON.SET', KEYS[1], unpack(jsonArgs))
+if wasAdded ~= false then
+    if expiry > 0 then
+        redis.call('PEXPIRE', KEYS[1], expiry)
+    else
+        redis.call('PERSIST', KEYS[1])
+    end
+    return 1
+end
+return 0
+";
+
+        /// <summary>
         /// The scripts.
         /// </summary>
         internal static readonly Dictionary<string, string> ScriptCollection = new ()
@@ -95,6 +157,9 @@ return 0
             { nameof(Unlink), Unlink },
             { nameof(UnlinkAndSetHash), UnlinkAndSetHash },
             { nameof(UnlinkAndSendJson), UnlinkAndSendJson },
+            { nameof(HsetIfNotExists), HsetIfNotExists },
+            { nameof(ReplaceHashIfExists), ReplaceHashIfExists },
+            { nameof(JsonSetWithExpire), JsonSetWithExpire },
         };
 
         /// <summary>
