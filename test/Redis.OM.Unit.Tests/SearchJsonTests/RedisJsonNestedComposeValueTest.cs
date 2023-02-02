@@ -35,18 +35,19 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
         }
 
         [Fact]
-        public void TestEmbededMultipleList()
+        public void TestEmbeddedMultipleList()
         {
             var currentAddress = new Address { State = "TN", City = "Chennai" };
             var permanentAddress = new Address { State = "TN", City = "Attur" };
             var personWithDualAddress = new PersonWithNestedArrayOfObject { Name = "Jeeva", Addresses = new List<Address> { currentAddress, permanentAddress } };
             var collection = new RedisCollection<PersonWithNestedArrayOfObject>(_connection);
             collection.Insert(personWithDualAddress);
-            var person1 = collection.FindById(personWithDualAddress.Id);
-            person1.Addresses[0].State = person1.Addresses[0].State + "(Tamil Nadu)";
+            var person = collection.FindById(personWithDualAddress.Id);
+            person.Addresses[0].State = person.Addresses[0].State + "(Tamil Nadu)";
             collection.Save();
             var result = collection.Where(x => x.Addresses.Any(x => x.State == "TN(Tamil Nadu)")).ToList();
             Assert.NotEmpty(result);
+            collection.Delete(person);
         }
 
         [Fact]
@@ -71,21 +72,40 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
             await collection.SaveAsync();
             results = await collection.Where(x => x.Addresses.Any(x => x.City == "Satellite Beach")).ToListAsync();
             Assert.NotEmpty(results);
+            collection.Delete(obj);
         }
 
         [Fact]
-        public async Task TestEmbededMultipleListWithUpdate()
+        public async Task TestEmbeddedMultipleListWithUpdate()
         {
             var currentAddress = new Address { State = "KL", City = "Kozhikode" };
             var permanentAddress = new Address { State = "TN", City = "Salem" };
             var personWithDualAddress = new PersonWithNestedArrayOfObject { Name = "Raja", Addresses = new List<Address> { currentAddress, permanentAddress } };
             var collection = new RedisCollection<PersonWithNestedArrayOfObject>(_connection);
             collection.Insert(personWithDualAddress);
-            var person1 = collection.FindById(personWithDualAddress.Id);
-            person1.Addresses[0].State = person1.Addresses[0].State + "(Kerala)";
-            await  collection.UpdateAsync(person1);
+            var person = collection.FindById(personWithDualAddress.Id);
+            person.Addresses[0].State = person.Addresses[0].State + "(Kerala)";
+            await  collection.UpdateAsync(person);
             var result = collection.Where(x => x.Addresses.Any(x => x.State == "KL(Kerala)")).ToList();
             Assert.NotEmpty(result);
+            collection.Delete(person);
+        }
+        
+        [Fact]
+        public async Task TestEmbeddedMultipleListWithUpdateInsert()
+        {
+            var currentAddress = new Address { State = "KL", City = "Kozhikode" };
+            var permanentAddress = new Address { State = "TN", City = "Salem" };
+            var addressToBeInserted = new Address { State = "FL", City = "Hollywood" };
+            var personWithDualAddress = new PersonWithNestedArrayOfObject { Name = "Raja", Addresses = new List<Address> { currentAddress, permanentAddress } };
+            var collection = new RedisCollection<PersonWithNestedArrayOfObject>(_connection);
+            collection.Insert(personWithDualAddress);
+            var person = collection.FindById(personWithDualAddress.Id);
+            person.Addresses.Add(addressToBeInserted);
+            collection.Update(person);
+            var result = collection.Where(x => x.Addresses.Any(x => x.City == "Hollywood")).ToList();
+            Assert.NotEmpty(result);
+            collection.Delete(person);
         }
     }
 }
