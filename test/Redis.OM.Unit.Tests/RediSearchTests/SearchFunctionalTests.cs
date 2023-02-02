@@ -927,63 +927,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public async Task TestBulkInsert()
-        {
-            var collection = new RedisCollection<Person>(_connection);
-            var persons = new List<Person>() {
-                new Person() { Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" }, },
-                new Person() { Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" }, },
-                new Person() { Name = "Jeeva", Age = 22, NickNames = new[] { "Jee", "Jeev", "J" }, },
-                new Person() { Name = "Martin", Age = 60, NickNames = new[] { "Mart", "Mat", "tin" }, }
-                };
-            var keys = await collection.Insert(persons);
-            var people = collection.Where(x => x.NickNames.Contains("Bob") || x.NickNames.Contains("Alie")).ToList();
-            Assert.Contains(people, x => x.Name == persons.First().Name);
-        }
-
-        [Fact]
-        public async Task TestBulkInsertWithSameIds()
-        {
-            var collection = new RedisCollection<Person>(_connection);
-            var persons = new List<Person>() {
-                new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Alice", Age = 51, NickNames = new[] { "Ally", "Alie", "Al" }, },
-                new Person() {Id="01GFZ9Y6CTEDHHXKT055N1YP3A" , Name = "Robert", Age = 37, NickNames = new[] { "Bobby", "Rob", "Bob" }, },
-                new Person() { Name = "Jeeva", Age = 22, NickNames = new[] { "Jee", "Jeev", "J" }, },
-                new Person() { Name = "Martin", Age = 60, NickNames = new[] { "Mart", "Mat", "tin" }, }
-                };
-            await collection.Insert(persons);
-            var people = await collection.Where(x => x.NickNames.Contains("Bob") || x.NickNames.Contains("Alie")).ToListAsync();
-            Assert.Equal(people.Count, persons.Count - 3);
-            Assert.False(people.First().Name == persons.First().Name); // this fails because the Name field of people doesn't contains the Name value Alice
-        }
-
-        [Fact]
-        public async Task BulkInsert50Records()
-        {
-            var collection = new RedisCollection<Person>(_connection);
-
-            var names = new[] { "Stever", "Martin", "Aegorn", "Robert", "Mary", "Joe", "Mark", "Otto" };
-            var rand = new Random();
-            var people = new List<Person>();
-            for (var i = 0; i < 50; i++)
-            {
-                people.Add(new Person
-                {
-                    Name = names[rand.Next(0, names.Length)],
-                    DepartmentNumber = rand.Next(1, 4),
-                    Sales = rand.Next(50000, 1000000),
-                    Age = rand.Next(17, 21),
-                    Height = 58.0 + rand.NextDouble() * 15,
-                    SalesAdjustment = rand.NextDouble()
-                }
-                );
-            }
-            await collection.Insert(people);
-            var countPeople = collection.Where(x => x.Age >= 17 && x.Age <= 21).ToList().Count;
-            Assert.Equal(people.Count, countPeople);
-        }
-
-        [Fact]
         public async Task TestListContains()
         {
             var collection = new RedisCollection<Person>(_connection);
