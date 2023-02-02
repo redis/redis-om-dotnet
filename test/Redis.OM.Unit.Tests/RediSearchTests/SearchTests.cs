@@ -2816,5 +2816,39 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100"));
         }
+
+        [Fact]
+        public void TestNestedOrderBy()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_mock.Object).OrderBy(x => x.Address.State).ToList();
+            _mock.Verify(x=>x.Execute("FT.SEARCH", "person-idx", "*", "LIMIT","0", "100", "SORTBY", "Address_State", "ASC"));
+        }
+
+        [Fact]
+        public void TestGeoFilterNested()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var res = collection.GeoFilter(x => x.Address.Location, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
+            Assert.Equal(32, res[0].Age);
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "100",
+                "GEOFILTER",
+                "Address_Location",
+                "5",
+                "6.7",
+                "50",
+                "km"
+            ));
+        }
     }
 }
