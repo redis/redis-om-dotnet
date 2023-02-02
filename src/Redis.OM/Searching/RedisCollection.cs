@@ -195,9 +195,13 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async ValueTask UpdateAsync(IEnumerable<T> items)
         {
-            var tasks = items.Select(UpdateAsync);
+            var tasks = items.Select(UpdateAsyncNoSave);
 
             await Task.WhenAll(tasks);
+            foreach (var kvp in tasks.Select(x => x.Result))
+            {
+                SaveToStateManager(kvp.Key, kvp.Value);
+            }
         }
 
         /// <inheritdoc />
@@ -518,16 +522,17 @@ namespace Redis.OM.Searching
             var tasks = new Dictionary<string, Task<T?>>();
             foreach (var id in ids.Distinct())
             {
-                tasks.Add(id, FindByIdAsync(id));
+                tasks.Add(id, FindByIdAsyncNoSave(id));
             }
 
             await Task.WhenAll(tasks.Values);
             var result = tasks.ToDictionary(x => x.Key, x => x.Value.Result);
             foreach (var res in result)
             {
-                if (res.Value != null)
+                string? key;
+                if (res.Value != null && res.Value.TryGetKey(out key) && key != null)
                 {
-                    SaveToStateManager(res.Value.GetKey(), res.Value);
+                    SaveToStateManager((string)key, res.Value);
                 }
             }
 
@@ -724,6 +729,40 @@ namespace Redis.OM.Searching
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
         {
             return f.Method;
+        }
+
+        private Task<T?> FindByIdAsyncNoSave(string id)
+        {
+            var prefix = typeof(T).GetKeyPrefix();
+            string key = id.Contains(prefix) ? id : $"{prefix}:{id}";
+            return _connection.GetAsync<T>(key).AsTask();
+        }
+
+        private async Task<KeyValuePair<string, T>> UpdateAsyncNoSave(T item)
+        {
+            var key = item.GetKey();
+            IList<IObjectDiff>? diff;
+            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+            if (diffConstructed)
+            {
+                if (diff!.Any())
+                {
+                    var args = new List<string>();
+                    var scriptName = diff!.First().Script;
+                    foreach (var update in diff!)
+                    {
+                        args.AddRange(update.SerializeScriptArgs());
+                    }
+
+                    await _connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray());
+                }
+            }
+            else
+            {
+                await _connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType);
+            }
+
+            return new KeyValuePair<string, T>(key, item);
         }
 
         private void Initialize(RedisQueryProvider provider, Expression? expression, Expression<Func<T, bool>>? booleanExpression)
