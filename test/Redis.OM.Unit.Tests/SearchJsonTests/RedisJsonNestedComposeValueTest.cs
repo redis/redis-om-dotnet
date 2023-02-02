@@ -27,7 +27,7 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
             [RedisIdField]
             [Indexed]
             public string Id { get; set; }
-            [Searchable] 
+            [Searchable]
             public string Name { get; set; }
             [Indexed(JsonPath = "$.City")]
             [Indexed(JsonPath = "$.State")]
@@ -45,7 +45,7 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
             var person1 = collection.FindById(personWithDualAddress.Id);
             person1.Addresses[0].State = person1.Addresses[0].State + "(Tamil Nadu)";
             collection.Save();
-            var result = collection.Where(x => x.Addresses.Any(x=> x.State == "TN(Tamil Nadu)")).ToList();
+            var result = collection.Where(x => x.Addresses.Any(x => x.State == "TN(Tamil Nadu)")).ToList();
             Assert.NotEmpty(result);
         }
 
@@ -71,6 +71,21 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
             await collection.SaveAsync();
             results = await collection.Where(x => x.Addresses.Any(x => x.City == "Satellite Beach")).ToListAsync();
             Assert.NotEmpty(results);
+        }
+
+        [Fact]
+        public async Task TestEmbededMultipleListWithUpdate()
+        {
+            var currentAddress = new Address { State = "KL", City = "Kozhikode" };
+            var permanentAddress = new Address { State = "TN", City = "Salem" };
+            var personWithDualAddress = new PersonWithNestedArrayOfObject { Name = "Raja", Addresses = new List<Address> { currentAddress, permanentAddress } };
+            var collection = new RedisCollection<PersonWithNestedArrayOfObject>(_connection);
+            collection.Insert(personWithDualAddress);
+            var person1 = collection.FindById(personWithDualAddress.Id);
+            person1.Addresses[0].State = person1.Addresses[0].State + "(Kerala)";
+            await  collection.UpdateAsync(person1);
+            var result = collection.Where(x => x.Addresses.Any(x => x.State == "KL(Kerala)")).ToList();
+            Assert.NotEmpty(result);
         }
     }
 }
