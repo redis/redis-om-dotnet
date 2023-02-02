@@ -409,7 +409,7 @@ namespace Redis.OM
 
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
-                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset) || type == typeof(Guid) || type == typeof(Guid?))
+                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset) || type == typeof(Guid) || type == typeof(Guid?) || type == typeof(Ulid) || type == typeof(Ulid?))
                 {
                     if (!hash.ContainsKey(propertyName))
                     {
