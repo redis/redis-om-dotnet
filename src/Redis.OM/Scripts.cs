@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Redis.OM
 {
@@ -165,6 +166,6 @@ return 0
         /// <summary>
         /// Gets or sets collection of SHAs.
         /// </summary>
-        internal static Dictionary<string, string> ShaCollection { get; set; } = new ();
+        internal static ConcurrentDictionary<string, string> ShaCollection { get; set; } = new ();
     }
 }
