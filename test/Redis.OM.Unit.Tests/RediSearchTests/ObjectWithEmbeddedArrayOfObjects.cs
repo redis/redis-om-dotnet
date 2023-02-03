@@ -6,6 +6,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     [Document(StorageType = StorageType.Json)]
     public class ObjectWithEmbeddedArrayOfObjects
     {
+        [RedisIdField]
+        public string Id { get; set; }
+
         [Indexed(JsonPath = "$.City")]
         [Indexed(JsonPath = "$.State")]
         [Indexed(JsonPath = "$.AddressType")]
