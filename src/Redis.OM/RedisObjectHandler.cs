@@ -161,6 +161,37 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Attempts to pull the key out of the object, returns false if it fails.
+        /// </summary>
+        /// <param name="obj">The object to pull the key out of.</param>
+        /// <param name="key">The key out param.</param>
+        /// <returns>True of a key was parsed, false if not.</returns>
+        internal static bool TryGetKey(this object obj, out string? key)
+        {
+            key = null;
+            var type = obj.GetType();
+            var documentAttribute = type.GetCustomAttribute(typeof(DocumentAttribute)) as DocumentAttribute;
+
+            if (documentAttribute == null)
+            {
+                return false;
+            }
+
+            var id = obj.GetId();
+            if (string.IsNullOrEmpty(id))
+            {
+                return false;
+            }
+
+            var sb = new StringBuilder();
+            sb.Append(GetKeyPrefix(type));
+            sb.Append(":");
+            sb.Append(id);
+            key = sb.ToString();
+            return true;
+        }
+
+        /// <summary>
         /// Generates the key prefix for the given type and id.
         /// </summary>
         /// <param name="type">The type.</param>

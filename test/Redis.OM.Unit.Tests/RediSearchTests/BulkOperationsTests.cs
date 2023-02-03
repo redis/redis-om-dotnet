@@ -174,7 +174,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             people[0].Height = 20.2;
             people[0].Age = 25;
             people[1].Age = 52;
-           await collection.UpdateAsync(people);
+            await collection.UpdateAsync(people);
             Assert.NotEqual(onepiece[0].Age, people[0].Age);
         }
 
