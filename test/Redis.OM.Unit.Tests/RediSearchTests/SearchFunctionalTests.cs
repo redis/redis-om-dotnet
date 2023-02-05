@@ -350,6 +350,26 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(testP.Id, secondQueriedP.Id);
         }
 
+
+        [Fact]
+        public void TestUpdateNullCollection()
+        {
+            var nickNames = new List<string>()  { "Bond", "James", "Steve" };
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person { Name = "Steve", Age = 32 };
+            var key = collection.Insert(testP);
+            var queriedP = collection.FindById(key);
+ 
+            queriedP.NickNamesList = nickNames;
+            collection.Update(queriedP);
+
+            var secondQueriedP = collection.FindById(key);
+
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(secondQueriedP.NickNamesList, nickNames);
+ 
+        }
+
         [Fact]
         public async Task TestUpdateAsync()
         {

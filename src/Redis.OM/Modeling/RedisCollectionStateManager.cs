@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Redis.OM;
@@ -122,7 +123,7 @@ namespace Redis.OM.Modeling
                 var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                 var snapshot = (JToken)Snapshot[key];
                 var diff = FindDiff(current!, snapshot);
-                differences = BuildJsonDifference(diff, "$");
+                differences = BuildJsonDifference(diff, "$", snapshot);
             }
             else
             {
@@ -157,7 +158,7 @@ namespace Redis.OM.Modeling
                         var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                         var snapshot = (JToken)Snapshot[key];
                         var diff = FindDiff(current!, snapshot);
-                        var diffArgs = BuildJsonDifference(diff, "$");
+                        var diffArgs = BuildJsonDifference(diff, "$", snapshot);
                         res.Add(key, diffArgs);
                     }
                     else
@@ -193,7 +194,7 @@ namespace Redis.OM.Modeling
             return res;
         }
 
-        private static IList<IObjectDiff> BuildJsonDifference(JObject diff, string currentPath)
+        private static IList<IObjectDiff> BuildJsonDifference(JObject diff, string currentPath, JToken snapshot)
         {
             var ret = new List<IObjectDiff>();
             if (diff.ContainsKey("+") && diff.ContainsKey("-"))
@@ -215,7 +216,7 @@ namespace Redis.OM.Modeling
 
             if (diff.ContainsKey("+"))
             {
-                if (diff["+"] is JArray arr)
+                if (diff["+"] is JArray arr && snapshot.SelectToken(diff.Path) is not null)
                 {
                     ret.AddRange(arr.Select(item => new JsonDiff("ARRAPPEND", currentPath, item)));
                 }
@@ -244,7 +245,7 @@ namespace Redis.OM.Modeling
             foreach (var item in diff)
             {
                 var val = item.Value as JObject;
-                ret.AddRange(BuildJsonDifference(val!, $"{currentPath}.{item.Key}"));
+                ret.AddRange(BuildJsonDifference(val!, $"{currentPath}.{item.Key}", snapshot));
             }
 
             return ret;
