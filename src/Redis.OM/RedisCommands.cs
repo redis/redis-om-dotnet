@@ -640,9 +640,9 @@ namespace Redis.OM
         /// <exception cref="ArgumentException">Thrown if the script cannot be resolved either the script is empty or the script name has not been encountered.</exception>
         public static async Task<int?> CreateAndEvalAsync(this IRedisConnection connection, string scriptName, string[] keys, string[] argv, string fullScript = "")
         {
-            if (!Scripts.ShaCollection.ContainsKey(scriptName))
+            string sha;
+            if (!Scripts.ShaCollection.TryGetValue(scriptName, out sha))
             {
-                string sha;
                 if (Scripts.ScriptCollection.ContainsKey(scriptName))
                 {
                     sha = await connection.ExecuteAsync("SCRIPT", "LOAD", Scripts.ScriptCollection[scriptName]);
@@ -661,7 +661,7 @@ namespace Redis.OM
 
             var args = new List<string>
             {
-                Scripts.ShaCollection[scriptName],
+                sha,
                 keys.Count().ToString(),
             };
             args.AddRange(keys);

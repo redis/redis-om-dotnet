@@ -134,7 +134,7 @@ namespace Redis.OM.Modeling
             var res = new Dictionary<string, IList<IObjectDiff>>();
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
-                foreach (var key in Snapshot.Keys)
+                foreach (var key in Snapshot.Keys.ToArray())
                 {
                     if (Data.ContainsKey(key))
                     {
