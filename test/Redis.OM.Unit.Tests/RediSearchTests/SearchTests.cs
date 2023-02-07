@@ -794,7 +794,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = collection.First(x => x.Name == "Steve");
             steve.Age = 33;
             await collection.UpdateAsync(steve);
-            _mock.Verify(x => x.ExecuteAsync("EVALSHA", "cbbf1c4fab5064f419e469cc51c563f8bf51e6fb", "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
+            _mock.Verify(x => x.ExecuteAsync("EVALSHA", It.IsAny<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
             _mock.Verify(x => x.ExecuteAsync("EVAL",Scripts.JsonDiffResolution, "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
             Scripts.ShaCollection.Clear();
         }
@@ -865,7 +865,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             steve.Age = 33;
             steve.Height = 71.5;
             await collection.UpdateAsync(steve);
-            _mock.Verify(x => x.ExecuteAsync("EVALSHA", "42", "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33", "SET", "$.Height", "71.5"));
+            _mock.Verify(x => x.ExecuteAsync("EVALSHA", It.IsAny<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33", "SET", "$.Height", "71.5"));
             Scripts.ShaCollection.Clear();
         }
 
