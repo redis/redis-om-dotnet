@@ -348,11 +348,11 @@ namespace Redis.OM.Unit.Tests
             res = await collection.InsertAsync(obj, WhenKey.NotExists, TimeSpan.FromMilliseconds(5000));
             Assert.Null(res);
             var expiration = (long)await connection.ExecuteAsync("PTTL", key);
-            Assert.True(expiration <= 4000);
+            Assert.True(expiration <= 4000, $"Actual: {expiration}");
             res = await collection.InsertAsync(obj, WhenKey.Exists, TimeSpan.FromMilliseconds(5000));
             expiration = (long)await connection.ExecuteAsync("PTTL", key);
             Assert.NotNull(res);
-            Assert.True(expiration >= 4000);
+            Assert.True(expiration >= 4000, $"Actual: {expiration}");
             res = collection.Insert(obj, WhenKey.Always, TimeSpan.FromMilliseconds(6000));
             expiration = (long)connection.Execute("PTTL", key);
             Assert.NotNull(res);
