@@ -151,9 +151,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSave()
         {
             var collection = new RedisCollection<Person>(_connection,10000);
-            var count = collection.Count();
+            var count = 0;
             foreach (var person in collection)
             {
+                count++;
                 person.Name = "TestSave";
                 person.Mother = new Person {Name = "Diane"};
             }
@@ -204,9 +205,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestSaveHashAsync()
         {
             var collection = new RedisCollection<HashPerson>(_connection, 10000);
-            var count = collection.Count();
+            var count = 0;
             await foreach (var person in collection)
             {
+                count++;
                 person.Name = "TestSaveHashAsync";
                 person.Mother = new HashPerson {Name = "Diane"};
             }
