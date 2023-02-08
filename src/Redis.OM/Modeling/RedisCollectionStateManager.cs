@@ -1,11 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Redis.OM;
-using Redis.OM.Modeling;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Redis.OM.Modeling
@@ -15,17 +11,6 @@ namespace Redis.OM.Modeling
     /// </summary>
     public class RedisCollectionStateManager
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        };
-
-        static RedisCollectionStateManager()
-        {
-            JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
-            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCollectionStateManager"/> class.
         /// </summary>
@@ -118,7 +103,7 @@ namespace Redis.OM.Modeling
 
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
-                var dataJson = JsonSerializer.Serialize(value, JsonSerializerOptions);
+                var dataJson = JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions);
                 var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                 var snapshot = (JToken)Snapshot[key];
                 var diff = FindDiff(current!, snapshot);
@@ -153,7 +138,7 @@ namespace Redis.OM.Modeling
                 {
                     if (Data.ContainsKey(key))
                     {
-                        var dataJson = JsonSerializer.Serialize(Data[key], JsonSerializerOptions);
+                        var dataJson = JsonSerializer.Serialize(Data[key], RedisSerializationSettings.JsonSerializerOptions);
                         var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                         var snapshot = (JToken)Snapshot[key];
                         var diff = FindDiff(current!, snapshot);
