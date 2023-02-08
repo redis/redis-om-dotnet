@@ -151,15 +151,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSave()
         {
             var collection = new RedisCollection<Person>(_connection,10000);
-            var count = collection.Count();
+            var count = 0;
             foreach (var person in collection)
             {
-                person.Name = "Steve";
+                count++;
+                person.Name = "TestSave";
                 person.Mother = new Person {Name = "Diane"};
             }
 
             collection.Save();
-            var steves = collection.Where(x => x.Name == "Steve");
+            var steves = collection.Where(x => x.Name == "TestSave");
             Assert.Equal(count, steves.Count());
         }
 
@@ -171,12 +172,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await foreach (var person in collection.Where(x=>x.Name == "Chris"))
             {
                 count++;
-                person.Name = "Augustine";
+                person.Name = "TestSaveAsync";
                 person.Mother = new Person {Name = "Monica"};
                 person.IsEngineer = true;
             }
             await collection.SaveAsync();
-            var augustines = collection.Where(x => x.Name == "Augustine");
+            var augustines = collection.Where(x => x.Name == "TestSaveAsync");
             var numSteves = augustines.Count();
             Assert.Equal(count, augustines.Count());
         }
@@ -191,11 +192,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await foreach (var person in collection.Where(x => x.Name == "Chris"))
             {
                 count++;
-                person.Name = "Thomas";
+                person.Name = "TestSaveAsyncSecondEnumeration";
             }
 
             await collection.SaveAsync();
-            var augustines = collection.Where(x => x.Name == "Thomas");
+            var augustines = collection.Where(x => x.Name == "TestSaveAsyncSecondEnumeration");
             Assert.Equal(count, augustines.Count());
 
         }
@@ -204,14 +205,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestSaveHashAsync()
         {
             var collection = new RedisCollection<HashPerson>(_connection, 10000);
-            var count = collection.Count();
+            var count = 0;
             await foreach (var person in collection)
             {
-                person.Name = "Steve";
+                count++;
+                person.Name = "TestSaveHashAsync";
                 person.Mother = new HashPerson {Name = "Diane"};
             }
             await collection.SaveAsync();
-            var steves = collection.Where(x => x.Name == "Steve");
+            var steves = collection.Where(x => x.Name == "TestSaveHashAsync");
             Assert.Equal(count, steves.Count());
         }
 
