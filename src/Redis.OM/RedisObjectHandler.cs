@@ -17,8 +17,6 @@ namespace Redis.OM
     /// </summary>
     internal static class RedisObjectHandler
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new ();
-
         private static readonly Dictionary<Type, object?> TypeDefaultCache = new ()
         {
             { typeof(string), null },
@@ -29,12 +27,6 @@ namespace Redis.OM
             { typeof(uint), default(uint) },
             { typeof(ulong), default(ulong) },
         };
-
-        static RedisObjectHandler()
-        {
-            JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
-            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
-        }
 
         /// <summary>
         /// Builds object from provided hash set.
@@ -64,7 +56,7 @@ namespace Redis.OM
                 asJson = SendToJson(hash, typeof(T));
             }
 
-            return JsonSerializer.Deserialize<T>(asJson, JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
         }
 
         /// <summary>
@@ -99,7 +91,7 @@ namespace Redis.OM
                 throw new ArgumentException("Type must be decorated with a DocumentAttribute");
             }
 
-            return JsonSerializer.Deserialize<T>(asJson, JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
         }
 
         /// <summary>
