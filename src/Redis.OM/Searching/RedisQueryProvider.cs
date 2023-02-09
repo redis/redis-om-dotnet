@@ -10,6 +10,7 @@ using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Common;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using StackExchange.Redis;
 
 namespace Redis.OM.Searching
 {
@@ -219,7 +220,7 @@ namespace Redis.OM.Searching
                 return reply.ToArray().First();
             }
 
-            throw new Exception("Invalid value returned by server");
+            throw new RedisExecutionException("Invalid value returned by server");
         }
 
         /// <summary>
@@ -359,7 +360,7 @@ namespace Redis.OM.Searching
                 }
                 catch (InvalidOperationException ex)
                 {
-                    throw new Exception(
+                    throw new RedisStateException(
                         "Exception encountered while trying to save State. This indicates a possible race condition. " +
                         "If you do not need to update, consider setting SaveState to false, otherwise, ensure collection is only enumerated on one thread at a time",
                         ex);
