@@ -2850,5 +2850,26 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "km"
             ));
         }
+        
+        [Fact]
+        public void TestSelectWithWhere()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.Age == 33).Select(x => x.Name).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Age:[33 33])",
+                "LIMIT",
+                "0",
+                "100",
+                "RETURN",
+                "1",
+                "Name"
+            ));
+        }
     }
 }
