@@ -254,7 +254,7 @@ namespace Redis.OM
                     }
                     else
                     {
-                        idProperty.SetValue(obj, id);
+                        idProperty.SetValue(obj, Convert.ChangeType(id, idProperty.PropertyType));
                     }
                 }
             }
