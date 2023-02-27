@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json.Linq;
@@ -968,6 +969,39 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Contains(people, x => x.Id == person1.Id);
             Assert.Contains(people, x => x.Id == person2.Id);
+        }
+
+        [Fact]
+        public void TestGuidSelects()
+        {
+            var obj = new ObjectWithStringLikeValueTypes { Guid = Guid.NewGuid() };
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection);
+            var key = collection.Insert(obj);
+            var res = collection.Where(x => x.Guid == obj.Guid).Select(x => x.Guid).ToList();
+            Assert.NotEmpty(res);
+            _connection.Unlink(key);
+        }
+
+        [Fact]
+        public void TestUlidSelects()
+        {
+            var obj = new ObjectWithStringLikeValueTypes { Ulid = Ulid.NewUlid() };
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_connection);
+            var key = collection.Insert(obj);
+            var res = collection.Where(x => x.Ulid == obj.Ulid).Select(x => x.Ulid).ToList();
+            Assert.NotEmpty(res);
+            _connection.Unlink(key);
+        }
+
+        [Fact]
+        public void TestIntSelects()
+        {
+            var obj = new Person { Name = "steve", Age = 33};
+            var collection = new RedisCollection<Person>(_connection);
+            collection.Insert(obj);
+            var res = collection.Where(x => x.Age == obj.Age).Select(x => x.Age).ToList();
+            Assert.NotEmpty(res);
+            collection.Delete(obj);
         }
     }
 }

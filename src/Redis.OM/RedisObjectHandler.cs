@@ -47,7 +47,7 @@ namespace Redis.OM
 
             var attr = Attribute.GetCustomAttribute(typeof(T), typeof(DocumentAttribute)) as DocumentAttribute;
             string asJson;
-            if (attr != null && attr.StorageType == StorageType.Json)
+            if (attr != null && attr.StorageType == StorageType.Json && hash.ContainsKey("$"))
             {
                 asJson = hash["$"];
             }
@@ -398,6 +398,11 @@ namespace Redis.OM
         private static string SendToJson(IDictionary<string, string> hash, Type t)
         {
             var properties = t.GetProperties();
+            if ((!properties.Any() || t == typeof(Ulid) || t == typeof(Ulid?)) && hash.Count == 1)
+            {
+                return $"\"{hash.First().Value}\"";
+            }
+
             var ret = "{";
             foreach (var property in properties)
             {
@@ -427,7 +432,7 @@ namespace Redis.OM
 
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
-                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset))
+                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset) || type == typeof(Guid) || type == typeof(Guid?) || type == typeof(Ulid) || type == typeof(Ulid?))
                 {
                     if (!hash.ContainsKey(propertyName))
                     {
