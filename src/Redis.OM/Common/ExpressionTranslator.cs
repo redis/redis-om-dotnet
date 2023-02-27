@@ -233,6 +233,9 @@ namespace Redis.OM.Common
                             case "GeoFilter":
                                 query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
                                 break;
+                            case "Where":
+                                query.QueryText = TranslateWhereMethod(exp);
+                                break;
                         }
                     }
 
@@ -244,8 +247,10 @@ namespace Redis.OM.Common
                     break;
             }
 
-            query.QueryText = mainBooleanExpression == null ? "*" : BuildQueryFromExpression(
-                ((LambdaExpression)mainBooleanExpression).Body);
+            if (mainBooleanExpression != null)
+            {
+                query.QueryText = BuildQueryFromExpression(((LambdaExpression)mainBooleanExpression).Body);
+            }
 
             return query;
         }
