@@ -264,12 +264,13 @@ namespace Redis.OM.Common
         {
             if (member is PropertyInfo info)
             {
-                if (TypeDeterminationUtilities.IsNumeric(info.PropertyType))
+                var type = Nullable.GetUnderlyingType(info.PropertyType) ?? info.PropertyType;
+                if (TypeDeterminationUtilities.IsNumeric(type))
                 {
                     return SearchFieldType.NUMERIC;
                 }
 
-                if (info.PropertyType.IsEnum)
+                if (type.IsEnum)
                 {
                     return TypeDeterminationUtilities.GetSearchFieldFromEnumProperty(info);
                 }
@@ -339,7 +340,8 @@ namespace Redis.OM.Common
                     {
                         if (!int.TryParse(rightContent, out _) && !long.TryParse(rightContent, out _))
                         {
-                            rightContent = ((int)Enum.Parse(member.Type, rightContent)).ToString();
+                            var type = Nullable.GetUnderlyingType(member.Type) ?? member.Type;
+                            rightContent = ((int)Enum.Parse(type, rightContent)).ToString();
                         }
                     }
 

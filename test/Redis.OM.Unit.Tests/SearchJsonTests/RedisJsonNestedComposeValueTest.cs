@@ -92,7 +92,7 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
         }
         
         [Fact]
-        public async Task TestEmbeddedMultipleListWithUpdateInsert()
+        public void TestEmbeddedMultipleListWithUpdateInsert()
         {
             var currentAddress = new Address { State = "KL", City = "Kozhikode" };
             var permanentAddress = new Address { State = "TN", City = "Salem" };

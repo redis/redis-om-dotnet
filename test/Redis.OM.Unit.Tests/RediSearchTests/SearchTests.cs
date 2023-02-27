@@ -2850,13 +2850,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "km"
             ));
         }
-        
+
         [Fact]
         public void TestSelectWithWhere()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
-
+                .Returns(_mockReply);        
             var collection = new RedisCollection<Person>(_mock.Object);
             _ = collection.Where(x => x.Age == 33).Select(x => x.Name).ToList();
             _mock.Verify(x => x.Execute(
@@ -2869,6 +2868,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "RETURN",
                 "1",
                 "Name"
+        }
+
+        [Fact]
+        public void TestNullableEnumQueries()
+
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<ObjectWithNullableEnum>(_mock.Object);
+            collection.Where(x => x.AnEnum == AnEnum.one && x.NullableStringEnum == AnEnum.two).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnullableenum-idx",
+                "((@AnEnum:[0 0]) (@NullableStringEnum:{two}))",
+                "LIMIT",
+                "0",
+                "100"
             ));
         }
     }
