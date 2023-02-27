@@ -44,8 +44,9 @@
   <PropertyGroup>
     <CodeAnalysisRuleSet>stylecop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DocumentationFile>bin\Debug\Redis.OM.xml</DocumentationFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  <PropertyGroup>
+    <DocumentationFile>
+      bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml
+    </DocumentationFile>
   </PropertyGroup>
 </Project>
