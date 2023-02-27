@@ -43,4 +43,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Indexed]
         public AnEnum AnEnum { get; set; }
     }
+
+    [Document]
+    public class ObjectWithNullableEnum
+    {
+        [Indexed] public AnEnum? AnEnum { get; set; }
+        [Indexed]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public AnEnum? NullableStringEnum { get; set; }
+    }
 }
