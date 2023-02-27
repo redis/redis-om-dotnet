@@ -2867,7 +2867,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "100",
                 "RETURN",
                 "1",
-                "Name"
+                "Name"));
         }
 
         [Fact]
