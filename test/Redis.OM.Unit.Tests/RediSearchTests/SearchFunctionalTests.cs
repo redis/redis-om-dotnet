@@ -148,13 +148,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestSave()
         {
-            var collection = new RedisCollection<Person>(_connection, 10000);
+            var collection = new RedisCollection<BasicJsonObjectTestSave>(_connection, 10000);
+            
+            for(var i = 0; i < 10; i++)
+            {
+                collection.Insert(new BasicJsonObjectTestSave() { Name = "TestSaveBefore" });
+            }
             var count = 0;
             foreach (var person in collection)
             {
                 count++;
                 person.Name = "TestSave";
-                person.Mother = new Person { Name = "Diane" };
             }
 
             collection.Save();
