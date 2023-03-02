@@ -1003,5 +1003,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotEmpty(res);
             collection.Delete(obj);
         }
+
+        [Fact]
+        public void TestQueryWithForwardSlashes()
+        {
+            var collection = new RedisCollection<ObjectWithZeroStopwords>(_connection);
+            collection.Insert(new ObjectWithZeroStopwords() { Name = "a/test/string" });
+
+            Assert.NotNull(collection.FirstOrDefault(x=>x.Name == "a/test/string"));
+        }
     }
 }
