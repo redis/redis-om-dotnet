@@ -1003,5 +1003,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotEmpty(res);
             collection.Delete(obj);
         }
+
+        [Fact]
+        public void TestUpdateWithQuotes()
+        {
+            var obj = new BasicJsonObject() { Name = "Bob" };
+            var collection = new RedisCollection<BasicJsonObject>(_connection);
+            collection.Insert(obj);
+            var reconstituted = collection.FindById(obj.Id);
+            reconstituted.Name = "\"Bob";
+            collection.Update(reconstituted);
+            collection.Delete(obj);
+        }
     }
 }
