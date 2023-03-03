@@ -14,8 +14,8 @@ namespace Redis.OM.Test.ConsoleApp
         [Document(StorageType = StorageType.Json)]
         public class Customer
         {
-            [Indexed] public string FirstName { get; set; }
-            [Indexed] public string LastName { get; set; }
+            [Indexed(Aggregatable = true)] public string FirstName { get; set; }
+            [Indexed(Aggregatable = true)] public string LastName { get; set; }
             [Indexed] public string Email { get; set; }
             [Indexed(Aggregatable = true)] public int Age { get; set; }
             [Indexed(Aggregatable = true)] public GeoLoc Home { get; set; }
@@ -41,7 +41,13 @@ namespace Redis.OM.Test.ConsoleApp
                 Email = "bondjamesbond@email.com",
                 Age = 68
             });
-            
+            customers.Insert(new Customer
+            {
+                FirstName = "Bruce",
+                LastName = "Wayne",
+                Email = "batman@email.com",
+                Age = 52
+            });
             // query
             // Find all customers who's last name is "Bond"
             var res = customers.Where(x => x.LastName == "Bond").ToList();
@@ -56,9 +62,12 @@ namespace Redis.OM.Test.ConsoleApp
             customerAggregations.Average(x => x.RecordShell.Age);
             
             // Format Customer Full Names
-            customerAggregations.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
-                "FullName");
             
+            customerAggregations= customerAggregations.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
+                "FullName");
+            // Filter Customer that fullname is "Bruce Wayne"
+            var filteredCustomers =
+                customerAggregations.Filter(p => p.Aggregations["FullName"] == "Bruce Wayne").ToList();
             // Get Customer Distance from Mall of America. 
             customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -93.241786, 44.853816),
                 "DistanceToMall");
