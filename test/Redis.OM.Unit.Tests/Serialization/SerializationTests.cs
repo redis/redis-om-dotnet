@@ -92,6 +92,16 @@ namespace Redis.OM.Unit.Tests
         }
 
         [Fact]
+        public void TestUlidMaterialization()
+        {
+            var ulid = Ulid.NewUlid();
+            var obj = new ObjectWithUlidId() {Id = ulid};
+            var key = _connection.Set(obj);
+            var reconstitutedObject = _connection.Get<ObjectWithUlidId>(key);
+            Assert.Equal(ulid, reconstitutedObject.Id);
+        }
+
+        [Fact]
         public void TestNotDefaultGuid()
         {
             var obj = new ObjectWithGuidId();

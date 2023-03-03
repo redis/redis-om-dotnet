@@ -233,6 +233,9 @@ namespace Redis.OM.Common
                             case "GeoFilter":
                                 query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
                                 break;
+                            case "Where":
+                                query.QueryText = TranslateWhereMethod(exp);
+                                break;
                         }
                     }
 
@@ -244,8 +247,10 @@ namespace Redis.OM.Common
                     break;
             }
 
-            query.QueryText = mainBooleanExpression == null ? "*" : BuildQueryFromExpression(
-                ((LambdaExpression)mainBooleanExpression).Body);
+            if (mainBooleanExpression != null)
+            {
+                query.QueryText = BuildQueryFromExpression(((LambdaExpression)mainBooleanExpression).Body);
+            }
 
             return query;
         }
@@ -259,12 +264,13 @@ namespace Redis.OM.Common
         {
             if (member is PropertyInfo info)
             {
-                if (TypeDeterminationUtilities.IsNumeric(info.PropertyType))
+                var type = Nullable.GetUnderlyingType(info.PropertyType) ?? info.PropertyType;
+                if (TypeDeterminationUtilities.IsNumeric(type))
                 {
                     return SearchFieldType.NUMERIC;
                 }
 
-                if (info.PropertyType.IsEnum)
+                if (type.IsEnum)
                 {
                     return TypeDeterminationUtilities.GetSearchFieldFromEnumProperty(info);
                 }
@@ -334,7 +340,8 @@ namespace Redis.OM.Common
                     {
                         if (!int.TryParse(rightContent, out _) && !long.TryParse(rightContent, out _))
                         {
-                            rightContent = ((int)Enum.Parse(member.Type, rightContent)).ToString();
+                            var type = Nullable.GetUnderlyingType(member.Type) ?? member.Type;
+                            rightContent = ((int)Enum.Parse(type, rightContent)).ToString();
                         }
                     }
 
@@ -375,7 +382,7 @@ namespace Redis.OM.Common
 
             if (exp is MemberExpression member)
             {
-                return $"{member.Member.Name}";
+                return ExpressionParserUtilities.GetSearchFieldNameFromMember(member);
             }
 
             if (exp is MethodCallExpression method)
@@ -411,7 +418,7 @@ namespace Redis.OM.Common
 
             if (exp is MemberExpression member)
             {
-                return new[] { $"{member.Member.Name}" };
+                return new[] { ExpressionParserUtilities.GetSearchFieldNameFromMember(member) };
             }
 
             if (exp is MethodCallExpression method)
@@ -431,7 +438,7 @@ namespace Redis.OM.Common
 
             if (exp is NewExpression newExpression)
             {
-                return newExpression.Members != null ? newExpression.Members.Select(x => $"{x.Name}").ToArray() : Array.Empty<string>();
+                return newExpression.Members != null ? newExpression.Arguments.Select(GetFieldName).ToArray() : Array.Empty<string>();
             }
 
             throw new ArgumentException("Invalid expression type detected");
@@ -582,7 +589,7 @@ namespace Redis.OM.Common
             var predicate = (UnaryExpression)expression.Arguments[1];
             var lambda = (LambdaExpression)predicate.Operand;
             var memberExpression = (MemberExpression)lambda.Body;
-            sb.Field = memberExpression.Member.Name;
+            sb.Field = ExpressionParserUtilities.GetSearchFieldNameFromMember(memberExpression);
             sb.Direction = ascending ? SortDirection.Ascending : SortDirection.Descending;
             return sb;
         }

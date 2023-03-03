@@ -392,10 +392,51 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
             _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
-            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);        
             _ = collection.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
                 "FullName").Filter(p => p.Aggregations["FullName"] == "Bruce Wayne").ToList();
             _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "*", "APPLY", "format(\"%s %s\",@FirstName,@LastName)", "AS", "FullName", "FILTER", "@FullName == 'Bruce Wayne'", "WITHCURSOR", "COUNT", "10000"));
+        }
+        
+        [Fact]
+        public void TestNestedOrderBy()
+
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _ = collection.OrderBy(x => x.RecordShell.Address.State).ToList();
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx", "*", "SORTBY", "2", "@Address_State", "ASC", "WITHCURSOR", "COUNT", "10000"));
+        }
+
+        [Fact]
+        public void TestNestedGroup()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _ = collection.GroupBy(x => x.RecordShell.Address.State).ToList();
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx", "*", "GROUPBY", "1", "@Address_State", "WITHCURSOR", "COUNT", "10000"));
+        }
+
+        [Fact]
+        public void TestNestedGroupMulti()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _ = collection.GroupBy(x => new {x.RecordShell.Address.State, x.RecordShell.Address.ForwardingAddress.City}).ToList();
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx", "*", "GROUPBY", "2", "@Address_State", "@Address_ForwardingAddress_City", "WITHCURSOR", "COUNT", "10000"));
+        }
+
+        [Fact]
+        public void TestNestedApply()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _ = collection.Apply(x => x.RecordShell.Address.HouseNumber + 4, "house_num_modified").ToList();
+            _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx", "*", "APPLY", "@Address_HouseNumber + 4", "AS", "house_num_modified", "WITHCURSOR", "COUNT", "10000"));
         }
     }
 }

@@ -1,11 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Redis.OM;
-using Redis.OM.Modeling;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Redis.OM.Modeling
@@ -15,17 +11,6 @@ namespace Redis.OM.Modeling
     /// </summary>
     public class RedisCollectionStateManager
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new ()
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        };
-
-        static RedisCollectionStateManager()
-        {
-            JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
-            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCollectionStateManager"/> class.
         /// </summary>
@@ -118,11 +103,11 @@ namespace Redis.OM.Modeling
 
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
-                var dataJson = JsonSerializer.Serialize(value, JsonSerializerOptions);
+                var dataJson = JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions);
                 var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                 var snapshot = (JToken)Snapshot[key];
                 var diff = FindDiff(current!, snapshot);
-                differences = BuildJsonDifference(diff, "$");
+                differences = BuildJsonDifference(diff, "$", snapshot);
             }
             else
             {
@@ -149,15 +134,15 @@ namespace Redis.OM.Modeling
             var res = new Dictionary<string, IList<IObjectDiff>>();
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
-                foreach (var key in Snapshot.Keys)
+                foreach (var key in Snapshot.Keys.ToArray())
                 {
                     if (Data.ContainsKey(key))
                     {
-                        var dataJson = JsonSerializer.Serialize(Data[key], JsonSerializerOptions);
+                        var dataJson = JsonSerializer.Serialize(Data[key], RedisSerializationSettings.JsonSerializerOptions);
                         var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                         var snapshot = (JToken)Snapshot[key];
                         var diff = FindDiff(current!, snapshot);
-                        var diffArgs = BuildJsonDifference(diff, "$");
+                        var diffArgs = BuildJsonDifference(diff, "$", snapshot);
                         res.Add(key, diffArgs);
                     }
                     else
@@ -193,7 +178,7 @@ namespace Redis.OM.Modeling
             return res;
         }
 
-        private static IList<IObjectDiff> BuildJsonDifference(JObject diff, string currentPath)
+        private static IList<IObjectDiff> BuildJsonDifference(JObject diff, string currentPath, JToken snapshot)
         {
             var ret = new List<IObjectDiff>();
             if (diff.ContainsKey("+") && diff.ContainsKey("-"))
@@ -215,7 +200,7 @@ namespace Redis.OM.Modeling
 
             if (diff.ContainsKey("+"))
             {
-                if (diff["+"] is JArray arr)
+                if (diff["+"] is JArray arr && snapshot.SelectToken(diff.Path) is not null)
                 {
                     ret.AddRange(arr.Select(item => new JsonDiff("ARRAPPEND", currentPath, item)));
                 }
@@ -244,7 +229,7 @@ namespace Redis.OM.Modeling
             foreach (var item in diff)
             {
                 var val = item.Value as JObject;
-                ret.AddRange(BuildJsonDifference(val!, $"{currentPath}.{item.Key}"));
+                ret.AddRange(BuildJsonDifference(val!, $"{currentPath}.{item.Key}", snapshot));
             }
 
             return ret;

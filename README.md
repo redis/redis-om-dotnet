@@ -360,7 +360,9 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@Jeevananthan](https://github.com/Jeevananthan-23)
 * [@mariusmuntean](https://github.com/mariusmuntean)
 * [@jcreus1](https://github.com/jcreus1)
+* [@JuliusMikkela](https://github.com/JuliusMikkela)
 * [@imansafari1991](https://github.com/imansafari1991)
+
 <!-- Logo -->
 [Logo]: images/logo.svg
 
