@@ -400,7 +400,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         
         [Fact]
         public void TestNestedOrderBy()
-
         {
             var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
             _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
