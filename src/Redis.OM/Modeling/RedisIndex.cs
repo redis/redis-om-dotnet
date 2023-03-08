@@ -55,7 +55,11 @@ namespace Redis.OM.Modeling
             if (objAttribute.Prefixes.Length > 0)
             {
                 args.Add(objAttribute.Prefixes.Length.ToString());
-                args.AddRange(objAttribute.Prefixes);
+                //args.AddRange(objAttribute.Prefixes);
+                foreach(var prefixes in objAttribute.Prefixes)
+                {
+                    args.Add($"{prefixes}:");
+                }
             }
             else
             {
