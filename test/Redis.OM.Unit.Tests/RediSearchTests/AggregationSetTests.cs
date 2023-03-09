@@ -388,6 +388,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestRightSideStringTypeFilter()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);        
+            _ = collection.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
+                "FullName").Filter(p => p.Aggregations["FullName"] == "Bruce Wayne").ToList();
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "*", "APPLY", "format(\"%s %s\",@FirstName,@LastName)", "AS", "FullName", "FILTER", "@FullName == 'Bruce Wayne'", "WITHCURSOR", "COUNT", "10000"));
+        }
+        
+        [Fact]
         public void TestNestedOrderBy()
         {
             var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
