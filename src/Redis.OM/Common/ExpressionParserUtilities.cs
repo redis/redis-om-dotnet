@@ -121,9 +121,9 @@ namespace Redis.OM.Common
             {
                 var right = GetOperandString(expression.Right);
                 var left = GetOperandString(expression.Left);
-
-                if (filterFormat && expression.Left is MemberExpression mem &&
-                    mem.Type == typeof(string))
+                if (filterFormat && ((expression.Left is MemberExpression mem &&
+                                      mem.Type == typeof(string)) || (expression.Left is UnaryExpression uni &&
+                                                                      uni.Type == typeof(string))))
                 {
                     right = $"'{right}'";
                 }
