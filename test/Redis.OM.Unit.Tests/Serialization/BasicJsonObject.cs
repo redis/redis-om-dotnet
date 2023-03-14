@@ -9,3 +9,11 @@ public class BasicJsonObject
     public string Id { get; set; }
     public string Name { get; set; }
 }
+
+[Document(StorageType = StorageType.Json)]
+public class BasicJsonObjectTestSave
+{
+    [RedisIdField]
+    public string Id { get; set; }
+    [Indexed]public string Name { get; set; }
+}
