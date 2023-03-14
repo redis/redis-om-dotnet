@@ -1009,6 +1009,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestQueryWithForwardSlashes()
+        {
+            var collection = new RedisCollection<ObjectWithZeroStopwords>(_connection);
+            collection.Insert(new ObjectWithZeroStopwords() { Name = "a/test/string" });
+
+            Assert.NotNull(collection.FirstOrDefault(x=>x.Name == "a/test/string"));
+        }
+        
+        [Fact]
         public void TestComplexObjectsWithMixedNesting()
         {
             var obj = new ComplexObjectWithCascadeAndJsonPath

@@ -2890,6 +2890,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestEscapeForwardSlash()        
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            collection.Where(x => x.TagField == "a/test/string").ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{a\\/test\\/string})",
+                "LIMIT",
+                "0",
+                "100"
+                ));
+        }
+
+        [Fact]
         public void TestMixedNestingIndexCreation()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
