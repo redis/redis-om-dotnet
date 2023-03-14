@@ -12,6 +12,18 @@ namespace Redis.OM.Modeling
     /// </summary>
     internal static class RedisSchemaField
     {
+        internal static bool IsComplexType(Type type)
+        {
+            return !TypeDeterminationUtilities.IsNumeric(type)
+                && type != typeof(string)
+                && type != typeof(GeoLoc)
+                && type != typeof(Ulid)
+                && type != typeof(bool)
+                && type != typeof(Guid)
+                && !type.IsEnum
+                && !IsTypeIndexableArray(type);
+        }
+
         /// <summary>
         /// gets the schema field args serialized for json.
         /// </summary>
@@ -35,24 +47,17 @@ namespace Redis.OM.Modeling
             var ret = new List<string>();
             foreach (var attr in attributes)
             {
+                int cascadeDepth = remainingDepth == -1 ? attr.CascadeDepth : remainingDepth;
                 if (attr.JsonPath != null)
                 {
-                    ret.AddRange(SerializeIndexFromJsonPaths(info, attr));
+                    ret.AddRange(SerializeIndexFromJsonPaths(info, attr, pathPrefix, aliasPrefix, cascadeDepth));
                 }
                 else
                 {
                     var innerType = Nullable.GetUnderlyingType(info.PropertyType) ?? info.PropertyType;
 
-                    if (!TypeDeterminationUtilities.IsNumeric(innerType)
-                        && innerType != typeof(string)
-                        && innerType != typeof(GeoLoc)
-                        && innerType != typeof(Ulid)
-                        && innerType != typeof(bool)
-                        && innerType != typeof(Guid)
-                        && !innerType.IsEnum
-                        && !IsTypeIndexableArray(innerType))
+                    if (IsComplexType(innerType))
                     {
-                        int cascadeDepth = remainingDepth == -1 ? attr.CascadeDepth : remainingDepth;
                         if (cascadeDepth > 0)
                         {
                             foreach (var property in info.PropertyType.GetProperties())
@@ -96,7 +101,7 @@ namespace Redis.OM.Modeling
 
         private static bool IsTypeIndexableArray(Type t) => t == typeof(string[]) || t == typeof(bool[]) || t == typeof(List<string>) || t == typeof(List<bool>);
 
-        private static IEnumerable<string> SerializeIndexFromJsonPaths(PropertyInfo parentInfo, SearchFieldAttribute attribute, string prefix = "$.")
+        private static IEnumerable<string> SerializeIndexFromJsonPaths(PropertyInfo parentInfo, SearchFieldAttribute attribute, string prefix = "$.", string aliasPrefix = "", int remainingDepth = -1)
         {
             var isCollection = false;
             var indexArgs = new List<string>();
@@ -128,12 +133,29 @@ namespace Redis.OM.Modeling
                 type = childProperty.PropertyType;
             }
 
-            var arrayStr = isCollection ? "[*]" : string.Empty;
-            indexArgs.Add($"{prefix}{parentInfo.Name}{arrayStr}{path.Substring(1)}");
-            indexArgs.Add("AS");
-            indexArgs.Add($"{parentInfo.Name}_{string.Join("_", propertyNames)}");
-            var underlyingType = Nullable.GetUnderlyingType(type);
-            indexArgs.AddRange(CommonSerialization(attribute, underlyingType ?? type, propertyInfo));
+            var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+            if (!IsComplexType(underlyingType))
+            {
+                var arrayStr = isCollection ? "[*]" : string.Empty;
+                indexArgs.Add($"{prefix}{parentInfo.Name}{arrayStr}{path.Substring(1)}");
+                indexArgs.Add("AS");
+                indexArgs.Add($"{aliasPrefix}{parentInfo.Name}_{string.Join("_", propertyNames)}");
+                indexArgs.AddRange(CommonSerialization(attribute, underlyingType, propertyInfo));
+            }
+            else
+            {
+                int cascadeDepth = remainingDepth == -1 ? attribute.CascadeDepth : remainingDepth;
+                if (cascadeDepth > 0)
+                {
+                    foreach (var property in propertyInfo.PropertyType.GetProperties())
+                    {
+                        var pathPrefix = $"{prefix}{parentInfo.Name}{path.Substring(1)}.";
+                        var alias = $"{aliasPrefix}{parentInfo.Name}_{string.Join("_", propertyNames)}_";
+                        indexArgs.AddRange(property.SerializeArgsJson(cascadeDepth - 1, pathPrefix, alias));
+                    }
+                }
+            }
+
             return indexArgs;
         }
 

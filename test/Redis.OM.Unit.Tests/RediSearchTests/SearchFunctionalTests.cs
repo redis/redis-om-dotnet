@@ -1009,6 +1009,36 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestComplexObjectsWithMixedNesting()
+        {
+            var obj = new ComplexObjectWithCascadeAndJsonPath
+            {
+                InnerCascade = new InnerObject()
+                {
+                    InnerInnerCascade = new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 },
+                    InnerInnerCollection = new[] { new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 } },
+                    InnerInnerJson = new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 }
+                },
+                InnerJson = new InnerObject()
+                {
+                    InnerInnerCascade = new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 },
+                    InnerInnerCollection = new[] { new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 } },
+                    InnerInnerJson = new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 }
+                }
+            };
+
+            var collection = new RedisCollection<ComplexObjectWithCascadeAndJsonPath>(_connection);
+
+            collection.Insert(obj);
+
+            Assert.NotNull(collection.FirstOrDefault(x => x.InnerCascade.InnerInnerCascade.Tag == "World"));
+            Assert.NotNull(collection.FirstOrDefault(x=> x.InnerCascade.InnerInnerCascade.Num == 42));
+            Assert.NotNull(collection.FirstOrDefault(x=> x.InnerCascade.InnerInnerCollection.Any(x=>x.Tag == "World")));
+            Assert.NotNull(collection.FirstOrDefault(x=>x.InnerJson.InnerInnerCascade.Tag == "World"));
+            Assert.NotNull(collection.FirstOrDefault(x=>x.InnerJson.InnerInnerCascade.Arr.Contains("hello")));
+        }
+        
+        [Fact]
         public void TestUpdateWithQuotes()
         {
             var obj = new BasicJsonObject() { Name = "Bob" };
