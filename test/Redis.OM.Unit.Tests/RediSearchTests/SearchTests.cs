@@ -2892,6 +2892,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestEscapeForwardSlash()        
         {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
             var collection = new RedisCollection<Person>(_mock.Object);
             collection.Where(x => x.TagField == "a/test/string").ToList();
             _mock.Verify(x => x.Execute(
@@ -2901,6 +2904,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "100"
+                ));
         }
 
         [Fact]
