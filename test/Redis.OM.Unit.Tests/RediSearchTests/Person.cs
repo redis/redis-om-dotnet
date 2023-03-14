@@ -66,5 +66,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
         [Indexed]
         public string? NullableStringField { get; set; }
+
+        [Indexed(Aggregatable = true)] public string FirstName { get; set; }
+        [Indexed(Aggregatable = true)] public string LastName { get; set; }
+
+
     }
 }

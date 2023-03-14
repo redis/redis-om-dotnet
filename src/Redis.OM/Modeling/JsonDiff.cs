@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Web;
 using Newtonsoft.Json.Linq;
 
 namespace Redis.OM.Modeling
@@ -33,7 +34,7 @@ namespace Redis.OM.Modeling
         {
             return _value.Type switch
             {
-                JTokenType.String => new[] { _operation, _path, $"\"{_value}\"" },
+                JTokenType.String => new[] { _operation, _path, $"\"{HttpUtility.JavaScriptStringEncode(_value.ToString())}\"" },
                 JTokenType.Boolean => new[] { _operation, _path, _value.ToString().ToLower() },
                 _ => new[] { _operation, _path, _value.ToString() }
             };

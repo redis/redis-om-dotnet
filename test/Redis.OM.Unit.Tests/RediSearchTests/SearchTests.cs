@@ -2890,11 +2890,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestEscapeForwardSlash()
+        public void TestEscapeForwardSlash()        
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
-
             var collection = new RedisCollection<Person>(_mock.Object);
             collection.Where(x => x.TagField == "a/test/string").ToList();
             _mock.Verify(x => x.Execute(
@@ -2904,6 +2901,71 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "100"
+        }
+
+        [Fact]
+        public void TestMixedNestingIndexCreation()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns("OK");
+
+            _mock.Object.CreateIndex(typeof(ComplexObjectWithCascadeAndJsonPath));
+
+            _mock.Verify(x => x.Execute(
+                "FT.CREATE",
+                $"{nameof(ComplexObjectWithCascadeAndJsonPath).ToLower()}-idx",
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                $"Redis.OM.Unit.Tests.{nameof(ComplexObjectWithCascadeAndJsonPath)}:",
+                "SCHEMA", "$.InnerCascade.InnerInnerJson.Tag", "AS", "InnerCascade_InnerInnerJson_Tag", "TAG", "SEPARATOR", "|",
+                "$.InnerCascade.InnerInnerCascade.Tag", "AS", "InnerCascade_InnerInnerCascade_Tag", "TAG", "SEPARATOR", "|",
+                "$.InnerCascade.InnerInnerCascade.Num", "AS", "InnerCascade_InnerInnerCascade_Num", "NUMERIC",
+                "$.InnerCascade.InnerInnerCascade.Arr[*]", "AS", "InnerCascade_InnerInnerCascade_Arr", "TAG", "SEPARATOR", "|",
+                "$.InnerCascade.InnerInnerCollection[*].Tag", "AS", "InnerCascade_InnerInnerCollection_Tag", "TAG", "SEPARATOR", "|",
+                "$.InnerJson.InnerInnerCascade.Tag", "AS", "InnerJson_InnerInnerCascade_Tag", "TAG", "SEPARATOR", "|",
+                "$.InnerJson.InnerInnerCascade.Num", "AS", "InnerJson_InnerInnerCascade_Num", "NUMERIC",
+                "$.InnerJson.InnerInnerCascade.Arr[*]", "AS", "InnerJson_InnerInnerCascade_Arr", "TAG", "SEPARATOR", "|"));
+        }
+
+        [Fact]
+        public void TestMixedNestingQuerying()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<ComplexObjectWithCascadeAndJsonPath>(_mock.Object);
+
+            collection.FirstOrDefault(x => x.InnerCascade.InnerInnerCascade.Tag == "hello");
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "complexobjectwithcascadeandjsonpath-idx",
+                "(@InnerCascade_InnerInnerCascade_Tag:{hello})",
+                "LIMIT",
+                "0",
+                "1"
+            ));
+            
+            collection.FirstOrDefault(x => x.InnerCascade.InnerInnerCascade.Num == 5);
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "complexobjectwithcascadeandjsonpath-idx",
+                "(@InnerCascade_InnerInnerCascade_Num:[5 5])",
+                "LIMIT",
+                "0",
+                "1"
+            ));
+            
+            collection.FirstOrDefault(x => x.InnerCascade.InnerInnerCollection.Any(x=>x.Tag == "hello"));
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "complexobjectwithcascadeandjsonpath-idx",
+                "(@InnerCascade_InnerInnerCollection_Tag:{hello})",
+                "LIMIT",
+                "0",
+                "1"
             ));
         }
     }
