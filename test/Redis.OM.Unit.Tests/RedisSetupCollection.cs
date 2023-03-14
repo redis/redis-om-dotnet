@@ -26,6 +26,7 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(ObjectWithDateTime));
             Connection.CreateIndex(typeof(ObjectWithDateTimeHash));
             Connection.CreateIndex(typeof(PersonWithNestedArrayOfObject));
+            Connection.CreateIndex(typeof(BasicJsonObjectTestSave));
         }
 
         private IRedisConnection _connection = null;
@@ -60,6 +61,7 @@ namespace Redis.OM.Unit.Tests
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithDateTime));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithDateTimeHash));
             Connection.DropIndexAndAssociatedRecords(typeof(PersonWithNestedArrayOfObject));
+            Connection.DropIndexAndAssociatedRecords(typeof(BasicJsonObjectTestSave));
         }
     }
 }
