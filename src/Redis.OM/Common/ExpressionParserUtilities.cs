@@ -108,6 +108,26 @@ namespace Redis.OM.Common
         }
 
         /// <summary>
+        /// Determines whether it's a binary expression.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>Whether or not it's a binary expression.</returns>
+        internal static bool IsBinaryExpression(Expression expression)
+        {
+            if (expression is BinaryExpression)
+            {
+                return true;
+            }
+
+            if (expression is UnaryExpression uni && uni.Operand is BinaryExpression)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Splits the expression apart into a query.
         /// </summary>
         /// <param name="rootBinaryExpression">The root expression.</param>
@@ -121,16 +141,16 @@ namespace Redis.OM.Common
             {
                 var right = GetOperandString(expression.Right);
                 var left = GetOperandString(expression.Left);
-
-                if (filterFormat && expression.Left is MemberExpression mem &&
-                    mem.Type == typeof(string))
+                if (filterFormat && ((expression.Left is MemberExpression mem &&
+                                      mem.Type == typeof(string)) || (expression.Left is UnaryExpression uni &&
+                                                                      uni.Type == typeof(string))))
                 {
                     right = $"'{right}'";
                 }
 
                 operationStack.Push(right);
                 operationStack.Push(GetOperatorFromNodeType(expression.NodeType));
-                if (!string.IsNullOrEmpty(left) && !(expression.Left is BinaryExpression))
+                if (!string.IsNullOrEmpty(left) && !IsBinaryExpression(expression.Left))
                 {
                     operationStack.Push(left);
                 }

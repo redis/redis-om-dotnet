@@ -148,13 +148,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestSave()
         {
-            var collection = new RedisCollection<Person>(_connection, 10000);
+            var collection = new RedisCollection<BasicJsonObjectTestSave>(_connection, 10000);
+            
+            for(var i = 0; i < 10; i++)
+            {
+                collection.Insert(new BasicJsonObjectTestSave() { Name = "TestSaveBefore" });
+            }
             var count = 0;
             foreach (var person in collection)
             {
                 count++;
                 person.Name = "TestSave";
-                person.Mother = new Person { Name = "Diane" };
             }
 
             collection.Save();
@@ -1032,6 +1036,18 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotNull(collection.FirstOrDefault(x=> x.InnerCascade.InnerInnerCollection.Any(x=>x.Tag == "World")));
             Assert.NotNull(collection.FirstOrDefault(x=>x.InnerJson.InnerInnerCascade.Tag == "World"));
             Assert.NotNull(collection.FirstOrDefault(x=>x.InnerJson.InnerInnerCascade.Arr.Contains("hello")));
+        }
+        
+        [Fact]
+        public void TestUpdateWithQuotes()
+        {
+            var obj = new BasicJsonObject() { Name = "Bob" };
+            var collection = new RedisCollection<BasicJsonObject>(_connection);
+            collection.Insert(obj);
+            var reconstituted = collection.FindById(obj.Id);
+            reconstituted.Name = "\"Bob";
+            collection.Update(reconstituted);
+            collection.Delete(obj);
         }
     }
 }
