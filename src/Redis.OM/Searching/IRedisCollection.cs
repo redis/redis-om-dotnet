@@ -92,7 +92,7 @@ namespace Redis.OM.Searching
         /// </summary>
         /// <param name="items">The items to insert.</param>
         /// <returns>The list of Keys.</returns>
-        Task<List<string>> Insert(IEnumerable<T> items);
+        Task<List<string>> InsertAsync(IEnumerable<T> items);
 
         /// <summary>
         /// Inserts list of items into redis.
@@ -100,7 +100,7 @@ namespace Redis.OM.Searching
         /// <param name="items">The items to insert.</param>
         /// <param name="timeSpan">The timespan of the document's (TTL).</param>
         /// /// <returns>The list of Keys.</returns>
-        Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan);
+        Task<List<string>> InsertAsync(IEnumerable<T> items, TimeSpan timeSpan);
 
         /// <summary>
         /// finds an item by it's ID or keyname.

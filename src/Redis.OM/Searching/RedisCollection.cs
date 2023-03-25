@@ -657,7 +657,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public async Task<List<string>> Insert(IEnumerable<T> items)
+        public async Task<List<string>> InsertAsync(IEnumerable<T> items)
         {
             var distinct = items.Distinct().ToArray();
             if (!distinct.Any())
@@ -676,7 +676,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
+        public async Task<List<string>> InsertAsync(IEnumerable<T> items, TimeSpan timeSpan)
         {
             var distinct = items.Distinct().ToArray();
             if (!distinct.Any())
