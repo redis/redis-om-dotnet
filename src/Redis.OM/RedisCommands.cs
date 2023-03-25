@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
@@ -15,17 +14,6 @@ namespace Redis.OM
     /// </summary>
     public static class RedisCommands
     {
-        private static readonly JsonSerializerOptions Options = new ()
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        };
-
-        static RedisCommands()
-        {
-            Options.Converters.Add(new GeoLocJsonConverter());
-            Options.Converters.Add(new DateTimeJsonConverter());
-        }
-
         /// <summary>
         /// Serializes an object to either hash or json (depending on how it's decorated), and saves it in redis.
         /// </summary>
@@ -150,7 +138,7 @@ namespace Redis.OM
         /// <returns>whether the operation succeeded.</returns>
         public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj)
         {
-            var json = JsonSerializer.Serialize(obj, Options);
+            var json = JsonSerializer.Serialize(obj, RedisSerializationSettings.JsonSerializerOptions);
             var result = await connection.ExecuteAsync("JSON.SET", key, path, json);
             return result == "OK";
         }
@@ -181,7 +169,7 @@ namespace Redis.OM
         /// <returns>whether the operation succeeded.</returns>
         public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, TimeSpan timeSpan)
         {
-            var json = JsonSerializer.Serialize(obj, Options);
+            var json = JsonSerializer.Serialize(obj, RedisSerializationSettings.JsonSerializerOptions);
             var result = await connection.JsonSetAsync(key, path, json, timeSpan);
             return result;
         }
@@ -224,7 +212,7 @@ namespace Redis.OM
         /// <returns>whether the operation succeeded.</returns>
         public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, object obj, WhenKey when, TimeSpan? timeSpan = null)
         {
-            var json = JsonSerializer.Serialize(obj, Options);
+            var json = JsonSerializer.Serialize(obj, RedisSerializationSettings.JsonSerializerOptions);
             return await connection.JsonSetAsync(key, path, json, when, timeSpan);
         }
 
@@ -292,7 +280,7 @@ namespace Redis.OM
         /// <returns>whether the operation succeeded.</returns>
         public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj)
         {
-            var json = JsonSerializer.Serialize(obj, Options);
+            var json = JsonSerializer.Serialize(obj, RedisSerializationSettings.JsonSerializerOptions);
             var result = connection.Execute("JSON.SET", key, path, json);
             return result == "OK";
         }
@@ -323,7 +311,7 @@ namespace Redis.OM
         /// <returns>whether the operation succeeded.</returns>
         public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, TimeSpan timeSpan)
         {
-            var json = JsonSerializer.Serialize(obj, Options);
+            var json = JsonSerializer.Serialize(obj, RedisSerializationSettings.JsonSerializerOptions);
             return connection.JsonSet(key, path, json, timeSpan);
         }
 
@@ -365,7 +353,7 @@ namespace Redis.OM
         /// <returns>whether the operation succeeded.</returns>
         public static bool JsonSet(this IRedisConnection connection, string key, string path, object obj, WhenKey when, TimeSpan? timeSpan = null)
         {
-            var json = JsonSerializer.Serialize(obj, Options);
+            var json = JsonSerializer.Serialize(obj, RedisSerializationSettings.JsonSerializerOptions);
             return connection.JsonSet(key, path, json, when, timeSpan);
         }
 
@@ -585,7 +573,7 @@ namespace Redis.OM
             var args = new List<string> { key };
             args.AddRange(paths);
             var res = (string)connection.Execute("JSON.GET", args.ToArray());
-            return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, Options) : default;
+            return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, RedisSerializationSettings.JsonSerializerOptions) : default;
         }
 
         /// <summary>
@@ -601,7 +589,7 @@ namespace Redis.OM
             var args = new List<string> { key };
             args.AddRange(paths);
             var res = (string)await connection.ExecuteAsync("JSON.GET", args.ToArray());
-            return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, Options) : default;
+            return !string.IsNullOrEmpty(res) ? JsonSerializer.Deserialize<T>(res, RedisSerializationSettings.JsonSerializerOptions) : default;
         }
 
         /// <summary>
@@ -791,7 +779,7 @@ namespace Redis.OM
             _ = value ?? throw new ArgumentNullException(nameof(value));
             if (storageType == StorageType.Json)
             {
-                connection.CreateAndEval(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, Options) });
+                connection.CreateAndEval(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions) });
             }
             else
             {
@@ -822,7 +810,7 @@ namespace Redis.OM
             _ = value ?? throw new ArgumentNullException(nameof(value));
             if (storageType == StorageType.Json)
             {
-                await connection.CreateAndEvalAsync(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, Options) });
+                await connection.CreateAndEvalAsync(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions) });
             }
             else
             {

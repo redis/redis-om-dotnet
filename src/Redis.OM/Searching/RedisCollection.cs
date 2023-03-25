@@ -476,7 +476,11 @@ namespace Redis.OM.Searching
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             var result = res.Documents.FirstOrDefault();
-            SaveToStateManager(result.Key, result.Value);
+            if (result.Key != null)
+            {
+                SaveToStateManager(result.Key, result.Value);
+            }
+
             return result.Value;
         }
 

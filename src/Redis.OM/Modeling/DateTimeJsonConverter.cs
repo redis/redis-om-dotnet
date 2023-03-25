@@ -15,7 +15,7 @@ namespace Redis.OM.Modeling
             long val = reader.TokenType == JsonTokenType.String ? long.Parse(reader.GetString() !) : reader.GetInt64();
 
             DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            return TimeZoneInfo.ConvertTimeFromUtc(dateTime.AddMilliseconds(val), TimeZoneInfo.Local);
+            return TimeZoneInfo.ConvertTimeFromUtc(dateTime.AddMilliseconds(val), RedisSerializationSettings.TimeZone);
         }
 
         /// <inheritdoc />

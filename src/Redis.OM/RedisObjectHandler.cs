@@ -17,8 +17,6 @@ namespace Redis.OM
     /// </summary>
     internal static class RedisObjectHandler
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new ();
-
         private static readonly Dictionary<Type, object?> TypeDefaultCache = new ()
         {
             { typeof(string), null },
@@ -29,12 +27,6 @@ namespace Redis.OM
             { typeof(uint), default(uint) },
             { typeof(ulong), default(ulong) },
         };
-
-        static RedisObjectHandler()
-        {
-            JsonSerializerOptions.Converters.Add(new GeoLocJsonConverter());
-            JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
-        }
 
         /// <summary>
         /// Builds object from provided hash set.
@@ -55,7 +47,7 @@ namespace Redis.OM
 
             var attr = Attribute.GetCustomAttribute(typeof(T), typeof(DocumentAttribute)) as DocumentAttribute;
             string asJson;
-            if (attr != null && attr.StorageType == StorageType.Json)
+            if (attr != null && attr.StorageType == StorageType.Json && hash.ContainsKey("$"))
             {
                 asJson = hash["$"];
             }
@@ -64,7 +56,7 @@ namespace Redis.OM
                 asJson = SendToJson(hash, typeof(T));
             }
 
-            return JsonSerializer.Deserialize<T>(asJson, JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
         }
 
         /// <summary>
@@ -99,7 +91,7 @@ namespace Redis.OM
                 throw new ArgumentException("Type must be decorated with a DocumentAttribute");
             }
 
-            return JsonSerializer.Deserialize<T>(asJson, JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
         }
 
         /// <summary>
@@ -406,6 +398,11 @@ namespace Redis.OM
         private static string SendToJson(IDictionary<string, string> hash, Type t)
         {
             var properties = t.GetProperties();
+            if ((!properties.Any() || t == typeof(Ulid) || t == typeof(Ulid?)) && hash.Count == 1)
+            {
+                return $"\"{hash.First().Value}\"";
+            }
+
             var ret = "{";
             foreach (var property in properties)
             {
@@ -435,7 +432,7 @@ namespace Redis.OM
 
                     ret += $"\"{propertyName}\":{hash[propertyName]},";
                 }
-                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset))
+                else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset) || type == typeof(Guid) || type == typeof(Guid?) || type == typeof(Ulid) || type == typeof(Ulid?))
                 {
                     if (!hash.ContainsKey(propertyName))
                     {

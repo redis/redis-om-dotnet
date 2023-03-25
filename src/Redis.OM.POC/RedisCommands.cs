@@ -3,23 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Text.Json.Serialization;
 using Redis.OM.Contracts;
-using Redis.OM;
-using Redis.OM.Modeling;
 
 namespace Redis.OM
 {
     public static class RedisCommands
     {
-        private static JsonSerializerOptions _options = new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-        static RedisCommands()
-        {
-            _options.Converters.Add(new GeoLocJsonConverter());
-        }
         public static string Ping(this IRedisConnection connection) => connection.Execute("PING");
 
         public static string Set(this IRedisConnection connection, string key, string value) => connection.Execute("SET", key, value);
