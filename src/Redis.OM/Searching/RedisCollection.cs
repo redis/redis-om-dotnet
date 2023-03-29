@@ -657,7 +657,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public async Task<List<string>> Insert(IEnumerable<T> items)
+        public async Task<List<string>> InsertAsync(IEnumerable<T> items)
         {
             var distinct = items.Distinct().ToArray();
             if (!distinct.Any())
@@ -676,7 +676,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public async Task<List<string>> Insert(IEnumerable<T> items, TimeSpan timeSpan)
+        public async Task<List<string>> InsertAsync(IEnumerable<T> items, TimeSpan timeSpan)
         {
             var distinct = items.Distinct().ToArray();
             if (!distinct.Any())
@@ -688,6 +688,25 @@ namespace Redis.OM.Searching
             foreach (var item in distinct)
             {
                 tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, timeSpan));
+            }
+
+            var result = await Task.WhenAll(tasks);
+            return result.ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<string?>> InsertAsync(IEnumerable<T> items, WhenKey when, TimeSpan? timeSpan = null)
+        {
+            var distinct = items.Distinct().ToArray();
+            if (!distinct.Any())
+            {
+                return new List<string?>();
+            }
+
+            var tasks = new List<Task<string?>>();
+            foreach (var item in distinct)
+            {
+                tasks.Add(((RedisQueryProvider)Provider).Connection.SetAsync(item, when, timeSpan));
             }
 
             var result = await Task.WhenAll(tasks);
