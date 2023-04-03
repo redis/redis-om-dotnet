@@ -61,15 +61,7 @@ namespace Redis.OM.Common
                         break;
                     case "Where":
                         lambda = (LambdaExpression)((UnaryExpression)exp.Arguments[1]).Operand;
-                        if (i == expressions.Count - 1)
-                        {
-                            aggregation.Query = new QueryPredicate(lambda);
-                        }
-                        else
-                        {
-                            aggregation.Predicates.Push(new FilterPredicate(lambda.Body));
-                        }
-
+                        aggregation.Queries.Add(new QueryPredicate(lambda));
                         break;
                     case "Average":
                     case "AverageAsync":
