@@ -448,5 +448,35 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Apply(x=>x.RecordShell.Age + x["house_num_modified"] * 4 + x.RecordShell.Sales, "arbitrary_calculation").ToList();
             _mock.Verify(x=>x.Execute("FT.AGGREGATE","person-idx", "*", "APPLY", "@Address_HouseNumber + 4", "AS", "house_num_modified", "APPLY", "@Age + @house_num_modified * 4 + @Sales", "AS", "arbitrary_calculation", "WITHCURSOR", "COUNT", "10000"));
         }
+
+        [Fact]
+        public void TestWhereByComplexObjectOnTheRightSide()
+        {
+            var customerFilter = new CustomerFilterDto()
+            {
+                FirstName = "James",
+                LastName = "Bond"
+            };
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _ = collection.Where(x =>x.RecordShell.FirstName==customerFilter.FirstName) .ToList();
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "@FirstName:{James}", "WITHCURSOR", "COUNT", "10000"));
+        }
+
+        [Fact]
+        public void TestSequentialWhereClauseTranslation()
+        {
+            var customerFilter = new CustomerFilterDto()
+            {
+                FirstName = "James",
+                LastName = "Bond"
+            };
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _ = collection.Where(x => x.RecordShell.FirstName == customerFilter.FirstName).Where(p=>p.RecordShell.LastName==customerFilter.LastName).ToList();
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "@LastName:{Bond} @FirstName:{James}", "WITHCURSOR", "COUNT", "10000"));
+        }
     }
 }
