@@ -478,5 +478,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.Where(x => x.RecordShell.FirstName == customerFilter.FirstName).Where(p=>p.RecordShell.LastName==customerFilter.LastName).ToList();
             _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "@LastName:{Bond} @FirstName:{James}", "WITHCURSOR", "COUNT", "10000"));
         }
+        [Fact]
+        public void TestSkipTakeTranslatedLimit()
+        {
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            _ = collection.OrderByDescending(p=>p.RecordShell.Age).Skip(0).Take(10).ToList();
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx","*","SORTBY","2","@Age","DESC","LIMIT","0","10", "WITHCURSOR", "COUNT", "10000"));
+        }
     }
 }
