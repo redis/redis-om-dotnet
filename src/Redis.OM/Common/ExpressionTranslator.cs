@@ -103,7 +103,7 @@ namespace Redis.OM.Common
                     case "Skip":
                         if (aggregation.Limit != null)
                         {
-                            aggregation.Limit.Count = TranslateSkip(exp);
+                            aggregation.Limit.Offset = TranslateSkip(exp);
                         }
                         else
                         {
