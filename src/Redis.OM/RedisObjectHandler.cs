@@ -51,6 +51,10 @@ namespace Redis.OM
             {
                 asJson = hash["$"];
             }
+            else if (hash.Keys.Count > 0 && hash.Keys.All(x => x.StartsWith("$")))
+            {
+                asJson = hash.Values.First();
+            }
             else
             {
                 asJson = SendToJson(hash, typeof(T));
@@ -498,6 +502,12 @@ namespace Redis.OM
                     {
                         ret += $"\"{propertyName}\":";
                         ret += SendToJson(entries, type);
+                        ret += ",";
+                    }
+                    else if (hash.ContainsKey(propertyName))
+                    {
+                        ret += $"\"{propertyName}\":";
+                        ret += hash[propertyName];
                         ret += ",";
                     }
                 }

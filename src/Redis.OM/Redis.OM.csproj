@@ -21,6 +21,7 @@
     <RepositoryType>Github</RepositoryType>
     <PackageTags>redis redisearch indexing databases</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

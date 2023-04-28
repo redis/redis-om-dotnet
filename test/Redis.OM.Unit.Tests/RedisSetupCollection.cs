@@ -28,6 +28,7 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(PersonWithNestedArrayOfObject));
             Connection.CreateIndex(typeof(ComplexObjectWithCascadeAndJsonPath));
             Connection.CreateIndex(typeof(BasicJsonObjectTestSave));
+            Connection.CreateIndex(typeof(SelectTestObject));
         }
 
         private IRedisConnection _connection = null;
@@ -64,6 +65,7 @@ namespace Redis.OM.Unit.Tests
             Connection.DropIndexAndAssociatedRecords(typeof(PersonWithNestedArrayOfObject));
             Connection.DropIndexAndAssociatedRecords(typeof(ComplexObjectWithCascadeAndJsonPath));
             Connection.DropIndexAndAssociatedRecords(typeof(BasicJsonObjectTestSave));
+            Connection.DropIndexAndAssociatedRecords(typeof(SelectTestObject));
         }
     }
 }
