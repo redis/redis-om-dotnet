@@ -319,25 +319,34 @@ namespace Redis.OM.Common
                 }
                 else if (binExpression.Left is UnaryExpression uni)
                 {
-                    member = (MemberExpression)uni.Operand;
-                    var attr = member.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() as JsonConverterAttribute;
-                    if (attr != null && attr.ConverterType == typeof(JsonStringEnumConverter))
+                    string predicate;
+                    if (uni.NodeType != ExpressionType.Not)
                     {
-                        if (int.TryParse(rightContent, out int ordinal))
+                        member = (MemberExpression)uni.Operand;
+                        var attr = member.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() as JsonConverterAttribute;
+                        if (attr != null && attr.ConverterType == typeof(JsonStringEnumConverter))
                         {
-                            rightContent = Enum.ToObject(member.Type, ordinal).ToString();
+                            if (int.TryParse(rightContent, out int ordinal))
+                            {
+                                rightContent = Enum.ToObject(member.Type, ordinal).ToString();
+                            }
                         }
+                        else
+                        {
+                            if (!int.TryParse(rightContent, out _) && !long.TryParse(rightContent, out _))
+                            {
+                                var type = Nullable.GetUnderlyingType(member.Type) ?? member.Type;
+                                rightContent = ((int)Enum.Parse(type, rightContent)).ToString();
+                            }
+                        }
+
+                        predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
                     }
                     else
                     {
-                        if (!int.TryParse(rightContent, out _) && !long.TryParse(rightContent, out _))
-                        {
-                            var type = Nullable.GetUnderlyingType(member.Type) ?? member.Type;
-                            rightContent = ((int)Enum.Parse(type, rightContent)).ToString();
-                        }
+                        predicate = $"{leftContent}{SplitPredicateSeporators(binExpression.NodeType)}{rightContent}";
                     }
 
-                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
                     sb.Append("(");
                     sb.Append(predicate);
                     sb.Append(")");
