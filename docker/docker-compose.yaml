@@ -137,6 +137,17 @@ services:
       cluster-network:
         ipv4_address: 192.168.57.35
     command: --port 6379 --requirepass foobar
+  redis-aggressive-timeout:
+    image: redis/redis-stack-server
+    container_name: redis-aggressive-timeout
+    ports:
+      - "6379"
+    environment:
+      - REDISEARCH_ARGS=TIMEOUT 1 ON_TIMEOUT FAIL
+    networks:
+      cluster-network:
+        ipv4_address: 192.168.57.58
+
   dotnet:
     networks:
       cluster-network:
@@ -146,6 +157,7 @@ services:
       - redis-sentinel      
       - redis-cluster1
       - redis-private
+      - redis-aggressive-timeout
     environment:
       - STANDALONE_HOST_PORT=redis-standalone:6379
       - SENTINLE_HOST_PORT=redis-sentinel:26379
@@ -153,6 +165,7 @@ services:
       - PRIVATE_HOST=redis-private
       - PRIVATE_PORT=6379
       - PRIVATE_PASSWORD=foobar
+      - AGGRESSIVELY_SHORT_TIMEOUT_REDIS=redis-aggressive-timeout:6379
     build:
       context: ../
     depends_on:
@@ -169,3 +182,4 @@ services:
       - redis-cluster5
       - redis-cluster6
       - redis-private
+      - redis-aggressive-timeout

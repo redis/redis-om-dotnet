@@ -19,6 +19,11 @@ namespace Redis.OM
         private readonly long? _internalLong;
 
         /// <summary>
+        /// Gets an error (if there was any) embedded in the result.
+        /// </summary>
+        public bool Error { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RedisReply"/> class.
         /// </summary>
         /// <param name="val">the value.</param>
@@ -78,6 +83,8 @@ namespace Redis.OM
                     _internalString = (string)result;
                     break;
                 case ResultType.Error:
+                    Error = true;
+                    _internalString = result.ToString();
                     break;
                 case ResultType.Integer:
                     _internalLong = (long)result;
