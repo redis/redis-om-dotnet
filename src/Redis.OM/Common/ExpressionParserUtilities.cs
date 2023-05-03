@@ -73,18 +73,26 @@ namespace Redis.OM.Common
         /// </summary>
         /// <param name="exp">expression.</param>
         /// <param name="treatEnumsAsInt">Treat enum as an integer.</param>
+        /// <param name="negate">Whether or not to negate the result.</param>
         /// <returns>the operand string.</returns>
         /// <exception cref="ArgumentException">thrown if expression is un-parseable.</exception>
-        internal static string GetOperandStringForQueryArgs(Expression exp, bool treatEnumsAsInt = false)
+        internal static string GetOperandStringForQueryArgs(Expression exp, bool treatEnumsAsInt = false, bool negate = false)
         {
-            return exp switch
+            var res = exp switch
             {
                 ConstantExpression constExp => $"{constExp.Value}",
                 MemberExpression member => GetOperandStringForMember(member, treatEnumsAsInt),
                 MethodCallExpression method => TranslateMethodStandardQuerySyntax(method),
-                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, treatEnumsAsInt),
+                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, treatEnumsAsInt, unary.NodeType == ExpressionType.Not),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
+
+            if (negate)
+            {
+                return $"-{res}";
+            }
+
+            return res;
         }
 
         /// <summary>
