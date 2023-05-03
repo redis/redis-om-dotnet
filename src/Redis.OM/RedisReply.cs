@@ -19,11 +19,6 @@ namespace Redis.OM
         private readonly long? _internalLong;
 
         /// <summary>
-        /// Gets an error (if there was any) embedded in the result.
-        /// </summary>
-        public bool Error { get; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="RedisReply"/> class.
         /// </summary>
         /// <param name="val">the value.</param>
@@ -94,6 +89,11 @@ namespace Redis.OM
                     break;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the result represents an error.
+        /// </summary>
+        public bool Error { get; }
 
         /// <summary>
         /// implicitly converts the reply to a double.
