@@ -12,6 +12,11 @@ namespace Redis.OM.Modeling
     /// </summary>
     internal static class RedisSchemaField
     {
+        /// <summary>
+        /// Checks the type to see if it's a complex type that cannot be used as a scalar in RediSearch.
+        /// </summary>
+        /// <param name="type">The Type to check.</param>
+        /// <returns>Whether not we consider the type to be complex.</returns>
         internal static bool IsComplexType(Type type)
         {
             return !TypeDeterminationUtilities.IsNumeric(type)
