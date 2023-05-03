@@ -1,4 +1,5 @@
-﻿using Redis.OM.Aggregation;
+﻿using System;
+using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using System.Threading.Tasks;
 using System.Linq;
@@ -243,6 +244,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 Assert.True(1<=result["COUNT"]);
             }
+        }
+
+        [Fact]
+        public void TestUnsortedFields()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+
+            Assert.Throws<NotSupportedException>(() =>
+                collection.Apply(x => $"{x.RecordShell.Email}", "TheEmailThatNeverWas").ToList());
+
         }
     }
 }

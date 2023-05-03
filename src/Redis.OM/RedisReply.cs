@@ -78,6 +78,8 @@ namespace Redis.OM
                     _internalString = (string)result;
                     break;
                 case ResultType.Error:
+                    Error = true;
+                    _internalString = result.ToString();
                     break;
                 case ResultType.Integer:
                     _internalLong = (long)result;
@@ -87,6 +89,11 @@ namespace Redis.OM
                     break;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the result represents an error.
+        /// </summary>
+        public bool Error { get; }
 
         /// <summary>
         /// implicitly converts the reply to a double.

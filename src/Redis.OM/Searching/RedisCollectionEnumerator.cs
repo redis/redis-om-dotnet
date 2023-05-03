@@ -38,22 +38,16 @@ namespace Redis.OM.Searching
         /// <param name="stateManager">the state manager.</param>
         /// <param name="booleanExpression">The main boolean expression to use to build the filter.</param>
         /// <param name="saveState">Determins whether the records from the RedisCollection are stored in the StateManager.</param>
-        public RedisCollectionEnumerator(Expression exp, IRedisConnection connection, int chunkSize, RedisCollectionStateManager stateManager, Expression<Func<T, bool>>? booleanExpression, bool saveState)
+        /// <param name="rootType">The root type for the enumerator.</param>
+        /// <param name="type">The type the enumerator is responsible for enumerating.</param>
+        internal RedisCollectionEnumerator(Expression exp, IRedisConnection connection, int chunkSize, RedisCollectionStateManager stateManager, Expression<Func<T, bool>>? booleanExpression, bool saveState, Type rootType, Type type)
         {
-            Type rootType;
-            var t = typeof(T);
-            DocumentAttribute documentDefinition = t.GetCustomAttribute<DocumentAttribute>();
-            if (documentDefinition == null)
+            if (!RedisSchemaField.IsComplexType(type))
             {
-                _primitiveType = t;
-                rootType = GetRootType((MethodCallExpression)exp);
-            }
-            else
-            {
-                rootType = t;
+                _primitiveType = type;
             }
 
-            _query = ExpressionTranslator.BuildQueryFromExpression(exp, rootType, booleanExpression);
+            _query = ExpressionTranslator.BuildQueryFromExpression(exp, rootType, booleanExpression, rootType);
             if (_query.Limit != null)
             {
                 _limited = true;
