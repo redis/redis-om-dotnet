@@ -3,6 +3,7 @@ using Moq.Language.Flow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Redis.OM;
 using Redis.OM.Contracts;
@@ -2975,6 +2976,36 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             ));
         }
         
+        [Fact]
+        public void TestMultipleContains()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithMultipleSearchableFields>(_mock.Object);
+            Expression<Func<ObjectWithMultipleSearchableFields, bool>> whereExpressionFail = a => !a.FirstName.Contains("Andrey") && !a.LastName.Contains("Bred");
+
+            collection.Where(whereExpressionFail).ToList();
+            whereExpressionFail = a => !a.FirstName.Contains("Andrey") && a.LastName.Contains("Bred");
+            collection.Where(whereExpressionFail).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithmultiplesearchablefields-idx",
+                "(-(@FirstName:Andrey) -(@LastName:Bred))",
+                "LIMIT",
+                "0",
+                "100"
+            ));
+            
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithmultiplesearchablefields-idx",
+                "(-(@FirstName:Andrey) (@LastName:Bred))",
+                "LIMIT",
+                "0",
+                "100"
+            ));
+            
+        }
         
         [Fact]
         public void TestSelectNestedObject()
