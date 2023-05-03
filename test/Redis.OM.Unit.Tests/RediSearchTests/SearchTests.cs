@@ -2997,6 +2997,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void QueryNamedPropertiesJson()
         {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithPropertyNamesDefined>(_mock.Object);
 
             collection.FirstOrDefault(x => x.Key == "hello");
