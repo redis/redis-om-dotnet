@@ -72,6 +72,8 @@ namespace Redis.OM.Searching
 #pragma warning restore SA1402
         where T : notnull
     {
+        private const string TimeoutText = "Timeout limit was reached";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchResponse{T}"/> class.
         /// </summary>
@@ -95,6 +97,16 @@ namespace Redis.OM.Searching
             else
             {
                 var vals = val.ToArray();
+                if (vals.Length == 1)
+                {
+                    var str = vals[0].ToString();
+                    if (str == TimeoutText)
+                    {
+                        throw new TimeoutException(
+                            "Encountered timeout when searching - check the duration of your query.");
+                    }
+                }
+
                 DocumentCount = vals[0];
                 Documents = new Dictionary<string, T>();
                 for (var i = 1; i < vals.Count(); i += 2)
