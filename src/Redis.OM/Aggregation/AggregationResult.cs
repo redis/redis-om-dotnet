@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Redis.OM;
 
@@ -21,6 +23,16 @@ namespace Redis.OM.Aggregation
         {
             Aggregations = new Dictionary<string, RedisReply>();
             var arr = res.ToArray();
+            if (arr.Length == 1 && arr.First().ToString(CultureInfo.InvariantCulture) ==
+                "Value was not found in result (not a hard error)")
+            {
+                throw new NotSupportedException(
+                    $"Received the error: {arr.First().ToString(CultureInfo.InvariantCulture)} from Redis. " +
+                    $"This implies that one of the fields you attempted to access in you Aggregation was not marked as " +
+                    $"Aggregatable or Sortbable at the time of index creation, or was not loaded properly in the pipeline. " +
+                    $"Please review your model and aggregation and try again.");
+            }
+
             for (var i = 0; i < arr.Length; i += 2)
             {
                 Aggregations.Add(arr[i], arr[i + 1]);

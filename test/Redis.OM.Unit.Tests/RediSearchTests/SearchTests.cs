@@ -513,7 +513,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                "0",
                "100",
                "RETURN",
-               "1",
+               "3",
+               "Name",
+               "AS",
                "Name"));
         }
 
@@ -2972,7 +2974,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1"
             ));
         }
-
+        
         [Fact]
         public async Task TestCreateIndexWithJsonPropertyName()
         {
@@ -2995,9 +2997,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void QueryNamedPropertiesJson()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
-
             var collection = new RedisCollection<ObjectWithPropertyNamesDefined>(_mock.Object);
 
             collection.FirstOrDefault(x => x.Key == "hello");
@@ -3009,6 +3008,41 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "1"
+            ));
+        }
+
+        [Fact]
+        public void TestSelectNestedObject()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var res = collection.Select(x => x.Address).ToList();
+            res = collection.Select(x => x.Address.ForwardingAddress).ToList();
+            
+            _mock.Verify(x=>x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "100",
+                "RETURN",
+                "1",
+                "$.Address"
+                ));
+            
+            _mock.Verify(x=>x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "100",
+                "RETURN",
+                "1",
+                "$.Address.ForwardingAddress"
             ));
         }
     }

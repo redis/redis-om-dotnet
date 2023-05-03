@@ -172,9 +172,10 @@ namespace Redis.OM.Common
         /// <param name="expression">The expression.</param>
         /// <param name="type">The root type.</param>
         /// <param name="mainBooleanExpression">The primary boolean expression to build the filter from.</param>
+        /// <param name="rootType">The root type for the expression.</param>
         /// <returns>A Redis query.</returns>
         /// <exception cref="InvalidOperationException">Thrown if type is missing indexing.</exception>
-        internal static RedisQuery BuildQueryFromExpression(Expression expression, Type type, Expression? mainBooleanExpression)
+        internal static RedisQuery BuildQueryFromExpression(Expression expression, Type type, Expression? mainBooleanExpression, Type rootType)
         {
             var attr = type.GetCustomAttribute<DocumentAttribute>();
             if (attr == null)
@@ -206,7 +207,7 @@ namespace Redis.OM.Common
                                 query.SortBy = TranslateOrderByMethod(exp, false);
                                 break;
                             case "Select":
-                                query.Return = TranslateSelectMethod(exp);
+                                query.Return = TranslateSelectMethod(exp, rootType, attr);
                                 break;
                             case "Take":
                                 query.Limit ??= new SearchLimit { Offset = 0 };
@@ -558,15 +559,108 @@ namespace Redis.OM.Common
 
         private static int TranslateSkip(MethodCallExpression exp) => (int)((ConstantExpression)exp.Arguments[1]).Value;
 
-        private static ReturnFields TranslateSelectMethod(MethodCallExpression expression)
+        private static string AliasOrPath(Type t, DocumentAttribute attr, MemberExpression expression)
+        {
+            if (attr.StorageType == StorageType.Json)
+            {
+                var innerMember = expression.Expression as MemberExpression;
+                if (innerMember != null)
+                {
+                    Expression innerExpression = innerMember;
+                    var pathStack = new Stack<string>();
+                    pathStack.Push(expression.Member.Name);
+                    while (innerMember != null)
+                    {
+                        pathStack.Push(innerMember.Member.Name);
+                        innerMember = innerMember.Expression as MemberExpression;
+                    }
+
+                    return $"$.{string.Join(".", pathStack)}";
+                }
+
+                if (expression.Member.DeclaringType != null && RedisSchemaField.IsComplexType(expression.Type))
+                {
+                    return $"$.{expression.Member.Name}"; // this can't have been aliased so return a path to it.
+                }
+
+                var searchField = expression.Member.GetCustomAttributes(typeof(SearchFieldAttribute)).FirstOrDefault();
+                if (searchField != default)
+                {
+                    return expression.Member.Name;
+                }
+
+                return $"$.{expression.Member.Name}";
+            }
+            else
+            {
+                return expression.Member.Name;
+            }
+        }
+
+        private static ReturnFields TranslateSelectMethod(MethodCallExpression expression, Type t, DocumentAttribute attr)
         {
             var predicate = (UnaryExpression)expression.Arguments[1];
             var lambda = (LambdaExpression)predicate.Operand;
 
             if (lambda.Body is MemberExpression member)
             {
-                var properties = new[] { member.Member.Name };
+                var properties = new[] { AliasOrPath(t, attr, member) };
                 return new ReturnFields(properties);
+            }
+
+            if (lambda.Body is MemberInitExpression memberInitExpression)
+            {
+                var returnFields = new List<ReturnField>();
+                foreach (var binding in memberInitExpression.Bindings)
+                {
+                    if (binding is MemberAssignment assignment)
+                    {
+                        if (assignment.Expression is MemberExpression assignmentExpression)
+                        {
+                            var path = AliasOrPath(t, attr, assignmentExpression);
+                            if (assignmentExpression.Member.Name == binding.Member.Name)
+                            {
+                                returnFields.Add(new (path));
+                            }
+                            else
+                            {
+                                returnFields.Add(new (path, binding.Member.Name));
+                            }
+                        }
+                    }
+                }
+
+                return new ReturnFields(returnFields);
+            }
+
+            if (lambda.Body is NewExpression newExpression)
+            {
+                var returnFields = new List<ReturnField>();
+                if (newExpression.Members.Count != newExpression.Arguments.Count())
+                {
+                    throw new ArgumentException(
+                        "Could not parse Select predicate because of the shape of the new expresssion");
+                }
+
+                for (var i = 0; i < newExpression.Arguments.Count; i++)
+                {
+                    var newExpressionArg = newExpression.Arguments[i];
+                    var memberInfo = newExpression.Members[i];
+                    if (newExpressionArg is MemberExpression newExpressionMember)
+                    {
+                        var path = AliasOrPath(t, attr, newExpressionMember);
+                        if (newExpressionMember.Member.Name == memberInfo.Name)
+                        {
+                            returnFields.Add(new ReturnField(path, memberInfo.Name));
+                        }
+                        else
+                        {
+                            returnFields.Add(new ReturnField(path, memberInfo.Name));
+                        }
+                    }
+                }
+
+                return new ReturnFields(returnFields);
             }
             else
             {

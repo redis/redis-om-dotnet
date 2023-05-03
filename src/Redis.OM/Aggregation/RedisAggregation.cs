@@ -31,7 +31,8 @@ namespace Redis.OM.Aggregation
         /// <summary>
         /// Gets or sets the query predicate.
         /// </summary>
-        public List<QueryPredicate> Queries { get; set; } = new();
+        public List<QueryPredicate> Queries { get; set; } = new ();
+
         /// <summary>
         /// Gets or sets the limit.
         /// </summary>
@@ -56,12 +57,14 @@ namespace Redis.OM.Aggregation
                 {
                     queries.AddRange(query.Serialize());
                 }
+
                 ret.AddRange(new[] { string.Join(" ", queries) });
             }
             else
             {
                 ret.Add("*");
             }
+
             foreach (var predicate in Predicates)
             {
                 ret.AddRange(predicate.Serialize());
