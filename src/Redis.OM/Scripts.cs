@@ -155,7 +155,7 @@ return 0
         /// <summary>
         /// The scripts.
         /// </summary>
-        internal static readonly Dictionary<string, string> ScriptCollection = new()
+        internal static readonly Dictionary<string, string> ScriptCollection = new ()
         {
             { nameof(JsonDiffResolution), JsonDiffResolution },
             { nameof(HashDiffResolution), HashDiffResolution },
@@ -170,6 +170,6 @@ return 0
         /// <summary>
         /// Gets or sets collection of SHAs.
         /// </summary>
-        internal static ConcurrentDictionary<string, string> ShaCollection { get; set; } = new();
+        internal static ConcurrentDictionary<string, string> ShaCollection { get; set; } = new ();
     }
 }
