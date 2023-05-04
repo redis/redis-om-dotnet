@@ -1107,5 +1107,25 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal("World",resNoNew.InnerInnerCascade.Tag);
             Assert.Equal(42,resNoNew.InnerInnerCascade.Num);
         }
+
+        [Fact]
+        public void SaveDateTimeOffset()
+        {
+            var obj = new ObjectWithDateTimeOffsetJson
+            {
+                Offset = DateTimeOffset.Now,
+                DateTime = DateTime.Now
+            };
+            var collection = new RedisCollection<ObjectWithDateTimeOffsetJson>(_connection);
+            collection.Insert(obj);
+
+            var intermediate = collection.First(x => x.Id == obj.Id);
+            intermediate.Offset = intermediate.Offset.AddMinutes(10);
+            intermediate.DateTime = intermediate.DateTime.AddHours(1);
+            collection.Update(intermediate);
+            var final = collection.First(x => x.Id == obj.Id);
+            Assert.Equal(intermediate.Offset,final.Offset);
+            Assert.Equal(intermediate.DateTime,final.DateTime);
+        }
     }
 }
