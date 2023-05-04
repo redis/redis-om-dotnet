@@ -34,30 +34,29 @@ namespace Redis.OM.Modeling
         /// <inheritdoc/>
         public string[] SerializeScriptArgs()
         {
-            if (_value.Type == JTokenType.Date)
-            {
-                if (_value is JValue jValue)
-                {
-                    if (jValue.Value is DateTimeOffset)
-                    {
-                        return new[]
-                        {
-                            _operation,
-                            _path,
-                            $"{JsonSerializer.Serialize(_value.Value<DateTimeOffset>())}",
-                        };
-                    }
-
-                    return new[] { _operation, _path, $"{JsonSerializer.Serialize(_value.Value<DateTime>())}" };
-                }
-            }
-
             return _value.Type switch
             {
                 JTokenType.String => new[] { _operation, _path, $"\"{HttpUtility.JavaScriptStringEncode(_value.ToString())}\"" },
                 JTokenType.Boolean => new[] { _operation, _path, _value.ToString().ToLower() },
+                JTokenType.Date => SerializeAsDateTime(),
                 _ => new[] { _operation, _path, _value.ToString() }
             };
+        }
+
+        private string[] SerializeAsDateTime()
+        {
+            var jValue = (JValue)_value;
+            if (jValue.Value is DateTimeOffset)
+            {
+                return new[]
+                {
+                    _operation,
+                    _path,
+                    $"{JsonSerializer.Serialize(_value.Value<DateTimeOffset>())}",
+                };
+            }
+
+            return new[] { _operation, _path, $"{JsonSerializer.Serialize(_value.Value<DateTime>())}" };
         }
     }
 }
