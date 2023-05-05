@@ -16,3 +16,9 @@ public class CongruentObject
     public InnerObject Field3 { get; set; }
     public InnerObject Field4 { get; set; }
 }
+
+public class CongruentObjectWithLikeNames
+{
+    public InnerObject Field1 { get; set; }
+    public InnerObject Field2 { get; set; }
+}
