@@ -1096,13 +1096,19 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(42,resAnonWithAssignments.Field3.InnerInnerCascade.Num);
             Assert.Equal("World",resAnonWithAssignments.Field4.InnerInnerCascade.Tag);
             Assert.Equal(42,resAnonWithAssignments.Field4.InnerInnerCascade.Num);
-
+            
             var resWithOtherObject = collection.Select(x => new CongruentObject{Field3 = x.Field1, Field4 = x.Field2}).ToList().First();
             Assert.Equal("World",resWithOtherObject.Field3.InnerInnerCascade.Tag);
             Assert.Equal(42,resWithOtherObject.Field3.InnerInnerCascade.Num);
             Assert.Equal("World",resWithOtherObject.Field4.InnerInnerCascade.Tag);
             Assert.Equal(42,resWithOtherObject.Field4.InnerInnerCascade.Num);
             
+            var resWithOtherObjectLikeNames = collection.Select(x => new CongruentObjectWithLikeNames(){Field1 = x.Field1, Field2 = x.Field2}).ToList().First();
+            Assert.Equal("World",resWithOtherObjectLikeNames.Field1.InnerInnerCascade.Tag);
+            Assert.Equal(42,resWithOtherObjectLikeNames.Field1.InnerInnerCascade.Num);
+            Assert.Equal("World",resWithOtherObjectLikeNames.Field2.InnerInnerCascade.Tag);
+            Assert.Equal(42,resWithOtherObjectLikeNames.Field2.InnerInnerCascade.Num);
+
             var resNoNew = collection.Select(x => x.Field1).ToList().First();
             Assert.Equal("World",resNoNew.InnerInnerCascade.Tag);
             Assert.Equal(42,resNoNew.InnerInnerCascade.Num);

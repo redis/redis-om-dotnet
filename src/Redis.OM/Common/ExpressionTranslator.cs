@@ -627,14 +627,7 @@ namespace Redis.OM.Common
                         if (assignment.Expression is MemberExpression assignmentExpression)
                         {
                             var path = AliasOrPath(t, attr, assignmentExpression);
-                            if (assignmentExpression.Member.Name == binding.Member.Name)
-                            {
-                                returnFields.Add(new (path));
-                            }
-                            else
-                            {
-                                returnFields.Add(new (path, binding.Member.Name));
-                            }
+                            returnFields.Add(new (path, binding.Member.Name));
                         }
                     }
                 }
