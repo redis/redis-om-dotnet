@@ -3041,5 +3041,131 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "$.Address.ForwardingAddress"
             ));
         }
+
+        [Fact]
+        public void NonNullableNumericFieldContains()
+        {
+            var ints = new int[] { 1, 2, 3 };
+            var bytes = new byte[] { 4, 5, 6 };
+            var sbytes = new sbyte[] { 7, 8, 9 };
+            var shorts = new short[] { 10, 11, 12 };
+            var uints = new uint[] { 13, 14, 15 };
+            var longs = new long[] { 16, 17, 18 };
+            var ulongs = new ulong[] { 19, 20, 21 };
+            var doubles = new double[] { 22.5, 23, 24 };
+            var floats = new float[] { 25.5F, 26, 27 };
+            var ushorts = new ushort[] { 28, 29, 30 };
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => ints.Contains(x.Integer));
+            collection.ToList();
+            var expected = $"@{nameof(ObjectWithNumerics.Integer)}:[1 1]|@{nameof(ObjectWithNumerics.Integer)}:[2 2]|@{nameof(ObjectWithNumerics.Integer)}:[3 3]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => bytes.Contains(x.Byte));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.Byte)}:[4 4]|@{nameof(ObjectWithNumerics.Byte)}:[5 5]|@{nameof(ObjectWithNumerics.Byte)}:[6 6]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => sbytes.Contains(x.SByte));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.SByte)}:[7 7]|@{nameof(ObjectWithNumerics.SByte)}:[8 8]|@{nameof(ObjectWithNumerics.SByte)}:[9 9]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => shorts.Contains(x.Short));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.Short)}:[10 10]|@{nameof(ObjectWithNumerics.Short)}:[11 11]|@{nameof(ObjectWithNumerics.Short)}:[12 12]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => ushorts.Contains(x.UShort));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.UShort)}:[28 28]|@{nameof(ObjectWithNumerics.UShort)}:[29 29]|@{nameof(ObjectWithNumerics.UShort)}:[30 30]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => uints.Contains(x.UInt));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.UInt)}:[13 13]|@{nameof(ObjectWithNumerics.UInt)}:[14 14]|@{nameof(ObjectWithNumerics.UInt)}:[15 15]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => longs.Contains(x.Long));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.Long)}:[16 16]|@{nameof(ObjectWithNumerics.Long)}:[17 17]|@{nameof(ObjectWithNumerics.Long)}:[18 18]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => ulongs.Contains(x.ULong));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.ULong)}:[19 19]|@{nameof(ObjectWithNumerics.ULong)}:[20 20]|@{nameof(ObjectWithNumerics.ULong)}:[21 21]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => doubles.Contains(x.Double));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.Double)}:[22.5 22.5]|@{nameof(ObjectWithNumerics.Double)}:[23 23]|@{nameof(ObjectWithNumerics.Double)}:[24 24]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+            
+            collection = new RedisCollection<ObjectWithNumerics>(_mock.Object).Where(x => floats.Contains(x.Float));
+            collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.Float)}:[25.5 25.5]|@{nameof(ObjectWithNumerics.Float)}:[26 26]|@{nameof(ObjectWithNumerics.Float)}:[27 27]";
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100"));
+        }
     }
 }
