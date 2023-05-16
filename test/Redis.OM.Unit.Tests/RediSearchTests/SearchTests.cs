@@ -2977,7 +2977,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
         
         [Fact]
-        public void TestMultipleContains()
+        public void TestMultipleContains()        
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
@@ -3004,7 +3004,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100"
             ));
-            
         }
         
         [Fact]
