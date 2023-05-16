@@ -72,7 +72,6 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                     var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right);
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, System.Linq.Expressions.Expression.Constant(val)));
                 }
-
             }
             else if (expression is ConstantExpression c
                      && c.Value.ToString() == "*")

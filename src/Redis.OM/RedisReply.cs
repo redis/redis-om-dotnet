@@ -21,6 +21,33 @@ namespace Redis.OM
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisReply"/> class.
         /// </summary>
+        /// <param name="result">the redisResult.</param>
+        public RedisReply(RedisResult result)
+        {
+            switch (result.Type)
+            {
+                case ResultType.None:
+                    break;
+                case ResultType.SimpleString:
+                case ResultType.BulkString:
+                    _internalString = (string)result;
+                    break;
+                case ResultType.Error:
+                    Error = true;
+                    _internalString = result.ToString();
+                    break;
+                case ResultType.Integer:
+                    _internalLong = (long)result;
+                    break;
+                case ResultType.MultiBulk:
+                    _values = ((RedisResult[])result).Select(x => new RedisReply(x)).ToArray();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisReply"/> class.
+        /// </summary>
         /// <param name="val">the value.</param>
         internal RedisReply(double val)
         {
@@ -64,29 +91,9 @@ namespace Redis.OM
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedisReply"/> class.
+        /// Gets a value indicating whether the result represents an error.
         /// </summary>
-        /// <param name="result">the redisResult.</param>
-        internal RedisReply(RedisResult result)
-        {
-            switch (result.Type)
-            {
-                case ResultType.None:
-                    break;
-                case ResultType.SimpleString:
-                case ResultType.BulkString:
-                    _internalString = (string)result;
-                    break;
-                case ResultType.Error:
-                    break;
-                case ResultType.Integer:
-                    _internalLong = (long)result;
-                    break;
-                case ResultType.MultiBulk:
-                    _values = ((RedisResult[])result).Select(x => new RedisReply(x)).ToArray();
-                    break;
-            }
-        }
+        public bool Error { get; }
 
         /// <summary>
         /// implicitly converts the reply to a double.

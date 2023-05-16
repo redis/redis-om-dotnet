@@ -265,25 +265,14 @@ public partial class Person
 
 ### Creating Indices
 
-With the Index defined, the next step is to create the index. There are two methods in `IRedisConnection` we can use,
+With the Index defined, the next step is to create the index. To do so use `IRedisConnection.CreateIndex(Type type)`. `CreateIndex` will create the index described by the `Type` parameter (which will be disassembled and serialized into a redis index) if and only if the Index does not already exist in Redis.
 
-1. `IRedisConnection.CreateIndex(Type type)`
-2. `IRedisConnection.MigrateIndex(Type type)`
-
-`CreateIndex` will create the index described by the `Type` parameter (which will be disassembled and serialized into a redis index) if and only if the Index does not already exist in Redis. `MigrateIndex`, on the other hand, will look at the index already in Redis and add/remove what is needed to bring it into compliance with the prescribed index.
 
 #### Create
 
 ```csharp
 var connection = RedisConnectionProvider.Connection;
 connection.CreateIndex(typeof(Person));
-```
-
-#### Migrate
-
-```csharp
-var connection = RedisConnectionProvider.Connection;
-connection.MigrateIndex(typeof(Person));
 ```
 
 ## Querying

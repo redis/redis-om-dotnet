@@ -7,7 +7,7 @@ public class ObjectWithMultipleSearchableFields
 {
     [RedisIdField]
     [Indexed]
-    public long Id { get; set; }
+    public string Id { get; set; }
 
     [Searchable]
     public string FirstName { get; set; }
