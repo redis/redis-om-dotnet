@@ -346,19 +346,6 @@ namespace Redis.OM.Common
                     return string.Join("|", ulids);
                 }
 
-                if (resolved is IEnumerable<int?> ints)
-                {
-                    var sb = new StringBuilder();
-                    sb.Append('|');
-                    foreach (var i in ints)
-                    {
-                        sb.Append($"[{i} {i}]|");
-                    }
-
-                    sb.Remove(sb.Length - 1, 1);
-                    return sb.ToString();
-                }
-
                 if (resolvedType.IsArray || resolvedType.GetInterfaces().Contains(typeof(IEnumerable)))
                 {
                     var asEnumerable = (IEnumerable)resolved;
@@ -366,6 +353,20 @@ namespace Redis.OM.Common
                     if (elementType == null)
                     {
                         elementType = resolvedType.GenericTypeArguments.FirstOrDefault();
+                    }
+
+                    if (elementType != null && TypeDeterminationUtilities.IsNumeric(elementType))
+                    {
+                        var sb = new StringBuilder();
+                        sb.Append('|');
+
+                        foreach (var item in asEnumerable)
+                        {
+                            sb.Append(FormattableString.Invariant($"[{item} {item}]|"));
+                        }
+
+                        sb.Remove(sb.Length - 1, 1);
+                        return sb.ToString();
                     }
 
                     if (elementType != null && elementType.IsEnum)
