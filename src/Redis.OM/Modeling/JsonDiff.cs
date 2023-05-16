@@ -1,4 +1,7 @@
-﻿using System.Web;
+﻿using System;
+using System.Linq;
+using System.Text.Json;
+using System.Web;
 using Newtonsoft.Json.Linq;
 
 namespace Redis.OM.Modeling
@@ -35,8 +38,25 @@ namespace Redis.OM.Modeling
             {
                 JTokenType.String => new[] { _operation, _path, $"\"{HttpUtility.JavaScriptStringEncode(_value.ToString())}\"" },
                 JTokenType.Boolean => new[] { _operation, _path, _value.ToString().ToLower() },
+                JTokenType.Date => SerializeAsDateTime(),
                 _ => new[] { _operation, _path, _value.ToString() }
             };
+        }
+
+        private string[] SerializeAsDateTime()
+        {
+            var jValue = (JValue)_value;
+            if (jValue.Value is DateTimeOffset)
+            {
+                return new[]
+                {
+                    _operation,
+                    _path,
+                    $"{JsonSerializer.Serialize(_value.Value<DateTimeOffset>())}",
+                };
+            }
+
+            return new[] { _operation, _path, $"{JsonSerializer.Serialize(_value.Value<DateTime>())}" };
         }
     }
 }
