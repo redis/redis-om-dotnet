@@ -67,7 +67,7 @@ namespace Redis.OM
         /// Initializes a new instance of the <see cref="RedisReply"/> class.
         /// </summary>
         /// <param name="result">the redisResult.</param>
-        internal RedisReply(RedisResult result)
+        public RedisReply(RedisResult result)
         {
             switch (result.Type)
             {
