@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -362,11 +363,21 @@ namespace Redis.OM
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
-                    var e = (IEnumerable<object>)property.GetValue(obj);
+                    IEnumerable<object> e;
+                    var innerType = GetEnumerableType(property);
+
+                    if (innerType.IsPrimitive || innerType == typeof(decimal))
+                    {
+                        e = PrimitiveCollectionToStrings(property, obj, innerType);
+                    }
+                    else
+                    {
+                        e = (IEnumerable<object>)property.GetValue(obj);
+                    }
+
                     var i = 0;
                     foreach (var v in e)
                     {
-                        var innerType = v.GetType();
                         if (innerType.IsPrimitive || innerType == typeof(decimal) || innerType == typeof(string))
                         {
                             hash.Add($"{propertyName}[{i}]", v.ToString());
@@ -449,13 +460,20 @@ namespace Redis.OM
                 {
                     var entries = hash.Where(x => x.Key.StartsWith($"{propertyName}["))
                         .ToDictionary(x => x.Key, x => x.Value);
-                    var innerType = type.GetGenericArguments().SingleOrDefault();
+                    var innerType = GetEnumerableType(property);
                     if (innerType == null)
                     {
                         throw new ArgumentException("Only a single Generic type is supported on enums for the Hash type");
                     }
 
-                    if (entries.Any())
+                    if (innerType == typeof(byte) && entries.Any())
+                    {
+                        var bytes = entries.Select(x => byte.Parse(x.Value)).ToArray();
+                        ret += $"\"{propertyName}\":\"";
+                        ret += Convert.ToBase64String(bytes);
+                        ret += "\",";
+                    }
+                    else if (entries.Any())
                     {
                         ret += $"\"{propertyName}\":[";
                         for (var i = 0; i < entries.Count(); i++)
@@ -516,6 +534,93 @@ namespace Redis.OM
             ret = ret.TrimEnd(',');
             ret += "}";
             return ret;
+        }
+
+        private static Type GetEnumerableType(PropertyInfo pi)
+        {
+            var type = pi.PropertyType.GetElementType();
+            if (type == null && pi.PropertyType.GetGenericArguments().Any())
+            {
+                type = pi.PropertyType.GetGenericArguments()[0];
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentException("Could not pull generic type out of collection");
+            }
+
+            type = Nullable.GetUnderlyingType(type) ?? type;
+            return type;
+        }
+
+        private static IEnumerable<string> PrimitiveCollectionToStrings(PropertyInfo pi, object obj, Type type)
+        {
+            if (type == typeof(bool))
+            {
+                return ((IEnumerable<bool>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(byte))
+            {
+                return ((IEnumerable<byte>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(sbyte))
+            {
+                return ((IEnumerable<sbyte>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(short))
+            {
+                return ((IEnumerable<short>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(ushort))
+            {
+                return ((IEnumerable<ushort>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(int))
+            {
+                return ((IEnumerable<int>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(uint))
+            {
+                return ((IEnumerable<uint>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(long))
+            {
+                return ((IEnumerable<ulong>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(ulong))
+            {
+                return ((IEnumerable<ulong>)pi.GetValue(obj)).Select(x => x.ToString());
+            }
+
+            if (type == typeof(char))
+            {
+                return ((IEnumerable<char>)pi.GetValue(obj)).Select(x => $"\"{x.ToString()}\"");
+            }
+
+            if (type == typeof(double))
+            {
+                return ((IEnumerable<double>)pi.GetValue(obj)).Select(x => x.ToString(CultureInfo.InvariantCulture));
+            }
+
+            if (type == typeof(float))
+            {
+                return ((IEnumerable<float>)pi.GetValue(obj)).Select(x => x.ToString(CultureInfo.InvariantCulture));
+            }
+
+            if (type == typeof(decimal))
+            {
+                return ((IEnumerable<decimal>)pi.GetValue(obj)).Select(x => x.ToString(CultureInfo.InvariantCulture));
+            }
+
+            throw new ArgumentException("Could not pull a usable type out from property info");
         }
     }
 }
