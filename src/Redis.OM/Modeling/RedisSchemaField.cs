@@ -74,7 +74,7 @@ namespace Redis.OM.Modeling
                     else
                     {
                         var pathPostFix = IsTypeIndexableArray(innerType) ? "[*]" : string.Empty;
-                        ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPrefix}" : $"{pathPrefix}{info.Name}{pathPostFix}");
+                        ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPostFix}" : $"{pathPrefix}{info.Name}{pathPostFix}");
                         ret.Add("AS");
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{aliasPrefix}{attr.PropertyName}" : $"{aliasPrefix}{info.Name}");
                         ret.AddRange(CommonSerialization(attr, innerType, info));
