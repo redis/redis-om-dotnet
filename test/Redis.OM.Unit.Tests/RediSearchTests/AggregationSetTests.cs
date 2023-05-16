@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Redis.OM.Aggregation;
@@ -486,6 +487,57 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
             _ = collection.OrderByDescending(p=>p.RecordShell.Age).Skip(0).Take(10).ToList();
             _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx","*","SORTBY","2","@Age","DESC","LIMIT","0","10", "WITHCURSOR", "COUNT", "10000"));
+        }
+
+        [Fact]
+        public void RightBinExpressionOperator()
+        {
+            var customerFilter = new CustomerFilterDto()
+            {
+                FirstName = "James",
+                LastName = "Bond"
+            };
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Age == 0 && (a.RecordShell!.Age == 2 || a.RecordShell!.Age == 50);
+
+            _ = collection.Where(query).ToList();
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "( @Age:[0 0] ( @Age:[2 2] | @Age:[50 50] ) )", "WITHCURSOR", "COUNT", "10000"));
+        }
+        
+        [Fact]
+        public void RightBinExpressionWithUniaryOperator()
+        {
+            var customerFilter = new CustomerFilterDto()
+            {
+                FirstName = "James",
+                LastName = "Bond"
+            };
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Name.Contains("Steve") && (a.RecordShell!.Age == 2 || a.RecordShell!.Age == 50);
+
+            _ = collection.Where(query).ToList();
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "(@Name:Steve) ( @Age:[2 2] | @Age:[50 50] )", "WITHCURSOR", "COUNT", "10000"));
+        }
+        
+        [Fact]
+        public void LeftBinExpressionWithUniaryOperator()
+        {
+            var customerFilter = new CustomerFilterDto()
+            {
+                FirstName = "James",
+                LastName = "Bond"
+            };
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            Expression<Func<AggregationResult<Person>, bool>> query = a => (a.RecordShell!.Age == 2 || a.RecordShell!.Age == 50) && a.RecordShell!.Name.Contains("Steve");
+
+            _ = collection.Where(query).ToList();
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "( @Age:[2 2] | @Age:[50 50] ) (@Name:Steve)", "WITHCURSOR", "COUNT", "10000"));
         }
     }
 }
