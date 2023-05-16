@@ -2977,7 +2977,45 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
         
         [Fact]
-        public void TestMultipleContains()        
+        public async Task TestCreateIndexWithJsonPropertyName()
+        {
+            _mock.Setup(x => x.ExecuteAsync(It.IsAny<string>(), It.IsAny<string[]>()))
+                .ReturnsAsync("OK");
+
+            await _mock.Object.CreateIndexAsync(typeof(ObjectWithPropertyNamesDefined));
+
+            _mock.Verify(x => x.ExecuteAsync(
+                "FT.CREATE",
+                $"{nameof(ObjectWithPropertyNamesDefined).ToLower()}-idx",
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                $"Redis.OM.Unit.Tests.{nameof(ObjectWithPropertyNamesDefined)}:",
+                "SCHEMA", "$.notKey", "AS", "notKey", "TAG", "SEPARATOR", "|"));
+        }
+
+        [Fact]
+        public void QueryNamedPropertiesJson()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithPropertyNamesDefined>(_mock.Object);
+
+            collection.FirstOrDefault(x => x.Key == "hello");
+
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                $"{nameof(ObjectWithPropertyNamesDefined).ToLower()}-idx",
+                "(@notKey:{hello})",
+                "LIMIT",
+                "0",
+                "1"
+            ));
+        }
+        
+        [Fact]
+        public void TestMultipleContains()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
@@ -3005,13 +3043,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "100"
             ));
         }
-        
+
         [Fact]
         public void TestSelectNestedObject()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
-
+            
             var collection = new RedisCollection<Person>(_mock.Object);
             var res = collection.Select(x => x.Address).ToList();
             res = collection.Select(x => x.Address.ForwardingAddress).ToList();
