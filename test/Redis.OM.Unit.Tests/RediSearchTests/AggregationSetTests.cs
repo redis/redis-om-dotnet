@@ -539,5 +539,21 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.Where(query).ToList();
             _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "( @Age:[2 2] | @Age:[50 50] ) (@Name:Steve)", "WITHCURSOR", "COUNT", "10000"));
         }
+        [Fact]
+        public void PunctuationMarkInTagQuery()
+        {
+            var customerFilter = new CustomerFilterDto()
+            {
+                FirstName = "Walter-Junior",
+                LastName = "White"
+            };
+            var collection = new RedisAggregationSet<Person>(_mock.Object, true, chunkSize: 10000);
+            _mock.Setup(x => x.Execute("FT.AGGREGATE", It.IsAny<string[]>())).Returns(MockedResult);
+            _mock.Setup(x => x.Execute("FT.CURSOR", It.IsAny<string[]>())).Returns(MockedResultCursorEnd);
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell.FirstName == customerFilter.FirstName;
+            _ = collection.Where(query).ToList();
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "@FirstName:{Walter\\-Junior}", "WITHCURSOR", "COUNT", "10000"));
+        }
+
     }
 }
