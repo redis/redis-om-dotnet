@@ -152,7 +152,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             switch (searchFieldType)
             {
                 case SearchFieldType.TAG:
-                    sb.Append($"{{{expression.Value}}}");
+                    sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(expression.Value.ToString())}}}");
                     break;
                 case SearchFieldType.TEXT:
                     sb.Append(expression.Value);
