@@ -81,8 +81,12 @@ return 0
         /// Unlinks a JSON object and sets the key again with a fresh new JSON object.
         /// </summary>
         internal const string UnlinkAndSendJson = @"
+local expiry = tonumber(redis.call('PTTL', KEYS[1]))
 redis.call('UNLINK', KEYS[1])
 redis.call('JSON.SET', KEYS[1], '.', ARGV[1])
+    if expiry > 0 then
+        redis.call('PEXPIRE', KEYS[1], expiry)
+    end
 return 0
 ";
 
@@ -100,8 +104,8 @@ if exists ~= 1 then
     redis.call('HSET', KEYS[1], unpack(hashArgs))
     if expiry > 0 then
         redis.call('PEXPIRE', KEYS[1], expiry)
-    end 
-    return 1    
+    end
+    return 1
 end
 return 0
 ";

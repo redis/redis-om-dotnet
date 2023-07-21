@@ -116,7 +116,9 @@ namespace Redis.OM
                    null,
                    GetMethodInfo(Select, source, expression),
                    new[] { source.Expression, Expression.Quote(expression) });
-            return new RedisCollection<TR>((RedisQueryProvider)source.Provider, exp, source.StateManager, null, source.SaveState, source.ChunkSize);
+            var res = new RedisCollection<TR>((RedisQueryProvider)source.Provider, exp, source.StateManager, null, source.SaveState, source.ChunkSize);
+            res.RootType = typeof(T);
+            return res;
         }
 
         /// <summary>

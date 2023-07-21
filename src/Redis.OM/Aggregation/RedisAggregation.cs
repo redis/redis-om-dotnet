@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Redis.OM.Aggregation.AggregationPredicates;
 
 namespace Redis.OM.Aggregation
@@ -28,6 +29,11 @@ namespace Redis.OM.Aggregation
         public QueryPredicate Query { get; set; } = new ();
 
         /// <summary>
+        /// Gets or sets the query predicate.
+        /// </summary>
+        public List<QueryPredicate> Queries { get; set; } = new ();
+
+        /// <summary>
         /// Gets or sets the limit.
         /// </summary>
         public LimitPredicate? Limit { get; set; }
@@ -43,8 +49,22 @@ namespace Redis.OM.Aggregation
         /// <returns>The serialized arguments.</returns>
         public string[] Serialize()
         {
+            var queries = new List<string>();
             var ret = new List<string>() { IndexName };
-            ret.AddRange(Query.Serialize());
+            if (Queries.Any())
+            {
+                foreach (var query in Queries)
+                {
+                    queries.AddRange(query.Serialize());
+                }
+
+                ret.AddRange(new[] { string.Join(" ", queries) });
+            }
+            else
+            {
+                ret.Add("*");
+            }
+
             foreach (var predicate in Predicates)
             {
                 ret.AddRange(predicate.Serialize());

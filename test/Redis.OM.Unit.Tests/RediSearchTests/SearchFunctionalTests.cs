@@ -1058,5 +1058,80 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             collection.Update(reconstituted);
             collection.Delete(obj);
         }
+
+        [Fact]
+        public void TestSelectOnEmbeddedDocuments()
+        {
+            var inner1 = new InnerObject()
+            {
+                InnerInnerCascade = new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 },
+                InnerInnerCollection = new[]
+                    { new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 } },
+                InnerInnerJson = new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 }
+            };
+
+            var inner2 = new InnerObject()
+            {
+                InnerInnerCascade = new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 },
+                InnerInnerCollection = new[]
+                    { new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 } },
+                InnerInnerJson = new InnerInnerObject() { Arr = new[] { "hello" }, Tag = "World", Num = 42 }
+            };
+
+            var collection = new RedisCollection<SelectTestObject>(_connection);
+            collection.Insert(new SelectTestObject
+            {
+                Field1 = inner1,
+                Field2 = inner2
+            });
+            
+            var resSimpleAnonNew = collection.Select(x => new {x.Field1, x.Field2}).ToList().First();
+            Assert.Equal("World",resSimpleAnonNew.Field1.InnerInnerCascade.Tag);
+            Assert.Equal(42,resSimpleAnonNew.Field1.InnerInnerCascade.Num);
+            Assert.Equal("World",resSimpleAnonNew.Field2.InnerInnerCascade.Tag);
+            Assert.Equal(42,resSimpleAnonNew.Field2.InnerInnerCascade.Num);
+            
+            var resAnonWithAssignments = collection.Select(x => new {Field3 = x.Field1, Field4 = x.Field2}).ToList().First();
+            Assert.Equal("World",resAnonWithAssignments.Field3.InnerInnerCascade.Tag);
+            Assert.Equal(42,resAnonWithAssignments.Field3.InnerInnerCascade.Num);
+            Assert.Equal("World",resAnonWithAssignments.Field4.InnerInnerCascade.Tag);
+            Assert.Equal(42,resAnonWithAssignments.Field4.InnerInnerCascade.Num);
+            
+            var resWithOtherObject = collection.Select(x => new CongruentObject{Field3 = x.Field1, Field4 = x.Field2}).ToList().First();
+            Assert.Equal("World",resWithOtherObject.Field3.InnerInnerCascade.Tag);
+            Assert.Equal(42,resWithOtherObject.Field3.InnerInnerCascade.Num);
+            Assert.Equal("World",resWithOtherObject.Field4.InnerInnerCascade.Tag);
+            Assert.Equal(42,resWithOtherObject.Field4.InnerInnerCascade.Num);
+            
+            var resWithOtherObjectLikeNames = collection.Select(x => new CongruentObjectWithLikeNames(){Field1 = x.Field1, Field2 = x.Field2}).ToList().First();
+            Assert.Equal("World",resWithOtherObjectLikeNames.Field1.InnerInnerCascade.Tag);
+            Assert.Equal(42,resWithOtherObjectLikeNames.Field1.InnerInnerCascade.Num);
+            Assert.Equal("World",resWithOtherObjectLikeNames.Field2.InnerInnerCascade.Tag);
+            Assert.Equal(42,resWithOtherObjectLikeNames.Field2.InnerInnerCascade.Num);
+
+            var resNoNew = collection.Select(x => x.Field1).ToList().First();
+            Assert.Equal("World",resNoNew.InnerInnerCascade.Tag);
+            Assert.Equal(42,resNoNew.InnerInnerCascade.Num);
+        }
+
+        [Fact]
+        public void SaveDateTimeOffset()
+        {
+            var obj = new ObjectWithDateTimeOffsetJson
+            {
+                Offset = DateTimeOffset.Now,
+                DateTime = DateTime.Now
+            };
+            var collection = new RedisCollection<ObjectWithDateTimeOffsetJson>(_connection);
+            collection.Insert(obj);
+
+            var intermediate = collection.First(x => x.Id == obj.Id);
+            intermediate.Offset = intermediate.Offset.AddMinutes(10);
+            intermediate.DateTime = intermediate.DateTime.AddHours(1);
+            collection.Update(intermediate);
+            var final = collection.First(x => x.Id == obj.Id);
+            Assert.Equal(intermediate.Offset,final.Offset);
+            Assert.Equal(intermediate.DateTime,final.DateTime);
+        }
     }
 }
