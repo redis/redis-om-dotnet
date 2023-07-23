@@ -136,13 +136,18 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
         }
 
-        private static string BuildEqualityPredicate(MemberInfo member, ConstantExpression expression)
+        private static string BuildEqualityPredicate(MemberInfo member, ConstantExpression expression, bool negated = false)
         {
             var sb = new StringBuilder();
             var fieldAttribute = member.GetCustomAttribute<SearchFieldAttribute>();
             if (fieldAttribute == null)
             {
                 throw new InvalidOperationException("Searches can only be performed on fields marked with a RedisFieldAttribute with the SearchFieldType not set to None");
+            }
+
+            if (negated)
+            {
+                sb.Append("-");
             }
 
             sb.Append($"@{member.Name}:");
@@ -176,7 +181,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 ExpressionType.GreaterThanOrEqual => $"@{member.Name}:[{constExpression.Value} inf]",
                 ExpressionType.LessThanOrEqual => $"@{member.Name}:[-inf {constExpression.Value}]",
                 ExpressionType.Equal => BuildEqualityPredicate(member, constExpression),
-                ExpressionType.NotEqual => $"@{member.Name} : -{{{constExpression.Value}}}",
+                ExpressionType.NotEqual => BuildEqualityPredicate(member, constExpression, true),
                 _ => string.Empty
             };
             return queryPredicate;
