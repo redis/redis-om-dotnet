@@ -1213,6 +1213,5 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                     "AS",
                     "res"));
         }
-        
     }
 }

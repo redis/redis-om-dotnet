@@ -135,7 +135,7 @@ namespace Redis.OM.Searching
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
-            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression, type);
             var response = Connection.SearchRawResult(query);
             return new SearchResponse<T>(response);
         }
@@ -164,7 +164,7 @@ namespace Redis.OM.Searching
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
-            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(expression, type, mainBooleanExpression, type);
             var response = await Connection.SearchRawResultAsync(query);
             return new SearchResponse<T>(response);
         }

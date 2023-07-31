@@ -1,5 +1,6 @@
 using Xunit;
 using System;
+using System.Collections.Generic;
 using StackExchange.Redis;
 using System.Linq;
 using System.IO;
@@ -451,6 +452,33 @@ namespace Redis.OM.Unit.Tests
             }
             stream.WriteLine("]");
             stream.Flush();
+        }
+
+        [Fact]
+        public async Task SearchTimeoutTest()
+        {
+            var hostInfo = Environment.GetEnvironmentVariable("AGGRESSIVELY_SHORT_TIMEOUT_REDIS") ?? string.Empty;
+            Console.WriteLine($"Current host info: {hostInfo}");
+            if (string.IsNullOrEmpty(hostInfo))
+            {
+                throw new ArgumentException(
+                    "AGGRESSIVELY_SHORT_TIMEOUT_REDIS environment variable is not set - please set an instance with a 1 ms timeout for searches with on timeout set to fail");
+            }
+
+            var provider = new RedisConnectionProvider($"redis://{hostInfo}");
+            provider.Connection.CreateIndex(typeof(Person));
+            var collection = provider.RedisCollection<Person>();
+
+            var tasks = new List<Task>();
+            for (var i = 0; i < 10000; i++)
+            {
+                tasks.Add(collection.InsertAsync(new Person() { Name = "Timeout Person", Age = 35 }));
+            }
+
+            await Task.WhenAll(tasks);
+
+            var ex = await Assert.ThrowsAsync<TimeoutException>(async () => await collection.Take(10000).ToListAsync());
+            Assert.Equal("Encountered timeout when searching - check the duration of your query.", ex.Message);
         }
     }
 }

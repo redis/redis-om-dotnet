@@ -67,11 +67,20 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                     var val = ExpressionParserUtilities.GetValue(mem.Member, frame.Value);
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, System.Linq.Expressions.Expression.Constant(val)));
                 }
+                else
+                {
+                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right);
+                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, System.Linq.Expressions.Expression.Constant(val)));
+                }
             }
             else if (expression is ConstantExpression c
                      && c.Value.ToString() == "*")
             {
                 stack.Push(c.Value.ToString());
+            }
+            else if (expression is MethodCallExpression method)
+            {
+                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method));
             }
             else
             {
@@ -86,10 +95,40 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <param name="stack">the stack.</param>
         protected override void SplitBinaryExpression(BinaryExpression expression, Stack<string> stack)
         {
-            if (expression.Left is BinaryExpression left)
+            var left = expression.Left as BinaryExpression;
+            var right = expression.Right as BinaryExpression;
+
+            if (left != null && right != null)
             {
+                stack.Push(")");
+                SplitBinaryExpression(right, stack);
+                if (expression.NodeType == ExpressionType.Or || expression.NodeType == ExpressionType.OrElse)
+                {
+                    stack.Push("|");
+                }
+
                 SplitBinaryExpression(left, stack);
+                stack.Push("(");
+            }
+            else if (left != null)
+            {
                 ValidateAndPushOperand(expression.Right, stack);
+                if (expression.NodeType == ExpressionType.Or)
+                {
+                    stack.Push("|");
+                }
+
+                SplitBinaryExpression(left, stack);
+            }
+            else if (right != null)
+            {
+                SplitBinaryExpression(right, stack);
+                if (expression.NodeType == ExpressionType.Or)
+                {
+                    stack.Push("|");
+                }
+
+                ValidateAndPushOperand(expression.Left, stack);
             }
             else
             {
@@ -113,7 +152,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             switch (searchFieldType)
             {
                 case SearchFieldType.TAG:
-                    sb.Append($"{{{expression.Value}}}");
+                    sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(expression.Value.ToString())}}}");
                     break;
                 case SearchFieldType.TEXT:
                     sb.Append(expression.Value);
