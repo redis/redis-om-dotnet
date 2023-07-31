@@ -1,67 +1,37 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
-using Redis.OM.Aggregation.AggregationPredicates;
+﻿using Newtonsoft.Json.Linq;
 using Redis.OM;
+using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using StackExchange.Redis;
+using System;
+using System.Linq;
+using System.Net;
 
-namespace Redis.OM.Test.ConsoleApp
+var connection = new RedisConnectionProvider(ConfigurationOptions.Parse("localhost:6379"));
+var customers = connection.RedisCollection<Customer>();
+connection.Connection.CreateIndex(typeof(Customer));
+
+// Insert customer
+customers.Insert(new Customer()
 {
-    public class Program
-    {
-        [Document(StorageType = StorageType.Json)]
-        public class Customer
-        {
-            [Indexed] public string FirstName { get; set; }
-            [Indexed] public string LastName { get; set; }
-            [Indexed] public string Email { get; set; }
-            [Indexed(Aggregatable = true)] public int Age { get; set; }
-            [Indexed(Aggregatable = true)] public GeoLoc Home { get; set; }
-        }
-        static void Main(string[] args)
-        {
-            // connect
-            var provider = new RedisConnectionProvider("redis://localhost:6379");
-            var connection = provider.Connection;
-            var customers = provider.RedisCollection<Customer>();
-            var customerAggregations = provider.AggregationSet<Customer>();
-            
-            // Create index
-            connection.CreateIndex(typeof(Customer));
+    FirstName = "James",
+    LastName = "Bond"
+});
 
-            // Get Index info
-            var indexinfo = connection.GetIndexInfo(typeof(Customer));
+// Find all customers with the nickname of Jim
+var test = await customers.Where(x => x.FirstName.Contains("James")).Select(x => new test() { FirstName = x.FirstName, LastName = x.LastName }).ToListAsync();
 
-            // Insert Object
-            customers.Insert(new Customer{
-                FirstName = "James",
-                LastName = "Bond",
-                Email = "bondjamesbond@email.com",
-                Age = 68
-            });
-            
-            // query
-            // Find all customers who's last name is "Bond"
-            var res = customers.Where(x => x.LastName == "Bond").ToList();
-            
-            // Find all customers who's last name is Bond OR who's age is greater than 65
-            customers.Where(x => x.LastName == "Bond" || x.Age > 65);
-            
-            // Find all customer's who's last name is Bond AND who's first name is James
-            customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
-            
-            // Get Average Age
-            customerAggregations.Average(x => x.RecordShell.Age);
-            
-            // Format Customer Full Names
-            customerAggregations.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
-                "FullName");
-            
-            // Get Customer Distance from Mall of America. 
-            customerAggregations.Apply(x => ApplyFunctions.GeoDistance(x.RecordShell.Home, -93.241786, 44.853816),
-                "DistanceToMall");
-        }
-    }
+Console.ReadLine();
+
+[Document(StorageType = StorageType.Json)]
+public class Customer
+{
+    [Indexed] public string FirstName { get; set; }
+    [Indexed] public string LastName { get; set; }
+}
+
+public class test
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
 }

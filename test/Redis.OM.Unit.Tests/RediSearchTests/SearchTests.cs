@@ -309,11 +309,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.Contains("Ste")).ToList();
+            var res = collection.Where(x => x.Name.Contains("*Ste*")).ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "(@Name:Ste)",
+                "(@Name:{*Ste*})",
                 "LIMIT",
                 "0",
                 "100"));
@@ -382,12 +382,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => !x.Name.Contains("Ste")).ToList();
+            var res = collection.Where(x => !x.Name.Contains("*Ste*")).ToList();
             Assert.Equal(32, res[0].Age);
             _mock.Verify(x => x.Execute(
                     "FT.SEARCH",
                     "person-idx",
-                    "-(@Name:Ste)",
+                    "-(@Name:{*Ste*})",
                     "LIMIT",
                     "0",
                     "100"));
@@ -400,11 +400,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.Contains("Ste") || x.TagField == "John").ToList();
+            var res = collection.Where(x => x.Name.Contains("*Ste*") || x.TagField == "John").ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "((@Name:Ste) | (@TagField:{John}))",
+                "((@Name:{*Ste*}) | (@TagField:{John}))",
                 "LIMIT",
                 "0",
                 "100"));
@@ -421,7 +421,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "((@Name:Ste*) | (@TagField:{John}))",
+                "((@Name:{Ste*}) | (@TagField:{John}))",
                 "LIMIT",
                 "0",
                 "100"));
@@ -795,7 +795,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             steve.Age = 33;
             await collection.UpdateAsync(steve);
             _mock.Verify(x => x.ExecuteAsync("EVALSHA", It.IsAny<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
-            _mock.Verify(x => x.ExecuteAsync("EVAL",Scripts.JsonDiffResolution, "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
+            _mock.Verify(x => x.ExecuteAsync("EVAL", Scripts.JsonDiffResolution, "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
             Scripts.ShaCollection.Clear();
         }
 
@@ -812,7 +812,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             steve.Age = 33;
             collection.Update(steve);
             _mock.Verify(x => x.Execute("EVALSHA", It.IsAny<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
-            _mock.Verify(x => x.Execute("EVAL",Scripts.JsonDiffResolution, "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
+            _mock.Verify(x => x.Execute("EVAL", Scripts.JsonDiffResolution, "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33"));
             Scripts.ShaCollection.Clear();
         }
 
@@ -2782,7 +2782,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var enum2 = AnEnum.two;
             var enum3 = AnEnum.three;
 
-            var potentialFieldValues = new {list = new List<AnEnum> { enum1, enum2, enum3 }};
+            var potentialFieldValues = new { list = new List<AnEnum> { enum1, enum2, enum3 } };
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.list.Contains(x.AnEnum));
@@ -2803,7 +2803,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var enum2 = AnEnum.two;
             var enum3 = AnEnum.three;
 
-            var potentialFieldValues = new {list = new List<AnEnum> { enum1, enum2, enum3 }};
+            var potentialFieldValues = new { list = new List<AnEnum> { enum1, enum2, enum3 } };
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_mock.Object).Where(x => potentialFieldValues.list.Contains(x.AnEnumAsInt));
@@ -2823,7 +2823,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
             var collection = new RedisCollection<Person>(_mock.Object).OrderBy(x => x.Address.State).ToList();
-            _mock.Verify(x=>x.Execute("FT.SEARCH", "person-idx", "*", "LIMIT","0", "100", "SORTBY", "Address_State", "ASC"));
+            _mock.Verify(x => x.Execute("FT.SEARCH", "person-idx", "*", "LIMIT", "0", "100", "SORTBY", "Address_State", "ASC"));
         }
 
         [Fact]
@@ -2855,7 +2855,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSelectWithWhere()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);        
+                .Returns(_mockReply);
             var collection = new RedisCollection<Person>(_mock.Object);
             _ = collection.Where(x => x.Age == 33).Select(x => x.Name).ToList();
             _mock.Verify(x => x.Execute(
@@ -2890,7 +2890,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestEscapeForwardSlash()        
+        public void TestEscapeForwardSlash()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
                 .Returns(_mockReply);
@@ -2942,7 +2942,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var collection = new RedisCollection<ComplexObjectWithCascadeAndJsonPath>(_mock.Object);
 
             collection.FirstOrDefault(x => x.InnerCascade.InnerInnerCascade.Tag == "hello");
-            
+
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "complexobjectwithcascadeandjsonpath-idx",
@@ -2951,7 +2951,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"
             ));
-            
+
             collection.FirstOrDefault(x => x.InnerCascade.InnerInnerCascade.Num == 5);
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
@@ -2961,8 +2961,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "1"
             ));
-            
-            collection.FirstOrDefault(x => x.InnerCascade.InnerInnerCollection.Any(x=>x.Tag == "hello"));
+
+            collection.FirstOrDefault(x => x.InnerCascade.InnerInnerCollection.Any(x => x.Tag == "hello"));
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "complexobjectwithcascadeandjsonpath-idx",
