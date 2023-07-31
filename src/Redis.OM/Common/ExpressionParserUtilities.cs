@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Modeling;
@@ -403,6 +404,21 @@ namespace Redis.OM.Common
                 $"Could not retrieve value from {member.Member.Name}, most likely, it is not properly decorated in the model defining the index.");
         }
 
+        /// <summary>
+        /// Will return the StorageType of the expression.
+        /// </summary>
+        /// <param name="member">MemberExpression</param>
+        /// <returns>StorageType or default.</returns>
+        private static StorageType? GetStorageTypeForMember(MemberExpression member)
+        {
+            var memberPath = new List<string>();
+            var parentExpressionType = member.Expression.Type;
+
+            var document = parentExpressionType.GetCustomAttributes().Where(x => x is DocumentAttribute).Cast<DocumentAttribute>().FirstOrDefault();
+
+            return document?.StorageType;
+        }
+
         private static string GetOperandStringStringArgs(Expression exp)
         {
             return exp switch
@@ -744,6 +760,14 @@ namespace Redis.OM.Common
             type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
             memberName = GetOperandStringForMember(expression);
             literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
+
+            var storageType = GetStorageTypeForMember(expression);
+
+            if (storageType == null || storageType == StorageType.Hash)
+            {
+                return (type == typeof(string)) ? $"({memberName}:{literal})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
+            }
+
             return (type == typeof(string)) ? $"({memberName}:{{{literal}}})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
         }
 
