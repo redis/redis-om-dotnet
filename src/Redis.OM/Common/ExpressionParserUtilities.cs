@@ -172,7 +172,9 @@ namespace Redis.OM.Common
         {
             return exp.Method.Name switch
             {
-                "Contains" => TranslateContainsStandardQuerySyntax(exp),
+                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, "*{0}*"),
+                nameof(string.StartsWith) => TranslateContainsStandardQuerySyntax(exp, "{0}*"),
+                nameof(string.EndsWith) => TranslateContainsStandardQuerySyntax(exp, "*{0}"),
                 "Any" => TranslateAnyForEmbeddedObjects(exp),
                 _ => throw new ArgumentException($"Unrecognized method for query translation:{exp.Method.Name}")
             };
@@ -650,7 +652,10 @@ namespace Redis.OM.Common
             return exp.Method.Name switch
             {
                 nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
-                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp),
+                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, "*{0}*"),
+                nameof(string.StartsWith) => TranslateContainsStandardQuerySyntax(exp, "{0}*"),
+                nameof(string.EndsWith) => TranslateContainsStandardQuerySyntax(exp, "*{0}"),
+
                 "Any" => TranslateAnyForEmbeddedObjects(exp),
                 _ => throw new InvalidOperationException($"Unable to parse method {exp.Method.Name}")
             };
@@ -676,7 +681,7 @@ namespace Redis.OM.Common
             return string.Format(format, args);
         }
 
-        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp)
+        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp, string template)
         {
             MemberExpression? expression = null;
             Type type;
@@ -765,10 +770,10 @@ namespace Redis.OM.Common
 
             if (storageType == null || storageType == StorageType.Hash)
             {
-                return (type == typeof(string)) ? $"({memberName}:{literal})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
+                return (type == typeof(string)) ? $"({memberName}:{string.Format(template, literal)})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
             }
 
-            return (type == typeof(string)) ? $"({memberName}:{{{literal}}})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
+            return (type == typeof(string)) ? $"({memberName}:{{{string.Format(template, EscapeTagField(literal))}}})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
         }
 
         private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp)

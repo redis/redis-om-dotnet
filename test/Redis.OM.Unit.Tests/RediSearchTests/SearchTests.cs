@@ -309,11 +309,45 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.Contains("*Ste*")).ToList();
+            var res = collection.Where(x => x.Name.Contains("Ste")).ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:{*Ste*})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestBasicQueryWithStartsWith()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var res = collection.Where(x => x.Name.StartsWith("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:{Ste*})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestBasicQueryWithEndsWith()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            var res = collection.Where(x => x.Name.EndsWith("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:{*Ste})",
                 "LIMIT",
                 "0",
                 "100"));
@@ -382,7 +416,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => !x.Name.Contains("*Ste*")).ToList();
+            var res = collection.Where(x => !x.Name.Contains("Ste")).ToList();
             Assert.Equal(32, res[0].Age);
             _mock.Verify(x => x.Execute(
                     "FT.SEARCH",
@@ -400,7 +434,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.Contains("*Ste*") || x.TagField == "John").ToList();
+            var res = collection.Where(x => x.Name.Contains("Ste") || x.TagField == "John").ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
@@ -417,7 +451,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.Contains("Ste*") || x.TagField == "John").ToList();
+            var res = collection.Where(x => x.Name.StartsWith("Ste") || x.TagField == "John").ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
