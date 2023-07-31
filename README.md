@@ -285,7 +285,7 @@ customers.Where(x => x.LastName == "Bond" || x.Age > 65);
 customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
 
 // Find all customers with the nickname of Jim
-customer.Where(x=>x.NickNames.Contains("Jim"));
+customers.Where(x=>x.NickNames.Contains("Jim"));
 ```
 
 ### 🖩 Aggregations

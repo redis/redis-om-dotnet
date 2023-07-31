@@ -45,10 +45,8 @@ namespace Redis.OM.Test.ConsoleApp
             });
 
             // query
-            //// Find all customers who's last name is "Bond"
-            //var res = customers.Where(x => x.LastName.Contains("Bond")).ToList();
-            //var res2 = customers.Where(x => x.LastName.Contains("*Bon*")).ToList();
-            var res3 = customers.Where(x => x.LastName.EndsWith("Bo*")).ToList();
+            // Find all customers who's last name is "Bond"
+            var res = customers.Where(x => x.LastName == "Bond").ToList();
 
             // Find all customers who's last name is Bond OR who's age is greater than 65
             customers.Where(x => x.LastName == "Bond" || x.Age > 65);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Unit.Tests.RediSearchTests;
@@ -122,6 +123,46 @@ namespace Redis.OM.Unit.Tests
 
             var id = _connection.Set(obj);
             _connection.Get<HashObjectWithTwoPropertiesWithMatchingPrefixes>(id);
+        }
+
+        [Fact]
+        public void TestHashTypeWithArrayOfPrimitives()
+        {
+            var obj = new HashTypeWithPrimitiveArray()
+            {
+                Name = "foo",
+                Ints = new[] { 1, 2, 3, 4, 5 },
+                Bools = new[] { true,false,true },
+                Shorts = new short[] { 1, 2, 3, 4, 5 },
+                Bytes = new byte[] { 1, 2, 3, 4, 5 },
+                SBytes = new sbyte[] { 1, 2, 3, 4, 5 },
+                UShorts = new ushort[] { 1, 2, 3, 4, 5 },
+                UInts = new uint[] { 1, 2, 3, 4, 5 },
+                Longs = new long[] { 1, 2, 3, 4, 5 },
+                ULongs = new ulong[] { 1, 2, 3, 4, 5 },
+                Chars = new char[] { 'a','b','c','d','e' },
+                Doubles = new double[] { 1, 2, 3, 4, 5 },
+                Floats = new float[] { 1, 2, 3, 4, 5 },
+                IntList = new List<int>(){1, 2, 3, 4, 5}
+            };
+
+            var id = _connection.Set(obj);
+
+            var res = _connection.Get<HashTypeWithPrimitiveArray>(id);
+            Assert.Equal(obj.Name,res.Name);
+            Assert.Equal(obj.Bools, res.Bools);
+            Assert.Equal(obj.Shorts, res.Shorts);
+            Assert.Equal(obj.Bytes, res.Bytes);
+            Assert.Equal(obj.SBytes, res.SBytes);
+            Assert.Equal(obj.UShorts, res.UShorts);
+            Assert.Equal(obj.Ints, res.Ints);
+            Assert.Equal(obj.UInts, res.UInts);
+            Assert.Equal(obj.Longs, res.Longs);
+            Assert.Equal(obj.ULongs, res.ULongs);
+            Assert.Equal(obj.Chars, res.Chars);
+            Assert.Equal(obj.Doubles, res.Doubles);
+            Assert.Equal(obj.Floats, res.Floats);
+            Assert.Equal(obj.IntList, res.IntList);
         }
     }
 }

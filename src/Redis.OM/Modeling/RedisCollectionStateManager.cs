@@ -104,7 +104,7 @@ namespace Redis.OM.Modeling
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
                 var dataJson = JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions);
-                var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DateFormatHandling = DateFormatHandling.IsoDateFormat, DateParseHandling = DateParseHandling.DateTimeOffset, DateTimeZoneHandling = DateTimeZoneHandling.Utc });
                 var snapshot = (JToken)Snapshot[key];
                 var diff = FindDiff(current!, snapshot);
                 differences = BuildJsonDifference(diff, "$", snapshot);
