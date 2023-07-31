@@ -98,6 +98,11 @@ namespace Redis.OM.Searching
         public int ChunkSize { get; }
 
         /// <summary>
+        /// Gets or sets the root type for the collection.
+        /// </summary>
+        internal Type RootType { get; set; } = typeof(T);
+
+        /// <summary>
         /// Gets or sets the main boolean expression to be used for building the filter for this collection.
         /// </summary>
         internal Expression<Func<T, bool>>? BooleanExpression
@@ -117,7 +122,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public bool Any()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)_connection.Search<T>(query).DocumentCount > 0;
         }
@@ -131,7 +136,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)_connection.Search<T>(query).DocumentCount > 0;
         }
@@ -269,7 +274,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<int> CountAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
         }
@@ -279,7 +284,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount;
         }
@@ -287,7 +292,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<bool> AnyAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
         }
@@ -297,7 +302,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)(await _connection.SearchAsync<T>(query)).DocumentCount > 0;
         }
@@ -305,7 +310,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T> FirstAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             var result = res.Documents.First();
@@ -318,7 +323,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             var result = res.Documents.First();
@@ -329,7 +334,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T?> FirstOrDefaultAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             var key = res.Documents.Keys.FirstOrDefault();
@@ -348,7 +353,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             var key = res.Documents.Keys.FirstOrDefault();
@@ -365,7 +370,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T> SingleAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount > 1)
@@ -384,7 +389,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount > 1)
@@ -401,7 +406,7 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public async Task<T?> SingleOrDefaultAsync()
         {
-            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression);
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount != 1)
@@ -425,7 +430,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = await _connection.SearchAsync<T>(query);
             if (res.DocumentCount != 1)
@@ -449,7 +454,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 0, Offset = 0 };
             return (int)_connection.Search<T>(query).DocumentCount;
         }
@@ -459,7 +464,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             var result = res.Documents.First();
@@ -472,7 +477,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             var result = res.Documents.FirstOrDefault();
@@ -489,7 +494,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             if (res.DocumentCount > 1)
@@ -507,7 +512,7 @@ namespace Redis.OM.Searching
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });
             var combined = BooleanExpression == null ? expression : BooleanExpression.And(expression);
-            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined);
+            var query = ExpressionTranslator.BuildQueryFromExpression(exp, typeof(T), combined, RootType);
             query.Limit = new SearchLimit { Number = 1, Offset = 0 };
             var res = _connection.Search<T>(query);
             if (res.DocumentCount != 1)
@@ -547,7 +552,7 @@ namespace Redis.OM.Searching
         public IEnumerator<T> GetEnumerator()
         {
             StateManager.Clear();
-            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager, BooleanExpression, SaveState);
+            return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager, BooleanExpression, SaveState, RootType, typeof(T));
         }
 
         /// <inheritdoc/>
@@ -746,7 +751,7 @@ namespace Redis.OM.Searching
         {
             var provider = (RedisQueryProvider)Provider;
             StateManager.Clear();
-            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState);
+            return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState, RootType, typeof(T));
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)

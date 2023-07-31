@@ -74,18 +74,26 @@ namespace Redis.OM.Common
         /// </summary>
         /// <param name="exp">expression.</param>
         /// <param name="treatEnumsAsInt">Treat enum as an integer.</param>
+        /// <param name="negate">Whether or not to negate the result.</param>
         /// <returns>the operand string.</returns>
         /// <exception cref="ArgumentException">thrown if expression is un-parseable.</exception>
-        internal static string GetOperandStringForQueryArgs(Expression exp, bool treatEnumsAsInt = false)
+        internal static string GetOperandStringForQueryArgs(Expression exp, bool treatEnumsAsInt = false, bool negate = false)
         {
-            return exp switch
+            var res = exp switch
             {
                 ConstantExpression constExp => $"{constExp.Value}",
                 MemberExpression member => GetOperandStringForMember(member, treatEnumsAsInt),
                 MethodCallExpression method => TranslateMethodStandardQuerySyntax(method),
-                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, treatEnumsAsInt),
+                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, treatEnumsAsInt, unary.NodeType == ExpressionType.Not),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
+
+            if (negate)
+            {
+                return $"-{res}";
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -341,19 +349,6 @@ namespace Redis.OM.Common
                     return string.Join("|", ulids);
                 }
 
-                if (resolved is IEnumerable<int?> ints)
-                {
-                    var sb = new StringBuilder();
-                    sb.Append('|');
-                    foreach (var i in ints)
-                    {
-                        sb.Append($"[{i} {i}]|");
-                    }
-
-                    sb.Remove(sb.Length - 1, 1);
-                    return sb.ToString();
-                }
-
                 if (resolvedType.IsArray || resolvedType.GetInterfaces().Contains(typeof(IEnumerable)))
                 {
                     var asEnumerable = (IEnumerable)resolved;
@@ -361,6 +356,20 @@ namespace Redis.OM.Common
                     if (elementType == null)
                     {
                         elementType = resolvedType.GenericTypeArguments.FirstOrDefault();
+                    }
+
+                    if (elementType != null && TypeDeterminationUtilities.IsNumeric(elementType))
+                    {
+                        var sb = new StringBuilder();
+                        sb.Append('|');
+
+                        foreach (var item in asEnumerable)
+                        {
+                            sb.Append(FormattableString.Invariant($"[{item} {item}]|"));
+                        }
+
+                        sb.Remove(sb.Length - 1, 1);
+                        return sb.ToString();
                     }
 
                     if (elementType != null && elementType.IsEnum)
