@@ -520,7 +520,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Name.Contains("Steve") && (a.RecordShell!.Age == 2 || a.RecordShell!.Age == 50);
 
             _ = collection.Where(query).ToList();
-            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "(@Name:Steve) ( @Age:[2 2] | @Age:[50 50] )", "WITHCURSOR", "COUNT", "10000"));
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "(@Name:{*Steve*}) ( @Age:[2 2] | @Age:[50 50] )", "WITHCURSOR", "COUNT", "10000"));
         }
         
         [Fact]
@@ -537,7 +537,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Expression<Func<AggregationResult<Person>, bool>> query = a => (a.RecordShell!.Age == 2 || a.RecordShell!.Age == 50) && a.RecordShell!.Name.Contains("Steve");
 
             _ = collection.Where(query).ToList();
-            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "( @Age:[2 2] | @Age:[50 50] ) (@Name:Steve)", "WITHCURSOR", "COUNT", "10000"));
+            _mock.Verify(x => x.Execute("FT.AGGREGATE", "person-idx", "( @Age:[2 2] | @Age:[50 50] ) (@Name:{*Steve*})", "WITHCURSOR", "COUNT", "10000"));
         }
         [Fact]
         public void PunctuationMarkInTagQuery()

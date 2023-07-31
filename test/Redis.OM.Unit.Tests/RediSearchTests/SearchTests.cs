@@ -3062,7 +3062,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "objectwithmultiplesearchablefields-idx",
-                "(-(@FirstName:Andrey) -(@LastName:Bred))",
+                "(-(@FirstName:*Andrey*) -(@LastName:*Bred*))",
                 "LIMIT",
                 "0",
                 "100"
@@ -3071,7 +3071,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "objectwithmultiplesearchablefields-idx",
-                "(-(@FirstName:Andrey) (@LastName:Bred))",
+                "(-(@FirstName:*Andrey*) (@LastName:*Bred*))",
                 "LIMIT",
                 "0",
                 "100"
