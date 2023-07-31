@@ -407,7 +407,7 @@ namespace Redis.OM.Common
         /// <summary>
         /// Will return the StorageType of the expression.
         /// </summary>
-        /// <param name="member">MemberExpression</param>
+        /// <param name="member">MemberExpression.</param>
         /// <returns>StorageType or default.</returns>
         private static StorageType? GetStorageTypeForMember(MemberExpression member)
         {
