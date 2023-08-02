@@ -5,12 +5,14 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
+using Redis.OM.Extensions;
 using Redis.OM.Modeling;
 using Redis.OM.Searching.Query;
 
@@ -180,6 +182,9 @@ namespace Redis.OM.Common
         {
             return exp.Method.Name switch
             {
+                nameof(StringExtension.ConstainsFuzzy1) => TranslateContainsStandardQuerySyntax(exp, "%{0}%"),
+                nameof(StringExtension.ConstainsFuzzy2) => TranslateContainsStandardQuerySyntax(exp, "%%{0}%%"),
+
                 nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, "*{0}*"),
                 nameof(string.StartsWith) => TranslateContainsStandardQuerySyntax(exp, "{0}*"),
                 nameof(string.EndsWith) => TranslateContainsStandardQuerySyntax(exp, "*{0}"),
@@ -660,6 +665,8 @@ namespace Redis.OM.Common
         {
             return exp.Method.Name switch
             {
+                nameof(StringExtension.ConstainsFuzzy1) => TranslateContainsStandardQuerySyntax(exp, "%{0}%"),
+                nameof(StringExtension.ConstainsFuzzy2) => TranslateContainsStandardQuerySyntax(exp, "%%{0}%%"),
                 nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
                 nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, "*{0}*"),
                 nameof(string.StartsWith) => TranslateContainsStandardQuerySyntax(exp, "{0}*"),
@@ -696,6 +703,7 @@ namespace Redis.OM.Common
             Type type;
             string memberName;
             string literal;
+            SearchFieldAttribute? searchableAttribute = null;
             if (exp.Arguments.LastOrDefault() is MemberExpression && exp.Arguments.FirstOrDefault() is MemberExpression)
             {
                 var propertyExpression = (MemberExpression)exp.Arguments.Last();
@@ -764,6 +772,7 @@ namespace Redis.OM.Common
             else if (exp.Arguments.FirstOrDefault() is MemberExpression)
             {
                 expression = (MemberExpression)exp.Arguments.First();
+                searchableAttribute = DetermineSearchAttribute(expression);
             }
 
             if (expression == null)
@@ -771,13 +780,17 @@ namespace Redis.OM.Common
                 throw new InvalidOperationException($"Could not parse query for Contains");
             }
 
+            if ((searchableAttribute is null || searchableAttribute is not SearchableAttribute) && template.Contains("%"))
+            {
+                throw new InvalidOperationException($"To use fuzzy search (Levenshtein distance 1 and 2) you must add {nameof(SearchFieldAttribute)}");
+            }
+
             type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
             memberName = GetOperandStringForMember(expression);
             literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
-
             var storageType = GetStorageTypeForMember(expression);
 
-            if (storageType == null || storageType == StorageType.Hash)
+            if (storageType == null || storageType == StorageType.Hash || searchableAttribute is not null)
             {
                 return (type == typeof(string)) ? $"({memberName}:{string.Format(template, literal)})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
             }
