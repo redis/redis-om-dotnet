@@ -10,7 +10,6 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
-using Redis.OM.Extensions;
 using Redis.OM.Modeling;
 using Redis.OM.Searching.Query;
 

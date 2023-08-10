@@ -9,7 +9,6 @@ using Redis.OM;
 using Redis.OM.Contracts;
 using Redis.OM.Searching;
 using Redis.OM.Common;
-using Redis.OM.Extensions;
 using Xunit;
 using Redis.OM.Searching.Query;
 using StackExchange.Redis;
