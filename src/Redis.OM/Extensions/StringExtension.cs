@@ -30,6 +30,8 @@ namespace Redis.OM
         /// <param name="distanceThreshold">The threshold for permissible distance (must be 3 or less).</param>
         /// <returns>Whether the strings are within the provided Levenshtein distance of each other.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if distanceThreshold is greater than 3.</exception>
+        /// <remarks>This is meant to be a shadow method that runs within an expression, a working implementation is
+        /// provided here for completeness.</remarks>
         public static bool FuzzyMatch(this string source, string term, byte distanceThreshold)
         {
             if (distanceThreshold > 3)
@@ -88,6 +90,8 @@ namespace Redis.OM
         /// <param name="source">The source string to check the distance from.</param>
         /// <param name="term">The destination string to check the distance to.</param>
         /// <returns>The Levenshtein distance.</returns>
+        /// <remarks>This is meant to be a shadow method that runs within an expression, a working implementation is
+        /// provided here for completeness.</remarks>
         private static int LevenshteinDistance(this string source, string term)
         {
             var d = new int[source.Length, term.Length];
