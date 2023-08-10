@@ -9,6 +9,7 @@ using Redis.OM;
 using Redis.OM.Contracts;
 using Redis.OM.Searching;
 using Redis.OM.Common;
+using Redis.OM.Extensions;
 using Xunit;
 using Redis.OM.Searching.Query;
 using StackExchange.Redis;
@@ -314,7 +315,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "(@Name:{*Ste*})",
+                "(@Name:Ste)",
                 "LIMIT",
                 "0",
                 "100"));
@@ -331,7 +332,143 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "(@Name:{Ste*})",
+                "(@Name:Ste*)",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestFuzzy()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.Name.FuzzyMatch("Ste", 2)).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:%%Ste%%)",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestMatchStartsWith()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.Name.MatchStartsWith("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:Ste*)",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public void TestMatchEndsWith()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.Name.MatchEndsWith("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:*Ste)",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public void TestMatchContains()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.Name.MatchContains("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:*Ste*)",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public void TestTagStartsWith()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.TagField.StartsWith("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{Ste*})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public void TestTagEndsWith()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.TagField.EndsWith("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{*Ste})",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+
+        [Fact]
+        public void TestTextEndsWith()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.Name.EndsWith("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:*Ste)",
+                "LIMIT",
+                "0",
+                "100"));
+        }
+        
+        [Fact]
+        public void TestTextStartsWith()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_mock.Object);
+            _ = collection.Where(x => x.Name.StartsWith("Ste")).ToList();
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:Ste*)",
                 "LIMIT",
                 "0",
                 "100"));
@@ -348,7 +485,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "(@Name:{*Ste})",
+                "(@Name:*Ste)",
                 "LIMIT",
                 "0",
                 "100"));
@@ -422,7 +559,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                     "FT.SEARCH",
                     "person-idx",
-                    "-(@Name:{*Ste*})",
+                    "-(@Name:Ste)",
                     "LIMIT",
                     "0",
                     "100"));
@@ -439,7 +576,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "((@Name:{*Ste*}) | (@TagField:{John}))",
+                "((@Name:Ste) | (@TagField:{John}))",
                 "LIMIT",
                 "0",
                 "100"));
@@ -452,11 +589,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.StartsWith("Ste") || x.TagField == "John").ToList();
+            var res = collection.Where(x => x.Name.Contains("Ste*") || x.TagField == "John").ToList();
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "((@Name:{Ste*}) | (@TagField:{John}))",
+                "((@Name:Ste*) | (@TagField:{John}))",
                 "LIMIT",
                 "0",
                 "100"));
@@ -3062,7 +3199,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "objectwithmultiplesearchablefields-idx",
-                "(-(@FirstName:*Andrey*) -(@LastName:*Bred*))",
+                "(-(@FirstName:Andrey) -(@LastName:Bred))",
                 "LIMIT",
                 "0",
                 "100"
@@ -3071,7 +3208,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _mock.Verify(x => x.Execute(
                 "FT.SEARCH",
                 "objectwithmultiplesearchablefields-idx",
-                "(-(@FirstName:*Andrey*) (@LastName:*Bred*))",
+                "(-(@FirstName:Andrey) (@LastName:Bred))",
                 "LIMIT",
                 "0",
                 "100"

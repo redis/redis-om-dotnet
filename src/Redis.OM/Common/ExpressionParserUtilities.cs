@@ -5,11 +5,9 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Extensions;
@@ -182,12 +180,13 @@ namespace Redis.OM.Common
         {
             return exp.Method.Name switch
             {
-                nameof(StringExtension.ConstainsFuzzy1) => TranslateContainsStandardQuerySyntax(exp, "%{0}%"),
-                nameof(StringExtension.ConstainsFuzzy2) => TranslateContainsStandardQuerySyntax(exp, "%%{0}%%"),
-
-                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, "*{0}*"),
-                nameof(string.StartsWith) => TranslateContainsStandardQuerySyntax(exp, "{0}*"),
-                nameof(string.EndsWith) => TranslateContainsStandardQuerySyntax(exp, "*{0}"),
+                "Contains" => TranslateContainsStandardQuerySyntax(exp),
+                nameof(StringExtension.FuzzyMatch) => TranslateFuzzyMatch(exp),
+                nameof(StringExtension.MatchContains) => TranslateMatchContains(exp),
+                nameof(StringExtension.MatchStartsWith) => TranslateMatchStartsWith(exp),
+                nameof(StringExtension.MatchEndsWith) => TranslateMatchEndsWith(exp),
+                nameof(string.StartsWith) => TranslateStartsWith(exp),
+                nameof(string.EndsWith) => TranslateEndsWith(exp),
                 "Any" => TranslateAnyForEmbeddedObjects(exp),
                 _ => throw new ArgumentException($"Unrecognized method for query translation:{exp.Method.Name}")
             };
@@ -665,13 +664,11 @@ namespace Redis.OM.Common
         {
             return exp.Method.Name switch
             {
-                nameof(StringExtension.ConstainsFuzzy1) => TranslateContainsStandardQuerySyntax(exp, "%{0}%"),
-                nameof(StringExtension.ConstainsFuzzy2) => TranslateContainsStandardQuerySyntax(exp, "%%{0}%%"),
+                nameof(StringExtension.FuzzyMatch) => TranslateFuzzyMatch(exp),
                 nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
-                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, "*{0}*"),
-                nameof(string.StartsWith) => TranslateContainsStandardQuerySyntax(exp, "{0}*"),
-                nameof(string.EndsWith) => TranslateContainsStandardQuerySyntax(exp, "*{0}"),
-
+                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp),
+                nameof(string.StartsWith) => TranslateStartsWith(exp),
+                nameof(string.EndsWith) => TranslateEndsWith(exp),
                 "Any" => TranslateAnyForEmbeddedObjects(exp),
                 _ => throw new InvalidOperationException($"Unable to parse method {exp.Method.Name}")
             };
@@ -697,13 +694,125 @@ namespace Redis.OM.Common
             return string.Format(format, args);
         }
 
-        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp, string template)
+        private static bool IsFullTextSearch(Expression expression)
+        {
+            if (expression is MemberExpression member)
+            {
+                return DetermineSearchAttribute(member) is SearchableAttribute;
+            }
+
+            return false;
+        }
+
+        private static string TranslateStartsWith(MethodCallExpression exp)
+        {
+            string source;
+            string prefix;
+            Expression sourceExpression;
+            if (exp.Arguments.Count < 2 && exp.Object is not null)
+            {
+                source = GetOperandString(exp.Object);
+                prefix = GetOperandString(exp.Arguments[0]);
+                sourceExpression = exp.Object;
+            }
+            else if (exp.Arguments.Count >= 2)
+            {
+                source = GetOperandString(exp.Arguments[0]);
+                prefix = GetOperandString(exp.Arguments[1]);
+                sourceExpression = exp.Arguments[0];
+            }
+            else
+            {
+                throw new InvalidOperationException("Could not parse out StartsWith method from provided expression");
+            }
+
+            if (IsFullTextSearch(sourceExpression))
+            {
+                return $"({source}:{prefix}*)";
+            }
+
+            return $"({source}:{{{EscapeTagField(prefix)}*}})";
+        }
+
+        private static string TranslateEndsWith(MethodCallExpression exp)
+        {
+            string source;
+            string suffix;
+            Expression sourceExpression;
+            if (exp.Arguments.Count < 2 && exp.Object is not null)
+            {
+                source = GetOperandString(exp.Object);
+                suffix = GetOperandString(exp.Arguments[0]);
+                sourceExpression = exp.Object;
+            }
+            else if (exp.Arguments.Count >= 2)
+            {
+                source = GetOperandString(exp.Arguments[0]);
+                suffix = GetOperandString(exp.Arguments[1]);
+                sourceExpression = exp.Arguments[0];
+            }
+            else
+            {
+                throw new InvalidOperationException("Could not parse out EndsWith method from provided expression");
+            }
+
+            if (IsFullTextSearch(sourceExpression))
+            {
+                return $"({source}:*{suffix})";
+            }
+
+            return $"({source}:{{*{EscapeTagField(suffix)}}})";
+        }
+
+        private static string TranslateMatchStartsWith(MethodCallExpression exp)
+        {
+            var source = GetOperandString(exp.Arguments[0]);
+            var prefix = GetOperandString(exp.Arguments[1]);
+            return $"({source}:{prefix}*)";
+        }
+
+        private static string TranslateMatchEndsWith(MethodCallExpression exp)
+        {
+            var source = GetOperandString(exp.Arguments[0]);
+            var suffix = GetOperandString(exp.Arguments[1]);
+            return $"({source}:*{suffix})";
+        }
+
+        private static string TranslateMatchContains(MethodCallExpression exp)
+        {
+            var source = GetOperandString(exp.Arguments[0]);
+            var infix = GetOperandString(exp.Arguments[1]);
+            return $"({source}:*{infix}*)";
+        }
+
+        private static string TranslateFuzzyMatch(MethodCallExpression exp)
+        {
+            var source = GetOperandString(exp.Arguments[0]);
+            var term = GetOperandString(exp.Arguments[1]);
+            if (!int.TryParse(GetOperandString(exp.Arguments[2]), out var distanceThreshold))
+            {
+                throw new ArgumentException($"Could not parse {nameof(distanceThreshold)}");
+            }
+
+            return distanceThreshold switch
+            {
+                1 => $"({source}:%{term}%)",
+                2 => $"({source}:%%{term}%%)",
+                3 => $"({source}:%%%{term}%%%)",
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(distanceThreshold),
+                    distanceThreshold,
+                    $"{nameof(distanceThreshold)} must not exceed 3")
+            };
+        }
+
+        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp)
         {
             MemberExpression? expression = null;
             Type type;
             string memberName;
             string literal;
-            SearchFieldAttribute? searchableAttribute = null;
+            SearchFieldAttribute? searchFieldAttribute = null;
             if (exp.Arguments.LastOrDefault() is MemberExpression && exp.Arguments.FirstOrDefault() is MemberExpression)
             {
                 var propertyExpression = (MemberExpression)exp.Arguments.Last();
@@ -768,11 +877,15 @@ namespace Redis.OM.Common
             if (exp.Object is MemberExpression)
             {
                 expression = exp.Object as MemberExpression;
+                if (expression is not null)
+                {
+                    searchFieldAttribute = DetermineSearchAttribute(expression);
+                }
             }
             else if (exp.Arguments.FirstOrDefault() is MemberExpression)
             {
                 expression = (MemberExpression)exp.Arguments.First();
-                searchableAttribute = DetermineSearchAttribute(expression);
+                searchFieldAttribute = DetermineSearchAttribute(expression);
             }
 
             if (expression == null)
@@ -780,22 +893,17 @@ namespace Redis.OM.Common
                 throw new InvalidOperationException($"Could not parse query for Contains");
             }
 
-            if ((searchableAttribute is null || searchableAttribute is not SearchableAttribute) && template.Contains("%"))
-            {
-                throw new InvalidOperationException($"To use fuzzy search (Levenshtein distance 1 and 2) you must add {nameof(SearchFieldAttribute)}");
-            }
-
             type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
             memberName = GetOperandStringForMember(expression);
             literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
             var storageType = GetStorageTypeForMember(expression);
 
-            if (storageType == null || storageType == StorageType.Hash || searchableAttribute is not null)
+            if (searchFieldAttribute is not null && searchFieldAttribute is SearchableAttribute)
             {
-                return (type == typeof(string)) ? $"({memberName}:{string.Format(template, literal)})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
+                return $"({memberName}:{literal})";
             }
 
-            return (type == typeof(string)) ? $"({memberName}:{{{string.Format(template, EscapeTagField(literal))}}})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
+            return (type == typeof(string)) ? $"({memberName}:{{*{EscapeTagField(literal)}*}})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
         }
 
         private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp)
