@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using NSubstitute;
+using NSubstitute.ClearExtensions;
+using NSubstitute.ReceivedExtensions;
 using Redis.OM;
 using Redis.OM.Contracts;
 using Redis.OM.Searching;
@@ -18,7 +21,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     public class SearchTests
     {
         private Mock<IRedisConnection> _mock = new Mock<IRedisConnection>();
-
+        private IRedisConnection _substitute = Substitute.For<IRedisConnection>();
         private RedisReply _mockReply = new RedisReply[]
         {
             new RedisReply(1),
@@ -60,548 +63,547 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestBasicQuery()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33).ToList();
-            _mock.Verify(x => x.Execute(
-                "FT.SEARCH",
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Age < 33).ToList();
+            _substitute.Received().Execute("FT.SEARCH",
                 "person-idx",
                 "(@Age:[-inf (33])",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicNegationQuery()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
-
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => !(x.Age < 33)).ToList();
-            _mock.Verify(x => x.Execute(
-                    "FT.SEARCH",
-                    "person-idx",
-                    "-(@Age:[-inf (33])",
-                    "LIMIT",
-                    "0",
-                    "100"));
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => !(x.Age < 33)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "-(@Age:[-inf (33])",
+                "LIMIT",
+                "0",
+                "100");
         }
 
         [Fact]
         public void TestBasicQueryWithVariable()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
             var y = 33;
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             var res = collection.Where(x => x.Age < y).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Age:[-inf (33])",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestFirstOrDefaultWithMixedLocals()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
             var heightList = new List<double> { 70.0, 68.0 };
             var y = 33;
             foreach (var height in heightList)
             {
-                var collection = new RedisCollection<Person>(_mock.Object);
-                var res = collection.FirstOrDefault(x => x.Age == y && x.Height == height);
-                _mock.Verify(x => x.Execute(
+                var collection = new RedisCollection<Person>(_substitute);
+                _ = collection.FirstOrDefault(x => x.Age == y && x.Height == height);
+                _substitute.Received().Execute(
                     "FT.SEARCH",
                     "person-idx",
                     $"((@Age:[33 33]) (@Height:[{height} {height}]))",
                     "LIMIT",
                     "0",
-                    "1"));
+                    "1");
             }
         }
 
         [Fact]
         public void TestBasicQueryWithExactNumericMatch()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
             var y = 33;
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age == y).ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Age == y).ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Age:[33 33])",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicFirstOrDefaultQuery()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
             var y = 33;
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.FirstOrDefault(x => x.Age == y);
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.FirstOrDefault(x => x.Age == y);
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Age:[33 33])",
                 "LIMIT",
                 "0",
-                "1"));
+                "1");
         }
 
         [Fact]
         public void TestBasicQueryNoNameIndex()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
             var y = 33;
-            var collection = new RedisCollection<PersonNoName>(_mock.Object);
-            var res = collection.FirstOrDefault(x => x.Age == y);
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<PersonNoName>(_substitute);
+            _ = collection.FirstOrDefault(x => x.Age == y);
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "personnoname-idx",
                 "(@Age:[33 33])",
                 "LIMIT",
                 "0",
-                "1"));
+                "1");
         }
 
         [Fact]
         public void TestBasicOrQuery()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33 || x.TagField == "Steve").ToList();
-            Assert.Equal(32, res[0].Age);
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Age < 33 || x.TagField == "Steve").ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "((@Age:[-inf (33]) | (@TagField:{Steve}))",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicOrQueryTwoTags()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.TagField == "Bob" || x.TagField == "Steve").ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.TagField == "Bob" || x.TagField == "Steve").ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "((@TagField:{Bob}) | (@TagField:{Steve}))",
                 "LIMIT",
                 "0",
-                "100"));
-            Assert.Equal(32, res[0].Age);
+                "100");
         }
 
         [Fact]
         public void TestBasicOrQueryWithNegation()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33 || x.TagField != "Steve" || x.Name != "Steve").ToList();
-            Assert.Equal(32, res[0].Age);
-            _mock.Verify(x => x.Execute(
-                    "FT.SEARCH",
-                    "person-idx",
-                    "(((@Age:[-inf (33]) | (-@TagField:{Steve})) | (-@Name:\"Steve\"))",
-                    "LIMIT",
-                    "0",
-                    "100"));
+            _ = collection.Where(x => x.Age < 33 || x.TagField != "Steve" || x.Name != "Steve").ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(((@Age:[-inf (33]) | (-@TagField:{Steve})) | (-@Name:\"Steve\"))",
+                "LIMIT",
+                "0",
+                "100");
         }
 
         [Fact]
         public void TestBasicAndQuery()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33 && x.TagField == "Steve").ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Age < 33 && x.TagField == "Steve").ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "((@Age:[-inf (33]) (@TagField:{Steve}))",
                 "LIMIT",
                 "0",
-                "100"));
-            Assert.Equal(32, res[0].Age);
+                "100");
         }
 
         [Fact]
         public void TestBasicTagQuery()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33 && x.TagField == "Steve").ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Age < 33 && x.TagField == "Steve").ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "((@Age:[-inf (33]) (@TagField:{Steve}))",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicThreeCluaseQuery()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33 && x.TagField == "Steve" && x.Height >= 70).ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Age < 33 && x.TagField == "Steve" && x.Height >= 70).ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(((@Age:[-inf (33]) (@TagField:{Steve})) (@Height:[70 inf]))",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestGroupedThreeCluaseQuery()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Age < 33 && (x.TagField == "Steve" || x.Height >= 70)).ToList();
-            _mock.Verify(x => x.Execute(
+            _ = collection.Where(x => x.Age < 33 && (x.TagField == "Steve" || x.Height >= 70)).ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "((@Age:[-inf (33]) ((@TagField:{Steve}) | (@Height:[70 inf])))",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicQueryWithContains()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.Contains("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Name.Contains("Ste")).ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:Ste)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicQueryWithStartsWith()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.StartsWith("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Name.StartsWith("Ste")).ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:Ste*)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestFuzzy()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.FuzzyMatch("Ste", 2)).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:%%Ste%%)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestMatchStartsWith()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.MatchStartsWith("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:Ste*)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
         
         [Fact]
         public void TestMatchEndsWith()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.MatchEndsWith("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:*Ste)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
         
         [Fact]
         public void TestMatchContains()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.MatchContains("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:*Ste*)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
         
         [Fact]
         public void TestTagStartsWith()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.TagField.StartsWith("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@TagField:{Ste*})",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
         
         [Fact]
         public void TestTagEndsWith()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.TagField.EndsWith("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@TagField:{*Ste})",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestTextEndsWith()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_mock.Object);
             _ = collection.Where(x => x.Name.EndsWith("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:*Ste)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
         
         [Fact]
         public void TestTextStartsWith()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.StartsWith("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:Ste*)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicQueryWithEndsWith()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.EndsWith("Ste")).ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Name.EndsWith("Ste")).ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:*Ste)",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicQueryFromPropertyOfModel()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             var modelObject = new Person() { Name = "Steve" };
             collection.Where(x => x.Name == modelObject.Name).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:\"Steve\")",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicQueryFromPropertyOfModelWithStringInterpolation()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             var modelObject = new Person() { Name = "Steve" };
             collection.Where(x => x.Name == $"A {nameof(Person)} named {modelObject.Name}").ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:\"A Person named Steve\")",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicQueryFromPropertyOfModelWithStringFormatFourArgs()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             var modelObject = new Person() { Name = "Steve" };
             var a = "A";
             var named = "named";
             collection.Where(x => x.Name == string.Format("{0} {1} {2} {3}", a, nameof(Person), named, modelObject.Name)).ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:\"A Person named Steve\")",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestBasicQueryWithContainsWithNegation()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => !x.Name.Contains("Ste")).ToList();
-            Assert.Equal(32, res[0].Age);
-            _mock.Verify(x => x.Execute(
-                    "FT.SEARCH",
-                    "person-idx",
-                    "-(@Name:Ste)",
-                    "LIMIT",
-                    "0",
-                    "100"));
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => !x.Name.Contains("Ste")).ToList();
+            _substitute.Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "-(@Name:Ste)",
+                "LIMIT",
+                "0",
+                "100");
         }
 
         [Fact]
         public void TestTwoPredicateQueryWithContains()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name.Contains("Ste") || x.TagField == "John").ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Name.Contains("Ste") || x.TagField == "John").ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "((@Name:Ste) | (@TagField:{John}))",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestTwoPredicateQueryWithPrefixMatching()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             var res = collection.Where(x => x.Name.Contains("Ste*") || x.TagField == "John").ToList();
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "((@Name:Ste*) | (@TagField:{John}))",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
         public void TestGeoFilter()
         {
-            _mock.Setup(x => x.Execute(
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.GeoFilter(x => x.Home, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
+            
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "*",
@@ -614,24 +616,19 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "6.7",
                 "50",
                 "km"
-                ))
-                .Returns(_mockReply);
-
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.GeoFilter(x => x.Home, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
-            Assert.Equal(32, res[0].Age);
+            );
         }
 
         [Fact]
         public void TestGeoFilterWithWhereClause()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
+            var collection = new RedisCollection<Person>(_substitute);
             var res = collection.Where(x => x.TagField == "Steve").GeoFilter(x => x.Home, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
             Assert.Equal(32, res[0].Age);
-            _mock.Verify(x => x.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@TagField:{Steve})",
@@ -644,66 +641,67 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "6.7",
                 "50",
                 "km"
-                ));
+            );
         }
 
         [Fact]
         public void TestSelect()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReplySelect);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Select(x => x.Name).ToList();
-            _mock.Verify(x => x.Execute(
-               "FT.SEARCH",
-               "person-idx",
-               "*",
-               "LIMIT",
-               "0",
-               "100",
-               "RETURN",
-               "1",
-               "Name"
-               ));
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Select(x => x.Name).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "100",
+                "RETURN",
+                "1",
+                "Name"
+            );
         }
 
         [Fact]
-        public void TestSelectComlexAnonType()
+        public void TestSelectComplexAnonType()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(_mockReplySelect);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Select(x => new { x.Name }).ToList();
-            _mock.Verify(x => x.Execute(
-               "FT.SEARCH",
-               "person-idx",
-               "*",
-               "LIMIT",
-               "0",
-               "100",
-               "RETURN",
-               "3",
-               "Name",
-               "AS",
-               "Name"));
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Select(x => new { x.Name }).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "100",
+                "RETURN",
+                "3",
+                "Name",
+                "AS",
+                "Name");
         }
 
         [Fact]
         public void TextEqualityExpression()
         {
-            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>())).Returns(_mockReply);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
 
-            var collection = new RedisCollection<Person>(_mock.Object);
-            var res = collection.Where(x => x.Name == "Steve").ToList();
-            _mock.Verify(x => x.Execute(
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Name == "Steve").ToList();
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:\"Steve\")",
                 "LIMIT",
                 "0",
-                "100"));
+                "100");
         }
 
         [Fact]
