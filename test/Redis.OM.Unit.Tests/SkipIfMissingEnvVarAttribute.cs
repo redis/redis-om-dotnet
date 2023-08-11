@@ -18,8 +18,13 @@ public class SkipIfMissingEnvVarAttribute : FactAttribute
     {
         get
         {
-            var missingEnvVars = _envVars.Where(x => Environment.GetEnvironmentVariable(x) == null);
-            return $"Skipping because the following environment variables were missing: {string.Join(",", _envVars)}";
+            var missingEnvVars = _envVars.Where(x => Environment.GetEnvironmentVariable(x) == null).ToArray();
+            if (missingEnvVars.Any())
+            {
+                return $"Skipping because the following environment variables were missing: {string.Join(",", missingEnvVars)}";
+            }
+
+            return null;
         }
     }
 }
