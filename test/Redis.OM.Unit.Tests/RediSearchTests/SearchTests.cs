@@ -2410,6 +2410,84 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void RangeOnDateTimeWithMultiplePredicates()
+        {
+            _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns(_mockReply);
+
+            var fromDto = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromHours(4));
+            var toDto = DateTimeOffset.UtcNow;
+
+            var fromDt = fromDto.DateTime;
+            var toDt = toDto.DateTime;
+
+            var msFrom = fromDto.ToUnixTimeMilliseconds();
+            var msTo = toDto.ToUnixTimeMilliseconds();
+
+            var collection = new RedisCollection<ObjectWithDateTime>(_mock.Object, 1000);
+            _ = collection.Where(x => x.TimestampOffset <= fromDto && x.TimestampOffset >= toDto).ToList();
+            _ = collection.Where(x => x.TimestampOffset <= fromDt && x.TimestampOffset >= toDt).ToList();
+            _ = collection.Where(x => x.Timestamp <= fromDto && x.Timestamp >= toDto).ToList();
+            _ = collection.Where(x => x.Timestamp <= fromDt && x.Timestamp >= toDt).ToList();
+            _ = collection.Where(x => x.NullableTimestamp <= fromDto && x.NullableTimestamp >= toDto).ToList();
+            _ = collection.Where(x => x.NullableTimestamp <= fromDt && x.NullableTimestamp >= toDt).ToList();
+
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"((@TimestampOffset:[-inf {msFrom}]) (@TimestampOffset:[{msTo} inf]))",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"((@TimestampOffset:[-inf {new DateTimeOffset(fromDt).ToUnixTimeMilliseconds()}]) (@TimestampOffset:[{new DateTimeOffset(toDt).ToUnixTimeMilliseconds()} inf]))",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"((@Timestamp:[-inf {msFrom}]) (@Timestamp:[{msTo} inf]))",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"((@Timestamp:[-inf {new DateTimeOffset(fromDt).ToUnixTimeMilliseconds()}]) (@Timestamp:[{new DateTimeOffset(toDt).ToUnixTimeMilliseconds()} inf]))",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"((@NullableTimestamp:[-inf {msFrom}]) (@NullableTimestamp:[{msTo} inf]))",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+
+            _mock.Verify(x => x.Execute(
+                "FT.SEARCH",
+                "objectwithdatetime-idx",
+                $"((@NullableTimestamp:[-inf {new DateTimeOffset(fromDt).ToUnixTimeMilliseconds()}]) (@NullableTimestamp:[{new DateTimeOffset(toDt).ToUnixTimeMilliseconds()} inf]))",
+                "LIMIT",
+                "0",
+                "1000"
+            ));
+        }
+
+        [Fact]
         public void RangeOnDatetime()
         {
             _mock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
