@@ -82,6 +82,27 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             {
                 stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method));
             }
+            else if (expression is UnaryExpression uni)
+            {
+                var operandStack = new Stack<string>();
+
+                if (uni.Operand is BinaryExpression be)
+                {
+                    SplitBinaryExpression(be, operandStack);
+                }
+                else
+                {
+                    ValidateAndPushOperand(uni.Operand, operandStack);
+                }
+
+                var val = string.Join(" ", operandStack);
+                if (uni.NodeType == ExpressionType.Not)
+                {
+                    val = $"(-({val}))";
+                }
+
+                stack.Push(val);
+            }
             else
             {
                 throw new ArgumentException("Invalid Expression Type");
