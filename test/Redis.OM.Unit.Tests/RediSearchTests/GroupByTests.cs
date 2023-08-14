@@ -1,20 +1,15 @@
-﻿using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
+using NSubstitute;
 using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
-using Redis.OM;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     public class GroupByTests
     {
-        Mock<IRedisConnection> _mock = new Mock<IRedisConnection>();
-        RedisReply _mockReply = new RedisReply[]
+        private readonly IRedisConnection _substitute = Substitute.For<IRedisConnection>();
+        private readonly RedisReply _mockReply = new []
         {
             new RedisReply(1),
             new RedisReply(new RedisReply[]
@@ -28,15 +23,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSimpleGroupBy()
         {
             var expectedPredicate = "@Name";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "GROUPBY",
                 "1",
-                expectedPredicate))
+                expectedPredicate)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.GroupBy(x=>x.RecordShell.Name).ToArray();
 
@@ -46,15 +41,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestSimpleGroupBy0()
         {
-            var expectedPredicate = "@Name";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                     "FT.AGGREGATE",
                     "person-idx",
                     "*",
                     "GROUPBY",
-                    "0"))
+                    "0")
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.GroupBy(x=>new{}).ToArray();
 
@@ -65,15 +59,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSimpleGroupByCloseGroup()
         {
             var expectedPredicate = "@Name";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                     "FT.AGGREGATE",
                     "person-idx",
                     "*",
                     "GROUPBY",
                     "1",
-                    expectedPredicate))
+                    expectedPredicate)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.GroupBy(x=>x.RecordShell.Name).CloseGroup().ToArray();
 
@@ -85,16 +79,16 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var expectedPredicate1 = "@Name";
             var expectedPredicate2 = "@Age";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "GROUPBY",
                 "2",
                 expectedPredicate1,
-                expectedPredicate2))
+                expectedPredicate2)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x => x.RecordShell.Name)
@@ -105,20 +99,20 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestGrouby2FieldsAnon()
+        public void TestGroupby2FieldsAnon()
         {
             var expectedPredicate1 = "@Name";
             var expectedPredicate2 = "@Age";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                     "FT.AGGREGATE",
                     "person-idx",
                     "*",
                     "GROUPBY",
                     "2",
                     expectedPredicate1,
-                    expectedPredicate2))
+                    expectedPredicate2)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x => new {x.RecordShell.Name, x.RecordShell.Age})
@@ -128,20 +122,20 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
         
         [Fact]
-        public void TestGrouby2FieldsAnonAggregation()
+        public void TestGroupby2FieldsAnonAggregation()
         {
             var expectedPredicate1 = "@Name";
             var expectedPredicate2 = "@AggAge";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                     "FT.AGGREGATE",
                     "person-idx",
                     "*",
                     "GROUPBY",
                     "2",
                     expectedPredicate1,
-                    expectedPredicate2))
+                    expectedPredicate2)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x => new {x.RecordShell.Name, AggAge = x["AggAge"]})
@@ -151,20 +145,20 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
         
         [Fact]
-        public void TestGrouby2FieldsOneFromPipeline()
+        public void TestGroupby2FieldsOneFromPipeline()
         {
             var expectedPredicate1 = "@Name";
             var expectedPredicate2 = "@blah";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "GROUPBY",
                 "2",
                 expectedPredicate1,
-                expectedPredicate2))
+                expectedPredicate2)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x => x.RecordShell.Name)
