@@ -104,7 +104,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 SplitBinaryExpression(right, stack);
                 if (expression.NodeType == ExpressionType.Or || expression.NodeType == ExpressionType.OrElse)
                 {
-                    stack.Push("|");
+                    stack.Push((left.Left as MemberExpression)?.Member.Name != (right.Left as MemberExpression)?.Member.Name ? ")|(" : "|");
                 }
 
                 SplitBinaryExpression(left, stack);

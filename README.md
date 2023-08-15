@@ -285,7 +285,7 @@ customers.Where(x => x.LastName == "Bond" || x.Age > 65);
 customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
 
 // Find all customers with the nickname of Jim
-customer.Where(x=>x.NickNames.Contains("Jim"));
+customers.Where(x=>x.NickNames.Contains("Jim"));
 ```
 
 ### 🖩 Aggregations
@@ -362,6 +362,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@jcreus1](https://github.com/jcreus1)
 * [@JuliusMikkela](https://github.com/JuliusMikkela)
 * [@imansafari1991](https://github.com/imansafari1991)
+* [@AndersenGans](https://github.com/AndersenGans)
 
 <!-- Logo -->
 [Logo]: images/logo.svg
