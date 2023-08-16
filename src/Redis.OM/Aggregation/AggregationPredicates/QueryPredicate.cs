@@ -40,9 +40,21 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <inheritdoc/>
         protected override void ValidateAndPushOperand(Expression expression, Stack<string> stack)
         {
-            if (expression is BinaryExpression binaryExpression
-                && binaryExpression.Left is MemberExpression memberExpression)
+            if (expression is BinaryExpression binaryExpression)
             {
+                var memberExpression = binaryExpression.Left as MemberExpression;
+                if (memberExpression is null)
+                {
+                    if (binaryExpression.Left is UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression } leftUnary)
+                    {
+                        memberExpression = (MemberExpression)leftUnary.Operand;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Invalid Expression Type");
+                    }
+                }
+
                 if (binaryExpression.Right is ConstantExpression constantExpression)
                 {
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, constantExpression));
@@ -54,17 +66,17 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                         case ConstantExpression c:
                             stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, c));
                             break;
-                        case MemberExpression mem when mem.Expression is ConstantExpression frame:
+                        case MemberExpression mem:
                         {
-                            var val = ExpressionParserUtilities.GetValue(mem.Member, frame.Value);
+                            var val = ExpressionParserUtilities.GetOperandString(mem);
                             stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, System.Linq.Expressions.Expression.Constant(val)));
                             break;
                         }
                     }
                 }
-                else if (binaryExpression.Right is MemberExpression mem && mem.Expression is ConstantExpression frame)
+                else if (binaryExpression.Right is MemberExpression mem)
                 {
-                    var val = ExpressionParserUtilities.GetValue(mem.Member, frame.Value);
+                    var val = ExpressionParserUtilities.GetOperandString(mem);
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, System.Linq.Expressions.Expression.Constant(val)));
                 }
                 else

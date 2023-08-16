@@ -903,6 +903,11 @@ namespace Redis.OM.Common
                 return ((double)value).ToString(CultureInfo.InvariantCulture);
             }
 
+            if (value is DateTimeOffset dto)
+            {
+                return dto.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
+            }
+
             if (value is DateTime dt)
             {
                 return new DateTimeOffset(dt).ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);

@@ -558,6 +558,34 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "COUNT",
                 "10");
         }
+        
+        [Fact]
+        public void DateTimeQuery()
+        {
+            var dt = DateTime.Now;
+            var dtMs = new DateTimeOffset(dt).ToUnixTimeMilliseconds();
 
+            var dto = DateTimeOffset.Now.Subtract(TimeSpan.FromHours(3));
+            var dtoMs = dto.ToUnixTimeMilliseconds();
+            var collection = new RedisAggregationSet<ObjectWithDateTime>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+
+            Expression<Func<AggregationResult<ObjectWithDateTime>, bool>> query = a => a.RecordShell.Timestamp > dt;
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "objectwithdatetime-idx", $"@Timestamp:[({dtMs} inf]", "WITHCURSOR", "COUNT", "10000");
+
+            query = a => a.RecordShell.Timestamp > dto;
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "objectwithdatetime-idx", $"@Timestamp:[({dtoMs} inf]", "WITHCURSOR", "COUNT", "10000");
+
+            query = a => a.RecordShell.TimestampOffset > dto;
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "objectwithdatetime-idx", $"@TimestampOffset:[({dtoMs} inf]", "WITHCURSOR", "COUNT", "10000");
+
+            query = a => a.RecordShell.TimestampOffset > dt;
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "objectwithdatetime-idx", $"@TimestampOffset:[({dtMs} inf]", "WITHCURSOR", "COUNT", "10000");
+        }
     }
 }

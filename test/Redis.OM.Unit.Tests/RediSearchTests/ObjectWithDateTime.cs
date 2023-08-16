@@ -10,6 +10,8 @@ public class ObjectWithDateTime
     public string Id { get; set; }
     [Indexed(Sortable = true)]
     public DateTime Timestamp { get; set; }
+    [Indexed(Sortable = true)]
+    public DateTimeOffset TimestampOffset { get; set; }
     [Indexed]
     public DateTime? NullableTimestamp { get; set; }
 }
