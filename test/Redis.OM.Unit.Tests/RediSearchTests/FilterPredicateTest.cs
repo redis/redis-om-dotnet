@@ -1,10 +1,9 @@
-﻿using Moq;
-using System;
+﻿using System;
 using System.Linq;
+using NSubstitute;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Contracts;
-using Redis.OM;
 using Redis.OM.Modeling;
 using Xunit;
 
@@ -12,8 +11,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     public class FilterPredicateTest
     {
-        Mock<IRedisConnection> _mock = new Mock<IRedisConnection>();
-        RedisReply _mockReply = new RedisReply[]
+        private readonly IRedisConnection _substitute = Substitute.For<IRedisConnection>();
+        RedisReply _mockReply = new []
         {
             new RedisReply(1),
             new RedisReply(new RedisReply[]
@@ -27,14 +26,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicFilter()
         {
             var expectedPredicate = "5 < 6";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate))
+                expectedPredicate)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var five = 5;
             var six = 6;
@@ -48,19 +47,19 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicFilterString()
         {
             var expectedPredicate = "@Name == 'steve'";
-            _mock.Setup(x => x.Execute(
-                    "FT.AGGREGATE",It.IsAny<string[]>()
-                    ))
+            _substitute.Execute(
+                    "FT.AGGREGATE",Arg.Any<string[]>()
+                )
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Filter(x=>x.RecordShell.Name == "steve").ToArray();
 
-            _mock.Verify(x=>x.Execute("FT.AGGREGATE",
+            _substitute.Received().Execute("FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate));
+                expectedPredicate);
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
         
@@ -68,20 +67,20 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicFilterStringUnpackedFromVariable()
         {
             var expectedPredicate = "@Name == 'steve'";
-            _mock.Setup(x => x.Execute(
-                    "FT.AGGREGATE",It.IsAny<string[]>()
-                ))
+            _substitute.Execute(
+                    "FT.AGGREGATE",Arg.Any<string[]>()
+                )
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var steve = "steve";
             var res = collection.Filter(x=>x.RecordShell.Name == steve).ToArray();
 
-            _mock.Verify(x=>x.Execute("FT.AGGREGATE",
+            _substitute.Received().Execute("FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate));
+                expectedPredicate);
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
 
@@ -89,19 +88,19 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicFilterNullableString()
         {
             var expectedPredicate = "@NullableStringField == 'steve'";
-            _mock.Setup(x => x.Execute(
-                    "FT.AGGREGATE",It.IsAny<string[]>()
-                ))
+            _substitute.Execute(
+                    "FT.AGGREGATE",Arg.Any<string[]>()
+                )
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
             
             var res = collection.Filter(x=>x.RecordShell.NullableStringField == "steve").ToArray();
 
-            _mock.Verify(x=>x.Execute("FT.AGGREGATE",
+            _substitute.Received().Execute("FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate));
+                expectedPredicate);
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
 
@@ -109,14 +108,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestFilterSingleIdentifier()
         {
             var expectedPredicate = "@Age < 6";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate))
+                expectedPredicate)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Filter(x => x.RecordShell.Age < 6).ToArray();
 
@@ -127,14 +126,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestFilterMathFunctions()
         {
             var expectedPredicate = "abs(@Age) < 6";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate))
+                expectedPredicate)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Filter(x => Math.Abs((int)x.RecordShell.Age) < 6).ToArray();
 
@@ -145,14 +144,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestFilterGeoFunctions()
         {
             var expectedPredicate = "geodistance(@Home,@Work) < 6";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate))
+                expectedPredicate)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Filter(x => ApplyFunctions.GeoDistance((GeoLoc)x.RecordShell.Home, (GeoLoc)x.RecordShell.Work) < 6).ToArray();
 
@@ -163,14 +162,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestFilterStringFunction()
         {
             var expectedPredicate = "contains(@Name,\"ste\")";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate))
+                expectedPredicate)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Filter(x => x.RecordShell.Name.Contains("ste")).ToArray();
 
@@ -181,14 +180,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestFilterDatetimeFunction()
         {
             var expectedPredicate = "dayofweek(@LastTimeOnline) < 6";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
                 "FILTER",
-                expectedPredicate))
+                expectedPredicate)
                 .Returns(_mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Filter(x => ApplyFunctions.DayOfWeek((long)x.RecordShell.LastTimeOnline) < 6).ToArray();
 
