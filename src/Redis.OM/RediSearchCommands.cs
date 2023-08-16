@@ -108,7 +108,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("Unknown Index name"))
+                if (ex.Message.ToLower().Contains("unknown index name"))
                 {
                     return null;
                 }
@@ -134,7 +134,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("Unknown Index name"))
+                if (ex.Message.ToLower().Contains("unknown index name"))
                 {
                     return null;
                 }
