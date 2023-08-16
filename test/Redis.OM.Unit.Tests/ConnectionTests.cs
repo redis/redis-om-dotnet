@@ -23,7 +23,7 @@ namespace Redis.OM.Unit.Tests
             Assert.Equal("Bar",res);
         }
 
-        [Fact]
+        [SkipIfMissingEnvVar("SENTINLE_HOST_PORT")]
         public void TestSentinel()
         {
             var hostInfo = System.Environment.GetEnvironmentVariable("SENTINLE_HOST_PORT") ?? "localhost:26379";
@@ -63,7 +63,7 @@ namespace Redis.OM.Unit.Tests
             Assert.Equal("Bar", res);
         }
 
-        [Fact]
+        [SkipIfMissingEnvVar("PRIVATE_HOST", "PRIVATE_PORT", "PRIVATE_PASSWORD")]
         public void TestPrivateConnection()
         {
             var host = Environment.GetEnvironmentVariable("PRIVATE_HOST") ?? "redis-private";
