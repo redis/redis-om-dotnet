@@ -537,6 +537,27 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.Where(query).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "@FirstName:{Walter\\-Junior}", "WITHCURSOR", "COUNT", "10000");
         }
+        
+        [Fact]
+        public void CustomPropertyNamesInQuery()
+        {
+            //Arrange
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+
+            var collection = new RedisAggregationSet<ObjectWithPropertyNamesDefined>(_substitute, true, 10);
+
+            //Act
+            _ = collection.Where(x => x.RecordShell.Key == "test").ToList();
+
+            //Assert
+            _substitute.Received().Execute("FT.AGGREGATE",
+                "objectwithpropertynamesdefined-idx",
+                "@notKey:{test}",
+                "WITHCURSOR",
+                "COUNT",
+                "10");
+        }
 
     }
 }
