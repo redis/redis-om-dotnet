@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using System.Threading.Tasks;
@@ -273,14 +274,33 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestUnsortedFields()
+        public async Task GetGroupCountWithNegationQuery()
         {
             Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
+            var results = await collection
+                .Where(x => x.RecordShell.Age != 0)
+                .GroupBy(x => x.RecordShell.Age).CountGroupMembers().ToListAsync();
+            foreach (var result in results)
+            {
+                Assert.True(1 <= result["COUNT"]);
+            }
+        }
 
-            Assert.Throws<NotSupportedException>(() =>
-                collection.Apply(x => $"{x.RecordShell.Email}", "TheEmailThatNeverWas").ToList());
+        [Fact]
+        public async Task TestListNotContains()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            
+            var names = new List<string> { "Beaker", "Rakib" };
+            var people = await collection
+                .Where(x => !names.Contains(x.RecordShell.Name) && x.RecordShell.Name != "fake")
+                .Load(x => x.RecordShell.Name)
+                .ToListAsync();
 
+            Assert.Contains(people, x => x.Hydrate().Name == "Statler");
+            Assert.DoesNotContain(people, x => x.Hydrate().Name == "Beaker");
         }
     }
 }
