@@ -542,35 +542,21 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void CustomPropertyNamesInQuery()
         {
             //Arrange
-            var replyList = new List<RedisReply>
-            {
-                (RedisReply)1
-            };
-            for (var i = 0; i < 10; i++)
-            {
-                replyList.Add((RedisReply)new RedisReply[]
-                {
-                    $"FakeResult",
-                    "blah"
-                });
-            }
-            var reply1 = (RedisReply)new RedisReply[] { replyList.ToArray(), (RedisReply)5 };
-            var reply2 = (RedisReply)new RedisReply[] { replyList.ToArray(), (RedisReply)0 };
-            _mock.SetupSequence(x => x.Execute(It.IsAny<string>(), It.IsAny<string[]>()))
-                .Returns(reply1)
-                .Returns(reply2);
-            var collection = new RedisAggregationSet<ObjectWithPropertyNamesDefined>(_mock.Object, true, 10);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+
+            var collection = new RedisAggregationSet<ObjectWithPropertyNamesDefined>(_substitute, true, 10);
 
             //Act
             _ = collection.Where(x => x.RecordShell.Key == "test").ToList();
 
             //Assert
-            _mock.Verify(x => x.Execute("FT.AGGREGATE",
+            _substitute.Received().Execute("FT.AGGREGATE",
                 "objectwithpropertynamesdefined-idx",
                 "@notKey:{test}",
                 "WITHCURSOR",
                 "COUNT",
-                "10"));
+                "10");
         }
 
     }
