@@ -271,5 +271,19 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 Assert.True(1<=result["COUNT"]);
             }
         }
+
+        [Fact]
+        public async Task GetGroupCountWithNegationQuery()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            var results = await collection
+                .Where(x => x.RecordShell.Age != 0)
+                .GroupBy(x => x.RecordShell.Age).CountGroupMembers().ToListAsync();
+            foreach (var result in results)
+            {
+                Assert.True(1 <= result["COUNT"]);
+            }
+        }
     }
 }
