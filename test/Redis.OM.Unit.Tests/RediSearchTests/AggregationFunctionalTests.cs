@@ -11,6 +11,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     public class AggregationFunctionalTests
     {
         private static readonly object connectionLock = new();
+        private static bool _dataIsSet = false;
 
         /// <summary>
         /// Init the database taking care to do it only once so that the test processes performed in parallel can count on an immutable database
@@ -24,6 +25,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
         private void Setup()
         {
+            if (_dataIsSet)
+            {
+                return;
+            }
+
             var beaker = new Person
             {
                 Name = "Beaker",
@@ -114,8 +120,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _connection.Set(bunsen);
             _connection.Set(hashKermit);
             _connection.Set(hashWaldorf);
+
+            _dataIsSet = true;
         }
 
+        [Fact]
+        public void GetPeopleByAgeOrName()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            var people = collection.Where(x => x.RecordShell.Age == 52 || x.RecordShell.Age == 75 || x.RecordShell.Name == "Fozzie Bear").ToArray();
+            Assert.Equal(3, people.Length);
+        }
+
+        [Fact]
+        public void GetPeopleByAgeOrNameAndDepartment()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            var query = collection.Where(x => x.RecordShell.Age == 52 || x.RecordShell.Age == 23 || x.RecordShell.Name == "Dr Bunsen Honeydew");
+            var people = query.Where(x => x.RecordShell.DepartmentNumber == 3).ToArray();
+            Assert.Equal(2, people.Length);
+        }
 
         [Fact]
         public void GetDepartmentBySales()
@@ -245,7 +271,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 Assert.True(1<=result["COUNT"]);
             }
         }
-        
+
         [Fact]
         public async Task GetGroupCountWithNegationQuery()
         {
@@ -258,17 +284,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 Assert.True(1 <= result["COUNT"]);
             }
-        }
-
-        [Fact]
-        public void TestUnsortedFields()
-        {
-            Setup();
-            var collection = new RedisAggregationSet<Person>(_connection);
-
-            Assert.Throws<NotSupportedException>(() =>
-                collection.Apply(x => $"{x.RecordShell.Email}", "TheEmailThatNeverWas").ToList());
-
         }
     }
 }

@@ -454,7 +454,7 @@ namespace Redis.OM.Unit.Tests
             stream.Flush();
         }
 
-        [Fact]
+        [SkipIfMissingEnvVar("AGGRESSIVELY_SHORT_TIMEOUT_REDIS")]
         public async Task SearchTimeoutTest()
         {
             var hostInfo = Environment.GetEnvironmentVariable("AGGRESSIVELY_SHORT_TIMEOUT_REDIS") ?? string.Empty;
