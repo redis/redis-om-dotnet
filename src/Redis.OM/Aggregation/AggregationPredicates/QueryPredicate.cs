@@ -40,37 +40,49 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <inheritdoc/>
         protected override void ValidateAndPushOperand(Expression expression, Stack<string> stack)
         {
-            if (expression is BinaryExpression binaryExpression
-                && binaryExpression.Left is MemberExpression memberExpression)
+            if (expression is BinaryExpression binaryExpression)
             {
+                var memberExpression = binaryExpression.Left as MemberExpression;
+                if (memberExpression is null)
+                {
+                    if (binaryExpression.Left is UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression } leftUnary)
+                    {
+                        memberExpression = (MemberExpression)leftUnary.Operand;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Invalid Expression Type");
+                    }
+                }
+
                 if (binaryExpression.Right is ConstantExpression constantExpression)
                 {
-                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, constantExpression));
+                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, constantExpression));
                 }
                 else if (binaryExpression.Right is UnaryExpression uni)
                 {
                     switch (uni.Operand)
                     {
                         case ConstantExpression c:
-                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, c));
+                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, c));
                             break;
-                        case MemberExpression mem when mem.Expression is ConstantExpression frame:
+                        case MemberExpression mem:
                         {
-                            var val = ExpressionParserUtilities.GetValue(mem.Member, frame.Value);
-                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, System.Linq.Expressions.Expression.Constant(val)));
+                            var val = ExpressionParserUtilities.GetOperandString(mem);
+                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, System.Linq.Expressions.Expression.Constant(val)));
                             break;
                         }
                     }
                 }
-                else if (binaryExpression.Right is MemberExpression mem && mem.Expression is ConstantExpression frame)
+                else if (binaryExpression.Right is MemberExpression mem)
                 {
-                    var val = ExpressionParserUtilities.GetValue(mem.Member, frame.Value);
-                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, System.Linq.Expressions.Expression.Constant(val)));
+                    var val = ExpressionParserUtilities.GetOperandString(mem);
+                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, System.Linq.Expressions.Expression.Constant(val)));
                 }
                 else
                 {
                     var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right);
-                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression.Member, System.Linq.Expressions.Expression.Constant(val)));
+                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, System.Linq.Expressions.Expression.Constant(val)));
                 }
             }
             else if (expression is ConstantExpression c
@@ -125,7 +137,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 SplitBinaryExpression(right, stack);
                 if (expression.NodeType == ExpressionType.Or || expression.NodeType == ExpressionType.OrElse)
                 {
-                    stack.Push("|");
+                    stack.Push((left.Left as MemberExpression)?.Member.Name != (right.Left as MemberExpression)?.Member.Name ? ")|(" : "|");
                 }
 
                 SplitBinaryExpression(left, stack);
@@ -157,7 +169,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
         }
 
-        private static string BuildEqualityPredicate(MemberInfo member, ConstantExpression expression, bool negated = false)
+        private static string BuildEqualityPredicate(MemberInfo member, ConstantExpression expression, string memberStr, bool negated = false)
         {
             var sb = new StringBuilder();
             var fieldAttribute = member.GetCustomAttribute<SearchFieldAttribute>();
@@ -171,7 +183,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 sb.Append("-");
             }
 
-            sb.Append($"@{member.Name}:");
+            sb.Append($"{memberStr}:");
             var searchFieldType = fieldAttribute.SearchFieldType != SearchFieldType.INDEXED
                 ? fieldAttribute.SearchFieldType
                 : ExpressionTranslator.DetermineIndexFieldsType(member);
@@ -193,16 +205,17 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             return sb.ToString();
         }
 
-        private string BuildQueryPredicate(ExpressionType expType, MemberInfo member, ConstantExpression constExpression)
+        private string BuildQueryPredicate(ExpressionType expType, MemberExpression member, ConstantExpression constExpression)
         {
+            var memberStr = ExpressionParserUtilities.GetOperandString(member);
             var queryPredicate = expType switch
             {
-                ExpressionType.GreaterThan => $"@{member.Name}:[({constExpression.Value} inf]",
-                ExpressionType.LessThan => $"@{member.Name}:[-inf ({constExpression.Value}]",
-                ExpressionType.GreaterThanOrEqual => $"@{member.Name}:[{constExpression.Value} inf]",
-                ExpressionType.LessThanOrEqual => $"@{member.Name}:[-inf {constExpression.Value}]",
-                ExpressionType.Equal => BuildEqualityPredicate(member, constExpression),
-                ExpressionType.NotEqual => BuildEqualityPredicate(member, constExpression, true),
+                ExpressionType.GreaterThan => $"{memberStr}:[({constExpression.Value} inf]",
+                ExpressionType.LessThan => $"{memberStr}:[-inf ({constExpression.Value}]",
+                ExpressionType.GreaterThanOrEqual => $"{memberStr}:[{constExpression.Value} inf]",
+                ExpressionType.LessThanOrEqual => $"{memberStr}:[-inf {constExpression.Value}]",
+                ExpressionType.Equal => BuildEqualityPredicate(member.Member, constExpression, memberStr),
+                ExpressionType.NotEqual => BuildEqualityPredicate(member.Member, constExpression, memberStr, true),
                 _ => string.Empty
             };
             return queryPredicate;
