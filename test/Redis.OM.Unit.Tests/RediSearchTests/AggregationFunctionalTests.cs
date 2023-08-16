@@ -272,7 +272,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 Assert.True(1<=result["COUNT"]);
             }
         }
-        
+
         [Fact]
         public async Task GetGroupCountWithNegationQuery()
         {
