@@ -1,32 +1,23 @@
-using Moq;
 using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Searching;
 using Xunit;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
+using NSubstitute;
+using NSubstitute.ClearExtensions;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     public class ReducerTests
     {
 
-        Mock<IRedisConnection> _mock = new Mock<IRedisConnection>();
-        RedisReply _mockReply = new RedisReply[]
-        {
-            new RedisReply(1),
-            new RedisReply(new RedisReply[]
-            {
-                "FakeResult",
-                "Blah"
-            })
-        };
+        private readonly IRedisConnection _substitute = Substitute.For<IRedisConnection>();
 
         [Fact]
         public void TestSumNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -37,7 +28,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             };
 
             var expectedPredicate = "@Age";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -48,9 +39,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 expectedPredicate,
                 "AS",
-                "Age_SUM"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_SUM").Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Sum(x => x.RecordShell.Age);
 
@@ -60,7 +50,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestSumAsync()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -71,7 +61,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             };
 
             var expectedPredicate = "@Age";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -82,9 +72,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 expectedPredicate,
                 "AS",
-                "Age_SUM"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_SUM")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Sum(x => x.RecordShell.Age);
 
@@ -94,7 +84,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestMultiple()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -103,19 +93,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                     5.0
                 })
             };
-            _mock.Setup(x => x.Execute(
-                    It.IsAny<string>(),
-                    It.IsAny<string[]>()))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
-            var res = collection
+            _ = collection
                 .GroupBy(x=>x.RecordShell.TagField)
                 .Sum(x => x.RecordShell.Sales)
                 .Average(x=>x.RecordShell.Age)
                 .ToList();
 
-            _mock.Verify(x=>x.Execute(
+            _substitute.Received().Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -133,14 +121,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_AVG"));
+                "Age_AVG");
         
         }
         
         [Fact]
         public void TestThree()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -149,20 +137,18 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                     5.0
                 })
             };
-            _mock.Setup(x => x.Execute(
-                    It.IsAny<string>(),
-                    It.IsAny<string[]>()))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
-            var res = collection
+            _ = collection
                 .GroupBy(x=>x.RecordShell.TagField)
                 .Sum(x => x.RecordShell.Sales)
                 .Average(x=>x.RecordShell.Age)
                 .Sum(x=>x.RecordShell.Age)
                 .ToList();
 
-            _mock.Verify(x=>x.Execute(
+            _substitute.Received().Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -186,14 +172,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_SUM"));
+                "Age_SUM");
         
         }
 
         [Fact]
         public void TestAverageNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -204,7 +190,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             };
 
             var expectedPredicate = "@Age";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -215,9 +201,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 expectedPredicate,
                 "AS",
-                "Age_AVG"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_AVG")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Average(x => x.RecordShell.Age);
 
@@ -225,9 +211,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestAverageNoGroupPredicateAsync()
+        public async Task TestAverageNoGroupPredicateAsync()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -238,7 +224,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             };
 
             var expectedPredicate = "@Age";
-            _mock.Setup(x => x.ExecuteAsync(
+            _substitute.ExecuteAsync(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -249,23 +235,20 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 expectedPredicate,
                 "AS",
-                "Age_AVG"))
-                .ReturnsAsync(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_AVG")
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
-            Task.Run(async () =>
-            {
-                var res = await collection.AverageAsync(x => x.RecordShell.Age);
+            var res = await collection.AverageAsync(x => x.RecordShell.Age);
 
-                Assert.Equal(5, res);
-            });
+            Assert.Equal(5, res);
             
         }
 
         [Fact]
         public void TestAverageWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -276,7 +259,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             };
 
             var expectedPredicate = "@Age";
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -288,9 +271,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 expectedPredicate,
                 "AS",
-                "Age_AVG"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_AVG")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.GroupBy(x=>x.RecordShell.Height).Average(x => x.RecordShell.Age).ToArray();
 
@@ -300,7 +283,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestCountNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -310,7 +293,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
             
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -320,9 +303,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "COUNT",
                 "0",
                 "AS",
-                "COUNT"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "COUNT")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Count();
 
@@ -332,7 +315,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestCountWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -342,7 +325,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -353,9 +336,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "COUNT",
                 "0",
                 "AS",
-                "COUNT"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "COUNT")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.GroupBy(x=>x.RecordShell.Height).Count();
 
@@ -365,7 +348,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestLongCountNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -375,7 +358,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -385,9 +368,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "COUNT",
                 "0",
                 "AS",
-                "COUNT"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "COUNT")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.LongCount();
 
@@ -397,7 +380,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestLongCountWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -407,7 +390,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -418,9 +401,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "COUNT",
                 "0",
                 "AS",
-                "COUNT"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "COUNT")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.GroupBy(x=>x.RecordShell.Height).LongCount();
 
@@ -430,7 +413,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestCountDistinctNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -440,7 +423,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -451,9 +434,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_COUNT_DISTINCT"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_COUNT_DISTINCT")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.CountDistinct(x=>x.RecordShell.Age);
 
@@ -463,7 +446,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestCountDistinctWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -473,7 +456,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -485,9 +468,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_COUNT_DISTINCT"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_COUNT_DISTINCT")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x => x.RecordShell.Height)
@@ -500,7 +483,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestCountDistinctIshNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -510,7 +493,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -521,9 +504,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_COUNT_DISTINCTISH"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_COUNT_DISTINCTISH")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .CountDistinctish(x => x.RecordShell.Age);
@@ -534,7 +517,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestCountDistinctIshNoGroupPredicateAsync()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -544,7 +527,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.ExecuteAsync(
+            _substitute.ExecuteAsync(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -555,9 +538,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_COUNT_DISTINCTISH"))
-                .ReturnsAsync(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_COUNT_DISTINCTISH")
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
             var res = await collection
                 .CountDistinctishAsync(x => x.RecordShell.Age);
 
@@ -568,7 +551,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestCountDistinctIshWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -578,7 +561,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -590,9 +573,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_COUNT_DISTINCTISH"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_COUNT_DISTINCTISH")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x => x.RecordShell.Height)
@@ -605,7 +588,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestStandardDeviationNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -615,7 +598,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -626,9 +609,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_STDDEV"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_STDDEV")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.StandardDeviation(x => x.RecordShell.Age);
 
@@ -638,7 +621,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestStandardDeviationNoGroupPredicateAsync()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -648,7 +631,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.ExecuteAsync(
+            _substitute.ExecuteAsync(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -659,10 +642,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_STDDEV"))
-                .ReturnsAsync(mockReply);
+                "Age_STDDEV")
+                .Returns(mockReply);
 
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = await collection.StandardDeviationAsync(x => x.RecordShell.Age);
 
@@ -672,7 +655,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestStandardDeviationWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -682,7 +665,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -694,9 +677,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_STDDEV"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_STDDEV")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x=>x.RecordShell.Height)
@@ -709,7 +692,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestQuantileNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -719,7 +702,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -731,9 +714,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "@Age",
                 "0.7",
                 "AS",
-                "Age_QUANTILE_0.7"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_QUANTILE_0.7")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Quantile(x => x.RecordShell.Age, .7);
 
@@ -743,14 +726,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestQuantileNoGroupPredicateTestingInvariantCultureCompliance()
         {
-            Helper.RunTestUnderDifferentCulture("it-IT", x => TestQuantileNoGroupPredicate());
+            Helper.RunTestUnderDifferentCulture("it-IT", _ => TestQuantileNoGroupPredicate());
         }
 
         [Fact]
         public async Task TestQuantileNoGroupPredicateAsync()
 
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -760,7 +743,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.ExecuteAsync(
+            _substitute.ExecuteAsync(
                     "FT.AGGREGATE",
                     "person-idx",
                     "*",
@@ -772,9 +755,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                     "@Age",
                     "0.7",
                     "AS",
-                    "Age_QUANTILE_0.7"))
-                .ReturnsAsync(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                    "Age_QUANTILE_0.7")
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = await collection.QuantileAsync(x => x.RecordShell.Age, .7);
             Assert.Equal(5, res);
@@ -783,13 +766,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestQuantileNoGroupPredicateAsyncTestingInvariantCultureCompliance()
         {
-            Helper.RunTestUnderDifferentCulture("it-IT", x => TestQuantileNoGroupPredicateAsync());
+            Helper.RunTestUnderDifferentCulture("it-IT", _ => TestQuantileNoGroupPredicateAsync());
         }
 
         [Fact]
         public void TestQuantileWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -799,7 +782,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -812,10 +795,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "@Age",
                 "0.7",
                 "AS",
-                "Age_QUANTILE_0.7"))
-                .Returns(mockReply);
+                "Age_QUANTILE_0.7")
+                .Returns((RedisReply)mockReply);
 
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x=>x.RecordShell.Height)
@@ -828,13 +811,13 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestQuantileWithGroupPredicateTestingInvariantCultureCompliance()
         {
-            Helper.RunTestUnderDifferentCulture("it-IT", x => TestQuantileWithGroupPredicate());
+            Helper.RunTestUnderDifferentCulture("it-IT", _ => TestQuantileWithGroupPredicate());
         }
 
         [Fact]
         public void TestDistinctNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -844,7 +827,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -855,9 +838,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_TOLIST"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_TOLIST")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Distinct(x => x.RecordShell.Age).ToArray();
             Assert.Equal(5, (int)res[0]["Age_TOLIST"]);
@@ -866,7 +849,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestDistinctWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -876,7 +859,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -888,9 +871,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_TOLIST"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_TOLIST")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x=>x.RecordShell.Height)
@@ -903,7 +886,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestFirstValueNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -913,7 +896,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -924,9 +907,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_FIRST_VALUE"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_FIRST_VALUE")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.FirstValue(x => x.RecordShell.Age);
             Assert.Equal(5, (int)res);
@@ -935,7 +918,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestFirstValueNoGroupPredicateAsync()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -945,7 +928,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.ExecuteAsync(
+            _substitute.ExecuteAsync(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -956,19 +939,18 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_FIRST_VALUE"))
-                .ReturnsAsync(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_FIRST_VALUE")
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = await collection.FirstValueAsync(x => x.RecordShell.Age);
             Assert.Equal(5, (int)res);
-            
         }
 
         [Fact]
         public void TestFirstValueWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -978,7 +960,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -990,9 +972,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_FIRST_VALUE"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_FIRST_VALUE")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x=>x.RecordShell.Height)
@@ -1004,7 +986,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestFirstValueSortPropertyNoDirectionNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1014,7 +996,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1027,9 +1009,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "BY",
                 "@Height",
                 "AS",
-                "Age_FIRST_VALUE"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_FIRST_VALUE")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.FirstValue(x => x.RecordShell.Age, nameof(Person.Height));
             Assert.Equal(5, (int)res);
@@ -1038,7 +1020,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestFirstValueSortPropertyNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1048,7 +1030,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1062,9 +1044,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "@Height",
                 "ASC",
                 "AS",
-                "Age_FIRST_VALUE"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_FIRST_VALUE")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.FirstValue(x => x.RecordShell.Age, nameof(Person.Height), SortDirection.Ascending);
             Assert.Equal(5, (int)res);
@@ -1073,7 +1055,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestRandomSampleNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1083,7 +1065,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1095,9 +1077,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "@Age",
                 "20",
                 "AS",
-                "Age_RANDOM_SAMPLE_20"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_RANDOM_SAMPLE_20")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.RandomSample(x => x.RecordShell.Age, 20).ToArray();
             Assert.Equal(5, (long)res[0]["Age_RANDOM_SAMPLE_20"]);
@@ -1106,7 +1088,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestRandomSampleWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1116,7 +1098,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1129,9 +1111,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "@Age",
                 "20",
                 "AS",
-                "Age_RANDOM_SAMPLE_20"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_RANDOM_SAMPLE_20")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x=>x.RecordShell.Height)
@@ -1144,7 +1126,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestMinNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1154,7 +1136,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1165,9 +1147,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_MIN"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_MIN")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Min(x => x.RecordShell.Age);
             Assert.Equal(5, res);
@@ -1176,7 +1158,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestMinWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1186,7 +1168,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1198,9 +1180,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_MIN"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_MIN")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x=>x.RecordShell.Height)
@@ -1213,7 +1195,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestMaxNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1223,7 +1205,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1234,9 +1216,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_MAX"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_MAX")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection.Max(x => x.RecordShell.Age);
             Assert.Equal(5, res);
@@ -1245,7 +1227,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestMaxAsyncNoGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1255,7 +1237,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.ExecuteAsync(
+            _substitute.ExecuteAsync(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1266,9 +1248,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_MAX"))
-                .ReturnsAsync(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_MAX")
+                .Returns(mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
             var res = await collection.MaxAsync(x => x.RecordShell.Age);
             Assert.Equal(5, (int)res);
             
@@ -1277,7 +1259,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestMaxWithGroupPredicate()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
                 new RedisReply(new RedisReply[]
@@ -1287,7 +1269,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 })
             };
 
-            _mock.Setup(x => x.Execute(
+            _substitute.Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1299,9 +1281,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "@Age",
                 "AS",
-                "Age_MAX"))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+                "Age_MAX")
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
             var res = collection
                 .GroupBy(x => x.RecordShell.Height)
@@ -1314,20 +1296,20 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestCountMembers()
         {
-            var mockReply = new RedisReply[]
+            var mockReply = new []
             {
                 new RedisReply(1),
             };
             
-            _mock.Setup(x => x.Execute(
-                    It.IsAny<string>(),
-                    It.IsAny<string[]>()))
-                .Returns(mockReply);
-            var collection = new RedisAggregationSet<Person>(_mock.Object);
+            _substitute.Execute(
+                    Arg.Any<string>(),
+                    Arg.Any<string[]>())
+                .Returns((RedisReply)mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
 
-            collection.GroupBy(x => x.RecordShell.Height).CountGroupMembers().ToList();
+            _ = collection.GroupBy(x => x.RecordShell.Height).CountGroupMembers().ToList();
             
-            _mock.Verify(x=>x.Execute(
+            _substitute.Received().Execute(
                 "FT.AGGREGATE",
                 "person-idx",
                 "*",
@@ -1338,7 +1320,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "COUNT",
                 "0",
                 "AS",
-                "COUNT"));
+                "COUNT");
         }
     }
 }
