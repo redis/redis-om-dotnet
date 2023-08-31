@@ -833,13 +833,19 @@ namespace Redis.OM.Common
                 }
 
                 type = Nullable.GetUnderlyingType(propertyExpression.Type) ?? propertyExpression.Type;
+                var valueType = Nullable.GetUnderlyingType(valuesExpression.Type) ?? valuesExpression.Type;
                 memberName = GetOperandStringForMember(propertyExpression);
                 var treatEnumsAsInts = type.IsEnum && !(propertyExpression.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() is JsonConverterAttribute converter && converter.ConverterType == typeof(JsonStringEnumConverter));
                 literal = GetOperandStringForQueryArgs(valuesExpression, treatEnumsAsInts);
 
-                if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>) || type == typeof(Guid) || type == typeof(Ulid) || (type.IsEnum && !treatEnumsAsInts)) && attribute is IndexedAttribute)
+                if ((valueType == typeof(List<string>) || valueType == typeof(string[]) || type == typeof(string[]) || type == typeof(List<string>) || type == typeof(Guid) || type == typeof(Ulid) || (type.IsEnum && !treatEnumsAsInts)) && attribute is IndexedAttribute)
                 {
                     return $"({memberName}:{{{EscapeTagField(literal).Replace("\\|", "|")}}})";
+                }
+
+                if (type == typeof(string) && attribute is IndexedAttribute)
+                {
+                    return $"({memberName}:{{*{EscapeTagField(literal)}*}})";
                 }
 
                 if (type == typeof(string) && attribute is SearchableAttribute)

@@ -370,7 +370,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100");
         }
-        
+
         [Fact]
         public void TestMatchContains()
         {
@@ -388,6 +388,34 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "100");
         }
         
+        [Fact]
+        public void TestTagContains()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+
+            var ste = "Ste";
+            var person = new Person() { TagField = "ath" };
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.TagField.Contains(ste)).ToList();
+            _ = collection.Where(x => x.TagField.Contains(person.TagField)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{*Ste*})",
+                "LIMIT",
+                "0",
+                "100");
+
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{*ath*})",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
         [Fact]
         public void TestTagStartsWith()
         {
