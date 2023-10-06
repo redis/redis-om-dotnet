@@ -5,6 +5,7 @@ using System.Text.Json;
 using NSubstitute;
 using NSubstitute.ClearExtensions;
 using Redis.OM.Contracts;
+using Redis.OM.Modeling;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests;
@@ -48,6 +49,14 @@ public class VectorIndexCreationTests
         );
     }
 
+    [Fact]
+    public void TestBinConversions()
+    {
+        var piStr = VectorUtils.DoubleToVecStr(Math.PI);
+        var pi = VectorUtils.DoubleFromVecStr(piStr);
+        Assert.Equal(Math.PI, pi);
+    }
+    
     [Fact]
     public void InsertVectors()
     {

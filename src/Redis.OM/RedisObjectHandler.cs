@@ -338,8 +338,7 @@ namespace Redis.OM
                     var val = property.GetValue(obj);
                     var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().First();
                     var vector = vectorizer.Vectorize(val);
-                    var vectorStr = "\\x" + string.Join("\\x", vector.Select(x => Convert.ToString(x, 16).PadLeft(2, '0')));
-                    hash.Add($"{propertyName}.Vector", vectorStr);
+                    hash.Add($"{propertyName}.Vector", VectorUtils.BytesToVecStr(vector));
                     hash.Add($"{propertyName}.Value", JsonSerializer.Serialize(val));
                     continue;
                 }
@@ -564,16 +563,15 @@ namespace Redis.OM
                 if (isVectorized)
                 {
                     var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().First();
-                    var encoded = VectorJsonConverter.SplitIntoJaggedArray(Encoding.UTF8.GetBytes(hash[vectorPropertyName]), vectorizer.VectorType == VectorType.FLOAT32 ? 4 : 8);
                     string arrString;
                     if (vectorizer.VectorType == VectorType.FLOAT32)
                     {
-                        var floats = encoded.Select(a => BitConverter.ToSingle(a, 0).ToString(CultureInfo.InvariantCulture)).ToArray();
+                        var floats = VectorUtils.VectorStrToFloats(hash[vectorPropertyName]);
                         arrString = string.Join(",", floats);
                     }
                     else
                     {
-                        var doubles = encoded.Select(a => BitConverter.ToDouble(a, 0).ToString(CultureInfo.InvariantCulture)).ToArray();
+                        var doubles = VectorUtils.VecStrToDoubles(hash[vectorPropertyName]);
                         arrString = string.Join(",", doubles);
                     }
 
@@ -608,12 +606,12 @@ namespace Redis.OM
         {
             if (type == typeof(double))
             {
-                return Encoding.UTF8.GetString(((IEnumerable<double>)pi.GetValue(obj)).SelectMany(BitConverter.GetBytes).ToArray());
+                return VectorUtils.ToVecString((IEnumerable<double>)pi.GetValue(obj));
             }
 
             if (type == typeof(float))
             {
-                return Encoding.UTF8.GetString(((IEnumerable<float>)pi.GetValue(obj)).SelectMany(BitConverter.GetBytes).ToArray());
+                return VectorUtils.ToVecString((IEnumerable<float>)pi.GetValue(obj));
             }
 
             throw new ArgumentException("Could not pull a usable type out from property info");
