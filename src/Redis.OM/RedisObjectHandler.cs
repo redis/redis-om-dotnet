@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 
@@ -332,6 +333,17 @@ namespace Redis.OM
 
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
+                if (property.GetCustomAttributes<VectorizerAttribute>().Any())
+                {
+                    var val = property.GetValue(obj);
+                    var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().First();
+                    var vector = vectorizer.Vectorize(val);
+                    var vectorStr = "\\x" + string.Join("\\x", vector.Select(x => Convert.ToString(x, 16).PadLeft(2, '0')));
+                    hash.Add($"{propertyName}.Vector", vectorStr);
+                    hash.Add($"{propertyName}.Value", JsonSerializer.Serialize(val));
+                    continue;
+                }
+
                 if (type.IsPrimitive || type == typeof(decimal) || type == typeof(string) || type == typeof(GeoLoc) || type == typeof(Ulid) || type == typeof(Guid))
                 {
                     var val = property.GetValue(obj);
@@ -360,6 +372,11 @@ namespace Redis.OM
                     {
                         hash.Add(propertyName, new DateTimeOffset(val).ToUnixTimeMilliseconds().ToString());
                     }
+                }
+                else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)) && property.GetCustomAttributes<VectorAttribute>().Any())
+                {
+                    var innerType = GetEnumerableType(property);
+                    hash.Add(propertyName, PrimitiveCollectionToVectorBytes(property, obj, innerType));
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
@@ -424,37 +441,51 @@ namespace Redis.OM
                 var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
-                if (!hash.Any(x => x.Key.StartsWith(propertyName)))
+                var isVectorized = property.GetCustomAttributes<VectorizerAttribute>().Any();
+                var lookupPropertyName = propertyName + (isVectorized ? ".Value" : string.Empty);
+                var vectorPropertyName = $"{propertyName}.Vector";
+                if (isVectorized && !hash.ContainsKey($"{propertyName}.Value") && !hash.ContainsKey($"{propertyName}.Vector"))
+                {
+                    continue;
+                }
+
+                if (isVectorized)
+                {
+                    ret += $"\"{propertyName}\":{{";
+                    propertyName = "Value";
+                }
+
+                if (!hash.Any(x => x.Key.StartsWith(lookupPropertyName)))
                 {
                     continue;
                 }
 
                 if (type == typeof(bool) || type == typeof(bool?))
                 {
-                    if (!hash.ContainsKey(propertyName))
+                    if (!hash.ContainsKey(lookupPropertyName))
                     {
                         continue;
                     }
 
-                    ret += $"\"{propertyName}\":{hash[propertyName].ToLower()},";
+                    ret += $"\"{propertyName}\":{hash[lookupPropertyName].ToLower()},";
                 }
                 else if (type.IsPrimitive || type == typeof(decimal) || type.IsEnum)
                 {
-                    if (!hash.ContainsKey(propertyName))
+                    if (!hash.ContainsKey(lookupPropertyName))
                     {
                         continue;
                     }
 
-                    ret += $"\"{propertyName}\":{hash[propertyName]},";
+                    ret += $"\"{propertyName}\":{hash[lookupPropertyName]},";
                 }
                 else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset) || type == typeof(Guid) || type == typeof(Guid?) || type == typeof(Ulid) || type == typeof(Ulid?))
                 {
-                    if (!hash.ContainsKey(propertyName))
+                    if (!hash.ContainsKey(lookupPropertyName))
                     {
                         continue;
                     }
 
-                    ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
+                    ret += $"\"{propertyName}\":\"{HttpUtility.JavaScriptStringEncode(hash[lookupPropertyName])}\",";
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
@@ -525,9 +556,29 @@ namespace Redis.OM
                     else if (hash.ContainsKey(propertyName))
                     {
                         ret += $"\"{propertyName}\":";
-                        ret += hash[propertyName];
+                        ret += hash[lookupPropertyName];
                         ret += ",";
                     }
+                }
+
+                if (isVectorized)
+                {
+                    var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().First();
+                    var encoded = VectorJsonConverter.SplitIntoJaggedArray(Encoding.UTF8.GetBytes(hash[vectorPropertyName]), vectorizer.VectorType == VectorType.FLOAT32 ? 4 : 8);
+                    string arrString;
+                    if (vectorizer.VectorType == VectorType.FLOAT32)
+                    {
+                        var floats = encoded.Select(a => BitConverter.ToSingle(a, 0).ToString(CultureInfo.InvariantCulture)).ToArray();
+                        arrString = string.Join(",", floats);
+                    }
+                    else
+                    {
+                        var doubles = encoded.Select(a => BitConverter.ToDouble(a, 0).ToString(CultureInfo.InvariantCulture)).ToArray();
+                        arrString = string.Join(",", doubles);
+                    }
+
+                    var valueStr = $"[{arrString}]";
+                    ret += $"\"Vector\":{valueStr}}}";
                 }
             }
 
@@ -551,6 +602,21 @@ namespace Redis.OM
 
             type = Nullable.GetUnderlyingType(type) ?? type;
             return type;
+        }
+
+        private static string PrimitiveCollectionToVectorBytes(PropertyInfo pi, object obj, Type type)
+        {
+            if (type == typeof(double))
+            {
+                return Encoding.UTF8.GetString(((IEnumerable<double>)pi.GetValue(obj)).SelectMany(BitConverter.GetBytes).ToArray());
+            }
+
+            if (type == typeof(float))
+            {
+                return Encoding.UTF8.GetString(((IEnumerable<float>)pi.GetValue(obj)).SelectMany(BitConverter.GetBytes).ToArray());
+            }
+
+            throw new ArgumentException("Could not pull a usable type out from property info");
         }
 
         private static IEnumerable<string> PrimitiveCollectionToStrings(PropertyInfo pi, object obj, Type type)
