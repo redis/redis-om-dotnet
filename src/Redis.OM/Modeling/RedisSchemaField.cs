@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json.Serialization;
 
 namespace Redis.OM.Modeling
@@ -61,7 +62,15 @@ namespace Redis.OM.Modeling
                 {
                     var innerType = Nullable.GetUnderlyingType(info.PropertyType) ?? info.PropertyType;
 
-                    if (IsComplexType(innerType))
+                    if (attr is VectorAttribute)
+                    {
+                        var pathPostfix = info.GetCustomAttributes<VectorizerAttribute>().Any() ? ".Vector" : string.Empty;
+                        ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPostfix}" : $"{pathPrefix}{info.Name}{pathPostfix}");
+                        ret.Add("AS");
+                        ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{aliasPrefix}{attr.PropertyName}" : $"{aliasPrefix}{info.Name}");
+                        ret.AddRange(CommonSerialization(attr, innerType, info));
+                    }
+                    else if (IsComplexType(innerType))
                     {
                         if (cascadeDepth > 0)
                         {
@@ -93,12 +102,18 @@ namespace Redis.OM.Modeling
         internal static string[] SerializeArgs(this PropertyInfo info)
         {
             var attr = Attribute.GetCustomAttribute(info, typeof(SearchFieldAttribute)) as SearchFieldAttribute;
-            if (attr == null)
+            if (attr is null)
             {
                 return Array.Empty<string>();
             }
 
-            var ret = new List<string> { !string.IsNullOrEmpty(attr.PropertyName) ? attr.PropertyName : info.Name };
+            var suffix = string.Empty;
+            if (attr.SearchFieldType == SearchFieldType.VECTOR && info.GetCustomAttributes<VectorizerAttribute>().Any())
+            {
+                suffix = ".Vector";
+            }
+
+            var ret = new List<string> { !string.IsNullOrEmpty(attr.PropertyName) ? $"attr.PropertyName{suffix}" : $"{info.Name}{suffix}" };
             var innerType = Nullable.GetUnderlyingType(info.PropertyType);
             ret.AddRange(CommonSerialization(attr, innerType ?? info.PropertyType, info));
             return ret.ToArray();
@@ -187,6 +202,84 @@ namespace Redis.OM.Modeling
 
         private static bool IsEnumTypeFlags(Type type) => type.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
 
+        private static IEnumerable<string> VectorSerialization(VectorAttribute vectorAttribute, Type declaredType, PropertyInfo propertyInfo)
+        {
+            var vectorizer = propertyInfo.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+            if (vectorizer is null)
+            {
+                if (vectorAttribute.Dim == default)
+                {
+                    throw new ArgumentException("Could not determine dimension of the vector");
+                }
+
+                if (declaredType != typeof(double[]) && declaredType != typeof(float[]))
+                {
+                    throw new ArgumentException("Could not determine the Vector Type");
+                }
+            }
+
+            yield return vectorAttribute.Algorithm.AsRedisString();
+            yield return vectorAttribute.NumArgs.ToString();
+            yield return "TYPE";
+            if (vectorizer is not null)
+            {
+                yield return vectorizer.VectorType.AsRedisString();
+            }
+            else if (declaredType == typeof(double[]))
+            {
+                yield return "FLOAT64";
+            }
+            else if (declaredType == typeof(float[]))
+            {
+                yield return "FLOAT32";
+            }
+
+            yield return "DIM";
+            yield return vectorizer is null ? vectorAttribute.Dim!.ToString() : vectorizer.Dim.ToString();
+            yield return "DISTANCE_METRIC";
+            yield return vectorAttribute.DistanceMetric.AsRedisString();
+            if (vectorAttribute.InitialCapacity != default)
+            {
+                yield return "INITIAL_CAP";
+                yield return vectorAttribute.InitialCapacity.ToString();
+            }
+
+            if (vectorAttribute.Algorithm == VectorAlgorithm.FLAT)
+            {
+                if (vectorAttribute.BlockSize != default)
+                {
+                    yield return "BLOCK_SIZE";
+                    yield return vectorAttribute.BlockSize.ToString();
+                }
+            }
+            else if (vectorAttribute.Algorithm == VectorAlgorithm.HNSW)
+            {
+                if (vectorAttribute.M != default)
+                {
+                    yield return "M";
+                    yield return vectorAttribute.M.ToString();
+                }
+
+                if (vectorAttribute.EfConstructor != default)
+                {
+                    yield return "EF_CONSTRUCTION";
+                    yield return vectorAttribute.EfConstructor.ToString();
+                }
+
+                if (vectorAttribute.EfRuntime != default)
+                {
+                    yield return "EF_RUNTIME";
+                    yield return vectorAttribute.EfRuntime.ToString();
+                }
+
+                if (vectorAttribute.Epsilon != default)
+                {
+                    yield return "EPSILON";
+                    yield return vectorAttribute.Epsilon.ToString(CultureInfo.InvariantCulture);
+                }
+            }
+        }
+
         private static string[] CommonSerialization(SearchFieldAttribute attr, Type declaredType, PropertyInfo propertyInfo)
         {
             var searchFieldType = GetSearchFieldType(declaredType, attr, propertyInfo);
@@ -228,6 +321,11 @@ namespace Redis.OM.Modeling
                 {
                     ret.Add("CASESENSITIVE");
                 }
+            }
+
+            if (searchFieldType == "VECTOR" && attr is VectorAttribute vector)
+            {
+                ret.AddRange(VectorSerialization(vector, declaredType, propertyInfo));
             }
 
             if (attr.Sortable || attr.Aggregatable)
