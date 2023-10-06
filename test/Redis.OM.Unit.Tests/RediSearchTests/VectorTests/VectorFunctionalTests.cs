@@ -27,6 +27,7 @@ public class VectorFunctionalTests
         {
             simpleHnswHash[i] = i;
         }
+
         for (var i = 0; i < 30; i++)
         {
             vectorizedFlatHashVector[i] = i;
@@ -48,6 +49,4 @@ public class VectorFunctionalTests
         var res = _connection.Get<ObjectWithVectorHash>(key);
         Assert.Equal("foobar", res.SimpleVectorizedVector);
     }
-
-    
 }
