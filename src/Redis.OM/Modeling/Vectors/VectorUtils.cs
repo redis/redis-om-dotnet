@@ -76,12 +76,12 @@ namespace Redis.OM.Modeling
         /// <summary>
         /// Converts Vector String to array of doubles.
         /// </summary>
-        /// <param name="str">the vector string.</param>
+        /// <param name="reply">the reply.</param>
         /// <returns>the doubles.</returns>
         /// <exception cref="ArgumentException">Thrown if unbalanced.</exception>
-        public static double[] VecStrToDoubles(string str)
+        public static double[] VecStrToDoubles(RedisReply reply)
         {
-            var bytes = VecStrToBytes(str);
+            var bytes = (byte[]?)reply ?? throw new InvalidCastException("Could not convert result to raw result.");
             if (bytes.Length % 8 != 0)
             {
                 throw new ArgumentException("Unbalanced Vector String");
@@ -99,12 +99,12 @@ namespace Redis.OM.Modeling
         /// <summary>
         /// Parses a vector string to an array of floats.
         /// </summary>
-        /// <param name="str">the string.</param>
+        /// <param name="reply">the reply.</param>
         /// <returns>The floats.</returns>
         /// <exception cref="ArgumentException">thrown if unbalanced.</exception>
-        public static float[] VectorStrToFloats(string str)
+        public static float[] VectorStrToFloats(RedisReply reply)
         {
-            var bytes = VecStrToBytes(str);
+            var bytes = (byte[]?)reply ?? throw new InvalidCastException("Could not convert result to raw result.");
             if (bytes.Length % 4 != 0)
             {
                 throw new ArgumentException("Unbalanced Vector String");

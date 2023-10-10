@@ -598,9 +598,9 @@ namespace Redis.OM
         /// <param name="connection">the connection.</param>
         /// <param name="keyName">the key name.</param>
         /// <returns>the object serialized into a dictionary.</returns>
-        public static IDictionary<string, string> HGetAll(this IRedisConnection connection, string keyName)
+        public static IDictionary<string, RedisReply> HGetAll(this IRedisConnection connection, string keyName)
         {
-            var ret = new Dictionary<string, string>();
+            var ret = new Dictionary<string, RedisReply>();
             var res = connection.Execute("HGETALL", keyName).ToArray();
             for (var i = 0; i < res.Length; i += 2)
             {

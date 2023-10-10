@@ -40,6 +40,7 @@ namespace Redis.OM
         internal static T FromHashSet<T>(IDictionary<string, string> hash)
             where T : notnull
         {
+            var dict = hash.ToDictionary(x => x.Key, x => new RedisReply(x.Value.ToString()));
             if (typeof(IRedisHydrateable).IsAssignableFrom(typeof(T)))
             {
                 var obj = Activator.CreateInstance<T>();
@@ -59,7 +60,7 @@ namespace Redis.OM
             }
             else
             {
-                asJson = SendToJson(hash, typeof(T));
+                asJson = SendToJson(dict, typeof(T));
             }
 
             return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
@@ -90,7 +91,7 @@ namespace Redis.OM
             }
             else if (attr != null)
             {
-                asJson = SendToJson(stringDictionary, typeof(T));
+                asJson = SendToJson(hash, typeof(T));
             }
             else
             {
@@ -106,7 +107,7 @@ namespace Redis.OM
         /// <param name="hash">The hash.</param>
         /// <param name="type">The type to deserialize to.</param>
         /// <returns>the deserialized object.</returns>
-        internal static object? FromHashSet(IDictionary<string, string> hash, Type type)
+        internal static object? FromHashSet(IDictionary<string, RedisReply> hash, Type type)
         {
             var asJson = SendToJson(hash, type);
             return JsonSerializer.Deserialize(asJson, type);
@@ -426,7 +427,7 @@ namespace Redis.OM
             return hash;
         }
 
-        private static string SendToJson(IDictionary<string, string> hash, Type t)
+        private static string SendToJson(IDictionary<string, RedisReply> hash, Type t)
         {
             var properties = t.GetProperties();
             if ((!properties.Any() || t == typeof(Ulid) || t == typeof(Ulid?)) && hash.Count == 1)
@@ -466,7 +467,7 @@ namespace Redis.OM
                         continue;
                     }
 
-                    ret += $"\"{propertyName}\":{hash[lookupPropertyName].ToLower()},";
+                    ret += $"\"{propertyName}\":{((string)hash[lookupPropertyName]).ToLower()},";
                 }
                 else if (type.IsPrimitive || type == typeof(decimal) || type.IsEnum)
                 {
@@ -485,6 +486,28 @@ namespace Redis.OM
                     }
 
                     ret += $"\"{propertyName}\":\"{HttpUtility.JavaScriptStringEncode(hash[lookupPropertyName])}\",";
+                }
+                else if ((type == typeof(double[]) || type == typeof(float[])) && property.GetCustomAttributes<VectorAttribute>().Any())
+                {
+                    if (!hash.ContainsKey(lookupPropertyName))
+                    {
+                        continue;
+                    }
+
+                    string arrString;
+                    if (type == typeof(float[]))
+                    {
+                        var floats = VectorUtils.VectorStrToFloats(hash[lookupPropertyName]);
+                        arrString = string.Join(",", floats);
+                    }
+                    else
+                    {
+                        var doubles = VectorUtils.VecStrToDoubles(hash[lookupPropertyName]);
+                        arrString = string.Join(",", doubles);
+                    }
+
+                    var valueStr = $"[{arrString}]";
+                    ret += $"\"{lookupPropertyName}\":{valueStr},";
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
@@ -511,7 +534,7 @@ namespace Redis.OM
                             if (innerType == typeof(bool) || innerType == typeof(bool?))
                             {
                                 var val = entries[$"{propertyName}[{i}]"];
-                                ret += $"{val.ToLower()},";
+                                ret += $"{((string)val).ToLower()},";
                             }
                             else if (innerType.IsPrimitive || innerType == typeof(decimal))
                             {
@@ -544,7 +567,7 @@ namespace Redis.OM
                 else
                 {
                     var entries = hash.Where(x => x.Key.StartsWith($"{propertyName}."))
-                        .Select(x => new KeyValuePair<string, string>(x.Key.Substring($"{propertyName}.".Length), x.Value))
+                        .Select(x => new KeyValuePair<string, RedisReply>(x.Key.Substring($"{propertyName}.".Length), x.Value))
                         .ToDictionary(x => x.Key, x => x.Value);
                     if (entries.Any())
                     {
