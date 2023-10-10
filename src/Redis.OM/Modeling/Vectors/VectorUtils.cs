@@ -55,10 +55,13 @@ namespace Redis.OM.Modeling
             {
                 switch (b)
                 {
-                    case 0x5c:
-                        sb.Append("\\\\");
+                    case 0x08:
+                        sb.Append("\\b");
                         break;
-                    case > 0x20 and <= 0x7f:
+                    case 0x22:
+                        sb.Append("\"");
+                        break;
+                    case >= 0x20 and <= 0x7f:
                         sb.Append((char)b);
                         break;
                     default:

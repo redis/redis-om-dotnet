@@ -29,3 +29,10 @@ public class ObjectWithVectorHash
     [SimpleVectorizer]
     public string SimpleVectorizedVector { get; set; }
 }
+
+[Document]
+public class ToyVector
+{
+    [RedisIdField] public string Id { get; set; }
+    [Vector(Dim=6)]public double[] SimpleVector { get; set; }
+}

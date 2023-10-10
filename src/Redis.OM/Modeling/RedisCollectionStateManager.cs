@@ -112,10 +112,11 @@ namespace Redis.OM.Modeling
             else
             {
                 var dataHash = value.BuildHashSet();
-                var snapshotHash = (IDictionary<string, string>)Snapshot[key];
+                var snapshotHash = (IDictionary<string, object>)Snapshot[key];
                 var deletedKeys = snapshotHash.Keys.Except(dataHash.Keys).Select(x => new KeyValuePair<string, string>(x, string.Empty));
                 var modifiedKeys = dataHash.Where(x =>
-                    !snapshotHash.Keys.Contains(x.Key) || snapshotHash[x.Key] != x.Value);
+                    !snapshotHash.Keys.Contains(x.Key) || snapshotHash[x.Key] != x.Value).Select(x =>
+                    new KeyValuePair<string, string>(x.Key, x.Value.ToString()));
                 differences = new List<IObjectDiff>
                 {
                     new HashDiff(modifiedKeys, deletedKeys.Select(x => x.Key)),
@@ -158,10 +159,11 @@ namespace Redis.OM.Modeling
                     if (Data.ContainsKey(key))
                     {
                         var dataHash = Data[key] !.BuildHashSet();
-                        var snapshotHash = (IDictionary<string, string>)Snapshot[key];
+                        var snapshotHash = (IDictionary<string, object>)Snapshot[key];
                         var deletedKeys = snapshotHash.Keys.Except(dataHash.Keys).Select(x => new KeyValuePair<string, string>(x, string.Empty));
                         var modifiedKeys = dataHash.Where(x =>
-                            !snapshotHash.Keys.Contains(x.Key) || snapshotHash[x.Key] != x.Value);
+                            !snapshotHash.Keys.Contains(x.Key) || snapshotHash[x.Key] != x.Value).Select(x =>
+                            new KeyValuePair<string, string>(x.Key, x.Value.ToString()));
                         var diff = new List<IObjectDiff>
                         {
                             new HashDiff(modifiedKeys, deletedKeys.Select(x => x.Key)),
