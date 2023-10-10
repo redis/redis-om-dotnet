@@ -23,7 +23,7 @@ namespace Redis.OM
         public string this[string key] 
         { 
             get => _connection.HMGet(_keyName, key).FirstOrDefault() ?? ""; 
-            set => _connection.HSet(_keyName, new KeyValuePair<string, string>(key,value)); 
+            set => _connection.HSet(_keyName, new KeyValuePair<string, object>(key,value)); 
         }
 
         public ICollection<string> Keys => new RedisHashScanner(_keyName, this, _connection, false);

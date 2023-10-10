@@ -315,18 +315,18 @@ namespace Redis.OM
         /// </summary>
         /// <param name="obj">object to be turned into a hash set.</param>
         /// <returns>A hash set generated from the object.</returns>
-        internal static IDictionary<string, string> BuildHashSet(this object obj)
+        internal static IDictionary<string, object> BuildHashSet(this object obj)
         {
             if (obj is IRedisHydrateable hydrateable)
             {
-                return hydrateable.BuildHashSet();
+                return hydrateable.BuildHashSet().ToDictionary(x => x.Key, x => (object)x.Value);
             }
 
             var properties = obj
                               .GetType()
                               .GetProperties()
                               .Where(x => x.GetValue(obj) != null);
-            var hash = new Dictionary<string, string>();
+            var hash = new Dictionary<string, object>();
             foreach (var property in properties)
             {
                 var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
@@ -338,7 +338,7 @@ namespace Redis.OM
                     var val = property.GetValue(obj);
                     var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().First();
                     var vector = vectorizer.Vectorize(val);
-                    hash.Add($"{propertyName}.Vector", VectorUtils.BytesToVecStr(vector));
+                    hash.Add($"{propertyName}.Vector", vector);
                     hash.Add($"{propertyName}.Value", JsonSerializer.Serialize(val));
                     continue;
                 }
@@ -602,16 +602,16 @@ namespace Redis.OM
             return type;
         }
 
-        private static string PrimitiveCollectionToVectorBytes(PropertyInfo pi, object obj, Type type)
+        private static byte[] PrimitiveCollectionToVectorBytes(PropertyInfo pi, object obj, Type type)
         {
             if (type == typeof(double))
             {
-                return VectorUtils.ToVecString((IEnumerable<double>)pi.GetValue(obj));
+                return ((IEnumerable<double>)pi.GetValue(obj)).SelectMany(BitConverter.GetBytes).ToArray();
             }
 
             if (type == typeof(float))
             {
-                return VectorUtils.ToVecString((IEnumerable<float>)pi.GetValue(obj));
+                return ((IEnumerable<float>)pi.GetValue(obj)).SelectMany(BitConverter.GetBytes).ToArray();
             }
 
             throw new ArgumentException("Could not pull a usable type out from property info");

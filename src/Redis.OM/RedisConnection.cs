@@ -24,7 +24,7 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public RedisReply Execute(string command, params string[] args)
+        public RedisReply Execute(string command, params object[] args)
         {
             try
             {
@@ -38,11 +38,11 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public async Task<RedisReply> ExecuteAsync(string command, params string[] args)
+        public async Task<RedisReply> ExecuteAsync(string command, params object[] args)
         {
             try
             {
-                var result = await _db.ExecuteAsync(command, args);
+                var result = await _db.ExecuteAsync(command, args).ConfigureAwait(false);
                 return new RedisReply(result);
             }
             catch (Exception ex)
@@ -52,7 +52,22 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public RedisReply[] ExecuteInTransaction(Tuple<string, string[]>[] commandArgsTuples)
+        public async Task<RedisReply[]> ExecuteInTransactionAsync(Tuple<string, object[]>[] commandArgsTuples)
+        {
+            var transaction = _db.CreateTransaction();
+            var tasks = new List<Task<RedisResult>>();
+            foreach (var tuple in commandArgsTuples)
+            {
+                tasks.Add(transaction.ExecuteAsync(tuple.Item1, tuple.Item2));
+            }
+
+            await transaction.ExecuteAsync().ConfigureAwait(false);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+            return tasks.Select(x => new RedisReply(x.Result)).ToArray();
+        }
+
+        /// <inheritdoc/>
+        public RedisReply[] ExecuteInTransaction(Tuple<string, object[]>[] commandArgsTuples)
         {
             var transaction = _db.CreateTransaction();
             var tasks = new List<Task<RedisResult>>();
@@ -63,21 +78,6 @@ namespace Redis.OM
 
             transaction.Execute();
             Task.WhenAll(tasks).Wait();
-            return tasks.Select(x => new RedisReply(x.Result)).ToArray();
-        }
-
-        /// <inheritdoc/>
-        public async Task<RedisReply[]> ExecuteInTransactionAsync(Tuple<string, string[]>[] commandArgsTuples)
-        {
-            var transaction = _db.CreateTransaction();
-            var tasks = new List<Task<RedisResult>>();
-            foreach (var tuple in commandArgsTuples)
-            {
-                tasks.Add(transaction.ExecuteAsync(tuple.Item1, tuple.Item2));
-            }
-
-            await transaction.ExecuteAsync();
-            await Task.WhenAll(tasks);
             return tasks.Select(x => new RedisReply(x.Result)).ToArray();
         }
 

@@ -14,7 +14,7 @@ namespace Redis.OM.Contracts
         /// <param name="command">The command name.</param>
         /// <param name="args">The arguments.</param>
         /// <returns>A redis Reply.</returns>
-        RedisReply Execute(string command, params string[] args);
+        RedisReply Execute(string command, params object[] args);
 
         /// <summary>
         /// Executes a command.
@@ -22,7 +22,7 @@ namespace Redis.OM.Contracts
         /// <param name="command">The command name.</param>
         /// <param name="args">The arguments.</param>
         /// <returns>A redis Reply.</returns>
-        Task<RedisReply> ExecuteAsync(string command, params string[] args);
+        Task<RedisReply> ExecuteAsync(string command, params object[] args);
 
         /// <summary>
         /// Executes the contained commands within the context of a transaction.
@@ -30,7 +30,7 @@ namespace Redis.OM.Contracts
         /// <param name="commandArgsTuples">each tuple represents a command and
         ///     it's arguments to execute inside a transaction.</param>
         /// <returns>A redis Reply.</returns>
-        Task<RedisReply[]> ExecuteInTransactionAsync(Tuple<string, string[]>[] commandArgsTuples);
+        Task<RedisReply[]> ExecuteInTransactionAsync(Tuple<string, object[]>[] commandArgsTuples);
 
         /// <summary>
         /// Executes the contained commands within the context of a transaction.
@@ -38,6 +38,6 @@ namespace Redis.OM.Contracts
         /// <param name="commandArgsTuples">each tuple represents a command and
         ///     it's arguments to execute inside a transaction.</param>
         /// <returns>A redis Reply.</returns>
-        RedisReply[] ExecuteInTransaction(Tuple<string, string[]>[] commandArgsTuples);
+        RedisReply[] ExecuteInTransaction(Tuple<string, object[]>[] commandArgsTuples);
     }
 }

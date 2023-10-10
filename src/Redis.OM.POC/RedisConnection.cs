@@ -42,19 +42,19 @@ namespace Redis.OM
             return new RedisList(this, listName, chunkSize);
         }
 
-        public RedisReply Execute(string command, params string[] args)
+        public RedisReply Execute(string command, params object[] args)
         {
-            var commandBytes = RespHelper.BuildCommand(command, args);
+            var commandBytes = RespHelper.BuildCommand(command, args.Select(x=>x.ToString()).ToArray());
             _socket.Send(commandBytes);
             return RespHelper.GetNextReplyFromSocket(_socket);
         }
 
-        public async Task<RedisReply> ExecuteAsync(string command, params string[] args)
+        public async Task<RedisReply> ExecuteAsync(string command, params object[] args)
         {
             await _semaphoreSlim.WaitAsync();
             try
             {
-                var commandBytes = new ArraySegment<byte>(RespHelper.BuildCommand(command, args));
+                var commandBytes = new ArraySegment<byte>(RespHelper.BuildCommand(command, args.Select(x=>x.ToString()).ToArray()));
                 await _socket.SendAsync(commandBytes, SocketFlags.None);
                 return await RespHelper.GetNextReplyFromSocketAsync(_socket);
             }
@@ -66,7 +66,7 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public RedisReply[] ExecuteInTransaction(Tuple<string, string[]>[] commandArgsTuples)
+        public RedisReply[] ExecuteInTransaction(Tuple<string, object[]>[] commandArgsTuples)
         {
             var transaction = _db.CreateTransaction();
             var tasks = new List<Task<RedisResult>>();
@@ -81,7 +81,7 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public async Task<RedisReply[]> ExecuteInTransactionAsync(Tuple<string, string[]>[] commandArgsTuples)
+        public async Task<RedisReply[]> ExecuteInTransactionAsync(Tuple<string, object[]>[] commandArgsTuples)
         {
             var transaction = _db.CreateTransaction();
             var tasks = new List<Task<RedisResult>>();

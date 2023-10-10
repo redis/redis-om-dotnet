@@ -74,14 +74,16 @@ public class VectorIndexCreationTests
         {
             vectorizedFlatHashVector[i] = i;
         }
+        
+        
 
         simpleHnswJsonStr.Append(string.Join(',', simpleHnswHash));
         vectorizedFlatVectorJsonStr.Append(string.Join(',', vectorizedFlatHashVector));
         simpleHnswJsonStr.Append(']');
         vectorizedFlatVectorJsonStr.Append(']');
-        
-        var byteStringSimpleHnsw = Encoding.UTF8.GetString(simpleHnswHash.SelectMany(BitConverter.GetBytes).ToArray());
-        var byteStringVectorizedFlashHash = Encoding.UTF8.GetString(vectorizedFlatHashVector.SelectMany(BitConverter.GetBytes).ToArray());
+
+        var simpleHnswBytes = simpleHnswHash.SelectMany(BitConverter.GetBytes).ToArray();
+        var flatVectorizedBytes = vectorizedFlatHashVector.SelectMany(BitConverter.GetBytes).ToArray();
 
         var hashObj = new ObjectWithVectorHash()
         {
@@ -100,12 +102,12 @@ public class VectorIndexCreationTests
         var json =
             $"{{\"Id\":\"foo\",\"SimpleHnswVector\":{simpleHnswJsonStr},\"SimpleVectorizedVector\":{{\"Value\":\"\\u0022foobar\\u0022\",\"Vector\":{vectorizedFlatVectorJsonStr}}}}}";
         
-        _substitute.Execute("HSET", Arg.Any<string[]>()).Returns(new RedisReply("3"));
-        _substitute.Execute("JSON.SET", Arg.Any<string[]>()).Returns(new RedisReply("OK"));
+        _substitute.Execute("HSET", Arg.Any<object[]>()).Returns(new RedisReply("3"));
+        _substitute.Execute("JSON.SET", Arg.Any<object[]>()).Returns(new RedisReply("OK"));
         _substitute.Set(hashObj);
         _substitute.Set(jsonObj);
         _substitute.Received().Execute("HSET", "Redis.OM.Unit.Tests.ObjectWithVectorHash:foo", "Id", "foo", "SimpleHnswVector",
-            byteStringSimpleHnsw, "SimpleVectorizedVector.Vector", byteStringVectorizedFlashHash, "SimpleVectorizedVector.Value", "foobar");
+            Arg.Is<byte[]>(x=>x.SequenceEqual(simpleHnswBytes)), "SimpleVectorizedVector.Vector", Arg.Is<byte[]>(x=>x.SequenceEqual(flatVectorizedBytes)), "SimpleVectorizedVector.Value", "\"foobar\"");
         _substitute.Received().Execute("JSON.SET", "Redis.OM.Unit.Tests.ObjectWithVector:foo", ".", json);
         var deseralized = JsonSerializer.Deserialize<ObjectWithVector>(json);
         Assert.Equal("foobar", deseralized.SimpleVectorizedVector);

@@ -565,7 +565,7 @@ namespace Redis.OM
         public static async Task<string?> XAddAsync(this IRedisConnection connection, string streamId, object message, string messageId = "*", int maxLen = -1, string minId = "", bool trimApprox = true, bool makeStream = true)
         {
             var kvps = message.BuildHashSet();
-            var args = new List<string> { streamId };
+            var args = new List<object> { streamId };
             if (!makeStream)
             {
                 args.Add("NOMKSTREAM");
@@ -611,7 +611,7 @@ namespace Redis.OM
         public static string? XAdd(this IRedisConnection connection, string streamId, object message, string messageId = "*", int maxLen = -1, string minId = "", bool trimApprox = true, bool makeStream = true)
         {
             var kvps = message.BuildHashSet();
-            var args = new List<string> { streamId };
+            var args = new List<object> { streamId };
             if (!makeStream)
             {
                 args.Add("NOMKSTREAM");
