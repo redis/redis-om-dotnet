@@ -42,7 +42,21 @@ public class VectorFunctionalTests
             SimpleVectorizedVector = "foo",
         };
         
-        _connection.Set(obj);
+        var key = _connection.Set(obj);
+        var res = _connection.Get<ObjectWithVectorHash>(key);
+        Assert.Equal(doubles, res.SimpleHnswVector);
+
+        key = _connection.Set(new ObjectWithVector()
+        {
+            Id = "foo",
+            SimpleHnswVector = doubles,
+            SimpleVectorizedVector = "foobarbaz"
+        });
+
+        var jsonRes = _connection.Get<ObjectWithVector>(key);
+        
+        Assert.Equal(doubles, jsonRes.SimpleHnswVector);
+        Assert.Equal("foobarbaz", jsonRes.SimpleVectorizedVector);
     }
 
     [Fact]
