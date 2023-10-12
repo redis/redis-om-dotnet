@@ -19,6 +19,11 @@ namespace Redis.OM.Searching.Query
         }
 
         /// <summary>
+        /// Gets or sets the nearest neighbors query.
+        /// </summary>
+        public NearestNeighbors? NearestNeighbors { get; set; }
+
+        /// <summary>
         /// Gets or sets the flags for the query options.
         /// </summary>
         public long Flags { get; set; } = 0;
@@ -63,16 +68,31 @@ namespace Redis.OM.Searching.Query
         /// </summary>
         /// <returns>the serialized arguments.</returns>
         /// <exception cref="ArgumentException">thrown if the index is null.</exception>
-        internal string[] SerializeQuery()
+        internal object[] SerializeQuery()
         {
-            var ret = new List<string>();
+            var ret = new List<object>();
             if (string.IsNullOrEmpty(Index))
             {
                 throw new ArgumentException("Index cannot be null");
             }
 
             ret.Add(Index);
-            ret.Add(QueryText);
+            if (NearestNeighbors is null)
+            {
+                ret.Add(QueryText);
+            }
+            else
+            {
+                var queryText = $"({QueryText})=>[KNN {NearestNeighbors.NumNeighbors} @{NearestNeighbors.PropertyName} $V]";
+                ret.Add(queryText);
+                ret.Add("PARAMS");
+                ret.Add(2);
+                ret.Add("V");
+                ret.Add(NearestNeighbors.VectorBlob);
+                ret.Add("DIALECT");
+                ret.Add(2);
+            }
+
             foreach (var flag in (QueryFlags[])Enum.GetValues(typeof(QueryFlags)))
             {
                 if ((Flags & (long)flag) == (long)flag)

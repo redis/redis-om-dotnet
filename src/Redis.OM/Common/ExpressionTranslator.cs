@@ -30,7 +30,7 @@ namespace Redis.OM.Common
             var attr = type.GetCustomAttribute<DocumentAttribute>();
             if (attr == null)
             {
-                throw new InvalidOperationException("Aggregations can only be perfomred on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
+                throw new InvalidOperationException("Aggregations can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
             var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}-idx" : attr.IndexName;
@@ -229,6 +229,9 @@ namespace Redis.OM.Common
                             case "Where":
                                 query.QueryText = TranslateWhereMethod(exp);
                                 break;
+                            case "NearestNeighbors":
+                                query.NearestNeighbors = ParseNearestNeighborsFromExpression(exp);
+                                break;
                         }
                     }
 
@@ -246,6 +249,41 @@ namespace Redis.OM.Common
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Builds a Nearest Neighbor query from provided expression.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>The nearest neighbor query.</returns>
+        internal static NearestNeighbors ParseNearestNeighborsFromExpression(MethodCallExpression expression)
+        {
+            var memberExpression = (MemberExpression)((LambdaExpression)((UnaryExpression)expression.Arguments[1]).Operand).Body;
+            var attr = memberExpression.Member.GetCustomAttributes<VectorAttribute>().FirstOrDefault() ?? throw new ArgumentException($"Could not find Vector attribute on {memberExpression.Member.Name}.");
+            var vectorizer = memberExpression.Member.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+            var propertyName = !string.IsNullOrEmpty(attr.PropertyName) ? attr.PropertyName : memberExpression.Member.Name;
+            var numNeighbors = (int)((ConstantExpression)expression.Arguments[2]).Value;
+            var value = ((ConstantExpression)expression.Arguments[3]).Value ?? throw new InvalidOperationException("Provided vector property was null");
+            byte[] bytes;
+
+            if (vectorizer is not null)
+            {
+                bytes = vectorizer.Vectorize(value);
+            }
+            else if (memberExpression.Type == typeof(float[]))
+            {
+                bytes = ((float[])value).SelectMany(BitConverter.GetBytes).ToArray();
+            }
+            else if (memberExpression.Type == typeof(double[]))
+            {
+                bytes = ((double[])value).SelectMany(BitConverter.GetBytes).ToArray();
+            }
+            else
+            {
+                throw new ArgumentException($"{memberExpression.Type} was not valid without a Vectorizer");
+            }
+
+            return new NearestNeighbors(propertyName, numNeighbors, bytes);
         }
 
         /// <summary>

@@ -30,7 +30,7 @@ public class ObjectWithVectorHash
     public string SimpleVectorizedVector { get; set; }
 }
 
-[Document]
+[Document(StorageType = StorageType.Json, Prefixes = new []{"Simple"})]
 public class ToyVector
 {
     [RedisIdField] public string Id { get; set; }
