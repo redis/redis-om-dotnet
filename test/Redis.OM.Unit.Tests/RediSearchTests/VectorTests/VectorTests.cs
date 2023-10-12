@@ -1,11 +1,13 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json;
 using NSubstitute;
 using NSubstitute.ClearExtensions;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Searching;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests;
@@ -18,7 +20,7 @@ public class VectorIndexCreationTests
     public void CreateIndexWithVector()
     {
         _substitute.ClearSubstitute();
-        _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(new RedisReply("OK"));
+        _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply("OK"));
 
         _substitute.CreateIndex(typeof(ObjectWithVector));
         _substitute.CreateIndex(typeof(ObjectWithVectorHash));
@@ -50,6 +52,33 @@ public class VectorIndexCreationTests
     }
 
     [Fact]
+    public void SimpleKnnQuery()
+    {
+        _substitute.ClearSubstitute();
+        _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
+        var collection = new RedisCollection<ObjectWithVector>(_substitute);
+        var compVector = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        float[] floats = Enumerable.Range(0, 30).Select(x => (float)x).ToArray();
+        var blob = compVector.SelectMany(BitConverter.GetBytes).ToArray();
+        var floatBlob = floats.SelectMany(BitConverter.GetBytes).ToArray();
+        _ = collection.NearestNeighbors(x=>x.SimpleHnswVector, 5, compVector).ToList();
+
+        _substitute.Received().Execute("FT.SEARCH",
+            $"{nameof(ObjectWithVector).ToLower()}-idx",
+            "(*)=>[KNN 5 @SimpleHnswVector $V]",
+            "PARAMS", 2, "V", Arg.Is<byte[]>(b=>b.SequenceEqual(blob)), "DIALECT", 2, "LIMIT", "0", "100");
+
+        _substitute.ClearSubstitute();
+        _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
+        _ = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 8, "hello world").ToArray();
+
+        _substitute.Received().Execute("FT.SEARCH",
+            $"{nameof(ObjectWithVector).ToLower()}-idx",
+            "(*)=>[KNN 8 @SimpleVectorizedVector $V]",
+            "PARAMS", 2, "V", Arg.Is<byte[]>(b=>b.SequenceEqual(floatBlob)), "DIALECT", 2, "LIMIT", "0", "100");
+    }
+
+    [Fact]
     public void TestBinConversions()
     {
         var piStr = VectorUtils.DoubleToVecStr(Math.PI);
@@ -74,8 +103,6 @@ public class VectorIndexCreationTests
         {
             vectorizedFlatHashVector[i] = i;
         }
-        
-        
 
         simpleHnswJsonStr.Append(string.Join(',', simpleHnswHash));
         vectorizedFlatVectorJsonStr.Append(string.Join(',', vectorizedFlatHashVector));

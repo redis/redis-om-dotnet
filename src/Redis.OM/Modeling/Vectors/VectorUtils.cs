@@ -97,6 +97,29 @@ namespace Redis.OM.Modeling
         }
 
         /// <summary>
+        /// Converts Vector String to array of doubles.
+        /// </summary>
+        /// <param name="reply">the reply.</param>
+        /// <returns>the doubles.</returns>
+        /// <exception cref="ArgumentException">Thrown if unbalanced.</exception>
+        public static double[] VecStrToDoubles(string reply)
+        {
+            var bytes = Encoding.ASCII.GetBytes(reply);
+            if (bytes.Length % 8 != 0)
+            {
+                throw new ArgumentException("Unbalanced Vector String");
+            }
+
+            var doubles = new double[bytes.Length / 8];
+            for (var i = 0; i < bytes.Length; i += 8)
+            {
+                doubles[i / 8] = BitConverter.ToDouble(bytes, i);
+            }
+
+            return doubles;
+        }
+
+        /// <summary>
         /// Parses a vector string to an array of floats.
         /// </summary>
         /// <param name="reply">the reply.</param>

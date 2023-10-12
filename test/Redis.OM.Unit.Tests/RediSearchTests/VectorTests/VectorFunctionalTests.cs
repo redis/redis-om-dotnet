@@ -1,6 +1,8 @@
+using System.Linq;
 using System.Text;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Searching;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests;
@@ -16,18 +18,63 @@ public class VectorFunctionalTests
     }
 
     [Fact]
+    public void BasicQuery()
+    {
+        _connection.CreateIndex(typeof(ObjectWithVector));
+        var collection = new RedisCollection<ObjectWithVector>(_connection);
+        collection.Insert(new ObjectWithVector
+        {
+            Id = "helloWorld",
+            SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
+            SimpleVectorizedVector = "FooBarBaz"
+        });
+
+        var res = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 1, "FooBarBaz").First();
+        Assert.Equal("helloWorld", res.Id);
+    }
+
+    [Fact]
+    public void Overflow()
+    {
+        var doubles = new double[]
+        {
+            1.79769313486231570e+308, 1.79769313486231570e+308, 1.79769313486231570e+308, 1.79769313486231570e+308,
+            1.79769313486231570e+308, 1.79769313486231570e+308
+        };
+
+        var lowerDoubles = new double[]
+            { -1.79769E+308, -1.79769E+308, -1.79769E+308, -1.79769E+308, -1.79769E+308, -1.79769E+308 };
+        _connection.CreateIndex(typeof(ToyVector));
+        var obj = new ToyVector()
+        {
+            Id = "1",
+            SimpleVector = doubles
+        };
+        
+        var collection = new RedisCollection<ToyVector>(_connection);
+        collection.NearestNeighbors(x => x.SimpleVector, 1, lowerDoubles).First();
+    }
+    
+    [Fact]
     public void Dave()
     {
         _connection.CreateIndex(typeof(ToyVector));
 
-        var doubles = VectorUtils.VecStrToDoubles("I'm_sorry_Dave,_I'm_afraid_I_can't_do_that......");
+        // var doubles = VectorUtils.VecStrToDoubles("This vector's json result gets blown out oddly..");
+        var doubles = VectorUtils.VecStrToDoubles("I'm sorry Dave, I'm afraid I can't do that......");
+        // var doubles = new double[] { 0, 1, 2, 3, 4, 5 };
         var obj = new ToyVector()
         {
-            Id = "foo",
+            Id = "1",
             SimpleVector = doubles
         };
         _connection.Set(obj);
+
+        var collection = new RedisCollection<ToyVector>(_connection);
+        collection.NearestNeighbors(x => x.SimpleVector, 1, doubles).First();
     }
+
+    
 
     [Fact]
     public void TestIndex()
