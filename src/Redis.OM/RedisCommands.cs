@@ -616,9 +616,9 @@ namespace Redis.OM
         /// <param name="connection">the connection.</param>
         /// <param name="keyName">the key name.</param>
         /// <returns>the object serialized into a dictionary.</returns>
-        public static async Task<IDictionary<string, string>> HGetAllAsync(this IRedisConnection connection, string keyName)
+        public static async Task<IDictionary<string, RedisReply>> HGetAllAsync(this IRedisConnection connection, string keyName)
         {
-            var ret = new Dictionary<string, string>();
+            var ret = new Dictionary<string, RedisReply>();
             var res = (await connection.ExecuteAsync("HGETALL", keyName)).ToArray();
             for (var i = 0; i < res.Length; i += 2)
             {

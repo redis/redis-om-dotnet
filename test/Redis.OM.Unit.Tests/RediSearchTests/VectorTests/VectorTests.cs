@@ -104,7 +104,7 @@ public class VectorIndexCreationTests
         float[] floats = Enumerable.Range(0, 30).Select(x => (float)x).ToArray();
         var blob = compVector.SelectMany(BitConverter.GetBytes).ToArray();
         var floatBlob = floats.SelectMany(BitConverter.GetBytes).ToArray();
-        _ = collection.NearestNeighbors(x=>x.SimpleHnswVector, 5, compVector).OrderBy(x=>x.VectorScoreField.NearestNeighborsScore).ToList();
+        _ = collection.NearestNeighbors(x=>x.SimpleHnswVector, 5, compVector).OrderBy(x=>x.VectorScores.NearestNeighborsScore).ToList();
 
         _substitute.Received().Execute("FT.SEARCH",
             $"{nameof(ObjectWithVector).ToLower()}-idx",
@@ -113,7 +113,7 @@ public class VectorIndexCreationTests
 
         _substitute.ClearSubstitute();
         _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
-        _ = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 8, "hello world").OrderByDescending(x=>x.VectorScoreField.NearestNeighborsScore).ToArray();
+        _ = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 8, "hello world").OrderByDescending(x=>x.VectorScores.NearestNeighborsScore).ToArray();
 
         _substitute.Received().Execute("FT.SEARCH",
             $"{nameof(ObjectWithVector).ToLower()}-idx",

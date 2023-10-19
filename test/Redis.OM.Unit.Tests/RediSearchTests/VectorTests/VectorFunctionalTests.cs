@@ -64,8 +64,8 @@ public class VectorFunctionalTests
         var res = collection.NearestNeighbors(x=>x.SimpleVectorizedVector, 1, "FooBarBaz")
             .First(x => x.SimpleHnswVector.VectorRange(queryVector, 5, "range"));
         Assert.Equal("helloWorld", res.Id);
-        Assert.Equal(4, res.VectorScoreField.RangeScore);
-        Assert.Equal(0, res.VectorScoreField.NearestNeighborsScore);
+        Assert.Equal(4, res.VectorScores.RangeScore);
+        Assert.Equal(0, res.VectorScores.NearestNeighborsScore);
     }
 
     [Fact]
@@ -84,11 +84,30 @@ public class VectorFunctionalTests
 
         var res = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 1, "FooBarBaz").First();
         Assert.Equal("helloWorld", res.Id);
-        Assert.Equal(0, res.VectorScoreField.NearestNeighborsScore);
+        Assert.Equal(0, res.VectorScores.NearestNeighborsScore);
         res = collection.NearestNeighbors(x => x.SimpleHnswVector, 1, queryVector).First();
-        Assert.Equal(4, res.VectorScoreField.NearestNeighborsScore);
+        Assert.Equal(4, res.VectorScores.NearestNeighborsScore);
     }
 
+    [Fact]
+    public void ScoresOnHash()
+    {
+        _connection.DropIndexAndAssociatedRecords(typeof(ObjectWithVectorHash));
+        _connection.CreateIndex(typeof(ObjectWithVectorHash));
+        var doubles = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var obj = new ObjectWithVectorHash
+        {
+            Id = "helloWorld",
+            SimpleHnswVector = doubles,
+            SimpleVectorizedVector = "foo",
+        };
+        var collection = new RedisCollection<ObjectWithVectorHash>(_connection);
+        collection.Insert(obj);
+        var res = collection.NearestNeighbors(x => x.SimpleHnswVector, 5, doubles).First();
+        
+        Assert.Equal(0, res.VectorScores.NearestNeighborsScore);
+    }
+    
     [Fact]
     public void TestIndex()
     {

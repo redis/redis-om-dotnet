@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Redis.OM;
 
 namespace Redis.OM.Searching
 {
@@ -54,7 +53,8 @@ namespace Redis.OM.Searching
             var dict = new Dictionary<string, T>();
             foreach (var kvp in Documents)
             {
-                var obj = RedisObjectHandler.FromHashSet<T>(kvp.Value);
+                var rrDict = kvp.Value.ToDictionary(x => x.Key, x => (RedisReply)x.Value);
+                var obj = RedisObjectHandler.FromHashSet<T>(rrDict);
                 dict.Add(kvp.Key, obj);
             }
 
@@ -112,7 +112,7 @@ namespace Redis.OM.Searching
                 for (var i = 1; i < vals.Count(); i += 2)
                 {
                     var docId = (string)vals[i];
-                    var documentHash = new Dictionary<string, string>();
+                    var documentHash = new Dictionary<string, RedisReply>();
                     var docArray = vals[i + 1].ToArray();
                     if (docArray.Length > 1)
                     {

@@ -5,7 +5,8 @@ using System.Text.Json.Serialization;
 namespace Redis.OM.Modeling.Vectors
 {
     /// <summary>
-    /// A collector for vector scores.
+    /// A collector for vector scores, binding this to your model causes Redis OM to bind all scores resulting from
+    /// a vector query to it. Otherwise it will be ignored when it is added to Redis.
     /// </summary>
     public class VectorScores
     {
