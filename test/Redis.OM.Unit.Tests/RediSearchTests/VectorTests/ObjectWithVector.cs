@@ -18,7 +18,7 @@ public class ObjectWithVector
     [SimpleVectorizer]
     public string SimpleVectorizedVector { get; set; }
 
-    public VectorScores VectorScoreField { get; set; }
+    public VectorScores VectorScores { get; set; }
 }
 
 [Document(StorageType = StorageType.Hash)]
@@ -33,6 +33,8 @@ public class ObjectWithVectorHash
     [Vector(Algorithm = VectorAlgorithm.FLAT)]
     [SimpleVectorizer]
     public string SimpleVectorizedVector { get; set; }
+
+    public VectorScores VectorScores { get; set; }
 }
 
 [Document(StorageType = StorageType.Json, Prefixes = new []{"Simple"})]

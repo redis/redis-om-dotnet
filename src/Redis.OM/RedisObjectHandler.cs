@@ -32,21 +32,20 @@ namespace Redis.OM
         };
 
         /// <summary>
-        /// Builds object from provided hash set.
+        /// Tries to parse the hash set into a fully or partially hydrated object.
         /// </summary>
-        /// <param name="hash">Hash set to build item from.</param>
-        /// <typeparam name="T">The type to construct.</typeparam>
-        /// <returns>An instance of the requested object.</returns>
-        /// <exception cref="Exception">Throws an exception if Deserialization fails.</exception>
-        internal static T FromHashSet<T>(IDictionary<string, string> hash)
-            where T : notnull
+        /// <param name="hash">The hash to generate the object from.</param>
+        /// <typeparam name="T">The type to convert to.</typeparam>
+        /// <returns>A fully or partially hydrated object.</returns>
+        /// <exception cref="Exception">Thrown if deserialization fails.</exception>
+        /// <exception cref="ArgumentException">Thrown if documentAttribute not decorating type.</exception>
+        internal static T FromHashSet<T>(IDictionary<string, RedisReply> hash)
         {
-            var dict = hash.ToDictionary(x => x.Key, x => new RedisReply(x.Value.ToString()));
+            var stringDictionary = hash.ToDictionary(x => x.Key, x => x.Value.ToString());
             if (typeof(IRedisHydrateable).IsAssignableFrom(typeof(T)))
             {
                 var obj = Activator.CreateInstance<T>();
-                ((IRedisHydrateable)obj).Hydrate(hash);
-                return obj;
+                ((IRedisHydrateable)obj!).Hydrate(stringDictionary);
             }
 
             var attr = Attribute.GetCustomAttribute(typeof(T), typeof(DocumentAttribute)) as DocumentAttribute;
@@ -61,7 +60,7 @@ namespace Redis.OM
             }
             else
             {
-                asJson = SendToJson(dict, typeof(T));
+                asJson = SendToJson(hash, typeof(T));
             }
 
             var res = JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
@@ -88,41 +87,6 @@ namespace Redis.OM
             }
 
             return res;
-        }
-
-        /// <summary>
-        /// Tries to parse the hash set into a fully or partially hydrated object.
-        /// </summary>
-        /// <param name="hash">The hash to generate the object from.</param>
-        /// <typeparam name="T">The type to convert to.</typeparam>
-        /// <returns>A fully or partially hydrated object.</returns>
-        /// <exception cref="Exception">Thrown if deserialization fails.</exception>
-        /// <exception cref="ArgumentException">Thrown if documentAttribute not decorating type.</exception>
-        internal static T FromHashSet<T>(IDictionary<string, RedisReply> hash)
-        {
-            var stringDictionary = hash.ToDictionary(x => x.Key, x => x.Value.ToString());
-            if (typeof(IRedisHydrateable).IsAssignableFrom(typeof(T)))
-            {
-                var obj = Activator.CreateInstance<T>();
-                ((IRedisHydrateable)obj!).Hydrate(stringDictionary);
-            }
-
-            var attr = Attribute.GetCustomAttribute(typeof(T), typeof(DocumentAttribute)) as DocumentAttribute;
-            string asJson;
-            if (attr != null && attr.StorageType == StorageType.Json && hash.ContainsKey("$"))
-            {
-                asJson = hash["$"];
-            }
-            else if (attr != null)
-            {
-                asJson = SendToJson(hash, typeof(T));
-            }
-            else
-            {
-                throw new ArgumentException("Type must be decorated with a DocumentAttribute");
-            }
-
-            return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
         }
 
         /// <summary>
@@ -325,7 +289,7 @@ namespace Redis.OM
         internal static T ToObject<T>(this RedisReply val)
             where T : notnull
         {
-            var hash = new Dictionary<string, string>();
+            var hash = new Dictionary<string, RedisReply>();
             var vals = val.ToArray();
             for (var i = 0; i < vals.Length; i += 2)
             {

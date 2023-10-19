@@ -49,6 +49,15 @@ namespace Redis.OM
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisReply"/> class.
         /// </summary>
+        /// <param name="raw">the raw bytes.</param>
+        internal RedisReply(byte[] raw)
+        {
+            _raw = raw;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisReply"/> class.
+        /// </summary>
         /// <param name="val">the value.</param>
         internal RedisReply(double val)
         {
