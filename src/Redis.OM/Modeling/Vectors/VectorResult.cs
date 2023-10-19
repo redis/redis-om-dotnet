@@ -1,30 +1,30 @@
-namespace Redis.OM.Modeling
+namespace Redis.OM
 {
     /// <summary>
-    /// A result from a vector search.
+    /// Represents a vector result with its score and the document associated with it.
     /// </summary>
-    /// <typeparam name="T">The Document type.</typeparam>
+    /// <typeparam name="T">the document type.</typeparam>
     public class VectorResult<T>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="VectorResult{T}"/> class.
         /// </summary>
-        /// <param name="score">the score.</param>
         /// <param name="document">the document.</param>
-        internal VectorResult(double score, T document)
+        /// <param name="score">the score.</param>
+        internal VectorResult(T document, double score)
         {
             Score = score;
             Document = document;
         }
 
         /// <summary>
-        /// Gets the distance score between this document and the queried vector.
-        /// </summary>
-        public double Score { get; }
-
-        /// <summary>
-        /// Gets the document part of the result.
+        /// Gets the document.
         /// </summary>
         public T Document { get; }
+
+        /// <summary>
+        /// Gets the score.
+        /// </summary>
+        public double Score { get; }
     }
 }

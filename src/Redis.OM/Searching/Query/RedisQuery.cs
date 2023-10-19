@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Redis.OM.Modeling.Vectors;
 
 namespace Redis.OM.Searching.Query
 {
@@ -22,6 +24,11 @@ namespace Redis.OM.Searching.Query
         /// Gets or sets the nearest neighbors query.
         /// </summary>
         public NearestNeighbors? NearestNeighbors { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parameters for the query.
+        /// </summary>
+        public List<object> Parameters { get; set; } = new ();
 
         /// <summary>
         /// Gets or sets the flags for the query options.
@@ -70,6 +77,7 @@ namespace Redis.OM.Searching.Query
         /// <exception cref="ArgumentException">thrown if the index is null.</exception>
         internal object[] SerializeQuery()
         {
+            var parameters = new List<object>(Parameters);
             var ret = new List<object>();
             if (string.IsNullOrEmpty(Index))
             {
@@ -77,18 +85,28 @@ namespace Redis.OM.Searching.Query
             }
 
             ret.Add(Index);
-            if (NearestNeighbors is null)
+
+            if (NearestNeighbors is not null)
             {
-                ret.Add(QueryText);
+                var queryText = $"({QueryText})=>[KNN {NearestNeighbors.NumNeighbors} @{NearestNeighbors.PropertyName} ${parameters.Count} AS {VectorScores.NearestNeighborScoreName}]";
+                ret.Add(queryText);
+                parameters.Add(NearestNeighbors.VectorBlob);
             }
             else
             {
-                var queryText = $"({QueryText})=>[KNN {NearestNeighbors.NumNeighbors} @{NearestNeighbors.PropertyName} $V]";
-                ret.Add(queryText);
+                ret.Add(QueryText);
+            }
+
+            if (parameters.Any())
+            {
                 ret.Add("PARAMS");
-                ret.Add(2);
-                ret.Add("V");
-                ret.Add(NearestNeighbors.VectorBlob);
+                ret.Add(parameters.Count * 2);
+                for (var i = 0; i < parameters.Count; i++)
+                {
+                    ret.Add(i.ToString());
+                    ret.Add(parameters[i]);
+                }
+
                 ret.Add("DIALECT");
                 ret.Add(2);
             }

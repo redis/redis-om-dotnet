@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Text;
 using Redis.OM.Contracts;
-using Redis.OM.Modeling;
 using Redis.OM.Searching;
 using Xunit;
 
@@ -10,11 +9,63 @@ namespace Redis.OM.Unit.Tests;
 [Collection("Redis")]
 public class VectorFunctionalTests
 {
-    private IRedisConnection _connection = null;
+    private readonly IRedisConnection _connection;
 
     public VectorFunctionalTests(RedisSetup setup)
     {
         _connection = setup.Connection;
+    }
+
+    [Fact]
+    public void BasicRangeQuery()
+    {
+        _connection.CreateIndex(typeof(ObjectWithVector));
+        var collection = new RedisCollection<ObjectWithVector>(_connection);
+        collection.Insert(new ObjectWithVector
+        {
+            Id = "helloWorld",
+            SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
+            SimpleVectorizedVector = "FooBarBaz"
+        });
+        var queryVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
+        var res = collection.First(x => x.SimpleHnswVector.VectorRange(queryVector, 5));
+        Assert.Equal("helloWorld", res.Id);
+    }
+
+    [Fact]
+    public void MultiRangeOnSameProperty()
+    {
+        _connection.CreateIndex(typeof(ObjectWithVector));
+        var collection = new RedisCollection<ObjectWithVector>(_connection);
+        collection.Insert(new ObjectWithVector
+        {
+            Id = "helloWorld",
+            SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
+            SimpleVectorizedVector = "FooBarBaz"
+        });
+        var queryVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
+        var res = collection.First(x => x.SimpleHnswVector.VectorRange(queryVector, 5) && x.SimpleHnswVector.VectorRange(queryVector, 6));
+        Assert.Equal("helloWorld", res.Id);
+    }
+
+    [Fact]
+    public void RangeAndKnn()
+    {
+        _connection.CreateIndex(typeof(ObjectWithVector));
+        var collection = new RedisCollection<ObjectWithVector>(_connection);
+        collection.Insert(new ObjectWithVector
+        {
+            Id = "helloWorld",
+            SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
+            SimpleVectorizedVector = "FooBarBaz"
+        });
+        var queryVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
+        queryVector[0] += 2;
+        var res = collection.NearestNeighbors(x=>x.SimpleVectorizedVector, 1, "FooBarBaz")
+            .First(x => x.SimpleHnswVector.VectorRange(queryVector, 5, "range"));
+        Assert.Equal("helloWorld", res.Id);
+        Assert.Equal(4, res.VectorScoreField.RangeScore);
+        Assert.Equal(0, res.VectorScoreField.NearestNeighborsScore);
     }
 
     [Fact]
@@ -28,53 +79,15 @@ public class VectorFunctionalTests
             SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
             SimpleVectorizedVector = "FooBarBaz"
         });
+        var queryVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
+        queryVector[0] += 2;
 
         var res = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 1, "FooBarBaz").First();
         Assert.Equal("helloWorld", res.Id);
+        Assert.Equal(0, res.VectorScoreField.NearestNeighborsScore);
+        res = collection.NearestNeighbors(x => x.SimpleHnswVector, 1, queryVector).First();
+        Assert.Equal(4, res.VectorScoreField.NearestNeighborsScore);
     }
-
-    [Fact]
-    public void Overflow()
-    {
-        var doubles = new double[]
-        {
-            1.79769313486231570e+308, 1.79769313486231570e+308, 1.79769313486231570e+308, 1.79769313486231570e+308,
-            1.79769313486231570e+308, 1.79769313486231570e+308
-        };
-
-        var lowerDoubles = new double[]
-            { -1.79769E+308, -1.79769E+308, -1.79769E+308, -1.79769E+308, -1.79769E+308, -1.79769E+308 };
-        _connection.CreateIndex(typeof(ToyVector));
-        var obj = new ToyVector()
-        {
-            Id = "1",
-            SimpleVector = doubles
-        };
-        
-        var collection = new RedisCollection<ToyVector>(_connection);
-        collection.NearestNeighbors(x => x.SimpleVector, 1, lowerDoubles).First();
-    }
-    
-    [Fact]
-    public void Dave()
-    {
-        _connection.CreateIndex(typeof(ToyVector));
-
-        // var doubles = VectorUtils.VecStrToDoubles("This vector's json result gets blown out oddly..");
-        var doubles = VectorUtils.VecStrToDoubles("I'm sorry Dave, I'm afraid I can't do that......");
-        // var doubles = new double[] { 0, 1, 2, 3, 4, 5 };
-        var obj = new ToyVector()
-        {
-            Id = "1",
-            SimpleVector = doubles
-        };
-        _connection.Set(obj);
-
-        var collection = new RedisCollection<ToyVector>(_connection);
-        collection.NearestNeighbors(x => x.SimpleVector, 1, doubles).First();
-    }
-
-    
 
     [Fact]
     public void TestIndex()
@@ -84,7 +97,7 @@ public class VectorFunctionalTests
         var doubles = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         var obj = new ObjectWithVectorHash
         {
-            Id = "foo",
+            Id = "helloWorld",
             SimpleHnswVector = doubles,
             SimpleVectorizedVector = "foo",
         };
@@ -95,7 +108,7 @@ public class VectorFunctionalTests
 
         key = _connection.Set(new ObjectWithVector()
         {
-            Id = "foo",
+            Id = "helloWorld",
             SimpleHnswVector = doubles,
             SimpleVectorizedVector = "foobarbaz"
         });
@@ -132,7 +145,7 @@ public class VectorFunctionalTests
 
         var hashObj = new ObjectWithVectorHash()
         {
-            Id = "foo",
+            Id = "helloWorld",
             SimpleHnswVector = simpleHnswHash,
             SimpleVectorizedVector = "foobar"
         };

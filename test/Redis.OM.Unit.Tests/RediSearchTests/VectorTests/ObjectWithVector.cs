@@ -1,4 +1,7 @@
+using System.Text.Json.Serialization;
 using Redis.OM.Modeling;
+using Redis.OM.Modeling.Vectors;
+using StackExchange.Redis;
 
 namespace Redis.OM.Unit.Tests;
 
@@ -14,6 +17,8 @@ public class ObjectWithVector
     [Vector(Algorithm = VectorAlgorithm.FLAT)]
     [SimpleVectorizer]
     public string SimpleVectorizedVector { get; set; }
+
+    public VectorScores VectorScoreField { get; set; }
 }
 
 [Document(StorageType = StorageType.Hash)]
