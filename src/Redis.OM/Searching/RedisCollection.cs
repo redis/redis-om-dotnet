@@ -549,7 +549,7 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc/>
-        public IEnumerator<T> GetEnumerator()
+        public virtual IEnumerator<T> GetEnumerator()
         {
             StateManager.Clear();
             return new RedisCollectionEnumerator<T>(Expression, _connection, ChunkSize, StateManager, BooleanExpression, SaveState, RootType, typeof(T));

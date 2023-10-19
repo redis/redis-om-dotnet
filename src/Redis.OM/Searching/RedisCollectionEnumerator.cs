@@ -164,7 +164,7 @@ namespace Redis.OM.Searching
                 _query!.Limit!.Offset = _query.Limit.Offset + _query.Limit.Number;
             }
 
-            _records = await _connection.SearchAsync<T>(_query);
+            _records = await _connection.SearchAsync<T>(_query).ConfigureAwait(false);
             _index = 0;
             _started = true;
             ConcatenateRecords();

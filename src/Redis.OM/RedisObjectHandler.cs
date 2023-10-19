@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Web;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Modeling.Vectors;
 
 [assembly: InternalsVisibleTo("Redis.OM.POC")]
 
@@ -63,7 +64,30 @@ namespace Redis.OM
                 asJson = SendToJson(dict, typeof(T));
             }
 
-            return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            var res = JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            if (hash.ContainsKey(VectorScores.NearestNeighborScoreName) || hash.Keys.Any(x => x.EndsWith(VectorScores.RangeScoreSuffix)))
+            {
+                var vectorScores = new VectorScores();
+                if (hash.ContainsKey(VectorScores.NearestNeighborScoreName))
+                {
+                    vectorScores.NearestNeighborsScore = ParseScoreFromString(hash[VectorScores.NearestNeighborScoreName]);
+                }
+
+                foreach (var key in hash.Keys.Where(x => x.EndsWith(VectorScores.RangeScoreSuffix)))
+                {
+                    var strippedKey = key.Substring(0, key.Length - VectorScores.RangeScoreSuffix.Length);
+                    var score = ParseScoreFromString(hash[key]);
+                    vectorScores.RangeScores.Add(strippedKey, score);
+                }
+
+                var scoreProperties = typeof(T).GetProperties().Where(x => x.PropertyType == typeof(VectorScores));
+                foreach (var p in scoreProperties)
+                {
+                    p.SetValue(res, vectorScores);
+                }
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -606,6 +630,22 @@ namespace Redis.OM
             ret = ret.TrimEnd(',');
             ret += "}";
             return ret;
+        }
+
+        private static double ParseScoreFromString(string scoreStr)
+        {
+            if (double.TryParse(scoreStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var score))
+            {
+                return score;
+            }
+
+            return scoreStr switch
+            {
+                "inf" => double.PositiveInfinity,
+                "-inf" => double.NegativeInfinity,
+                "nan" => double.NaN,
+                _ => throw new ArgumentException($"Could not parse score from {scoreStr}", nameof(scoreStr))
+            };
         }
 
         private static Type GetEnumerableType(PropertyInfo pi)
