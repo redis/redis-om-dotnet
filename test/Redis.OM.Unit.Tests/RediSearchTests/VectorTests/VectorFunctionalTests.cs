@@ -109,6 +109,27 @@ public class VectorFunctionalTests
     }
     
     [Fact]
+    public void HybridQueryTest()
+    {
+        _connection.DropIndexAndAssociatedRecords(typeof(ObjectWithVectorHash));
+        _connection.CreateIndex(typeof(ObjectWithVectorHash));
+        var doubles = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var obj = new ObjectWithVectorHash
+        {
+            Id = "theOneWithStuff",
+            SimpleHnswVector = doubles,
+            Name = "Steve",
+            Num = 6,
+            SimpleVectorizedVector = "foo",
+        };
+        var collection = new RedisCollection<ObjectWithVectorHash>(_connection);
+        collection.Insert(obj);
+        var res = collection.Where(x=>x.Name == "Steve" && x.Num == 6).NearestNeighbors(x => x.SimpleHnswVector, 5, doubles).First();
+        
+        Assert.Equal(0, res.VectorScores.NearestNeighborsScore);
+    }
+
+    [Fact]
     public void TestIndex()
     {
         _connection.CreateIndex(typeof(ObjectWithVectorHash));

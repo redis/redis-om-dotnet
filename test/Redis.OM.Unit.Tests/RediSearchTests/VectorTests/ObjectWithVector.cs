@@ -11,6 +11,10 @@ public class ObjectWithVector
     [RedisIdField]
     public string Id { get; set; }
 
+    [Indexed] public string Name { get; set; }
+
+    [Indexed] public int Num { get; set; }
+    
     [Vector(Algorithm = VectorAlgorithm.HNSW, Dim = 10)]
     public double[] SimpleHnswVector { get; set; }
 
@@ -26,6 +30,10 @@ public class ObjectWithVectorHash
 {
     [RedisIdField]
     public string Id { get; set; }
+
+    [Indexed] public string Name { get; set; }
+    
+    [Indexed] public int Num { get; set; }
 
     [Vector(Algorithm = VectorAlgorithm.HNSW, Dim = 10)]
     public double[] SimpleHnswVector { get; set; }

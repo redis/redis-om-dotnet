@@ -183,4 +183,21 @@ public class VectorIndexCreationTests
         var deseralized = JsonSerializer.Deserialize<ObjectWithVector>(json);
         Assert.Equal("foobar", deseralized.SimpleVectorizedVector);
     }
+
+    [Fact]
+    public void HybridQuery()
+    {
+        _substitute.ClearSubstitute();
+        _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
+        var collection = new RedisCollection<ObjectWithVector>(_substitute);
+        var compVector = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var blob = compVector.SelectMany(BitConverter.GetBytes);
+        _ = collection.Where(x => x.Name == "Steve" && x.Num < 5)
+            .NearestNeighbors(x => x.SimpleHnswVector, 2, compVector).ToList();
+        _substitute.Received().Execute("FT.SEARCH",
+            $"{nameof(ObjectWithVector).ToLower()}-idx",
+            $"(((@Name:{{Steve}}) (@Num:[-inf (5])))=>[KNN 2 @SimpleHnswVector $0 AS {VectorScores.NearestNeighborScoreName}]",
+            "PARAMS", 2, "0", Arg.Is<byte[]>(b=>b.SequenceEqual(blob)), "DIALECT", 2, "LIMIT", "0", "100");
+        
+    }
 }
