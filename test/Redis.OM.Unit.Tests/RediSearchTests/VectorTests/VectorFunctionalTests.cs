@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text;
 using Redis.OM.Contracts;
@@ -16,6 +17,88 @@ public class VectorFunctionalTests
         _connection = setup.Connection;
     }
 
+    [Fact]
+    public void TestHuggingFaceVectorizer()
+    {
+        _connection.DropIndexAndAssociatedRecords(typeof(HuggingFaceVectors));
+        _connection.CreateIndex(typeof(HuggingFaceVectors));
+        var collection = new RedisCollection<HuggingFaceVectors>(_connection);
+        var obj = new HuggingFaceVectors
+        {
+            Age = 45,
+            Sentence = "Hello World this is Hal.",
+            Name = "Hal"
+        };
+
+        collection.Insert(obj);
+        var res = collection.NearestNeighbors(x => x.Sentence, 2, "Hello World this is Hal.").First();
+        Assert.Equal(obj.Id, res.Id);
+        Assert.Equal(0, res.VectorScore.NearestNeighborsScore);
+        Assert.Equal(obj.Sentence, res.Sentence);
+    }
+
+    [Fact]
+    public void TestParis()
+    {
+        _connection.DropIndexAndAssociatedRecords(typeof(HuggingFaceVectors));
+        _connection.CreateIndex(typeof(HuggingFaceVectors));
+        var collection = new RedisCollection<HuggingFaceVectors>(_connection);
+        var obj = new HuggingFaceVectors
+        {
+            Age = 2259,
+            Sentence = "What is the capital of France?",
+            Name = "Paris"
+        };
+
+        collection.Insert(obj);
+        var res = collection
+            .First(x => x.Sentence.VectorRange("What really is the capital of France?", .1, "range") && x.Age > 1000);
+        res = collection.NearestNeighbors(x => x.Sentence, 2, "What really is the capital of France?").First(x => x.Age > 1000);
+        Assert.Equal(obj.Id, res.Id);
+        Assert.True(res.VectorScore.RangeScore < .1);
+        Assert.Equal(obj.Sentence, res.Sentence);
+    }
+
+    [Fact]
+    public void TestOpenAIVectorizer()
+    {
+        _connection.DropIndexAndAssociatedRecords(typeof(OpenAIVectors));
+        _connection.CreateIndex(typeof(OpenAIVectors));
+        var collection = new RedisCollection<OpenAIVectors>(_connection);
+        var obj = new OpenAIVectors
+        {
+            Age = 45,
+            Sentence = "Hello World this is Hal.",
+            Name = "Hal"
+        };
+
+        collection.Insert(obj);
+        var res = collection.NearestNeighbors(x => x.Sentence, 2, "Hello World this is Hal.").First();
+        Assert.Equal(obj.Id, res.Id);
+        Assert.True(res.VectorScore.NearestNeighborsScore < .01);
+        Assert.Equal(obj.Sentence, res.Sentence);
+    }
+
+    [Fact]
+    public void TestOpenAIVectorRange()
+    {
+        _connection.DropIndexAndAssociatedRecords(typeof(OpenAIVectors));
+        _connection.CreateIndex(typeof(OpenAIVectors));
+        var collection = new RedisCollection<OpenAIVectors>(_connection);
+        var obj = new OpenAIVectors
+        {
+            Age = 2259,
+            Sentence = "What is the capital of France?",
+            Name = "Paris"
+        };
+
+        collection.Insert(obj);
+        var res = collection.First(x => x.Sentence.VectorRange("What really is the capital of France?", 1, "range"));
+        Assert.Equal(obj.Id, res.Id);
+        Assert.True(res.VectorScore.RangeScore < .1);
+        Assert.Equal(obj.Sentence, res.Sentence);
+    }
+    
     [Fact]
     public void BasicRangeQuery()
     {

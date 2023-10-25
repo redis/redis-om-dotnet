@@ -388,3 +388,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+test/Redis.OM.Unit.Tests/appsettings.json.local
