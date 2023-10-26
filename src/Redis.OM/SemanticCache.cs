@@ -26,7 +26,7 @@ namespace Redis.OM
         /// <param name="ttl">The Time To Live for a record inserted.</param>
         /// <param name="vectorizer">The vectorizer to use.</param>
         /// <param name="connection">The connection to redis.</param>
-        internal SemanticCache(string indexName, string prefix, double threshold, long? ttl, IVectorizer vectorizer, IRedisConnection connection)
+        internal SemanticCache(string indexName, string prefix, double threshold, long? ttl, IVectorizer<string> vectorizer, IRedisConnection connection)
         {
             IndexName = indexName;
             Prefix = prefix;
@@ -49,7 +49,7 @@ namespace Redis.OM
         public long? Ttl { get; }
 
         /// <inheritdoc/>
-        public IVectorizer Vectorizer { get; }
+        public IVectorizer<string> Vectorizer { get; }
 
         /// <inheritdoc/>
         public SemanticCacheResponse[] Check(string prompt, int maxNumResults = 10)
