@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,6 +27,23 @@ namespace Redis.OM.Modeling
             typeof(float),
             typeof(DateTime),
         };
+
+        /// <summary>
+        /// Determins whether the collection is a numeric collection.
+        /// </summary>
+        /// <param name="enumerable">The enumerable.</param>
+        /// <returns>whether the enumerable is a numeric enumerable.</returns>
+        internal static bool IsNumericEnumerable(in IEnumerable enumerable)
+        {
+            var type = enumerable.GetType().IsArray ? enumerable.GetType().GetElementType() : enumerable.GetType().GenericTypeArguments[0];
+            if (type is null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+            return NumericTypes.Contains(underlyingType);
+        }
 
         /// <summary>
         /// Is the type numeric.
