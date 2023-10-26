@@ -6,9 +6,9 @@
     <RootNamespace>Redis.OM</RootNamespace>
     <Nullable>enable</Nullable>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <PackageVersion>0.5.3</PackageVersion>
-    <Version>0.5.3</Version>
-    <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.5.3</PackageReleaseNotes>
+    <PackageVersion>0.5.4</PackageVersion>
+    <Version>0.5.4</Version>
+    <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.5.4</PackageReleaseNotes>
     <Description>Object Mapping and More for Redis</Description>
     <Title>Redis OM</Title>
     <Authors>Steve Lorello</Authors>
