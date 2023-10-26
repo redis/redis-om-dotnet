@@ -868,6 +868,12 @@ namespace Redis.OM.Common
                 searchFieldAttribute = DetermineSearchAttribute(expression);
             }
 
+            if (exp.Arguments.LastOrDefault() is MemberExpression memEx && exp.Arguments.FirstOrDefault() is ConstantExpression cs)
+            {
+                var propertyName = $"{GetOperandString(memEx)}";
+                return $"({GetContainsStringForConstantExpression(propertyName, cs)})";
+            }
+
             if (expression == null)
             {
                 throw new InvalidOperationException($"Could not parse query for Contains");
@@ -883,6 +889,45 @@ namespace Redis.OM.Common
             }
 
             return (type == typeof(string)) ? $"({memberName}:{{*{EscapeTagField(literal)}*}})" : $"({memberName}:{{{EscapeTagField(literal)}}})";
+        }
+
+        private static string GetContainsStringForConstantExpression(string propertyNameOperand, ConstantExpression cs)
+        {
+            var enumerable = cs.Value as IEnumerable;
+            if (enumerable is null)
+            {
+                throw new ArgumentException("Could not create contains predicate from non-enumerable value");
+            }
+
+            var isNumeric = TypeDeterminationUtilities.IsNumericEnumerable(enumerable);
+            var sb = new StringBuilder();
+
+            if (!isNumeric)
+            {
+                sb.Append($"{propertyNameOperand}:{{");
+            }
+
+            foreach (var o in enumerable)
+            {
+                if (isNumeric)
+                {
+                    sb.Append($"{propertyNameOperand}:[{o} {o}]");
+                }
+                else
+                {
+                    sb.Append(EscapeTagField(o.ToString()));
+                }
+
+                sb.Append("|");
+            }
+
+            sb.Remove(sb.Length - 1, 1);
+            if (!isNumeric)
+            {
+                sb.Append("}");
+            }
+
+            return sb.ToString();
         }
 
         private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp)
