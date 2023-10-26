@@ -39,7 +39,7 @@ namespace Redis.OM.Contracts
         /// <param name="prompt">The prompt.</param>
         /// <param name="maxNumResults">How many results to pull back at most (defaults to 10).</param>
         /// <returns>The responses.</returns>
-        SemanticCacheResponse[] Check(string prompt, int maxNumResults = 10);
+        SemanticCacheResponse[] GetSimilar(string prompt, int maxNumResults = 10);
 
         /// <summary>
         /// Checks the cache to see if any close prompts have been added.
@@ -47,7 +47,7 @@ namespace Redis.OM.Contracts
         /// <param name="prompt">The prompt.</param>
         /// <param name="maxNumResults">How many results to pull back at most (defaults to 10).</param>
         /// <returns>The responses.</returns>
-        Task<SemanticCacheResponse[]> CheckAsync(string prompt, int maxNumResults = 10);
+        Task<SemanticCacheResponse[]> GetSimilarAsync(string prompt, int maxNumResults = 10);
 
         /// <summary>
         /// Stores the Prompt/response/metadata in Redis.
@@ -55,7 +55,7 @@ namespace Redis.OM.Contracts
         /// <param name="prompt">The prompt.</param>
         /// <param name="response">The response.</param>
         /// <param name="metadata">The metadata.</param>
-        void Store(string prompt, string response, object? metadata);
+        void Store(string prompt, string response, object? metadata = null);
 
         /// <summary>
         /// Stores the Prompt/response/metadata in Redis.
@@ -64,7 +64,7 @@ namespace Redis.OM.Contracts
         /// <param name="response">The response.</param>
         /// <param name="metadata">The metadata.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task StoreAsync(string prompt, string response, object? metadata);
+        Task StoreAsync(string prompt, string response, object? metadata = null);
 
         /// <summary>
         /// Deletes the cache from Redis.
@@ -78,5 +78,16 @@ namespace Redis.OM.Contracts
         /// <param name="dropRecords">Whether or not to drop the records associated with the cache. Defaults to true.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task DeleteCacheAsync(bool dropRecords = true);
+
+        /// <summary>
+        /// Creates the index for Semantic Cache.
+        /// </summary>
+        void CreateIndex();
+
+        /// <summary>
+        /// Creates the index for the Semantic Cache.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task CreateIndexAsync();
     }
 }
