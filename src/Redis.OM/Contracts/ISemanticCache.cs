@@ -31,7 +31,7 @@ namespace Redis.OM.Contracts
         /// <summary>
         /// Gets the vectorizer to use for the Semantic Cache.
         /// </summary>
-        IVectorizer Vectorizer { get; }
+        IVectorizer<string> Vectorizer { get; }
 
         /// <summary>
         /// Checks the cache to see if any close prompts have been added.
