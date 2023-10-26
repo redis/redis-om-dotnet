@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
+using Redis.OM.Modeling;
 using Redis.OM.Searching.Query;
 
 namespace Redis.OM
@@ -26,7 +28,7 @@ namespace Redis.OM
         /// <param name="ttl">The Time To Live for a record inserted.</param>
         /// <param name="vectorizer">The vectorizer to use.</param>
         /// <param name="connection">The connection to redis.</param>
-        internal SemanticCache(string indexName, string prefix, double threshold, long? ttl, IVectorizer<string> vectorizer, IRedisConnection connection)
+        public SemanticCache(string indexName, string prefix, double threshold, long? ttl, IVectorizer<string> vectorizer, IRedisConnection connection)
         {
             IndexName = indexName;
             Prefix = prefix;
@@ -52,7 +54,7 @@ namespace Redis.OM
         public IVectorizer<string> Vectorizer { get; }
 
         /// <inheritdoc/>
-        public SemanticCacheResponse[] Check(string prompt, int maxNumResults = 10)
+        public SemanticCacheResponse[] GetSimilar(string prompt, int maxNumResults = 10)
         {
             var query = BuildCheckQuery(prompt, maxNumResults);
             var res = (RedisReply[])_connection.Execute("FT.SEARCH", query.SerializeQuery());
@@ -60,7 +62,7 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public async Task<SemanticCacheResponse[]> CheckAsync(string prompt, int maxNumResults = 10)
+        public async Task<SemanticCacheResponse[]> GetSimilarAsync(string prompt, int maxNumResults = 10)
         {
             var query = BuildCheckQuery(prompt, maxNumResults);
             var res = (RedisReply[])await _connection.ExecuteAsync("FT.SEARCH", query.SerializeQuery()).ConfigureAwait(false);
@@ -68,7 +70,7 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public void Store(string prompt, string response, object? metadata)
+        public void Store(string prompt, string response, object? metadata = null)
         {
             var key = $"{Prefix}:{Sha256Hash(prompt)}";
             var hash = BuildDocumentHash(prompt, response, metadata);
@@ -83,7 +85,7 @@ namespace Redis.OM
         }
 
         /// <inheritdoc/>
-        public Task StoreAsync(string prompt, string response, object? metadata)
+        public Task StoreAsync(string prompt, string response, object? metadata = null)
         {
             var key = $"{Prefix}:{Sha256Hash(prompt)}";
             var hash = BuildDocumentHash(prompt, response, metadata);
@@ -131,6 +133,44 @@ namespace Redis.OM
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
+        public void CreateIndex()
+        {
+            try
+            {
+                var serializedParams = SerializedIndexArgs();
+                _connection.Execute("FT.CREATE", serializedParams);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Index already exists"))
+                {
+                    return;
+                }
+
+                throw;
+            }
+        }
+
+        /// <inheritdoc />
+        public Task CreateIndexAsync()
+        {
+            try
+            {
+                var serializedParams = SerializedIndexArgs();
+                return _connection.ExecuteAsync("FT.CREATE", serializedParams);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Index already exists"))
+                {
+                    return Task.CompletedTask;
+                }
+
+                throw;
+            }
+        }
+
         private static string Sha256Hash(string value)
         {
             StringBuilder sb = new StringBuilder();
@@ -152,7 +192,7 @@ namespace Redis.OM
         private RedisQuery BuildCheckQuery(string prompt, int maxNumResults)
         {
             var query = new RedisQuery(IndexName);
-            query.QueryText = "@embedding:[VECTOR_RANGE $0 $1]=>[$YIELD_DISTANCE_AS: semantic_score]";
+            query.QueryText = "@embedding:[VECTOR_RANGE $0 $1]=>{$YIELD_DISTANCE_AS: semantic_score}";
             query.Parameters.Add(Threshold);
             query.Parameters.Add(Vectorizer.Vectorize(prompt));
             if (maxNumResults != 10)
@@ -198,6 +238,11 @@ namespace Redis.OM
             }
 
             return hash;
+        }
+
+        private object[] SerializedIndexArgs()
+        {
+            return new object[] { IndexName, nameof(Prefix), 1, Prefix, "SCHEMA", "embedding", "VECTOR", "FLAT", 6, "DIM", Vectorizer.Dim, "TYPE", Vectorizer.VectorType.AsRedisString(), "DISTANCE_METRIC", "COSINE", };
         }
     }
 }

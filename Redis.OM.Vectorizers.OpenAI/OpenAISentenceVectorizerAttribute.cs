@@ -1,9 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Redis.OM.Modeling;
-using Redis.OM.Vectorizers.HuggingFace;
 
-namespace Redis.OM.OpenAI;
+namespace Redis.OM;
 
 public class OpenAISentenceVectorizerAttribute : VectorizerAttribute
 {

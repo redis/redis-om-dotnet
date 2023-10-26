@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 
-namespace Redis.OM.Vectorizers.HuggingFace;
+namespace Redis.OM;
 
 public class Configuration
 {
