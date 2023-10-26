@@ -837,7 +837,7 @@ namespace Redis.OM.Common
                 var treatEnumsAsInts = type.IsEnum && !(propertyExpression.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() is JsonConverterAttribute converter && converter.ConverterType == typeof(JsonStringEnumConverter));
                 literal = GetOperandStringForQueryArgs(valuesExpression, treatEnumsAsInts);
 
-                if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>) || type == typeof(Guid) || type == typeof(Ulid) || (type.IsEnum && !treatEnumsAsInts)) && attribute is IndexedAttribute)
+                if ((type == typeof(string) || type == typeof(string[]) || type == typeof(List<string>) || type == typeof(Guid) || type == typeof(Guid[]) || type == typeof(List<Guid>) || type == typeof(Ulid) || (type.IsEnum && !treatEnumsAsInts)) && attribute is IndexedAttribute)
                 {
                     return $"({memberName}:{{{EscapeTagField(literal).Replace("\\|", "|")}}})";
                 }
