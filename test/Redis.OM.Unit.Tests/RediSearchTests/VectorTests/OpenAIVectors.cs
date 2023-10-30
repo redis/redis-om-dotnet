@@ -1,6 +1,6 @@
 using Redis.OM.Modeling;
 using Redis.OM.Modeling.Vectors;
-using Redis.OM.Vectorizers.OpenAI;
+using Redis.OM.Vectorizers;
 
 namespace Redis.OM.Unit.Tests;
 

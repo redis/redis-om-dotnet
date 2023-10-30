@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Net;
-using Redis.OM;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests

@@ -1,4 +1,4 @@
-using Redis.OM.Vectorizers.HuggingFace;
+using Redis.OM.Vectorizers;
 using Redis.OM.Modeling;
 using Redis.OM.Modeling.Vectors;
 

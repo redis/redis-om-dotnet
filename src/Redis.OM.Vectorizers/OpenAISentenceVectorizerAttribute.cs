@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Redis.OM.Modeling;
 
-namespace Redis.OM.Vectorizers.OpenAI;
+namespace Redis.OM.Vectorizers;
 
 public class OpenAISentenceVectorizerAttribute : VectorizerAttribute
 {

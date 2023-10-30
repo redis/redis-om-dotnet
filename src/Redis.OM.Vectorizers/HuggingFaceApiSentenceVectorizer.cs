@@ -3,7 +3,7 @@ using System.Text.Json;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 
-namespace Redis.OM.Vectorizers.HuggingFace;
+namespace Redis.OM.Vectorizers;
 
 public class HuggingFaceApiSentenceVectorizer : IVectorizer<string>
 {
