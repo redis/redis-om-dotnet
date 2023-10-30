@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 
@@ -20,10 +21,10 @@ public class HuggingFaceApiSentenceVectorizer : IVectorizer<string>
     public int Dim { get; }
     public byte[] Vectorize(string str)
     {
-        return GetFloats(str).SelectMany(BitConverter.GetBytes).ToArray();
+        return GetFloats(str, ModelId, _huggingFaceAuthToken).SelectMany(BitConverter.GetBytes).ToArray();
     }
     
-    public float[] GetFloats(string s)
+    public static float[] GetFloats(string s, string modelId, string huggingFaceAuthToken)
     {
         var client = Configuration.Instance.Client;
         var requestContent = JsonContent.Create(new
@@ -37,15 +38,15 @@ public class HuggingFaceApiSentenceVectorizer : IVectorizer<string>
             Method = HttpMethod.Post,
             Content = requestContent,
             RequestUri =
-                new Uri($"{Configuration.Instance.HuggingFaceBaseAddress}/pipeline/feature-extraction/{ModelId}"),
+                new Uri($"{Configuration.Instance.HuggingFaceBaseAddress}/pipeline/feature-extraction/{modelId}"),
             Headers =
             {
-                { "Authorization", $"Bearer {_huggingFaceAuthToken}" }
+                { "Authorization", $"Bearer {huggingFaceAuthToken}" }
             }
         };
         
-        var res = client.SendAsync(request).Result;
-        var floats = res.Content.ReadFromJsonAsync<float[][]>().Result;
+        var res = client.Send(request);
+        var floats = JsonSerializer.Deserialize<float[][]>(RedisOMHttpUtil.ReadJsonSync(res));
         if (floats is null)
         {
             throw new Exception("Did not receive a response back from HuggingFace");

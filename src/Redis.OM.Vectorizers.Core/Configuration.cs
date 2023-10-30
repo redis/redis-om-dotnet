@@ -8,6 +8,7 @@ public class Configuration
     public string? this[string str] => _settings[str];
     public string HuggingFaceAuthorizationToken => _settings["REDIS_OM_HF_TOKEN"] ?? string.Empty;
     public string OpenAiAuthorizationToken => _settings["REDIS_OM_OAI_TOKEN"] ?? string.Empty;
+    public string AzureOpenAIApiKey => _settings["REDIS_OM_AZURE_OAI_TOKEN"] ?? string.Empty;
     public string ModelId => _settings["REDIS_OM_HF_MODEL_ID"] ?? string.Empty;
     public string HuggingFaceBaseAddress => _settings["REDIS_OM_HF_FEATURE_EXTRACTION_URL"] ?? string.Empty; 
     
@@ -45,7 +46,8 @@ public class Configuration
                 {"REDIS_OM_HF_FEATURE_EXTRACTION_URL", DefaultHuggingFaceApiUrl},
                 {"REDIS_OM_OAI_API_URL", DefaultOpenAiApiUrl},
                 {"REDIS_OM_HF_TOKEN", Environment.GetEnvironmentVariable("REDIS_OM_HF_TOKEN")},
-                {"REDIS_OM_OAI_TOKEN", Environment.GetEnvironmentVariable("REDIS_OM_OAI_TOKEN")}
+                {"REDIS_OM_OAI_TOKEN", Environment.GetEnvironmentVariable("REDIS_OM_OAI_TOKEN")},
+                {"REDIS_OM_AZURE_OAI_TOKEN", Environment.GetEnvironmentVariable("REDIS_OM_AZURE_OAI_TOKEN")}
             })
         .AddJsonFile("settings.json", true, true)
         .AddJsonFile("appsettings.json", true, true);

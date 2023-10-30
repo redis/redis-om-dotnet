@@ -3,7 +3,7 @@ using System.Text.Json;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 
-namespace Redis.OM;
+namespace Redis.OM.Vectorizers.OpenAI;
 
 public class OpenAISentenceVectorizer : IVectorizer<string>
 {
@@ -21,35 +21,31 @@ public class OpenAISentenceVectorizer : IVectorizer<string>
     public int Dim { get; }
     public byte[] Vectorize(string str)
     {
-        var floats = GetFloats(str);
+        var floats = GetFloats(str, _model, _openAIAuthToken);
         return floats.SelectMany(BitConverter.GetBytes).ToArray();
     }
 
-    internal float[] GetFloats(string s)
+    internal static float[] GetFloats(string s, string model, string openAIAuthToken)
     {
         var client = Configuration.Instance.Client;
-        var requestContent = JsonContent.Create(
-            new
-            {
-                input = s,
-                model = _model
-            });
+        var requestContent = JsonContent.Create(new { input = s, model = model });
 
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
             RequestUri = new Uri($"{Configuration.Instance.OpenAiApiUrl}/v1/embeddings"),
             Content = requestContent,
-            Headers = { { "Authorization", $"Bearer {_openAIAuthToken}" } }
+            Headers = { { "Authorization", $"Bearer {openAIAuthToken}" } }
         };
 
-        var res = client.SendAsync(request).Result;
+        var res = client.Send(request);
         if (!res.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
                 $"Open AI did not respond with a positive error code: {res.StatusCode}, {res.ReasonPhrase}");
         }
-        var jsonObj = res.Content.ReadFromJsonAsync<JsonElement>().Result;
+
+        var jsonObj = JsonSerializer.Deserialize<JsonElement>(RedisOMHttpUtil.ReadJsonSync(res));
 
         
         if (!jsonObj.TryGetProperty("data", out var data))
