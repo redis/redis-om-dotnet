@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Redis.OM.Vectorizers.OpenAI\Redis.OM.Vectorizers.OpenAI.csproj" />
+    <ProjectReference Include="..\..\src\Redis.OM.Vectorizers.AzureOpenAI\Redis.OM.Vectorizers.AzureOpenAI.csproj" />
     <ProjectReference Include="..\..\src\Redis.OM.Vectorizers.HuggingFace\Redis.OM.Vectorizers.HuggingFace.csproj" />
     <ProjectReference Include="..\..\src\Redis.OM.POC\Redis.OM.POC.csproj" />
   </ItemGroup>

@@ -24,42 +24,19 @@ public class HuggingFaceApiSentenceVectorizerAttribute : VectorizerAttribute
 
     public override byte[] Vectorize(object obj)
     {
-        var s = (string)obj;
+        if (obj is not string s)
+        {
+            throw new ArgumentException("Object must be a string", nameof(obj));
+        }
+        
         var floats = GetFloats(s);
         return floats.SelectMany(BitConverter.GetBytes).ToArray();
     }
 
     public float[] GetFloats(string s)
     {
-        var client = Configuration.Instance.Client;
         var modelId = ModelId ?? Configuration.Instance["REDIS_OM_HF_MODEL_ID"];
         if (modelId is null) throw new InvalidOperationException("Model Id Required to use Hugging Face API.");
-
-        var requestContent = JsonContent.Create(new
-        {
-            inputs = new string[] { s },
-            options = new { wait_for_model = true }
-        });
-
-        var request = new HttpRequestMessage()
-        {
-            Method = HttpMethod.Post,
-            Content = requestContent,
-            RequestUri =
-                new Uri($"{Configuration.Instance.HuggingFaceBaseAddress}/pipeline/feature-extraction/{modelId}"),
-            Headers =
-            {
-                { "Authorization", $"Bearer {Configuration.Instance.HuggingFaceAuthorizationToken}" }
-            }
-        };
-        
-        var res = client.SendAsync(request).Result;
-        var floats = res.Content.ReadFromJsonAsync<float[][]>().Result;
-        if (floats is null)
-        {
-            throw new Exception("Did not receive a response back from HuggingFace");
-        }
-
-        return floats.First();
+        return HuggingFaceApiSentenceVectorizer.GetFloats(s, modelId, Configuration.Instance.HuggingFaceAuthorizationToken);
     }
 }

@@ -4,12 +4,11 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>Redis.OM.Vectorizers.OpenAI</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\Redis.OM.Vectorizers.Core\Redis.OM.Vectorizers.Core.csproj" />
-      <ProjectReference Include="..\src\Redis.OM\Redis.OM.csproj" />
+      <ProjectReference Include="..\Redis.OM.Vectorizers.Core\Redis.OM.Vectorizers.Core.csproj" />
+      <ProjectReference Include="..\Redis.OM\Redis.OM.csproj" />
     </ItemGroup>
 
 </Project>

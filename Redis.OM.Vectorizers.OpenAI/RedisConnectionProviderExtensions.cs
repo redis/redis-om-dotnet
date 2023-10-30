@@ -1,4 +1,5 @@
 using Redis.OM.Contracts;
+using Redis.OM.Vectorizers.OpenAI;
 
 namespace Redis.OM;
 
