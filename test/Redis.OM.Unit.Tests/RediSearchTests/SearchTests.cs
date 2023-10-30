@@ -1,8 +1,10 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using NSubstitute;
 using NSubstitute.ClearExtensions;
@@ -370,7 +372,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100");
         }
-        
+
         [Fact]
         public void TestMatchContains()
         {
@@ -388,6 +390,34 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "100");
         }
         
+        [Fact]
+        public void TestTagContains()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var ste = "Ste";
+            var person = new Person() { TagField = "ath" };
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.TagField.Contains(ste)).ToList();
+            _ = collection.Where(x => x.TagField.Contains(person.TagField)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{*Ste*})",
+                "LIMIT",
+                "0",
+                "100");
+
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@TagField:{*ath*})",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
         [Fact]
         public void TestTagStartsWith()
         {
@@ -3427,6 +3457,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "100");
+        }
+
+        [Fact]
+        public void TestConstantExpressionContains()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<Person>(_substitute);
+            var parameter = Expression.Parameter(typeof(Person), "b");
+            var property = Expression.Property(parameter, "TagField");
+            var values = new string[] { "James", "Bond" };
+            MethodInfo contains = typeof(Enumerable).GetMethods(BindingFlags.Static | BindingFlags.Public).Where(x => x.Name.Contains(nameof(Enumerable.Contains))).Single(x => x.GetParameters().Length == 2).MakeGenericMethod(property.Type);
+            var body = Expression.Call(contains, Expression.Constant(values), property);
+            var lambada = Expression.Lambda<Func<Person, bool>>(body, parameter);
+            _ = collection.Where(lambada).ToList();
+            _substitute.Received().Execute("FT.SEARCH", "person-idx", "(@TagField:{James|Bond})", "LIMIT", "0", "100");
         }
     }
 }

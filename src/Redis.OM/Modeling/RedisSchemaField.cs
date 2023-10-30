@@ -119,7 +119,7 @@ namespace Redis.OM.Modeling
             return ret.ToArray();
         }
 
-        private static bool IsTypeIndexableArray(Type t) => t == typeof(string[]) || t == typeof(bool[]) || t == typeof(List<string>) || t == typeof(List<bool>);
+        private static bool IsTypeIndexableArray(Type t) => t == typeof(string[]) || t == typeof(bool[]) || t == typeof(Guid[]) || t == typeof(List<string>) || t == typeof(List<bool>) || t == typeof(List<Guid>);
 
         private static IEnumerable<string> SerializeIndexFromJsonPaths(PropertyInfo parentInfo, SearchFieldAttribute attribute, string prefix = "$.", string aliasPrefix = "", int remainingDepth = -1)
         {
