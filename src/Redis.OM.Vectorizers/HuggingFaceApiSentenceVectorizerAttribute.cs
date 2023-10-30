@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using Redis.OM.Modeling;
 
-namespace Redis.OM.Vectorizers.HuggingFace;
+namespace Redis.OM.Vectorizers;
 
 public class HuggingFaceApiSentenceVectorizerAttribute : VectorizerAttribute
 {

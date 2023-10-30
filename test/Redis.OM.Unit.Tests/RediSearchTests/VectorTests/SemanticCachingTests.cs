@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Redis.OM.Contracts;
-using Redis.OM.Vectorizers.AzureOpenAI;
+using Redis.OM.Vectorizers;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests;
