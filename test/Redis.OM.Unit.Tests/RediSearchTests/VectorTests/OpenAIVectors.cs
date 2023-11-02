@@ -10,9 +10,9 @@ public class OpenAIVectors
     [RedisIdField]
     public string Id { get; set; }
     
-    [Vector]
+    [Indexed]
     [OpenAISentenceVectorizer]
-    public string Sentence { get; set; }
+    public Vector<string> Sentence { get; set; }
 
     [Indexed]
     public string Name { get; set; }

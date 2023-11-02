@@ -10,9 +10,9 @@ public class HuggingFaceVectors
     [RedisIdField]
     public string Id { get; set; }
     
-    [Vector]
+    [Indexed]
     [HuggingFaceApiSentenceVectorizer(ModelId = "sentence-transformers/all-MiniLM-L6-v2")]
-    public string Sentence { get; set; }
+    public Vector<string> Sentence { get; set; }
 
     [Indexed]
     public string Name { get; set; }

@@ -1,10 +1,11 @@
 using System;
 using System.Text.Json.Serialization;
+using Redis.OM.Contracts;
 
 namespace Redis.OM.Modeling
 {
     /// <summary>
-    /// Method for converting a field into a vector.
+    /// A vectorizer attribute.
     /// </summary>
     public abstract class VectorizerAttribute : JsonConverterAttribute
     {
@@ -29,6 +30,22 @@ namespace Redis.OM.Modeling
         /// <param name="obj">the object to convert.</param>
         /// <returns>A byte array containing the vectorized data.</returns>
         public abstract byte[] Vectorize(object obj);
+    }
+
+    /// <summary>
+    /// Method for converting a field into a vector.
+    /// </summary>
+    /// <typeparam name="T">The type.</typeparam>
+#pragma warning disable SA1402
+    public abstract class VectorizerAttribute<T> : VectorizerAttribute
+    where T : class
+#pragma warning restore SA1402
+    {
+        /// <summary>
+        /// Gets the vectorizer for this attribute.
+        /// </summary>
+        /// <returns>The vectorizer.</returns>
+        public abstract IVectorizer<T> Vectorizer { get; }
 
         /// <summary>
         /// Creates the json converter fulfilled by this attribute.
@@ -37,7 +54,7 @@ namespace Redis.OM.Modeling
         /// <returns>The Json Converter.</returns>
         public override JsonConverter? CreateConverter(Type typeToConvert)
         {
-            return new VectorJsonConverter(this);
+            return new VectorJsonConverter<T>(this);
         }
     }
 }

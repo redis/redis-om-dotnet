@@ -23,18 +23,20 @@ public class VectorFunctionalTests
         _connection.DropIndexAndAssociatedRecords(typeof(HuggingFaceVectors));
         _connection.CreateIndex(typeof(HuggingFaceVectors));
         var collection = new RedisCollection<HuggingFaceVectors>(_connection);
+        var sentenceVector = Vector.Of("Hello World this is Hal.");
         var obj = new HuggingFaceVectors
         {
             Age = 45,
-            Sentence = "Hello World this is Hal.",
+            Sentence = sentenceVector,
             Name = "Hal"
         };
 
         collection.Insert(obj);
-        var res = collection.NearestNeighbors(x => x.Sentence, 2, "Hello World this is Hal.").First();
+        var queryVector = Vector.Of("Hello World this is Hal.");
+        var res = collection.NearestNeighbors(x => x.Sentence, 2, queryVector).First();
         Assert.Equal(obj.Id, res.Id);
         Assert.Equal(0, res.VectorScore.NearestNeighborsScore);
-        Assert.Equal(obj.Sentence, res.Sentence);
+        Assert.Equal(obj.Sentence.Value, res.Sentence.Value);
     }
 
     [Fact]
@@ -43,20 +45,23 @@ public class VectorFunctionalTests
         _connection.DropIndexAndAssociatedRecords(typeof(HuggingFaceVectors));
         _connection.CreateIndex(typeof(HuggingFaceVectors));
         var collection = new RedisCollection<HuggingFaceVectors>(_connection);
+        var sentenceVector = Vector.Of("What is the capital of France?");
         var obj = new HuggingFaceVectors
         {
             Age = 2259,
-            Sentence = "What is the capital of France?",
+            Sentence = sentenceVector,
             Name = "Paris"
         };
 
         collection.Insert(obj);
+        var queryVector = Vector.Of("What really is the capital of France?");
         var res = collection
-            .First(x => x.Sentence.VectorRange("What really is the capital of France?", .1, "range") && x.Age > 1000);
-        res = collection.NearestNeighbors(x => x.Sentence, 2, "What really is the capital of France?").First(x => x.Age > 1000);
+            .First(x => x.Sentence.VectorRange(queryVector, .1, "range") && x.Age > 1000);
+        res = collection.NearestNeighbors(x => x.Sentence, 2, queryVector).First(x => x.Age > 1000);
         Assert.Equal(obj.Id, res.Id);
         Assert.True(res.VectorScore.RangeScore < .1);
-        Assert.Equal(obj.Sentence, res.Sentence);
+        Assert.Equal(sentenceVector.Value, res.Sentence.Value);
+        Assert.Equal(obj.Sentence.Embedding, res.Sentence.Embedding);
     }
 
     [Fact]
@@ -65,18 +70,21 @@ public class VectorFunctionalTests
         _connection.DropIndexAndAssociatedRecords(typeof(OpenAIVectors));
         _connection.CreateIndex(typeof(OpenAIVectors));
         var collection = new RedisCollection<OpenAIVectors>(_connection);
+        var sentenceVector = Vector.Of("Hello World this is Hal."); 
         var obj = new OpenAIVectors
         {
             Age = 45,
-            Sentence = "Hello World this is Hal.",
+            Sentence = sentenceVector,
             Name = "Hal"
         };
 
         collection.Insert(obj);
-        var res = collection.NearestNeighbors(x => x.Sentence, 2, "Hello World this is Hal.").First();
+        var queryVector = Vector.Of("Hello World this is Hal.");
+        var res = collection.NearestNeighbors(x => x.Sentence, 2, queryVector).First();
         Assert.Equal(obj.Id, res.Id);
         Assert.True(res.VectorScore.NearestNeighborsScore < .01);
-        Assert.Equal(obj.Sentence, res.Sentence);
+        Assert.Equal(obj.Sentence.Value, res.Sentence.Value);
+        Assert.Equal(obj.Sentence.Embedding, res.Sentence.Embedding);
     }
 
     [Fact]
@@ -85,18 +93,21 @@ public class VectorFunctionalTests
         _connection.DropIndexAndAssociatedRecords(typeof(OpenAIVectors));
         _connection.CreateIndex(typeof(OpenAIVectors));
         var collection = new RedisCollection<OpenAIVectors>(_connection);
+        var sentenceVector = Vector.Of("What is the capital of France?");
         var obj = new OpenAIVectors
         {
             Age = 2259,
-            Sentence = "What is the capital of France?",
+            Sentence = sentenceVector,
             Name = "Paris"
         };
 
         collection.Insert(obj);
-        var res = collection.First(x => x.Sentence.VectorRange("What really is the capital of France?", 1, "range"));
+        var queryVector = Vector.Of("What really is the capital of France?");
+        var res = collection.First(x => x.Sentence.VectorRange(queryVector, 1, "range"));
         Assert.Equal(obj.Id, res.Id);
         Assert.True(res.VectorScore.RangeScore < .1);
-        Assert.Equal(obj.Sentence, res.Sentence);
+        Assert.Equal(obj.Sentence.Value, res.Sentence.Value);
+        Assert.Equal(obj.Sentence.Embedding, res.Sentence.Embedding);
     }
     
     [Fact]
@@ -104,13 +115,15 @@ public class VectorFunctionalTests
     {
         _connection.CreateIndex(typeof(ObjectWithVector));
         var collection = new RedisCollection<ObjectWithVector>(_connection);
+        var simpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        var simpleVectorizedVector = Vector.Of("FooBarBaz");
         collection.Insert(new ObjectWithVector
         {
             Id = "helloWorld",
-            SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
-            SimpleVectorizedVector = "FooBarBaz"
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
         });
-        var queryVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
+        var queryVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
         var res = collection.First(x => x.SimpleHnswVector.VectorRange(queryVector, 5));
         Assert.Equal("helloWorld", res.Id);
     }
@@ -120,13 +133,15 @@ public class VectorFunctionalTests
     {
         _connection.CreateIndex(typeof(ObjectWithVector));
         var collection = new RedisCollection<ObjectWithVector>(_connection);
+        var simpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        var simpleVectorizedVector = Vector.Of("FooBarBaz");
         collection.Insert(new ObjectWithVector
         {
             Id = "helloWorld",
-            SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
-            SimpleVectorizedVector = "FooBarBaz"
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
         });
-        var queryVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
+        var queryVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
         var res = collection.First(x => x.SimpleHnswVector.VectorRange(queryVector, 5) && x.SimpleHnswVector.VectorRange(queryVector, 6));
         Assert.Equal("helloWorld", res.Id);
     }
@@ -136,15 +151,18 @@ public class VectorFunctionalTests
     {
         _connection.CreateIndex(typeof(ObjectWithVector));
         var collection = new RedisCollection<ObjectWithVector>(_connection);
+        var simpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        var simpleVectorizedVector = Vector.Of("FooBarBaz");
         collection.Insert(new ObjectWithVector
         {
             Id = "helloWorld",
-            SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
-            SimpleVectorizedVector = "FooBarBaz"
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
         });
-        var queryVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
-        queryVector[0] += 2;
-        var res = collection.NearestNeighbors(x=>x.SimpleVectorizedVector, 1, "FooBarBaz")
+        var queryVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        queryVector.Value[0] += 2;
+        var stringQueryVector = Vector.Of("FooBarBaz");
+        var res = collection.NearestNeighbors(x=>x.SimpleVectorizedVector, 1, stringQueryVector)
             .First(x => x.SimpleHnswVector.VectorRange(queryVector, 5, "range"));
         Assert.Equal("helloWorld", res.Id);
         Assert.Equal(4, res.VectorScores.RangeScore);
@@ -156,16 +174,19 @@ public class VectorFunctionalTests
     {
         _connection.CreateIndex(typeof(ObjectWithVector));
         var collection = new RedisCollection<ObjectWithVector>(_connection);
+        var simpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        var simpleVectorizedVector = Vector.Of("FooBarBaz");
         collection.Insert(new ObjectWithVector
         {
             Id = "helloWorld",
-            SimpleHnswVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray(),
-            SimpleVectorizedVector = "FooBarBaz"
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
         });
-        var queryVector = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
-        queryVector[0] += 2;
+        var queryVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        queryVector.Value[0] += 2;
 
-        var res = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 1, "FooBarBaz").First();
+        var stringQueryVector = Vector.Of("FooBarBaz");
+        var res = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 1, stringQueryVector).First();
         Assert.Equal("helloWorld", res.Id);
         Assert.Equal(0, res.VectorScores.NearestNeighborsScore);
         res = collection.NearestNeighbors(x => x.SimpleHnswVector, 1, queryVector).First();
@@ -177,16 +198,17 @@ public class VectorFunctionalTests
     {
         _connection.DropIndexAndAssociatedRecords(typeof(ObjectWithVectorHash));
         _connection.CreateIndex(typeof(ObjectWithVectorHash));
-        var doubles = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var simpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        var simpleVectorizedVector = Vector.Of("foo");
         var obj = new ObjectWithVectorHash
         {
             Id = "helloWorld",
-            SimpleHnswVector = doubles,
-            SimpleVectorizedVector = "foo",
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector,
         };
         var collection = new RedisCollection<ObjectWithVectorHash>(_connection);
         collection.Insert(obj);
-        var res = collection.NearestNeighbors(x => x.SimpleHnswVector, 5, doubles).First();
+        var res = collection.NearestNeighbors(x => x.SimpleHnswVector, 5, simpleHnswVector).First();
         
         Assert.Equal(0, res.VectorScores.NearestNeighborsScore);
     }
@@ -196,18 +218,19 @@ public class VectorFunctionalTests
     {
         _connection.DropIndexAndAssociatedRecords(typeof(ObjectWithVectorHash));
         _connection.CreateIndex(typeof(ObjectWithVectorHash));
-        var doubles = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var simpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        var simpleVectorizedVector = Vector.Of("foo");
         var obj = new ObjectWithVectorHash
         {
             Id = "theOneWithStuff",
-            SimpleHnswVector = doubles,
+            SimpleHnswVector = simpleHnswVector,
             Name = "Steve",
             Num = 6,
-            SimpleVectorizedVector = "foo",
+            SimpleVectorizedVector = simpleVectorizedVector,
         };
         var collection = new RedisCollection<ObjectWithVectorHash>(_connection);
         collection.Insert(obj);
-        var res = collection.Where(x=>x.Name == "Steve" && x.Num == 6).NearestNeighbors(x => x.SimpleHnswVector, 5, doubles).First();
+        var res = collection.Where(x=>x.Name == "Steve" && x.Num == 6).NearestNeighbors(x => x.SimpleHnswVector, 5, simpleHnswVector).First();
         
         Assert.Equal(0, res.VectorScores.NearestNeighborsScore);
     }
@@ -217,29 +240,34 @@ public class VectorFunctionalTests
     {
         _connection.CreateIndex(typeof(ObjectWithVectorHash));
 
-        var doubles = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var simpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        var simpleVectorizedVector = Vector.Of("foo");
         var obj = new ObjectWithVectorHash
         {
             Id = "helloWorld",
-            SimpleHnswVector = doubles,
-            SimpleVectorizedVector = "foo",
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector,
         };
         
         var key = _connection.Set(obj);
         var res = _connection.Get<ObjectWithVectorHash>(key);
-        Assert.Equal(doubles, res.SimpleHnswVector);
+        Assert.Equal(simpleHnswVector.Value, res.SimpleHnswVector.Value);
+        Assert.Equal(simpleHnswVector.Embedding, res.SimpleHnswVector.Embedding);
 
+        simpleVectorizedVector = Vector.Of("foobarbaz");
         key = _connection.Set(new ObjectWithVector()
         {
             Id = "helloWorld",
-            SimpleHnswVector = doubles,
-            SimpleVectorizedVector = "foobarbaz"
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
         });
 
         var jsonRes = _connection.Get<ObjectWithVector>(key);
         
-        Assert.Equal(doubles, jsonRes.SimpleHnswVector);
-        Assert.Equal("foobarbaz", jsonRes.SimpleVectorizedVector);
+        Assert.Equal(simpleHnswVector.Value, jsonRes.SimpleHnswVector.Value);
+        Assert.Equal(simpleHnswVector.Embedding, jsonRes.SimpleHnswVector.Embedding);
+        Assert.Equal(simpleVectorizedVector.Value, jsonRes.SimpleVectorizedVector.Value);
+        Assert.Equal(simpleVectorizedVector.Embedding, jsonRes.SimpleVectorizedVector.Embedding);
     }
 
     [Fact]
@@ -266,15 +294,18 @@ public class VectorFunctionalTests
         simpleHnswJsonStr.Append(']');
         vectorizedFlatVectorJsonStr.Append(']');
 
+        var simpleHnswVector = Vector.Of(simpleHnswHash);
+        var simpleVectorizedVector = Vector.Of("foobar");
         var hashObj = new ObjectWithVectorHash()
         {
             Id = "helloWorld",
-            SimpleHnswVector = simpleHnswHash,
-            SimpleVectorizedVector = "foobar"
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
         };
 
         var key = _connection.Set(hashObj);
         var res = _connection.Get<ObjectWithVectorHash>(key);
-        Assert.Equal("foobar", res.SimpleVectorizedVector);
+        Assert.Equal(simpleVectorizedVector.Value, res.SimpleVectorizedVector.Value);
+        Assert.Equal(simpleVectorizedVector.Embedding, res.SimpleVectorizedVector.Embedding);
     }
 }

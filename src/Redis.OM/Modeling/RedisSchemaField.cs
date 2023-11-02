@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json.Serialization;
+using Redis.OM.Modeling.Vectors;
 
 namespace Redis.OM.Modeling
 {
@@ -62,9 +63,10 @@ namespace Redis.OM.Modeling
                 {
                     var innerType = Nullable.GetUnderlyingType(info.PropertyType) ?? info.PropertyType;
 
-                    if (attr is VectorAttribute)
+                    if (attr is IndexedAttribute indexedAttribute && (innerType == typeof(Vector) || innerType.BaseType == typeof(Vector)))
                     {
-                        var pathPostfix = info.GetCustomAttributes<VectorizerAttribute>().Any() ? ".Vector" : string.Empty;
+                        var vectorizer = info.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault(x => x.GetType() != typeof(FloatVectorizerAttribute) && x.GetType() != typeof(DoubleVectorizerAttribute));
+                        var pathPostfix = vectorizer != null ? ".Vector" : string.Empty;
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPostfix}" : $"{pathPrefix}{info.Name}{pathPostfix}");
                         ret.Add("AS");
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{aliasPrefix}{attr.PropertyName}" : $"{aliasPrefix}{info.Name}");
@@ -108,9 +110,13 @@ namespace Redis.OM.Modeling
             }
 
             var suffix = string.Empty;
-            if (attr.SearchFieldType == SearchFieldType.VECTOR && info.GetCustomAttributes<VectorizerAttribute>().Any())
+            if (attr.SearchFieldType == SearchFieldType.INDEXED && (info.PropertyType == typeof(Vector) || info.PropertyType.BaseType == typeof(Vector)))
             {
-                suffix = ".Vector";
+                var vectorizer = info.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+                if (vectorizer is not null && vectorizer is not FloatVectorizerAttribute && vectorizer is not DoubleVectorizerAttribute)
+                {
+                    suffix = ".Vector";
+                }
             }
 
             var ret = new List<string> { !string.IsNullOrEmpty(attr.PropertyName) ? $"attr.PropertyName{suffix}" : $"{info.Name}{suffix}" };
@@ -192,6 +198,11 @@ namespace Redis.OM.Modeling
                 return "GEO";
             }
 
+            if (declaredType == typeof(Vector) || declaredType.BaseType == typeof(Vector))
+            {
+                return "VECTOR";
+            }
+
             if (declaredType.IsEnum)
             {
                 return propertyInfo.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() is JsonConverterAttribute converter && converter.ConverterType == typeof(JsonStringEnumConverter) ? "TAG" : "NUMERIC";
@@ -202,40 +213,21 @@ namespace Redis.OM.Modeling
 
         private static bool IsEnumTypeFlags(Type type) => type.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
 
-        private static IEnumerable<string> VectorSerialization(VectorAttribute vectorAttribute, Type declaredType, PropertyInfo propertyInfo)
+        private static IEnumerable<string> VectorSerialization(IndexedAttribute vectorAttribute, PropertyInfo propertyInfo)
         {
             var vectorizer = propertyInfo.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
             if (vectorizer is null)
             {
-                if (vectorAttribute.Dim == default)
-                {
-                    throw new ArgumentException("Could not determine dimension of the vector");
-                }
-
-                if (declaredType != typeof(double[]) && declaredType != typeof(float[]))
-                {
-                    throw new ArgumentException("Could not determine the Vector Type");
-                }
+                throw new InvalidOperationException("Indexed vector fields must provide a vectorizer.");
             }
 
             yield return vectorAttribute.Algorithm.AsRedisString();
             yield return vectorAttribute.NumArgs.ToString();
             yield return "TYPE";
-            if (vectorizer is not null)
-            {
-                yield return vectorizer.VectorType.AsRedisString();
-            }
-            else if (declaredType == typeof(double[]))
-            {
-                yield return "FLOAT64";
-            }
-            else if (declaredType == typeof(float[]))
-            {
-                yield return "FLOAT32";
-            }
+            yield return vectorizer.VectorType.AsRedisString();
 
             yield return "DIM";
-            yield return vectorizer is null ? vectorAttribute.Dim!.ToString() : vectorizer.Dim.ToString();
+            yield return vectorizer.Dim.ToString();
             yield return "DISTANCE_METRIC";
             yield return vectorAttribute.DistanceMetric.AsRedisString();
             if (vectorAttribute.InitialCapacity != default)
@@ -323,9 +315,9 @@ namespace Redis.OM.Modeling
                 }
             }
 
-            if (searchFieldType == "VECTOR" && attr is VectorAttribute vector)
+            if (searchFieldType == "VECTOR" && attr is IndexedAttribute vector)
             {
-                ret.AddRange(VectorSerialization(vector, declaredType, propertyInfo));
+                ret.AddRange(VectorSerialization(vector, propertyInfo));
             }
 
             if (attr.Sortable || attr.Aggregatable)

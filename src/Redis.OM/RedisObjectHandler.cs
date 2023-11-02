@@ -326,9 +326,22 @@ namespace Redis.OM
                 {
                     var val = property.GetValue(obj);
                     var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().First();
-                    var vector = vectorizer.Vectorize(val);
-                    hash.Add($"{propertyName}.Vector", vector);
-                    hash.Add($"{propertyName}.Value", JsonSerializer.Serialize(val));
+                    if (val is not Vector vector)
+                    {
+                        throw new InvalidOperationException("VectorizerAttribute must decorate vectors");
+                    }
+
+                    vector.Embed(vectorizer);
+                    if (vectorizer is FloatVectorizerAttribute or DoubleVectorizerAttribute)
+                    {
+                        hash.Add(propertyName, vector.Embedding!);
+                    }
+                    else
+                    {
+                        hash.Add($"{propertyName}.Vector", vector.Embedding!);
+                        hash.Add($"{propertyName}.Value", JsonSerializer.Serialize(vector.Obj));
+                    }
+
                     continue;
                 }
 
@@ -361,10 +374,15 @@ namespace Redis.OM
                         hash.Add(propertyName, new DateTimeOffset(val).ToUnixTimeMilliseconds().ToString());
                     }
                 }
-                else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)) && property.GetCustomAttributes<VectorAttribute>().Any())
+                else if (type == typeof(Vector))
                 {
-                    var innerType = GetEnumerableType(property);
-                    hash.Add(propertyName, PrimitiveCollectionToVectorBytes(property, obj, innerType));
+                    var val = (Vector)obj;
+                    if (val.Embedding is null)
+                    {
+                        throw new InvalidOperationException("Could not use null embedding.");
+                    }
+
+                    hash.Add(propertyName, val.Embedding);
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
@@ -429,7 +447,31 @@ namespace Redis.OM
                 var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
-                var isVectorized = property.GetCustomAttributes<VectorizerAttribute>().Any();
+                var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+                if (vectorizer is FloatVectorizerAttribute || vectorizer is DoubleVectorizerAttribute)
+                {
+                    if (hash.ContainsKey(propertyName))
+                    {
+                        string arrString;
+                        if (vectorizer.VectorType == VectorType.FLOAT32)
+                        {
+                            var floats = VectorUtils.VectorStrToFloats(hash[propertyName]);
+                            arrString = string.Join(",", floats);
+                        }
+                        else
+                        {
+                            var doubles = VectorUtils.VecStrToDoubles(hash[propertyName]);
+                            arrString = string.Join(",", doubles);
+                        }
+
+                        var valueStr = $"[{arrString}]";
+                        ret += $"\"{propertyName}\":{valueStr},";
+                    }
+
+                    continue;
+                }
+
+                var isVectorized = vectorizer != null;
                 var lookupPropertyName = propertyName + (isVectorized ? ".Value" : string.Empty);
                 var vectorPropertyName = $"{propertyName}.Vector";
                 if (isVectorized && !hash.ContainsKey($"{propertyName}.Value") && !hash.ContainsKey($"{propertyName}.Vector"))
@@ -475,7 +517,7 @@ namespace Redis.OM
 
                     ret += $"\"{propertyName}\":\"{HttpUtility.JavaScriptStringEncode(hash[lookupPropertyName])}\",";
                 }
-                else if ((type == typeof(double[]) || type == typeof(float[])) && property.GetCustomAttributes<VectorAttribute>().Any())
+                else if (type == typeof(Vector))
                 {
                     if (!hash.ContainsKey(lookupPropertyName))
                     {
@@ -573,7 +615,17 @@ namespace Redis.OM
 
                 if (isVectorized)
                 {
-                    var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().First();
+                    if (vectorizer is null)
+                    {
+                        throw new InvalidOperationException(
+                            "Vector field must be decorated with a vectorizer attribute");
+                    }
+
+                    if (hash.ContainsKey(lookupPropertyName))
+                    {
+                        ret += $"\"Value\":\"{HttpUtility.JavaScriptStringEncode(hash[lookupPropertyName])}\",";
+                    }
+
                     string arrString;
                     if (vectorizer.VectorType == VectorType.FLOAT32)
                     {

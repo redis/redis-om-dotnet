@@ -1,7 +1,5 @@
-using System.Text.Json.Serialization;
 using Redis.OM.Modeling;
 using Redis.OM.Modeling.Vectors;
-using StackExchange.Redis;
 
 namespace Redis.OM.Unit.Tests;
 
@@ -15,12 +13,13 @@ public class ObjectWithVector
 
     [Indexed] public int Num { get; set; }
     
-    [Vector(Algorithm = VectorAlgorithm.HNSW, Dim = 10)]
-    public double[] SimpleHnswVector { get; set; }
+    [Indexed(Algorithm = VectorAlgorithm.HNSW)]
+    [DoubleVectorizer(10)]
+    public Vector<double[]> SimpleHnswVector { get; set; }
 
-    [Vector(Algorithm = VectorAlgorithm.FLAT)]
+    [Indexed(Algorithm = VectorAlgorithm.FLAT)]
     [SimpleVectorizer]
-    public string SimpleVectorizedVector { get; set; }
+    public Vector<string> SimpleVectorizedVector { get; set; }
 
     public VectorScores VectorScores { get; set; }
 }
@@ -35,12 +34,13 @@ public class ObjectWithVectorHash
     
     [Indexed] public int Num { get; set; }
 
-    [Vector(Algorithm = VectorAlgorithm.HNSW, Dim = 10)]
-    public double[] SimpleHnswVector { get; set; }
+    [Indexed(Algorithm = VectorAlgorithm.HNSW)]
+    [DoubleVectorizer(10)]
+    public Vector<double[]> SimpleHnswVector { get; set; }
     
-    [Vector(Algorithm = VectorAlgorithm.FLAT)]
+    [Indexed(Algorithm = VectorAlgorithm.FLAT)]
     [SimpleVectorizer]
-    public string SimpleVectorizedVector { get; set; }
+    public Vector<string> SimpleVectorizedVector { get; set; }
 
     public VectorScores VectorScores { get; set; }
 }
@@ -49,5 +49,5 @@ public class ObjectWithVectorHash
 public class ToyVector
 {
     [RedisIdField] public string Id { get; set; }
-    [Vector(Dim=6)]public double[] SimpleVector { get; set; }
+    [Indexed][DoubleVectorizer(6)]public Vector<double[]> SimpleVector { get; set; }
 }

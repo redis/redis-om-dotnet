@@ -97,14 +97,13 @@ namespace Redis.OM.Modeling
         }
 
         /// <summary>
-        /// Converts Vector String to array of doubles.
+        /// converts the vector bytes to an array of doubles.
         /// </summary>
-        /// <param name="reply">the reply.</param>
-        /// <returns>the doubles.</returns>
+        /// <param name="bytes">the bytes.</param>
+        /// <returns>The doubles.</returns>
         /// <exception cref="ArgumentException">Thrown if unbalanced.</exception>
-        public static double[] VecStrToDoubles(string reply)
+        public static double[] VectorBytesToDoubles(byte[] bytes)
         {
-            var bytes = Encoding.ASCII.GetBytes(reply);
             if (bytes.Length % 8 != 0)
             {
                 throw new ArgumentException("Unbalanced Vector String");
@@ -120,14 +119,25 @@ namespace Redis.OM.Modeling
         }
 
         /// <summary>
-        /// Parses a vector string to an array of floats.
+        /// Converts Vector String to array of doubles.
         /// </summary>
         /// <param name="reply">the reply.</param>
-        /// <returns>The floats.</returns>
-        /// <exception cref="ArgumentException">thrown if unbalanced.</exception>
-        public static float[] VectorStrToFloats(RedisReply reply)
+        /// <returns>the doubles.</returns>
+        /// <exception cref="ArgumentException">Thrown if unbalanced.</exception>
+        public static double[] VecStrToDoubles(string reply)
         {
-            var bytes = (byte[]?)reply ?? throw new InvalidCastException("Could not convert result to raw result.");
+            var bytes = Encoding.ASCII.GetBytes(reply);
+            return VectorBytesToDoubles(bytes);
+        }
+
+        /// <summary>
+        /// Parses the bytes into an array of floats.
+        /// </summary>
+        /// <param name="bytes">the bytes.</param>
+        /// <returns>the floats.</returns>
+        /// <exception cref="ArgumentException">Thrown if bytes are unbalanced.</exception>
+        public static float[] VectorBytesToFloats(byte[] bytes)
+        {
             if (bytes.Length % 4 != 0)
             {
                 throw new ArgumentException("Unbalanced Vector String");
@@ -140,6 +150,18 @@ namespace Redis.OM.Modeling
             }
 
             return floats;
+        }
+
+        /// <summary>
+        /// Parses a vector string to an array of floats.
+        /// </summary>
+        /// <param name="reply">the reply.</param>
+        /// <returns>The floats.</returns>
+        /// <exception cref="ArgumentException">thrown if unbalanced.</exception>
+        public static float[] VectorStrToFloats(RedisReply reply)
+        {
+            var bytes = (byte[]?)reply ?? throw new InvalidCastException("Could not convert result to raw result.");
+            return VectorBytesToFloats(bytes);
         }
 
         /// <summary>
@@ -184,5 +206,19 @@ namespace Redis.OM.Modeling
 
             return bytes.ToArray();
         }
+
+        /// <summary>
+        /// Converts doubles to array of bytes.
+        /// </summary>
+        /// <param name="doubles">the doubles.</param>
+        /// <returns>the array of bytes.</returns>
+        internal static byte[] GetBytes(this double[] doubles) => doubles.SelectMany(BitConverter.GetBytes).ToArray();
+
+        /// <summary>
+        /// Converts floats to array of bytes.
+        /// </summary>
+        /// <param name="floats">the floats.</param>
+        /// <returns>the array of bytes.</returns>
+        internal static byte[] GetBytes(this float[] floats) => floats.SelectMany(BitConverter.GetBytes).ToArray();
     }
 }
