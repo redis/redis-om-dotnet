@@ -1005,26 +1005,16 @@ namespace Redis.OM.Common
             var field = GetOperandStringForMember(member);
             var vectorizer = member.Member.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
             byte[] bytes;
-            var operand = GetOperand(exp.Arguments[1]);
-
-            if (vectorizer is not null)
-            {
-                bytes = vectorizer.Vectorize(operand);
-            }
-            else if (member.Type == typeof(double[]))
-            {
-                bytes = ((double[])operand).SelectMany(BitConverter.GetBytes).ToArray();
-            }
-            else if (member.Type == typeof(float[]))
-            {
-                bytes = ((float[])operand).SelectMany(BitConverter.GetBytes).ToArray();
-            }
-            else
+            var operand = (Vector)GetOperand(exp.Arguments[1]);
+            if (vectorizer is null)
             {
                 throw new InvalidOperationException(
                     $"Attempting to run a vector range on a {member.Type} with no provided vectorizer");
             }
 
+            operand.Embed(vectorizer);
+
+            bytes = operand.Embedding ?? throw new InvalidOperationException("Embedding was null");
             var distance = (double)((ConstantExpression)exp.Arguments[2]).Value;
             var distanceArgName = parameters.Count.ToString();
             parameters.Add(distance);

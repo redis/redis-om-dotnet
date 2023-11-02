@@ -263,7 +263,7 @@ namespace Redis.OM.Common
         internal static NearestNeighbors ParseNearestNeighborsFromExpression(MethodCallExpression expression)
         {
             var memberExpression = (MemberExpression)((LambdaExpression)((UnaryExpression)expression.Arguments[1]).Operand).Body;
-            var attr = memberExpression.Member.GetCustomAttributes<VectorAttribute>().FirstOrDefault() ?? throw new ArgumentException($"Could not find Vector attribute on {memberExpression.Member.Name}.");
+            var attr = memberExpression.Member.GetCustomAttributes<IndexedAttribute>().FirstOrDefault() ?? throw new ArgumentException($"Could not find Vector attribute on {memberExpression.Member.Name}.");
             var vectorizer = memberExpression.Member.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
             var propertyName = !string.IsNullOrEmpty(attr.PropertyName) ? attr.PropertyName : memberExpression.Member.Name;
             var numNeighbors = (int)((ConstantExpression)expression.Arguments[2]).Value;
@@ -272,7 +272,19 @@ namespace Redis.OM.Common
 
             if (vectorizer is not null)
             {
-                bytes = vectorizer.Vectorize(value);
+                if (value is Vector vec)
+                {
+                    if (vec.Embedding is null)
+                    {
+                        vec.Embed(vectorizer);
+                    }
+
+                    bytes = vec.Embedding!;
+                }
+                else
+                {
+                    bytes = vectorizer.Vectorize(value);
+                }
             }
             else if (memberExpression.Type == typeof(float[]))
             {

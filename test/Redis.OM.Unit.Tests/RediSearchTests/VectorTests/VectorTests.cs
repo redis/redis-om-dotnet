@@ -63,9 +63,9 @@ public class VectorIndexCreationTests
         _substitute.ClearSubstitute();
         _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
         var collection = new RedisCollection<ObjectWithVector>(_substitute);
-        var compVector = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var compVector = Vector.Of(new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
         float[] floats = Enumerable.Range(0, 30).Select(x => (float)x).ToArray();
-        var blob = compVector.SelectMany(BitConverter.GetBytes).ToArray();
+        var blob = compVector.Value.SelectMany(BitConverter.GetBytes).ToArray();
         var floatBlob = floats.SelectMany(BitConverter.GetBytes).ToArray();
         _ = collection.NearestNeighbors(x=>x.SimpleHnswVector, 5, compVector).ToList();
 
@@ -76,7 +76,8 @@ public class VectorIndexCreationTests
 
         _substitute.ClearSubstitute();
         _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
-        _ = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 8, "hello world").ToArray();
+        var queryVector = Vector.Of("hello world");
+        _ = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 8, queryVector).ToArray();
 
         _substitute.Received().Execute("FT.SEARCH",
             $"{nameof(ObjectWithVector).ToLower()}-idx",
@@ -93,7 +94,8 @@ public class VectorIndexCreationTests
         var compVector = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         float[] floats = Enumerable.Range(0, 30).Select(x => (float)x).ToArray();
         var floatBytes = floats.SelectMany(BitConverter.GetBytes).ToArray();
-        _ = collection.Where(x => x.SimpleVectorizedVector.VectorRange("foobar", .3)).ToList();
+        var queryVector = Vector.Of("foobar");
+        _ = collection.Where(x => x.SimpleVectorizedVector.VectorRange(queryVector, .3)).ToList();
         _substitute.Received().Execute("FT.SEARCH", $"{nameof(ObjectWithVector).ToLower()}-idx",
             "@SimpleVectorizedVector:[VECTOR_RANGE $0 $1]", "PARAMS", 4, "0", .3, "1", Arg.Is<byte[]>(b => b.SequenceEqual(floatBytes)),
             "DIALECT", 2, "LIMIT", "0", "100");
@@ -106,9 +108,9 @@ public class VectorIndexCreationTests
         _substitute.ClearSubstitute();
         _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
         var collection = new RedisCollection<ObjectWithVector>(_substitute);
-        var compVector = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        var compVector = Vector.Of(new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
         float[] floats = Enumerable.Range(0, 30).Select(x => (float)x).ToArray();
-        var blob = compVector.SelectMany(BitConverter.GetBytes).ToArray();
+        var blob = compVector.Value.SelectMany(BitConverter.GetBytes).ToArray();
         var floatBlob = floats.SelectMany(BitConverter.GetBytes).ToArray();
         _ = collection.NearestNeighbors(x=>x.SimpleHnswVector, 5, compVector).OrderBy(x=>x.VectorScores.NearestNeighborsScore).ToList();
 
@@ -119,7 +121,8 @@ public class VectorIndexCreationTests
 
         _substitute.ClearSubstitute();
         _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
-        _ = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 8, "hello world").OrderByDescending(x=>x.VectorScores.NearestNeighborsScore).ToArray();
+        var queryVector = Vector.Of("hello world");
+        _ = collection.NearestNeighbors(x => x.SimpleVectorizedVector, 8, queryVector).OrderByDescending(x=>x.VectorScores.NearestNeighborsScore).ToArray();
 
         _substitute.Received().Execute("FT.SEARCH",
             $"{nameof(ObjectWithVector).ToLower()}-idx",
@@ -162,18 +165,21 @@ public class VectorIndexCreationTests
         var simpleHnswBytes = simpleHnswHash.SelectMany(BitConverter.GetBytes).ToArray();
         var flatVectorizedBytes = vectorizedFlatHashVector.SelectMany(BitConverter.GetBytes).ToArray();
 
+        var simpleHnswVector = Vector.Of(simpleHnswHash);
+        var simpleVectorizedVector = Vector.Of("foobar");
+
         var hashObj = new ObjectWithVectorHash()
         {
             Id = "foo",
-            SimpleHnswVector = simpleHnswHash,
-            SimpleVectorizedVector = "foobar"
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
         };
 
         var jsonObj = new ObjectWithVector()
         {
             Id = "foo",
-            SimpleHnswVector = simpleHnswHash,
-            SimpleVectorizedVector = "foobar"
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
         };
 
         var json =
@@ -187,7 +193,7 @@ public class VectorIndexCreationTests
             Arg.Is<byte[]>(x=>x.SequenceEqual(simpleHnswBytes)), "SimpleVectorizedVector.Vector", Arg.Is<byte[]>(x=>x.SequenceEqual(flatVectorizedBytes)), "SimpleVectorizedVector.Value", "\"foobar\"");
         _substitute.Received().Execute("JSON.SET", "Redis.OM.Unit.Tests.ObjectWithVector:foo", ".", json);
         var deseralized = JsonSerializer.Deserialize<ObjectWithVector>(json);
-        Assert.Equal("foobar", deseralized.SimpleVectorizedVector);
+        Assert.Equal("foobar", deseralized.SimpleVectorizedVector.Value);
     }
 
     [Fact]
@@ -196,8 +202,8 @@ public class VectorIndexCreationTests
         _substitute.ClearSubstitute();
         _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply(0));
         var collection = new RedisCollection<ObjectWithVector>(_substitute);
-        var compVector = new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        var blob = compVector.SelectMany(BitConverter.GetBytes);
+        var compVector = Vector.Of(new double[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+        var blob = compVector.Value.SelectMany(BitConverter.GetBytes);
         _ = collection.Where(x => x.Name == "Steve" && x.Num < 5)
             .NearestNeighbors(x => x.SimpleHnswVector, 2, compVector).ToList();
         _substitute.Received().Execute("FT.SEARCH",

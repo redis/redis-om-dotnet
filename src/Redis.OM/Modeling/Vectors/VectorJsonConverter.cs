@@ -2,50 +2,131 @@ using System;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Redis.OM.Modeling.Vectors;
 
 namespace Redis.OM.Modeling
 {
     /// <summary>
     /// Converts the provided object to a json vector.
     /// </summary>
-    internal class VectorJsonConverter : JsonConverter<object>
+    /// <typeparam name="T">The type.</typeparam>
+    internal class VectorJsonConverter<T> : JsonConverter<Vector<T>>
+        where T : class
     {
-        private readonly VectorizerAttribute _vectorizerAttribute;
+        private readonly VectorizerAttribute<T> _vectorizerAttribute;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="VectorJsonConverter"/> class.
+        /// Initializes a new instance of the <see cref="VectorJsonConverter{T}"/> class.
         /// </summary>
         /// <param name="attribute">the attribute that will be used for vectorization.</param>
-        internal VectorJsonConverter(VectorizerAttribute attribute)
+        internal VectorJsonConverter(VectorizerAttribute<T> attribute)
         {
             _vectorizerAttribute = attribute;
         }
 
         /// <inheritdoc />
-        public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Vector<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
+            T res;
             reader.Read();
-            reader.Read();
-            var res = JsonSerializer.Deserialize(reader.GetString() !, typeToConvert);
-            reader.Read();
-            reader.Read(); // Vector
-            reader.Read(); // start array
-            for (var i = 0; i < _vectorizerAttribute.Dim; i++)
+            byte[] embedding;
+            if (_vectorizerAttribute is FloatVectorizerAttribute floatVectorizer)
             {
-                reader.Read(); // each item
+                float[] floats = new float[floatVectorizer.Dim];
+                for (var i = 0; i < floatVectorizer.Dim; i++)
+                {
+                    floats[i] = reader.GetSingle();
+                    reader.Read();
+                }
+
+                res = (floats as T) !;
+                embedding = floats.GetBytes();
+            }
+            else if (_vectorizerAttribute is DoubleVectorizerAttribute doubleVectorizer)
+            {
+                double[] doubles = new double[doubleVectorizer.Dim];
+                for (var i = 0; i < doubleVectorizer.Dim; i++)
+                {
+                    doubles[i] = reader.GetDouble();
+                    reader.Read();
+                }
+
+                res = (doubles as T) !;
+                embedding = doubles.GetBytes();
+            }
+            else
+            {
+                reader.Read();
+                res = JsonSerializer.Deserialize<T>(reader.GetString() !) !;
+                reader.Read();
+                reader.Read(); // Vector
+                reader.Read(); // start array
+                if (_vectorizerAttribute.VectorType == VectorType.FLOAT32)
+                {
+                    var floats = new float[_vectorizerAttribute.Dim];
+                    for (var i = 0; i < _vectorizerAttribute.Dim; i++)
+                    {
+                        floats[i] = reader.GetSingle();
+                        reader.Read(); // each item
+                    }
+
+                    embedding = floats.GetBytes();
+                }
+                else
+                {
+                    var doubles = new double[_vectorizerAttribute.Dim];
+                    for (var i = 0; i < _vectorizerAttribute.Dim; i++)
+                    {
+                        doubles[i] = reader.GetDouble();
+                        reader.Read(); // each item
+                    }
+
+                    embedding = doubles.GetBytes();
+                }
+
+                reader.Read(); // end array
             }
 
-            reader.Read(); // end array
-            return res;
+            var vector = new Vector<T>(res!) { Embedding = embedding };
+            return vector;
         }
 
         /// <inheritdoc />
-        public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, Vector<T> value, JsonSerializerOptions options)
         {
+            if (_vectorizerAttribute is DoubleVectorizerAttribute && value is Vector<double[]> doubleVector)
+            {
+                writer.WriteStartArray();
+                foreach (var d in doubleVector.Value)
+                {
+                    writer.WriteNumberValue(d);
+                }
+
+                writer.WriteEndArray();
+                return;
+            }
+
+            if (_vectorizerAttribute is FloatVectorizerAttribute && value is Vector<double[]> floatVector)
+            {
+                writer.WriteStartArray();
+                foreach (var d in floatVector.Value)
+                {
+                    writer.WriteNumberValue(d);
+                }
+
+                writer.WriteEndArray();
+                return;
+            }
+
             writer.WriteStartObject();
             writer.WritePropertyName("Value");
-            writer.WriteStringValue(JsonSerializer.Serialize(value));
-            var bytes = _vectorizerAttribute.Vectorize(value);
+            writer.WriteStringValue(JsonSerializer.Serialize(value.Obj));
+            if (value.Embedding is null)
+            {
+                value.Embed(_vectorizerAttribute);
+            }
+
+            var bytes = value.Embedding!;
             var jagged = SplitIntoJaggedArray(bytes, _vectorizerAttribute.VectorType == VectorType.FLOAT32 ? 4 : 8);
             writer.WritePropertyName("Vector");
             if (_vectorizerAttribute.VectorType == VectorType.FLOAT32)
@@ -61,7 +142,7 @@ namespace Redis.OM.Modeling
             }
             else
             {
-                var doubles = jagged.Select(BitConverter.ToDouble).ToArray();
+                var doubles = jagged.Select(x => BitConverter.ToDouble(x, 0)).ToArray();
                 writer.WriteStartArray();
                 foreach (var d in doubles)
                 {
