@@ -6,7 +6,7 @@ namespace Redis.OM.Vectorizers;
 /// <summary>
 /// An OpenAI Sentence Vectorizer.
 /// </summary>
-public class OpenAISentenceVectorizerAttribute : VectorizerAttribute<string>
+public class OpenAIVectorizerAttribute : VectorizerAttribute<string>
 {
     private const string DefaultModel = "text-embedding-ada-002";
 
@@ -28,7 +28,7 @@ public class OpenAISentenceVectorizerAttribute : VectorizerAttribute<string>
     {
         get
         {
-            return _vectorizer ??= new OpenAISentenceVectorizer(Configuration.Instance.OpenAiAuthorizationToken, ModelId, Dim);
+            return _vectorizer ??= new OpenAIVectorizer(Configuration.Instance.OpenAiAuthorizationToken, ModelId, Dim);
         }
     }
 
@@ -42,6 +42,6 @@ public class OpenAISentenceVectorizerAttribute : VectorizerAttribute<string>
 
     internal float[] GetFloats(string s)
     {
-        return OpenAISentenceVectorizer.GetFloats(s, ModelId, Configuration.Instance.OpenAiAuthorizationToken);
+        return OpenAIVectorizer.GetFloats(s, ModelId, Configuration.Instance.OpenAiAuthorizationToken);
     }
 }

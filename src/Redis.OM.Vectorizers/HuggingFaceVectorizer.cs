@@ -5,9 +5,9 @@ using Redis.OM.Modeling;
 
 namespace Redis.OM.Vectorizers;
 
-public class HuggingFaceApiSentenceVectorizer : IVectorizer<string>
+public class HuggingFaceVectorizer : IVectorizer<string>
 {
-    public HuggingFaceApiSentenceVectorizer(string authToken, string modelId, int dim)
+    public HuggingFaceVectorizer(string authToken, string modelId, int dim)
     {
         _huggingFaceAuthToken = authToken;
         ModelId = modelId;

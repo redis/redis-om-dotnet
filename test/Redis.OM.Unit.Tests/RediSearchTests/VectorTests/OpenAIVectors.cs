@@ -11,7 +11,7 @@ public class OpenAIVectors
     public string Id { get; set; }
     
     [Indexed]
-    [OpenAISentenceVectorizer]
+    [OpenAIVectorizer]
     public Vector<string> Sentence { get; set; }
 
     [Indexed]

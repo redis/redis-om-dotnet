@@ -4,15 +4,15 @@ using Redis.OM.Modeling;
 namespace Redis.OM.Vectorizers;
 
 /// <inheritdoc />
-public class AzureOpenAISentenceVectorizerAttribute : VectorizerAttribute<string>
+public class AzureOpenAIVectorizerAttribute : VectorizerAttribute<string>
 {
     /// <inheritdoc />
-    public AzureOpenAISentenceVectorizerAttribute(string deploymentName, string resourceName, int dim)
+    public AzureOpenAIVectorizerAttribute(string deploymentName, string resourceName, int dim)
     {
         DeploymentName = deploymentName;
         ResourceName = resourceName;
         Dim = dim;
-        Vectorizer = new AzureOpenAISentenceVectorizer(Configuration.Instance.AzureOpenAIApiKey, ResourceName, DeploymentName, Dim);
+        Vectorizer = new AzureOpenAIVectorizer(Configuration.Instance.AzureOpenAIApiKey, ResourceName, DeploymentName, Dim);
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public class AzureOpenAISentenceVectorizerAttribute : VectorizerAttribute<string
             throw new ArgumentException("Object must be a string to be embedded", nameof(obj));
         }
         
-        var floats = AzureOpenAISentenceVectorizer.GetFloats(s, ResourceName, DeploymentName, Configuration.Instance.AzureOpenAIApiKey);
+        var floats = AzureOpenAIVectorizer.GetFloats(s, ResourceName, DeploymentName, Configuration.Instance.AzureOpenAIApiKey);
         return floats.SelectMany(BitConverter.GetBytes).ToArray();
     }
 }

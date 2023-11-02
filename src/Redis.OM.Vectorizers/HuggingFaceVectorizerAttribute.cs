@@ -7,7 +7,7 @@ namespace Redis.OM.Vectorizers;
 /// <summary>
 /// An attribute that provides a Hugging Face API Sentence Vectorizer.
 /// </summary>
-public class HuggingFaceApiSentenceVectorizerAttribute : VectorizerAttribute<string>
+public class HuggingFaceVectorizerAttribute : VectorizerAttribute<string>
 {
     public string? ModelId { get; set; }
 
@@ -26,7 +26,7 @@ public class HuggingFaceApiSentenceVectorizerAttribute : VectorizerAttribute<str
                     throw new InvalidOperationException("Need a Model ID in order to process vector");
                 }
             
-                _vectorizer = new HuggingFaceApiSentenceVectorizer(Configuration.Instance.HuggingFaceAuthorizationToken, ModelId, Dim);
+                _vectorizer = new HuggingFaceVectorizer(Configuration.Instance.HuggingFaceAuthorizationToken, ModelId, Dim);
             }
 
             return _vectorizer;
@@ -73,6 +73,6 @@ public class HuggingFaceApiSentenceVectorizerAttribute : VectorizerAttribute<str
     {
         var modelId = ModelId ?? Configuration.Instance["REDIS_OM_HF_MODEL_ID"];
         if (modelId is null) throw new InvalidOperationException("Model Id Required to use Hugging Face API.");
-        return HuggingFaceApiSentenceVectorizer.GetFloats(s, modelId, Configuration.Instance.HuggingFaceAuthorizationToken);
+        return HuggingFaceVectorizer.GetFloats(s, modelId, Configuration.Instance.HuggingFaceAuthorizationToken);
     }
 }

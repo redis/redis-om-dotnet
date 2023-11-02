@@ -5,12 +5,12 @@ using Redis.OM.Modeling;
 
 namespace Redis.OM.Vectorizers;
 
-public class OpenAISentenceVectorizer : IVectorizer<string>
+public class OpenAIVectorizer : IVectorizer<string>
 {
     private readonly string _openAIAuthToken;
     private readonly string _model;
 
-    public OpenAISentenceVectorizer(string openAIAuthToken, string model = "text-embedding-ada-002", int dim = 1536)
+    public OpenAIVectorizer(string openAIAuthToken, string model = "text-embedding-ada-002", int dim = 1536)
     {
         _openAIAuthToken = openAIAuthToken;
         _model = model;
