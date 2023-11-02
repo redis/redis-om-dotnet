@@ -6,13 +6,13 @@ using Redis.OM.Modeling;
 
 namespace Redis.OM.Vectorizers;
 
-public class AzureOpenAISentenceVectorizer : IVectorizer<string>
+public class AzureOpenAIVectorizer : IVectorizer<string>
 {
     private readonly string _apiKey;
     private readonly string _resourceName;
     private readonly string _deploymentName;
     
-    public AzureOpenAISentenceVectorizer(string apiKey, string resourceName, string deploymentName, int dim)
+    public AzureOpenAIVectorizer(string apiKey, string resourceName, string deploymentName, int dim)
     {
         _apiKey = apiKey;
         _resourceName = resourceName;

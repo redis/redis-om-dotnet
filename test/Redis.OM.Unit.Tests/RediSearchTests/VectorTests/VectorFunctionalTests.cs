@@ -308,4 +308,43 @@ public class VectorFunctionalTests
         Assert.Equal(simpleVectorizedVector.Value, res.SimpleVectorizedVector.Value);
         Assert.Equal(simpleVectorizedVector.Embedding, res.SimpleVectorizedVector.Embedding);
     }
+
+    [Fact]
+    public void OpenAIQueryTest()
+    {
+        _connection.DropIndexAndAssociatedRecords(typeof(OpenAIQuery));
+        _connection.CreateIndex(typeof(OpenAIQuery));
+        
+        var collection = new RedisCollection<OpenAIQuery>(_connection);
+        var query = new OpenAIQuery
+        {
+            Language = "en_us", 
+            Prompt = Vector.Of("What is the Capital of France?"), 
+            Response = "Paris", 
+            TimeStamp = DateTime.Now - TimeSpan.FromHours(3)
+        };
+        collection.Insert(query);
+        var queryPrompt = Vector.Of("What really is the Capital of France?");
+        var result = collection.First(x => x.Prompt.VectorRange(queryPrompt, .15));
+        
+        Assert.Equal("Paris", result.Response);
+        Assert.NotNull(queryPrompt.Embedding);
+
+        result = collection.NearestNeighbors(x => x.Prompt, 1, queryPrompt).First();
+        Assert.Equal("Paris", result.Response);
+        Assert.NotNull(queryPrompt.Embedding);
+        
+        result = collection.Where(x=>x.Language == "en_us").NearestNeighbors(x => x.Prompt, 1, queryPrompt).First();
+        Assert.Equal("Paris", result.Response);
+        Assert.NotNull(queryPrompt.Embedding);
+        
+        result = collection.First(x=>x.Language == "en_us" && x.Prompt.VectorRange(queryPrompt, .15));
+        Assert.Equal("Paris", result.Response);
+        Assert.NotNull(queryPrompt.Embedding);
+
+        var ts = DateTimeOffset.Now - TimeSpan.FromHours(4);
+        result = collection.First(x=>x.TimeStamp > ts && x.Prompt.VectorRange(queryPrompt, .15));
+        Assert.Equal("Paris", result.Response);
+        Assert.NotNull(queryPrompt.Embedding);
+    }
 }

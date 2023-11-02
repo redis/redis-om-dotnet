@@ -11,7 +11,7 @@ public class HuggingFaceVectors
     public string Id { get; set; }
     
     [Indexed]
-    [HuggingFaceApiSentenceVectorizer(ModelId = "sentence-transformers/all-MiniLM-L6-v2")]
+    [HuggingFaceVectorizer(ModelId = "sentence-transformers/all-MiniLM-L6-v2")]
     public Vector<string> Sentence { get; set; }
 
     [Indexed]

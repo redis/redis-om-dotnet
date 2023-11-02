@@ -32,7 +32,7 @@ public class SemanticCachingTests
     {
         var token = Environment.GetEnvironmentVariable("REDIS_OM_HF_TOKEN");
         Assert.NotNull(token);
-        var cache = _provider.HuggingFaceSemanticCache(token);
+        var cache = _provider.HuggingFaceSemanticCache(token, threshold: .15);
         cache.Store("What is the capital of France?", "Paris");
         var res = cache.GetSimilar("What really is the capital of France?").First();
         Assert.Equal("Paris",res.Response);
