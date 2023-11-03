@@ -335,11 +335,14 @@ public class VectorFunctionalTests
     [SkipIfMissingEnvVar("REDIS_OM_OAI_TOKEN")]
     public void OpenAIQueryTest()
     {
-        _connection.DropIndexAndAssociatedRecords(typeof(OpenAIQuery));
-        _connection.CreateIndex(typeof(OpenAIQuery));
+        var provider = new RedisConnectionProvider("");
+
+        provider.RedisCollection<OpenAICompletionResponse>();
+        _connection.DropIndexAndAssociatedRecords(typeof(OpenAICompletionResponse));
+        _connection.CreateIndex(typeof(OpenAICompletionResponse));
         
-        var collection = new RedisCollection<OpenAIQuery>(_connection);
-        var query = new OpenAIQuery
+        var collection = new RedisCollection<OpenAICompletionResponse>(_connection);
+        var query = new OpenAICompletionResponse
         {
             Language = "en_us", 
             Prompt = Vector.Of("What is the Capital of France?"), 
