@@ -5,12 +5,12 @@ using Redis.OM.Vectorizers;
 namespace Redis.OM.Unit.Tests;
 
 [Document(StorageType = StorageType.Json)]
-public class OpenAIQuery
+public class OpenAICompletionResponse
 {
     [RedisIdField]
     public string Id { get; set; }
 
-    [Indexed(DistanceMetric = DistanceMetric.COSINE)]
+    [Indexed(DistanceMetric = DistanceMetric.COSINE, Algorithm = VectorAlgorithm.HNSW, M = 16)]
     [OpenAIVectorizer]
     public Vector<string> Prompt { get; set; }
 
