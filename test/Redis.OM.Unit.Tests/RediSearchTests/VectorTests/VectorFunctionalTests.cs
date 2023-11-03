@@ -159,6 +159,29 @@ public class VectorFunctionalTests
             SimpleHnswVector = simpleHnswVector,
             SimpleVectorizedVector = simpleVectorizedVector
         });
+        var queryVector =Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
+        queryVector[0] += 2;
+        var stringQueryVector = Vector.Of("FooBarBaz");
+        var res = collection.NearestNeighbors(x=>x.SimpleVectorizedVector, 1, stringQueryVector)
+            .First(x => x.SimpleHnswVector.VectorRange(queryVector, 5, "range"));
+        Assert.Equal("helloWorld", res.Id);
+        Assert.Equal(4, res.VectorScores.RangeScore);
+        Assert.Equal(0, res.VectorScores.NearestNeighborsScore);
+    }
+    
+    [Fact]
+    public void RangeAndKnnWithVector()
+    {
+        _connection.CreateIndex(typeof(ObjectWithVector));
+        var collection = new RedisCollection<ObjectWithVector>(_connection);
+        var simpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
+        var simpleVectorizedVector = Vector.Of("FooBarBaz");
+        collection.Insert(new ObjectWithVector
+        {
+            Id = "helloWorld",
+            SimpleHnswVector = simpleHnswVector,
+            SimpleVectorizedVector = simpleVectorizedVector
+        });
         var queryVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray());
         queryVector.Value[0] += 2;
         var stringQueryVector = Vector.Of("FooBarBaz");
@@ -324,27 +347,22 @@ public class VectorFunctionalTests
             TimeStamp = DateTime.Now - TimeSpan.FromHours(3)
         };
         collection.Insert(query);
-        var queryPrompt = Vector.Of("What really is the Capital of France?");
+        var queryPrompt ="What really is the Capital of France?";
         var result = collection.First(x => x.Prompt.VectorRange(queryPrompt, .15));
         
         Assert.Equal("Paris", result.Response);
-        Assert.NotNull(queryPrompt.Embedding);
 
         result = collection.NearestNeighbors(x => x.Prompt, 1, queryPrompt).First();
         Assert.Equal("Paris", result.Response);
-        Assert.NotNull(queryPrompt.Embedding);
         
         result = collection.Where(x=>x.Language == "en_us").NearestNeighbors(x => x.Prompt, 1, queryPrompt).First();
         Assert.Equal("Paris", result.Response);
-        Assert.NotNull(queryPrompt.Embedding);
         
         result = collection.First(x=>x.Language == "en_us" && x.Prompt.VectorRange(queryPrompt, .15));
         Assert.Equal("Paris", result.Response);
-        Assert.NotNull(queryPrompt.Embedding);
 
         var ts = DateTimeOffset.Now - TimeSpan.FromHours(4);
         result = collection.First(x=>x.TimeStamp > ts && x.Prompt.VectorRange(queryPrompt, .15));
         Assert.Equal("Paris", result.Response);
-        Assert.NotNull(queryPrompt.Embedding);
     }
 }
