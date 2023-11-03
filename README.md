@@ -340,10 +340,10 @@ The Vectorizer will manage the embedding generation for you without you having t
 
 #### Query Vectors in Redis
 
-To query vector fields in Redis, all you need to do is use the `VectorRange` method on a vector within our normal LINQ queries, and/or use the `NearestNeighbors` with whatever other filters you want to use, here's some examples:
+To query vector fields in Redis, all you need to do is use the `VectorRange` method on a vector within a normal LINQ query, and/or use the `NearestNeighbors` with whatever other filters you want to use, here's some examples:
 
 ```cs
-var queryPrompt = Vector.Of("What really is the Capital of France?");
+var queryPrompt = "What really is the Capital of France?";
 
 // simple vector range, find first within .15
 var result = collection.First(x => x.Prompt.VectorRange(queryPrompt, .15));
