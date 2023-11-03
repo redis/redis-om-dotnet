@@ -15,7 +15,7 @@ public class SemanticCachingTests
         _provider = setup.Provider;
     }
 
-    [Fact]
+    [SkipIfMissingEnvVar("REDIS_OM_OAI_TOKEN")]
     public void OpenAISemanticCache()
     {
         var token = Environment.GetEnvironmentVariable("REDIS_OM_OAI_TOKEN");
@@ -27,7 +27,7 @@ public class SemanticCachingTests
         Assert.True(res.Score < .15);
     }
 
-    [Fact]
+    [SkipIfMissingEnvVar("REDIS_OM_HF_TOKEN")]
     public void HuggingFaceSemanticCache()
     {
         var token = Environment.GetEnvironmentVariable("REDIS_OM_HF_TOKEN");
@@ -39,7 +39,7 @@ public class SemanticCachingTests
         Assert.True(res.Score < .15);
     }
 
-    [Fact]
+    [SkipIfMissingEnvVar("REDIS_OM_AZURE_OAI_TOKEN")]
     public void AzureOpenAISemanticCache()
     {
         var token = Environment.GetEnvironmentVariable("REDIS_OM_AZURE_OAI_TOKEN");

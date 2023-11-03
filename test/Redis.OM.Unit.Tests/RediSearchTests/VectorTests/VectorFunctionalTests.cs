@@ -17,7 +17,7 @@ public class VectorFunctionalTests
         _connection = setup.Connection;
     }
 
-    [Fact]
+    [SkipIfMissingEnvVar("REDIS_OM_HF_TOKEN")]
     public void TestHuggingFaceVectorizer()
     {
         _connection.DropIndexAndAssociatedRecords(typeof(HuggingFaceVectors));
@@ -39,7 +39,7 @@ public class VectorFunctionalTests
         Assert.Equal(obj.Sentence.Value, res.Sentence.Value);
     }
 
-    [Fact]
+    [SkipIfMissingEnvVar("REDIS_OM_HF_TOKEN")]
     public void TestParis()
     {
         _connection.DropIndexAndAssociatedRecords(typeof(HuggingFaceVectors));
@@ -64,7 +64,7 @@ public class VectorFunctionalTests
         Assert.Equal(obj.Sentence.Embedding, res.Sentence.Embedding);
     }
 
-    [Fact]
+    [SkipIfMissingEnvVar("REDIS_OM_OAI_TOKEN")]
     public void TestOpenAIVectorizer()
     {
         _connection.DropIndexAndAssociatedRecords(typeof(OpenAIVectors));
@@ -87,7 +87,7 @@ public class VectorFunctionalTests
         Assert.Equal(obj.Sentence.Embedding, res.Sentence.Embedding);
     }
 
-    [Fact]
+    [SkipIfMissingEnvVar("REDIS_OM_OAI_TOKEN")]
     public void TestOpenAIVectorRange()
     {
         _connection.DropIndexAndAssociatedRecords(typeof(OpenAIVectors));
@@ -309,7 +309,7 @@ public class VectorFunctionalTests
         Assert.Equal(simpleVectorizedVector.Embedding, res.SimpleVectorizedVector.Embedding);
     }
 
-    [Fact]
+    [SkipIfMissingEnvVar("REDIS_OM_OAI_TOKEN")]
     public void OpenAIQueryTest()
     {
         _connection.DropIndexAndAssociatedRecords(typeof(OpenAIQuery));
