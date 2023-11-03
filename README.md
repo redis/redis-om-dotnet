@@ -327,14 +327,14 @@ With the vector defined in our model, all we need to do is create Vectors of the
 
 ```cs
 var collection = _provider.RedisCollection<OpenAICompletionResponse>();
-var query = new OpenAICompletionResponse
+var completionResult = new OpenAICompletionResponse
 {
     Language = "en_us", 
     Prompt = Vector.Of("What is the Capital of France?"), 
     Response = "Paris", 
     TimeStamp = DateTime.Now - TimeSpan.FromHours(3)
 };
-collection.Insert(query);
+collection.Insert(completionResult);
 ```
 
 The Vectorizer will manage the embedding generation for you without you having to intervene.
@@ -344,20 +344,20 @@ The Vectorizer will manage the embedding generation for you without you having t
 To query vector fields in Redis, all you need to do is use the `VectorRange` method on a vector within our normal LINQ queries, and/or use the `NearestNeighbors` with whatever other filters you want to use, here's some examples:
 
 ```cs
-var queryPrompt = "What really is the Capital of France?";
+var prompt = "What really is the Capital of France?";
 
 // simple vector range, find first within .15
-var result = collection.First(x => x.Prompt.VectorRange(queryPrompt, .15));
+var result = collection.First(x => x.Prompt.VectorRange(prompt, .15));
 
 // simple nearest neighbors query, finds first nearest neighbor
-result = collection.NearestNeighbors(x => x.Prompt, 1, queryPrompt).First();
+result = collection.NearestNeighbors(x => x.Prompt, 1, prompt).First();
 
 // hybrid query, pre-filters result set for english responses, then runs a nearest neighbors search.
-result = collection.Where(x=>x.Language == "en_us").NearestNeighbors(x => x.Prompt, 1, queryPrompt).First();
+result = collection.Where(x=>x.Language == "en_us").NearestNeighbors(x => x.Prompt, 1, prompt).First();
 
 // hybrid query, pre-filters responses newer than 4 hours, and finds first result within .15
 var ts = DateTimeOffset.Now - TimeSpan.FromHours(4);
-result = collection.First(x=>x.TimeStamp > ts && x.Prompt.VectorRange(queryPrompt, .15));
+result = collection.First(x=>x.TimeStamp > ts && x.Prompt.VectorRange(prompt, .15));
 ```
 
 #### What Happens to the Embeddings?
