@@ -9,9 +9,9 @@ namespace Redis.OM
     public abstract class Vector
     {
         /// <summary>
-        /// Gets the Embedding.
+        /// Gets or sets the Embedding. You may set the embedding yourself, if it's not set when Redis OM inserts the vector, it will generate it for you.
         /// </summary>
-        public byte[]? Embedding { get; internal set; }
+        public byte[]? Embedding { get; set; }
 
         /// <summary>
         /// Gets the embedding represented as an array of floats.
