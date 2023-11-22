@@ -119,7 +119,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestBasicQueryWithExactNumericMatch()
+        public void TestBasicQueryWithExactIntegerMatch()
         {
             _substitute.ClearSubstitute();
             _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
@@ -133,6 +133,32 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "100");
+        }
+
+        [Fact]
+        public void TestBasicQueryWithExactDecimalMatch()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            var y = 90.5M;
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Salary == y).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Salary:[90.5 90.5])",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
+        [Theory]
+        [InlineData("en-DE")]
+        [InlineData("it-IT")]
+        [InlineData("es-ES")]
+        public void TestBasicQueryWithExactDecimalMatchTestingInvariantCultureCompliance(string lcid)
+        {
+            Helper.RunTestUnderDifferentCulture(lcid, _ => TestBasicQueryWithExactDecimalMatch());
         }
 
         [Fact]
@@ -1055,6 +1081,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.UpdateAsync(steve);
             await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33", "SET", "$.Height", "71.5");
             Scripts.ShaCollection.Clear();
+        }
+
+        [Theory]
+        [InlineData("en-DE")]
+        [InlineData("it-IT")]
+        [InlineData("es-ES")]
+        public void TestUpdateJsonWithDoubleTestingInvariantCultureCompliance(string lcid)
+        {
+            Helper.RunTestUnderDifferentCulture(lcid, async _ => await TestUpdateJsonWithDouble());
         }
 
         [Fact]
@@ -3346,6 +3381,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var doubles = new [] { 22.5, 23, 24 };
             var floats = new [] { 25.5F, 26, 27 };
             var ushorts = new ushort[] { 28, 29, 30 };
+            var decimals = new decimal[] { 31.5M, 32, 33 };
             _substitute.ClearSubstitute();
             _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithNumerics>(_substitute).Where(x => ints.Contains(x.Integer));
@@ -3450,6 +3486,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             collection = new RedisCollection<ObjectWithNumerics>(_substitute).Where(x => floats.Contains(x.Float));
             _ = collection.ToList();
             expected = $"@{nameof(ObjectWithNumerics.Float)}:[25.5 25.5]|@{nameof(ObjectWithNumerics.Float)}:[26 26]|@{nameof(ObjectWithNumerics.Float)}:[27 27]";
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumerics-idx",
+                expected,
+                "LIMIT",
+                "0",
+                "100");
+
+            collection = new RedisCollection<ObjectWithNumerics>(_substitute).Where(x => decimals.Contains(x.Decimal));
+            _ = collection.ToList();
+            expected = $"@{nameof(ObjectWithNumerics.Decimal)}:[31.5 31.5]|@{nameof(ObjectWithNumerics.Decimal)}:[32 32]|@{nameof(ObjectWithNumerics.Decimal)}:[33 33]";
             _substitute.Received().Execute(
                 "FT.SEARCH",
                 "objectwithnumerics-idx",

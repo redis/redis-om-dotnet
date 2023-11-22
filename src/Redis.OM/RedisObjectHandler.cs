@@ -337,7 +337,7 @@ namespace Redis.OM
                     var val = property.GetValue(obj);
                     if (val != null)
                     {
-                        hash.Add(propertyName, val.ToString());
+                        hash.Add(propertyName, Convert.ToString(val, CultureInfo.InvariantCulture));
                     }
                 }
                 else if (type.IsEnum)

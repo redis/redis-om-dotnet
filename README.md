@@ -365,6 +365,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@AndersenGans](https://github.com/AndersenGans)
 * [@mdrakib](https://github.com/mdrakib)
 * [@jrpavoncello](https://github.com/jrpavoncello)
+* [@axnetg](https://github.com/axnetg)
 
 <!-- Logo -->
 [Logo]: images/logo.svg
