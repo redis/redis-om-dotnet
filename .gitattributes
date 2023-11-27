@@ -1,0 +1,2 @@
+*.onnx filter=lfs diff=lfs merge=lfs -text
+src/Redis.OM.Vectorizers.AllMiniLML6V2/Resources/vocab.txt filter=lfs diff=lfs merge=lfs -text
