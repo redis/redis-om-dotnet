@@ -126,7 +126,7 @@ namespace Redis.OM.Searching
                     }
                     else
                     {
-                        DocumentsSkippedCount++;
+                        DocumentsSkippedCount++; // needed when a key expired while it was being enumerated by Redis.
                     }
                 }
             }
