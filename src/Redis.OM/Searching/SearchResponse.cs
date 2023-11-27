@@ -124,6 +124,10 @@ namespace Redis.OM.Searching
                         var obj = RedisObjectHandler.FromHashSet<T>(documentHash);
                         Documents.Add(docId, obj);
                     }
+                    else
+                    {
+                        DocumentsSkippedCount++; // needed when a key expired while it was being enumerated by Redis.
+                    }
                 }
             }
         }
@@ -131,6 +135,7 @@ namespace Redis.OM.Searching
         private SearchResponse()
         {
             DocumentCount = 0;
+            DocumentsSkippedCount = 0;
             Documents = new Dictionary<string, T>();
         }
 
@@ -138,6 +143,12 @@ namespace Redis.OM.Searching
         /// Gets or sets the number of documents found by the search.
         /// </summary>
         public long DocumentCount { get; set; }
+
+        /// <summary>
+        /// Gets the number of documents skipped while enumerating the search result set.
+        /// This can be indicative of documents that have expired during enumeration.
+        /// </summary>
+        public int DocumentsSkippedCount { get; private set; }
 
         /// <summary>
         /// Gets the documents.
