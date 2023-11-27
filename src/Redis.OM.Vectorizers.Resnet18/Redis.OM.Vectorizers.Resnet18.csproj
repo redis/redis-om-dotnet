@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="LG.Microsoft.ML.DnnImageFeaturizer.ResNet18" Version="0.18.0.4" />
+        <PackageReference Include="Microsoft.ML" Version="1.6.0" />
+        <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="1.6.0" />
+        <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="1.6.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Redis.OM.Vectorizers\Redis.OM.Vectorizers.csproj" />
+      <ProjectReference Include="..\Redis.OM\Redis.OM.csproj" />
+    </ItemGroup>
+</Project>
