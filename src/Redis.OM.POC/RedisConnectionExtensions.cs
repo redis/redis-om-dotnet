@@ -7,7 +7,7 @@ namespace Redis.OM
     {
         public static IRedisConnection Connect(this RedisConnectionConfiguration conf)
         {
-            return new RedisConnection(conf.Host);
+            return new RedisConnectionStub(conf.Host);
         }
     }
 }

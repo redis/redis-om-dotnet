@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
+using Redis.OM.Modeling;
 using StackExchange.Redis;
 
 namespace Redis.OM
@@ -31,6 +32,14 @@ namespace Redis.OM
                 var result = _db.Execute(command, args);
                 return new RedisReply(result);
             }
+            catch (RedisException ex)
+            {
+                throw new RedisExecutionException($"{ex.Message}{Environment.NewLine}Failed on {command} {string.Join(" ", args)}", ex);
+            }
+            catch (TimeoutException ex)
+            {
+                throw new RedisExecutionException($"{ex.Message}{Environment.NewLine}Failed on {command} {string.Join(" ", args)}", ex);
+            }
             catch (Exception ex)
             {
                 throw new Exception($"{ex.Message}{Environment.NewLine}Failed on {command} {string.Join(" ", args)}", ex);
@@ -44,6 +53,14 @@ namespace Redis.OM
             {
                 var result = await _db.ExecuteAsync(command, args);
                 return new RedisReply(result);
+            }
+            catch (RedisException ex)
+            {
+                throw new RedisExecutionException($"{ex.Message}{Environment.NewLine}Failed on {command} {string.Join(" ", args)}", ex);
+            }
+            catch (TimeoutException ex)
+            {
+                throw new RedisExecutionException($"{ex.Message}{Environment.NewLine}Failed on {command} {string.Join(" ", args)}", ex);
             }
             catch (Exception ex)
             {

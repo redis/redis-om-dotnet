@@ -13,7 +13,7 @@ using StackExchange.Redis;
 
 namespace Redis.OM
 {
-    public partial class RedisConnection : IRedisConnection, IDisposable
+    public partial class RedisConnectionStub : IRedisConnection, IDisposable
     {
         private Socket _socket;
         private TcpClient _tcpClient;
@@ -21,7 +21,7 @@ namespace Redis.OM
         private readonly IDatabase _db;
 
         //private static var tran = IDatabase.CreateTransaction();
-        public RedisConnection(string hostName="localhost")
+        public RedisConnectionStub(string hostName="localhost")
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _tcpClient = new TcpClient(hostName, 6379);
