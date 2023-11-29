@@ -5,16 +5,16 @@ using Redis.OM.Vectorizers.Resnet18;
 namespace Redis.OM.Vectorizer.Tests;
 
 [Document(StorageType = StorageType.Json)]
-public class DocWithVector
+public class DocWithVectors
 {
     [RedisIdField]
     public string Id { get; set; }
 
-    [Indexed]
+    [Indexed(Algorithm = VectorAlgorithm.HNSW)]
     [SentenceVectorizer]
     public Vector<string> Sentence { get; set; }
     
     [Indexed]
-    [FilePathImageVectorizer]
+    [ImageVectorizer]
     public Vector<string> ImagePath { get; set; }
 }

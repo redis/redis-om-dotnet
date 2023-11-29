@@ -2,8 +2,24 @@ using Redis.OM.Contracts;
 
 namespace Redis.OM.Vectorizers;
 
+/// <summary>
+/// Static extensions for The RedisConnectionProvider.
+/// </summary>
 public static class RedisConnectionProviderExtensions
 {
+    
+    /// <summary>
+    /// Creates a Semantic Cache using the Hugging face model API 
+    /// </summary>
+    /// <param name="provider">The Connection Provider.</param>
+    /// <param name="huggingFaceAuthToken">The API token for Hugging face.</param>
+    /// <param name="threshold">The activation threshold.</param>
+    /// <param name="modelId">The Model Id to use.</param>
+    /// <param name="dim">The dimensionality of the tensors.</param>
+    /// <param name="indexName">The Index name.</param>
+    /// <param name="prefix">The prefix.</param>
+    /// <param name="ttl">The TTL</param>
+    /// <returns></returns>
     public static ISemanticCache HuggingFaceSemanticCache(this IRedisConnectionProvider provider, string huggingFaceAuthToken, double threshold = .15, string modelId = "sentence-transformers/all-mpnet-base-v2", int dim = 768, string indexName = "HuggingFaceSemanticCache", string? prefix = null, long? ttl = null)
     {
         var vectorizer = new HuggingFaceVectorizer(huggingFaceAuthToken, modelId, dim);

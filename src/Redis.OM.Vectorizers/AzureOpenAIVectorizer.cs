@@ -38,7 +38,7 @@ public class AzureOpenAIVectorizer : IVectorizer<string>
             Headers = { { "api-key", apiKey } }
         };
 
-        var res = client.SendAsync(request).Result;
+        var res = client.Send(request);
         if (!res.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
