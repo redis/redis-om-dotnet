@@ -32,7 +32,7 @@ public class UriImageVectorizer : IVectorizer<string>
         var mlContext = MlContext.Value;
         var pipeline = mlContext.Transforms.ExtractPixels("Pixels", "Image")
             .Append(mlContext.Transforms.DnnFeaturizeImage("Features",
-                m => m.ModelSelector.ResNet18(mlContext, m.OutputColumn, m.InputColumn), "Pixels"));
+                m => m.ModelSelector.ResNet18(mlContext, m.OutputColumn, m.InputColumn, mlContext), "Pixels"));
 
         return pipeline;
     }

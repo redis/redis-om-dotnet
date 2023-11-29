@@ -1,13 +1,27 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">    
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Redis.OM.Vectorizers.Resnet18</RootNamespace>
+        <PackageVersion>0.6.0</PackageVersion>
+        <Version>0.6.0</Version>
+        <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.6.0</PackageReleaseNotes>
+        <Description>Resnet 18 Vectorizers for Redis OM .NET.</Description>
+        <Title>Redis OM Resnet 18 Vectorizers</Title>
+        <Authors>Steve Lorello</Authors>
+        <Copyright>Redis Inc</Copyright>
+        <PackageProjectUrl>https://github.com/redis/redis-om-dotnet</PackageProjectUrl>
+        <PackageIcon>icon-square.png</PackageIcon>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/redis/redis-om-dotnet</RepositoryUrl>
+        <RepositoryType>Github</RepositoryType>
+        <PackageTags>redis redisearch indexing databases</PackageTags>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="LG.Microsoft.ML.DnnImageFeaturizer.ResNet18" Version="0.18.0.4" />
+<!--        <PackageReference Include="Microsoft.ML.DnnImageFeaturizer.ResNet18" Version="0.18.0" IncludeAssets="all" />-->
         <PackageReference Include="Microsoft.ML" Version="1.6.0" />
         <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="1.6.0" />
         <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="1.6.0" />
@@ -17,4 +31,29 @@
       <ProjectReference Include="..\Redis.OM.Vectorizers\Redis.OM.Vectorizers.csproj" />
       <ProjectReference Include="..\Redis.OM\Redis.OM.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+        <None Include="../../images/icon-square.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Resources\resnet-preproc-v1-18.onnx" />
+      <None Remove="Resources\resnet18-v2-7.onnx" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Resources" />
+    </ItemGroup>
+        
+    <ItemGroup>
+        <Content Include="$(MSBuildThisFileDirectory)Redis.OM.Vectorizers.Resnet18.props" Pack="true" PackagePath="build" />
+        <Content Include="Resources\**\*.*" Pack="true" PackagePath="Resources">            
+        </Content>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <DocumentationFile>
+            bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml
+        </DocumentationFile>
+    </PropertyGroup>
 </Project>
