@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -25,8 +24,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Redis.OM.Vectorizers.AllMiniLML6V2\Redis.OM.Vectorizers.AllMiniLML6V2.csproj" />
-    <ProjectReference Include="..\..\src\Redis.OM.Vectorizers.Resnet18\Redis.OM.Vectorizers.Resnet18.csproj" />
+    <ProjectReference Include="..\..\src\Redis.OM.Vectorizers.Resnet18\Redis.OM.Vectorizers.Resnet18.csproj"/>
     <ProjectReference Include="..\Redis.OM.Unit.Tests\Redis.OM.Unit.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="hal.jpg" />
+    <Content Include="hal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

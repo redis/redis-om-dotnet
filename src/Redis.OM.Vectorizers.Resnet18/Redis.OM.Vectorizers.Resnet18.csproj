@@ -47,8 +47,10 @@
         
     <ItemGroup>
         <Content Include="$(MSBuildThisFileDirectory)Redis.OM.Vectorizers.Resnet18.props" Pack="true" PackagePath="build" />
-        <Content Include="Resources\**\*.*" Pack="true" PackagePath="Resources">            
+        <Content Include="Resources\**\*.*" Pack="true" PackagePath="Resources">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        
     </ItemGroup>
 
     <PropertyGroup>
