@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Redis.OM.Vectorizers.AllMiniLML6V2\Redis.OM.Vectorizers.AllMiniLML6V2.csproj" />
-    <ProjectReference Include="..\..\src\Redis.OM.Vectorizers.Resnet18\Redis.OM.Vectorizers.Resnet18.csproj"/>
+    <ProjectReference Include="..\..\src\Redis.OM.Vectorizers.Resnet18\Redis.OM.Vectorizers.Resnet18.csproj" />
     <ProjectReference Include="..\Redis.OM.Unit.Tests\Redis.OM.Unit.Tests.csproj" />
   </ItemGroup>
 

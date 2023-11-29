@@ -3,11 +3,14 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Transforms;
 using Microsoft.ML.Transforms.Onnx;
-using TransformExtensionsCatalog = Microsoft.ML.TransformExtensionsCatalog;
 
 namespace Redis.OM.Vectorizers.Resnet18;
 
-public static class DnnImageModelSelectorExtensions
+/// <summary>
+/// Extensions pulled and slightly modified from  from ML.NET to service this package as the content files cannot be
+/// reliably copied from transitive dependencies. 
+/// </summary>
+internal static class DnnImageModelSelectorExtensions
 {
     /// <summary>
     /// Returns an estimator chain with the two corresponding models (a preprocessing one and a main one) required for the ResNet pipeline.
