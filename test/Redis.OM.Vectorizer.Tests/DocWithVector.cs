@@ -15,6 +15,6 @@ public class DocWithVector
     public Vector<string> Sentence { get; set; }
     
     [Indexed]
-    [UriImageVectorizer]
-    public Vector<string> ImageUri { get; set; }
+    [FilePathImageVectorizer]
+    public Vector<string> ImagePath { get; set; }
 }

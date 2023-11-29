@@ -18,7 +18,7 @@ public class SentenceVectorizerTests
         connection.Set(new DocWithVector
         {
             Sentence = Vector.Of("Hello world this is Hal."),
-            ImageUri = Vector.Of("https://triviahappy.com/wp-content/uploads/2014/05/05282014hal.jpg")
+            ImagePath = Vector.Of("hal.jpg")
         });
     }
 }
