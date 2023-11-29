@@ -29,7 +29,7 @@ public class FilePathImageVectorizer : IVectorizer<string>
             .Append(mlContext.Transforms.ResizeImages("ImageObject", 224, 224))
             .Append(mlContext.Transforms.ExtractPixels("Pixels", "ImageObject"))
             .Append(mlContext.Transforms.DnnFeaturizeImage("Features",
-                m => m.ModelSelector.ResNet18(mlContext, m.OutputColumn, m.InputColumn), "Pixels"));
+                m => m.ModelSelector.ResNet18(mlContext, m.OutputColumn, m.InputColumn, mlContext), "Pixels"));
 
         return pipeline;
     }
