@@ -94,7 +94,7 @@ namespace Redis.OM.Searching
             switch (_started)
             {
                 case true when _limited:
-                case true when _records.Documents.Count < _query!.Limit!.Number:
+                case true when _records.Documents.Count < _query!.Limit!.Number && _records.DocumentsSkippedCount == 0:
                     return false;
                 default:
                     return GetNextChunk();
@@ -113,7 +113,7 @@ namespace Redis.OM.Searching
             switch (_started)
             {
                 case true when _limited:
-                case true when _records.Documents.Count < _query!.Limit!.Number:
+                case true when _records.Documents.Count < _query!.Limit!.Number && _records.DocumentsSkippedCount == 0:
                     return false;
                 default:
                     return await GetNextChunkAsync();
