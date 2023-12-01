@@ -32,8 +32,8 @@ public class ImageVectorizer : IVectorizer<string>
             };
             var imageStream = Configuration.Instance.Client.Send(request).Content.ReadAsStream();
             var image = Image.FromStream(imageStream);
-            var resized = new Bitmap(image, new Size(224, 224));
-            var vector = VectorizeBitMaps(new [] { resized })[0].SelectMany(BitConverter.GetBytes).ToArray();
+            var bitmap = new Bitmap(image);
+            var vector = VectorizeBitMaps(new [] { bitmap })[0].SelectMany(BitConverter.GetBytes).ToArray();
             return vector;
         }
 
@@ -84,7 +84,9 @@ public class ImageVectorizer : IVectorizer<string>
     private static EstimatorChain<TransformerChain<ColumnCopyingTransformer>> CreateBitmapPipeline()
     {
         var mlContext = MlContext.Value;
-        var pipeline = mlContext.Transforms.ExtractPixels("Pixels", "Image")
+        var pipeline = mlContext.Transforms
+            .ResizeImages("Image", 224,224)
+            .Append(mlContext.Transforms.ExtractPixels("Pixels", "Image"))
             .Append(mlContext.Transforms.DnnFeaturizeImage("Features",
                 m => m.ModelSelector.ResNet18(mlContext, m.OutputColumn, m.InputColumn, mlContext), "Pixels"));
 

@@ -1,4 +1,5 @@
 using Redis.OM.Contracts;
+using Redis.OM.Searching;
 using Redis.OM.Unit.Tests;
 using Redis.OM.Vectorizers.AllMiniLML6V2;
 
@@ -16,11 +17,20 @@ public class VectorizerFunctionalTests
     public void Test()
     {
         var connection = _provider.Connection;
+        connection.CreateIndex(typeof(DocWithVectors));
         connection.Set(new DocWithVectors
         {
             Sentence = Vector.Of("Hello world this is Hal."),
             ImagePath = Vector.Of("hal.jpg")
         });
+
+        var collection = new RedisCollection<DocWithVectors>(connection);
+
+        // images
+        var res = collection.NearestNeighbors(x => x.ImagePath, 5, "hal.jpg");
+        Assert.Equal(0, res.First().Scores.NearestNeighborsScore);
+        // sentences
+        collection.NearestNeighbors(x => x.Sentence, 5, "Hello world this really is Hal.");
     }
 
     [Fact]
