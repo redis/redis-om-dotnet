@@ -3474,5 +3474,180 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.Where(lambada).ToList();
             _substitute.Received().Execute("FT.SEARCH", "person-idx", "(@TagField:{James|Bond})", "LIMIT", "0", "100");
         }
+
+        [Fact]
+        public async Task EnumerateAllWhenKeyExpires()
+        {
+            RedisReply firstReply = new RedisReply[]
+            {
+                new(2),
+                new("Redis.OM.Unit.Tests.RediSearchTests.Person:E912BED67BD64386B4FDC7322D"),
+                new(new RedisReply[]
+                {
+                    "$",
+                    "{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"E912BED67BD64386B4FDC7322D\"}"
+                }),
+                new("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"),
+                // Key expired while executing the search
+                new(Array.Empty<RedisReply>())
+            };
+            RedisReply secondReply = new RedisReply[]
+            {
+                new(2),
+                new("Redis.OM.Unit.Tests.RediSearchTests.Person:4F6AE0A9BAE044E4B2D2186044"),
+                new(new RedisReply[]
+                {
+                    "$",
+                    "{\"Name\":\"Josh\",\"Age\":30,\"Height\":12.0, \"Id\":\"4F6AE0A9BAE044E4B2D2186044\"}"
+                })
+            };
+            RedisReply finalEmptyResult = new RedisReply[]
+            {
+                new(0),
+            };
+
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "2").Returns(firstReply);
+            _substitute.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "2",
+                "2").Returns(secondReply);
+            _substitute.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "4",
+                "2").Returns(finalEmptyResult);
+
+            var people = new List<Person>();
+            // Chunk size 2 induces the iterator to call FT.SEARCH 3 times
+            await foreach (var person in new RedisCollection<Person>(_substitute, 2))
+            {
+                people.Add(person);
+            }
+
+            Assert.Equal(2, people.Count);
+
+            Assert.Equal("Steve", people[0].Name);
+            Assert.Equal("Josh", people[1].Name);
+        }
+
+        [Fact]
+        public async Task EnumerateAllWhenKeyExpiresAtEnd()
+        {
+            RedisReply firstReply = new RedisReply[]
+            {
+                new(2),
+                new("Redis.OM.Unit.Tests.RediSearchTests.Person:E912BED67BD64386B4FDC7322D"),
+                new(new RedisReply[]
+                {
+                    "$",
+                    "{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"E912BED67BD64386B4FDC7322D\"}"
+                }),
+                new("Redis.OM.Unit.Tests.RediSearchTests.Person:4F6AE0A9BAE044E4B2D2186044"),
+                new(new RedisReply[]
+                {
+                    "$",
+                    "{\"Name\":\"Josh\",\"Age\":30,\"Height\":12.0, \"Id\":\"4F6AE0A9BAE044E4B2D2186044\"}"
+                })
+            };
+            RedisReply secondReply = new RedisReply[]
+            {
+                new(1),
+                new("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"),
+                // Key expired while executing the search
+                new(Array.Empty<RedisReply>())
+            };
+            RedisReply finalEmptyResult = new RedisReply[]
+            {
+                new(0),
+            };
+
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "2").Returns(firstReply);
+            _substitute.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "2",
+                "2").Returns(secondReply);
+            _substitute.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "4",
+                "2").Returns(finalEmptyResult);
+
+            var people = new List<Person>();
+            // Chunk size 2 induces the iterator to call FT.SEARCH 3 times
+            await foreach (var person in new RedisCollection<Person>(_substitute, 2))
+            {
+                people.Add(person);
+            }
+
+            Assert.Equal(2, people.Count);
+
+            Assert.Equal("Steve", people[0].Name);
+            Assert.Equal("Josh", people[1].Name);
+        }
+
+        [Fact]
+        public async Task EnumerateAllButAllExpired()
+        {
+            RedisReply firstReply = new RedisReply[]
+            {
+                new(1),
+                new("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"),
+                // Key expired while executing the search
+                new(Array.Empty<RedisReply>())
+            };
+            RedisReply finalEmptyResult = new RedisReply[]
+            {
+                new(0),
+            };
+
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "0",
+                "2").Returns(firstReply);
+            _substitute.ExecuteAsync(
+                "FT.SEARCH",
+                "person-idx",
+                "*",
+                "LIMIT",
+                "4",
+                "2").Returns(finalEmptyResult);
+
+            var people = new List<Person>();
+            // Chunk size 2 induces the iterator to call FT.SEARCH twice
+            await foreach (var person in new RedisCollection<Person>(_substitute, 2))
+            {
+                people.Add(person);
+            }
+
+            Assert.Empty(people);
+        }
     }
 }
