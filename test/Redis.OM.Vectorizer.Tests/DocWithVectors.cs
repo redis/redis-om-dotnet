@@ -1,4 +1,5 @@
 using Redis.OM.Modeling;
+using Redis.OM.Modeling.Vectors;
 using Redis.OM.Vectorizers.AllMiniLML6V2;
 using Redis.OM.Vectorizers.Resnet18;
 
@@ -17,4 +18,6 @@ public class DocWithVectors
     [Indexed]
     [ImageVectorizer]
     public Vector<string> ImagePath { get; set; }
+
+    public VectorScores? Scores { get; set; }
 }
