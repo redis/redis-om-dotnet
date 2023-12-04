@@ -34,6 +34,16 @@ public static class RedisConnectionProviderExtensions
         return cache;
     }
     
+    /// <summary>
+    /// Creates a Semantic Cache that leverages OpenAI's REST API.
+    /// </summary>
+    /// <param name="provider">The Provider.</param>
+    /// <param name="openAIAuthToken">The OpenAI bearer token.</param>
+    /// <param name="threshold">The activation threshold for acceptable distance.</param>
+    /// <param name="indexName">The index name to create.</param>
+    /// <param name="prefix">The Prefix to use for the semantic cache.</param>
+    /// <param name="ttl">The Time to Live for Items in the Semantic Cache.</param>
+    /// <returns></returns>
     public static ISemanticCache OpenAISemanticCache(this IRedisConnectionProvider provider, string openAIAuthToken, double threshold = .15, string indexName = "OpenAISemanticCache", string? prefix = null, long? ttl = null)
     {
         var vectorizer = new OpenAIVectorizer(openAIAuthToken);
@@ -48,6 +58,19 @@ public static class RedisConnectionProviderExtensions
         return cache;
     }
 
+    /// <summary>
+    /// Creates a Semantic Cache leveraging Azure's Open AI REST Api.
+    /// </summary>
+    /// <param name="provider">The RedisConnectionProvider.</param>
+    /// <param name="apiKey">The API Key for Azure.</param>
+    /// <param name="resourceName">The Resource Name.</param>
+    /// <param name="deploymentId">The Deployment ID</param>
+    /// <param name="dim">The dimension of the model at the given Resource/Deployment.</param>
+    /// <param name="threshold">The Activation Threshold.</param>
+    /// <param name="indexName">The Index name.</param>
+    /// <param name="prefix">The Prefix.</param>
+    /// <param name="ttl">The Time to Live for a record inserted into the cache.</param>
+    /// <returns></returns>
     public static ISemanticCache AzureOpenAISemanticCache(this IRedisConnectionProvider provider, string apiKey, string resourceName, string deploymentId, int dim, double threshold = .15, string indexName = "AzureOpenAISemanticCache", string? prefix = null, long? ttl = null)
     {
         var vectorizer = new AzureOpenAIVectorizer(apiKey, resourceName, deploymentId, dim);

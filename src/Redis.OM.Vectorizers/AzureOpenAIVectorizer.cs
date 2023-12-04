@@ -6,12 +6,22 @@ using Redis.OM.Modeling;
 
 namespace Redis.OM.Vectorizers;
 
+/// <summary>
+/// Vectorizer for Azure's OpenAI REST API
+/// </summary>
 public class AzureOpenAIVectorizer : IVectorizer<string>
 {
     private readonly string _apiKey;
     private readonly string _resourceName;
     private readonly string _deploymentName;
     
+    /// <summary>
+    /// Initializes vectorizer
+    /// </summary>
+    /// <param name="apiKey">The Vectorizers API Key</param>
+    /// <param name="resourceName">The Azure Resource Name.</param>
+    /// <param name="deploymentName">The Azure Deployment Name.</param>
+    /// <param name="dim">The dimensions of the model addressed by this resource/deployment.</param>
     public AzureOpenAIVectorizer(string apiKey, string resourceName, string deploymentName, int dim)
     {
         _apiKey = apiKey;
@@ -20,8 +30,13 @@ public class AzureOpenAIVectorizer : IVectorizer<string>
         Dim = dim;
     }
 
+    /// <inheritdoc />
     public VectorType VectorType => VectorType.FLOAT32;
+
+    /// <inheritdoc />
     public int Dim { get; }
+
+    /// <inheritdoc />
     public byte[] Vectorize(string str) => GetFloats(str, _resourceName, _deploymentName, _apiKey).SelectMany(BitConverter.GetBytes).ToArray();
     
     internal static float[] GetFloats(string s, string resourceName, string deploymentName, string apiKey)

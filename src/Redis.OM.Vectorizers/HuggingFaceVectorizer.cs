@@ -5,8 +5,17 @@ using Redis.OM.Modeling;
 
 namespace Redis.OM.Vectorizers;
 
+/// <summary>
+/// Vectorizer for HuggingFace API.
+/// </summary>
 public class HuggingFaceVectorizer : IVectorizer<string>
 {
+    /// <summary>
+    /// Initializes the Vectorizer.
+    /// </summary>
+    /// <param name="authToken">Auth token.</param>
+    /// <param name="modelId">Model Id.</param>
+    /// <param name="dim">Dimensions for the output tensors of the model.</param>
     public HuggingFaceVectorizer(string authToken, string modelId, int dim)
     {
         _huggingFaceAuthToken = authToken;
@@ -15,16 +24,33 @@ public class HuggingFaceVectorizer : IVectorizer<string>
     }
     
     private readonly string _huggingFaceAuthToken;
+
+    /// <summary>
+    /// The Model Id.
+    /// </summary>
     public string ModelId { get; }
+
+    /// <inheritdoc />
     public VectorType VectorType => VectorType.FLOAT32;
-    
+
+    /// <inheritdoc />
     public int Dim { get; }
+
+    /// <inheritdoc />
     public byte[] Vectorize(string str)
     {
         return GetFloats(str, ModelId, _huggingFaceAuthToken).SelectMany(BitConverter.GetBytes).ToArray();
     }
     
-    public static float[] GetFloats(string s, string modelId, string huggingFaceAuthToken)
+    /// <summary>
+    /// Gets the floats for the sentence.
+    /// </summary>
+    /// <param name="s">the string.</param>
+    /// <param name="modelId">The Model Id.</param>
+    /// <param name="huggingFaceAuthToken">The HF token.</param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    internal static float[] GetFloats(string s, string modelId, string huggingFaceAuthToken)
     {
         var client = Configuration.Instance.Client;
         var requestContent = JsonContent.Create(new

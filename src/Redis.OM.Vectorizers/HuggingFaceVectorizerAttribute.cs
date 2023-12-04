@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using Redis.OM.Contracts;
+﻿using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 
 namespace Redis.OM.Vectorizers;
@@ -9,6 +8,9 @@ namespace Redis.OM.Vectorizers;
 /// </summary>
 public class HuggingFaceVectorizerAttribute : VectorizerAttribute<string>
 {
+    /// <summary>
+    /// The Model Id.
+    /// </summary>
     public string? ModelId { get; set; }
 
     private IVectorizer<string>? _vectorizer;
@@ -26,7 +28,7 @@ public class HuggingFaceVectorizerAttribute : VectorizerAttribute<string>
                     throw new InvalidOperationException("Need a Model ID in order to process vector");
                 }
             
-                _vectorizer = new HuggingFaceVectorizer(Configuration.Instance.HuggingFaceAuthorizationToken, ModelId, Dim);
+                _vectorizer = new HuggingFaceVectorizer(Configuration.Instance.HuggingFaceAuthorizationToken, modelId, Dim);
             }
 
             return _vectorizer;
@@ -38,6 +40,7 @@ public class HuggingFaceVectorizerAttribute : VectorizerAttribute<string>
     public override VectorType VectorType => VectorType.FLOAT32;
     private int? _dim;
 
+    /// <inheritdoc />
     public override int Dim
     {
         get

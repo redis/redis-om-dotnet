@@ -5,11 +5,20 @@ using Redis.OM.Modeling;
 
 namespace Redis.OM.Vectorizers;
 
+/// <summary>
+/// A Vectorizer leveraging Open AI's REST API
+/// </summary>
 public class OpenAIVectorizer : IVectorizer<string>
 {
     private readonly string _openAIAuthToken;
     private readonly string _model;
 
+    /// <summary>
+    /// Initializes the vectorizer.
+    /// </summary>
+    /// <param name="openAIAuthToken">The Authorization Token.</param>
+    /// <param name="model">The Model ID</param>
+    /// <param name="dim">The dimension of the model's output tensor.</param>
     public OpenAIVectorizer(string openAIAuthToken, string model = "text-embedding-ada-002", int dim = 1536)
     {
         _openAIAuthToken = openAIAuthToken;
@@ -17,8 +26,13 @@ public class OpenAIVectorizer : IVectorizer<string>
         Dim = dim;
     }
 
+    /// <inheritdoc />
     public VectorType VectorType => VectorType.FLOAT32;
+
+    /// <inheritdoc />
     public int Dim { get; }
+
+    /// <inheritdoc />
     public byte[] Vectorize(string str)
     {
         var floats = GetFloats(str, _model, _openAIAuthToken);
@@ -28,7 +42,7 @@ public class OpenAIVectorizer : IVectorizer<string>
     internal static float[] GetFloats(string s, string model, string openAIAuthToken)
     {
         var client = Configuration.Instance.Client;
-        var requestContent = JsonContent.Create(new { input = s, model = model });
+        var requestContent = JsonContent.Create(new { input = s, model });
 
         var request = new HttpRequestMessage
         {

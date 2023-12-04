@@ -1,6 +1,6 @@
 namespace Redis.OM;
 
-internal class RedisOMHttpUtil
+internal static class RedisOMHttpUtil
 {
     public static string ReadJsonSync(HttpResponseMessage msg)
     {

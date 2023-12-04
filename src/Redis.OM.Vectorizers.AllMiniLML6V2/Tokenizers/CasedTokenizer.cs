@@ -8,7 +8,7 @@ internal abstract class CasedTokenizer : TokenizerBase
     
     protected override IEnumerable<string> TokenizeSentence(string text)
     {
-        return text.Split(new string[] { " ", "   ", "\r\n" }, StringSplitOptions.None)
+        return text.Split(new [] { " ", "   ", "\r\n" }, StringSplitOptions.None)
             .SelectMany(o => o.SplitAndKeep(".,;:\\/?!#$%()=+-*\"'–_`<>&^@{}[]|~'".ToArray()));
     }
 }
