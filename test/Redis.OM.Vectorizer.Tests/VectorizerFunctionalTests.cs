@@ -1,6 +1,5 @@
 using Redis.OM.Contracts;
 using Redis.OM.Searching;
-using Redis.OM.Unit.Tests;
 using Redis.OM.Vectorizers.AllMiniLML6V2;
 
 namespace Redis.OM.Vectorizer.Tests;
