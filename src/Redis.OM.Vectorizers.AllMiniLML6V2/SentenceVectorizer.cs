@@ -123,8 +123,6 @@ public class SentenceVectorizer : IVectorizer<string>
      
     internal static DenseTensor<float> Normalize(DenseTensor<float> input_dense, float eps = 1e-12f)
     {
-        //Computes sum(abs(x)^2)^(1/2)
-
         var sentencesCount = input_dense.Dimensions[0];
         var hiddenStates   = input_dense.Dimensions[1];
 
