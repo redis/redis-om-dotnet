@@ -1,4 +1,3 @@
-using System.Drawing;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Transforms;
@@ -31,9 +30,8 @@ public class ImageVectorizer : IVectorizer<string>
                 RequestUri = uri,
             };
             var imageStream = Configuration.Instance.Client.Send(request).Content.ReadAsStream();
-            var image = Image.FromStream(imageStream);
-            var bitmap = new Bitmap(image);
-            var vector = VectorizeBitMaps(new [] { bitmap })[0].SelectMany(BitConverter.GetBytes).ToArray();
+            var image = MLImage.CreateFromStream(imageStream);
+            var vector = VectorizeBitMaps(new [] { image })[0].SelectMany(BitConverter.GetBytes).ToArray();
             return vector;
         }
 
@@ -93,9 +91,9 @@ public class ImageVectorizer : IVectorizer<string>
         return pipeline;
     }
     
-    public static float[][] VectorizeBitMaps(IEnumerable<Bitmap> bitmaps)
+    public static float[][] VectorizeBitMaps(IEnumerable<MLImage> mlImages)
     {
-        var images = bitmaps.Select(x => new InMemoryImageData { Image = x });
+        var images = mlImages.Select(x => new InMemoryImageData { Image = x });
         var mlContext = MlContext.Value;
         var dataView = mlContext.Data.LoadFromEnumerable(images);
         var transformedData = BitmapPipeline.Value.Fit(dataView).Transform(dataView);

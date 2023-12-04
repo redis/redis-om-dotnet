@@ -1,4 +1,3 @@
-using System.Drawing;
 using Microsoft.ML.Data;
 using Microsoft.ML.Transforms.Image;
 
@@ -13,5 +12,5 @@ public class ImageInput
 public class InMemoryImageData
 {
     [ImageType(224,224)]
-    public Bitmap Image;
+    public MLImage Image;
 }
