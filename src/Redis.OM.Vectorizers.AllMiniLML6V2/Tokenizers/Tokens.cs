@@ -1,6 +1,6 @@
 namespace Redis.OM.Vectorizers.AllMiniLML6V2.Tokenizers;
 
-public class Tokens
+internal class Tokens
 {
     public const string Padding = "";
     public const string Unknown = "[UNK]";

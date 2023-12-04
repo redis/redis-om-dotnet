@@ -31,7 +31,7 @@ public class ImageVectorizer : IVectorizer<string>
             };
             var imageStream = Configuration.Instance.Client.Send(request).Content.ReadAsStream();
             var image = MLImage.CreateFromStream(imageStream);
-            var vector = VectorizeBitMaps(new [] { image })[0].SelectMany(BitConverter.GetBytes).ToArray();
+            var vector = VectorizeImages(new [] { image })[0].SelectMany(BitConverter.GetBytes).ToArray();
             return vector;
         }
 
@@ -44,7 +44,7 @@ public class ImageVectorizer : IVectorizer<string>
         return VectorizeFiles(new[] { obj })[0].SelectMany(BitConverter.GetBytes).ToArray();
     }
 
-    private static Lazy<EstimatorChain<TransformerChain<ColumnCopyingTransformer>>> FilePipeline = new(CreateFilePipeline);
+    private static readonly Lazy<EstimatorChain<TransformerChain<ColumnCopyingTransformer>>> FilePipeline = new(CreateFilePipeline);
 
     private static readonly Lazy<MLContext> MlContext = new(()=>new MLContext());
 
@@ -68,7 +68,7 @@ public class ImageVectorizer : IVectorizer<string>
     /// <returns></returns>
     public static float[][] VectorizeFiles(IEnumerable<string> imagePaths)
     {
-        var images = imagePaths.Select(x => new ImageInput { ImageSource = x });
+        var images = imagePaths.Select(x => new ImageInput(x));
         var mlContext = MlContext.Value;
         var dataView = mlContext.Data.LoadFromEnumerable(images);
         
@@ -77,7 +77,7 @@ public class ImageVectorizer : IVectorizer<string>
         return vector;
     }
 
-    public static Lazy<EstimatorChain<TransformerChain<ColumnCopyingTransformer>>> BitmapPipeline = new(CreateBitmapPipeline);
+    private static readonly Lazy<EstimatorChain<TransformerChain<ColumnCopyingTransformer>>> BitmapPipeline = new(CreateBitmapPipeline);
 
     private static EstimatorChain<TransformerChain<ColumnCopyingTransformer>> CreateBitmapPipeline()
     {
@@ -91,9 +91,14 @@ public class ImageVectorizer : IVectorizer<string>
         return pipeline;
     }
     
-    public static float[][] VectorizeBitMaps(IEnumerable<MLImage> mlImages)
+    /// <summary>
+    /// Encodes a collection of images.
+    /// </summary>
+    /// <param name="mlImages"></param>
+    /// <returns></returns>
+    public static float[][] VectorizeImages(IEnumerable<MLImage> mlImages)
     {
-        var images = mlImages.Select(x => new InMemoryImageData { Image = x });
+        var images = mlImages.Select(x => new InMemoryImageData(x));
         var mlContext = MlContext.Value;
         var dataView = mlContext.Data.LoadFromEnumerable(images);
         var transformedData = BitmapPipeline.Value.Fit(dataView).Transform(dataView);

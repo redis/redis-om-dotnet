@@ -27,10 +27,10 @@ public class VectorizerFunctionalTests
         var collection = new RedisCollection<DocWithVectors>(connection);
 
         // images
-        var res = collection.NearestNeighbors(x => x.ImagePath, 5, "hal.jpg");
-        Assert.Equal(0, res.First().Scores.NearestNeighborsScore);
+        var res = collection.NearestNeighbors(x => x.ImagePath!, 5, "hal.jpg");
+        Assert.Equal(0, res.First().Scores!.NearestNeighborsScore);
         // sentences
-        collection.NearestNeighbors(x => x.Sentence, 5, "Hello world this really is Hal.");
+        collection.NearestNeighbors(x => x.Sentence!, 5, "Hello world this really is Hal.");
     }
 
     [Fact]

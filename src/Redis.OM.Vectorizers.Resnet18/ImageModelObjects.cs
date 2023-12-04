@@ -3,14 +3,24 @@ using Microsoft.ML.Transforms.Image;
 
 namespace Redis.OM.Vectorizers.Resnet18;
 
-public class ImageInput
+internal class ImageInput
 {
     [ColumnName(@"ImageSource")]
     public string ImageSource { get; set; }
+
+    public ImageInput(string imageSource)
+    {
+        ImageSource = imageSource;
+    }
 }
 
-public class InMemoryImageData
+internal class InMemoryImageData
 {
     [ImageType(224,224)]
     public MLImage Image;
+
+    public InMemoryImageData(MLImage image)
+    {
+        Image = image;
+    }
 }

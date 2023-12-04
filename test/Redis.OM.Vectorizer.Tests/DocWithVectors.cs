@@ -9,15 +9,15 @@ namespace Redis.OM.Vectorizer.Tests;
 public class DocWithVectors
 {
     [RedisIdField]
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     [Indexed(Algorithm = VectorAlgorithm.HNSW)]
     [SentenceVectorizer]
-    public Vector<string> Sentence { get; set; }
+    public Vector<string>? Sentence { get; set; }
     
     [Indexed]
     [ImageVectorizer]
-    public Vector<string> ImagePath { get; set; }
+    public Vector<string>? ImagePath { get; set; }
 
     public VectorScores? Scores { get; set; }
 }

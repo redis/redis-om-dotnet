@@ -7,9 +7,15 @@ using Redis.OM.Vectorizers.AllMiniLML6V2.Tokenizers;
 
 namespace Redis.OM.Vectorizers.AllMiniLML6V2;
 
+/// <summary>
+/// A vectorizer to Vectorize sentences using ALl Mini LM L6 V2 Model.
+/// </summary>
 public class SentenceVectorizer : IVectorizer<string>
 {
+    /// <inheritdoc />
     public VectorType VectorType => VectorType.FLOAT32;
+
+    /// <inheritdoc />
     public int Dim => 384;
     private static Lazy<TokenizerBase> Tokenizer => new Lazy<TokenizerBase>(AllMiniLML6V2Tokenizer.Create);
     private static Lazy<InferenceSession> InferenceSession => new Lazy<InferenceSession>(LoadInferenceSession);
@@ -27,7 +33,8 @@ public class SentenceVectorizer : IVectorizer<string>
         _ = stream.Read(resourceBytes, 0, resourceBytes.Length);
         return new InferenceSession(resourceBytes);
     }
-    
+
+    /// <inheritdoc />
     public byte[] Vectorize(string obj)
     {
         return Encode(new[] { obj })[0].SelectMany(BitConverter.GetBytes).ToArray();
@@ -35,6 +42,11 @@ public class SentenceVectorizer : IVectorizer<string>
 
      private static Lazy<string[]> OutputNames => new (() => InferenceSession.Value.OutputMetadata.Keys.ToArray());
 
+    /// <summary>
+    /// Vectorizers an array of sentences (which are vectorized individually).
+    /// </summary>
+    /// <param name="sentences">The Sentences</param>
+    /// <returns></returns>
     public static float[][] Encode(string[] sentences)
     {
         const int MaxTokens = 512;
@@ -50,7 +62,7 @@ public class SentenceVectorizer : IVectorizer<string>
 
             var tokenIndexes = tokens.Take(MaxTokens).Select(token => (long)token.VocabularyIndex).Concat(padding).ToArray();
             var segmentIndexes = tokens.Take(MaxTokens).Select(token => token.SegmentIndex).Concat(padding).ToArray();
-            var inputMask = tokens.Take(MaxTokens).Select(o => 1L).Concat(padding).ToArray();
+            var inputMask = tokens.Take(MaxTokens).Select(_ => 1L).Concat(padding).ToArray();
             return (tokenIndexes, TokenTypeIds: segmentIndexes, inputMask);
         }).ToList();
         var tokenCount = encoded.First().InputIds.Length;
@@ -77,7 +89,7 @@ public class SentenceVectorizer : IVectorizer<string>
 
         var dimensions = new[] { numSentences, tokenCount };
 
-        var input = new NamedOnnxValue[3]
+        var input = new []
         {
             NamedOnnxValue.CreateFromTensor("input_ids",      new DenseTensor<long>(flattenIDs,          dimensions)),
             NamedOnnxValue.CreateFromTensor("attention_mask", new DenseTensor<long>(flattenAttentionMask,dimensions)),
@@ -109,7 +121,7 @@ public class SentenceVectorizer : IVectorizer<string>
         return outputFlatten;
     }
      
-     public static DenseTensor<float> Normalize(DenseTensor<float> input_dense, float eps = 1e-12f)
+    internal static DenseTensor<float> Normalize(DenseTensor<float> input_dense, float eps = 1e-12f)
     {
         //Computes sum(abs(x)^2)^(1/2)
 
@@ -142,7 +154,7 @@ public class SentenceVectorizer : IVectorizer<string>
     }
 
 
-    public static DenseTensor<float> MeanPooling(DenseTensor<float> token_embeddings_dense, List<(long[] InputIds, long[] TokenTypeIds, long[] AttentionMask)> encodedSentences, float eps = 1e-9f)
+    internal static DenseTensor<float> MeanPooling(DenseTensor<float> token_embeddings_dense, List<(long[] InputIds, long[] TokenTypeIds, long[] AttentionMask)> encodedSentences, float eps = 1e-9f)
     {
         var sentencesCount = token_embeddings_dense.Dimensions[0];
         var sentenceLength = token_embeddings_dense.Dimensions[1];
