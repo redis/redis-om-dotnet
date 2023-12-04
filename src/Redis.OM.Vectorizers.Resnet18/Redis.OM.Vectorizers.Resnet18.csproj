@@ -21,10 +21,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-<!--        <PackageReference Include="Microsoft.ML.DnnImageFeaturizer.ResNet18" Version="0.18.0" IncludeAssets="all" />-->
-        <PackageReference Include="Microsoft.ML" Version="1.6.0" />
-        <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="1.6.0" />
-        <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="1.6.0" />
+        <PackageReference Include="Microsoft.ML" Version="3.0.0" />
+        <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="3.0.0" />
+        <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="3.0.0" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.16.3" />
     </ItemGroup>
 
     <ItemGroup>
