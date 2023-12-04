@@ -387,6 +387,11 @@ cache.Store("What is the capital of France?", "Paris");
 var res = cache.GetSimilar("What really is the capital of France?").First();
 ```
 
+### ML.NET Based Vectorizers
+
+We also provide the packages `Redis.OM.Vectorizers.ResNet18` and `Redis.OM.Vectorizers.AllMiniLML6V2` which have embedded models / ML Pipelines in them to
+allow you to easily Vectorize Images and Sentences respectively without the need to depend on an external API.
+
 ### 🖩 Aggregations
 
 We can also run aggregations on the customer object, again using expressions in LINQ:
