@@ -10,7 +10,8 @@ public class VectorizerFunctionalTests
     private readonly IRedisConnectionProvider _provider;
     public VectorizerFunctionalTests()
     {
-        _provider = new RedisConnectionProvider("redis://localhost:6379");
+        var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+        _provider = new RedisConnectionProvider($"redis://{host}");
     }
 
     [Fact]
