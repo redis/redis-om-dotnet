@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Modeling;
+using Redis.OM.Modeling.Vectors;
 using Redis.OM.Searching;
 using Redis.OM.Searching.Query;
 
@@ -30,7 +31,7 @@ namespace Redis.OM.Common
             var attr = type.GetCustomAttribute<DocumentAttribute>();
             if (attr == null)
             {
-                throw new InvalidOperationException("Aggregations can only be perfomred on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
+                throw new InvalidOperationException("Aggregations can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
             var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}-idx" : attr.IndexName;
@@ -183,6 +184,7 @@ namespace Redis.OM.Common
                 throw new InvalidOperationException("Searches can only be performed on objects decorated with a RedisObjectDefinitionAttribute that specifies a particular index");
             }
 
+            var parameters = new List<object>();
             var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}-idx" : attr.IndexName;
             var query = new RedisQuery(indexName!) { QueryText = "*" };
             switch (expression)
@@ -227,7 +229,10 @@ namespace Redis.OM.Common
                                 query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
                                 break;
                             case "Where":
-                                query.QueryText = TranslateWhereMethod(exp);
+                                query.QueryText = TranslateWhereMethod(exp, parameters);
+                                break;
+                            case "NearestNeighbors":
+                                query.NearestNeighbors = ParseNearestNeighborsFromExpression(exp);
                                 break;
                         }
                     }
@@ -236,16 +241,65 @@ namespace Redis.OM.Common
                 }
 
                 case LambdaExpression lambda:
-                    query.QueryText = BuildQueryFromExpression(lambda.Body);
+                    query.QueryText = BuildQueryFromExpression(lambda.Body, parameters);
                     break;
             }
 
             if (mainBooleanExpression != null)
             {
-                query.QueryText = BuildQueryFromExpression(((LambdaExpression)mainBooleanExpression).Body);
+                parameters = new List<object>();
+                query.QueryText = BuildQueryFromExpression(((LambdaExpression)mainBooleanExpression).Body, parameters);
             }
 
+            query.Parameters = parameters;
             return query;
+        }
+
+        /// <summary>
+        /// Builds a Nearest Neighbor query from provided expression.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>The nearest neighbor query.</returns>
+        internal static NearestNeighbors ParseNearestNeighborsFromExpression(MethodCallExpression expression)
+        {
+            var memberExpression = (MemberExpression)((LambdaExpression)((UnaryExpression)expression.Arguments[1]).Operand).Body;
+            var attr = memberExpression.Member.GetCustomAttributes<IndexedAttribute>().FirstOrDefault() ?? throw new ArgumentException($"Could not find Vector attribute on {memberExpression.Member.Name}.");
+            var vectorizer = memberExpression.Member.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+            var propertyName = !string.IsNullOrEmpty(attr.PropertyName) ? attr.PropertyName : memberExpression.Member.Name;
+            var numNeighbors = (int)((ConstantExpression)expression.Arguments[2]).Value;
+            var value = ((ConstantExpression)expression.Arguments[3]).Value ?? throw new InvalidOperationException("Provided vector property was null");
+            byte[] bytes;
+
+            if (vectorizer is not null)
+            {
+                if (value is Vector vec)
+                {
+                    if (vec.Embedding is null)
+                    {
+                        vec.Embed(vectorizer);
+                    }
+
+                    bytes = vec.Embedding!;
+                }
+                else
+                {
+                    bytes = vectorizer.Vectorize(value);
+                }
+            }
+            else if (memberExpression.Type == typeof(float[]))
+            {
+                bytes = ((float[])value).SelectMany(BitConverter.GetBytes).ToArray();
+            }
+            else if (memberExpression.Type == typeof(double[]))
+            {
+                bytes = ((double[])value).SelectMany(BitConverter.GetBytes).ToArray();
+            }
+            else
+            {
+                throw new ArgumentException($"{memberExpression.Type} was not valid without a Vectorizer");
+            }
+
+            return new NearestNeighbors(propertyName, numNeighbors, bytes);
         }
 
         /// <summary>
@@ -276,40 +330,41 @@ namespace Redis.OM.Common
         /// Translates a binary expression.
         /// </summary>
         /// <param name="binExpression">The Binary Expression.</param>
+        /// <param name="parameters">The parameters of the query.</param>
         /// <returns>The query string formatted from the binary expression.</returns>
         /// <exception cref="ArgumentException">Thrown if expression is not parsable because of the arguments passed into it.</exception>
-        internal static string TranslateBinaryExpression(BinaryExpression binExpression)
+        internal static string TranslateBinaryExpression(BinaryExpression binExpression, List<object> parameters)
         {
             var sb = new StringBuilder();
             if (binExpression.Left is BinaryExpression leftBin && binExpression.Right is BinaryExpression rightBin)
             {
                 sb.Append("(");
-                sb.Append(TranslateBinaryExpression(leftBin));
+                sb.Append(TranslateBinaryExpression(leftBin, parameters));
                 sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(TranslateBinaryExpression(rightBin));
+                sb.Append(TranslateBinaryExpression(rightBin, parameters));
                 sb.Append(")");
             }
             else if (binExpression.Left is BinaryExpression left)
             {
                 sb.Append("(");
-                sb.Append(TranslateBinaryExpression(left));
+                sb.Append(TranslateBinaryExpression(left, parameters));
                 sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right));
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters));
                 sb.Append(")");
             }
             else if (binExpression.Right is BinaryExpression right)
             {
                 sb.Append("(");
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left));
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters));
                 sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(TranslateBinaryExpression(right));
+                sb.Append(TranslateBinaryExpression(right, parameters));
                 sb.Append(")");
             }
             else
             {
-                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left);
+                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters);
 
-                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right);
+                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters);
 
                 if (binExpression.Left is MemberExpression member)
                 {
@@ -677,26 +732,26 @@ namespace Redis.OM.Common
             var predicate = (UnaryExpression)expression.Arguments[1];
             var lambda = (LambdaExpression)predicate.Operand;
             var memberExpression = (MemberExpression)lambda.Body;
-            sb.Field = ExpressionParserUtilities.GetSearchFieldNameFromMember(memberExpression);
+            sb.Field = memberExpression.Member.Name == nameof(VectorScores.NearestNeighborsScore) ? VectorScores.NearestNeighborScoreName : ExpressionParserUtilities.GetSearchFieldNameFromMember(memberExpression);
             sb.Direction = ascending ? SortDirection.Ascending : SortDirection.Descending;
             return sb;
         }
 
-        private static string BuildQueryFromExpression(Expression exp)
+        private static string BuildQueryFromExpression(Expression exp, List<object> parameters)
         {
             if (exp is BinaryExpression binExp)
             {
-                return TranslateBinaryExpression(binExp);
+                return TranslateBinaryExpression(binExp, parameters);
             }
 
             if (exp is MethodCallExpression method)
             {
-                return ExpressionParserUtilities.TranslateMethodExpressions(method);
+                return ExpressionParserUtilities.TranslateMethodExpressions(method, parameters);
             }
 
             if (exp is UnaryExpression uni)
             {
-                var operandString = BuildQueryFromExpression(uni.Operand);
+                var operandString = BuildQueryFromExpression(uni.Operand, parameters);
                 if (uni.NodeType == ExpressionType.Not)
                 {
                     operandString = $"-{operandString}";
@@ -714,18 +769,11 @@ namespace Redis.OM.Common
             throw new ArgumentException("Unparseable Lambda Body detected");
         }
 
-        private static string TranslateFirstMethod(MethodCallExpression expression)
+        private static string TranslateWhereMethod(MethodCallExpression expression, List<object> parameters)
         {
             var predicate = (UnaryExpression)expression.Arguments[1];
             var lambda = (LambdaExpression)predicate.Operand;
-            return BuildQueryFromExpression(lambda.Body);
-        }
-
-        private static string TranslateWhereMethod(MethodCallExpression expression)
-        {
-            var predicate = (UnaryExpression)expression.Arguments[1];
-            var lambda = (LambdaExpression)predicate.Operand;
-            return BuildQueryFromExpression(lambda.Body);
+            return BuildQueryFromExpression(lambda.Body, parameters);
         }
 
         private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberExpression memberExpression)

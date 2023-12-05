@@ -32,24 +32,18 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(ObjectWithDateTimeOffsetJson));
         }
 
-        private IRedisConnection _connection = null;
-        public IRedisConnection Connection
-        {
-            get
-            {
-                if (_connection == null)
-                    _connection = GetConnection();
-                return _connection;
-            }
-        }
+        private IRedisConnectionProvider _provider;
 
-        private IRedisConnection GetConnection()
+        public IRedisConnectionProvider Provider => _provider ??= GetProvider();
+        
+        public IRedisConnection Connection => Provider.Connection;
+
+        private IRedisConnectionProvider GetProvider()
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost:6379";
             var connectionString = $"redis://{host}";
-            var provider = new RedisConnectionProvider(connectionString);
-            return provider.Connection;
-        }        
+            return new RedisConnectionProvider(connectionString);
+        }
 
         public void Dispose()
         {

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json.Serialization;
+using Redis.OM.Modeling.Vectors;
 
 namespace Redis.OM.Modeling
 {
@@ -61,7 +63,16 @@ namespace Redis.OM.Modeling
                 {
                     var innerType = Nullable.GetUnderlyingType(info.PropertyType) ?? info.PropertyType;
 
-                    if (IsComplexType(innerType))
+                    if (attr is IndexedAttribute indexedAttribute && (innerType == typeof(Vector) || innerType.BaseType == typeof(Vector)))
+                    {
+                        var vectorizer = info.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault(x => x.GetType() != typeof(FloatVectorizerAttribute) && x.GetType() != typeof(DoubleVectorizerAttribute));
+                        var pathPostfix = vectorizer != null ? ".Vector" : string.Empty;
+                        ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPostfix}" : $"{pathPrefix}{info.Name}{pathPostfix}");
+                        ret.Add("AS");
+                        ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{aliasPrefix}{attr.PropertyName}" : $"{aliasPrefix}{info.Name}");
+                        ret.AddRange(CommonSerialization(attr, innerType, info));
+                    }
+                    else if (IsComplexType(innerType))
                     {
                         if (cascadeDepth > 0)
                         {
@@ -93,12 +104,22 @@ namespace Redis.OM.Modeling
         internal static string[] SerializeArgs(this PropertyInfo info)
         {
             var attr = Attribute.GetCustomAttribute(info, typeof(SearchFieldAttribute)) as SearchFieldAttribute;
-            if (attr == null)
+            if (attr is null)
             {
                 return Array.Empty<string>();
             }
 
-            var ret = new List<string> { !string.IsNullOrEmpty(attr.PropertyName) ? attr.PropertyName : info.Name };
+            var suffix = string.Empty;
+            if (attr.SearchFieldType == SearchFieldType.INDEXED && (info.PropertyType == typeof(Vector) || info.PropertyType.BaseType == typeof(Vector)))
+            {
+                var vectorizer = info.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+                if (vectorizer is not null && vectorizer is not FloatVectorizerAttribute && vectorizer is not DoubleVectorizerAttribute)
+                {
+                    suffix = ".Vector";
+                }
+            }
+
+            var ret = new List<string> { !string.IsNullOrEmpty(attr.PropertyName) ? $"attr.PropertyName{suffix}" : $"{info.Name}{suffix}" };
             var innerType = Nullable.GetUnderlyingType(info.PropertyType);
             ret.AddRange(CommonSerialization(attr, innerType ?? info.PropertyType, info));
             return ret.ToArray();
@@ -177,6 +198,11 @@ namespace Redis.OM.Modeling
                 return "GEO";
             }
 
+            if (declaredType == typeof(Vector) || declaredType.BaseType == typeof(Vector))
+            {
+                return "VECTOR";
+            }
+
             if (declaredType.IsEnum)
             {
                 return propertyInfo.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() is JsonConverterAttribute converter && converter.ConverterType == typeof(JsonStringEnumConverter) ? "TAG" : "NUMERIC";
@@ -186,6 +212,65 @@ namespace Redis.OM.Modeling
         }
 
         private static bool IsEnumTypeFlags(Type type) => type.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
+
+        private static IEnumerable<string> VectorSerialization(IndexedAttribute vectorAttribute, PropertyInfo propertyInfo)
+        {
+            var vectorizer = propertyInfo.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+            if (vectorizer is null)
+            {
+                throw new InvalidOperationException("Indexed vector fields must provide a vectorizer.");
+            }
+
+            yield return vectorAttribute.Algorithm.AsRedisString();
+            yield return vectorAttribute.NumArgs.ToString();
+            yield return "TYPE";
+            yield return vectorizer.VectorType.AsRedisString();
+
+            yield return "DIM";
+            yield return vectorizer.Dim.ToString();
+            yield return "DISTANCE_METRIC";
+            yield return vectorAttribute.DistanceMetric.AsRedisString();
+            if (vectorAttribute.InitialCapacity != default)
+            {
+                yield return "INITIAL_CAP";
+                yield return vectorAttribute.InitialCapacity.ToString();
+            }
+
+            if (vectorAttribute.Algorithm == VectorAlgorithm.FLAT)
+            {
+                if (vectorAttribute.BlockSize != default)
+                {
+                    yield return "BLOCK_SIZE";
+                    yield return vectorAttribute.BlockSize.ToString();
+                }
+            }
+            else if (vectorAttribute.Algorithm == VectorAlgorithm.HNSW)
+            {
+                if (vectorAttribute.M != default)
+                {
+                    yield return "M";
+                    yield return vectorAttribute.M.ToString();
+                }
+
+                if (vectorAttribute.EfConstructor != default)
+                {
+                    yield return "EF_CONSTRUCTION";
+                    yield return vectorAttribute.EfConstructor.ToString();
+                }
+
+                if (vectorAttribute.EfRuntime != default)
+                {
+                    yield return "EF_RUNTIME";
+                    yield return vectorAttribute.EfRuntime.ToString();
+                }
+
+                if (vectorAttribute.Epsilon != default)
+                {
+                    yield return "EPSILON";
+                    yield return vectorAttribute.Epsilon.ToString(CultureInfo.InvariantCulture);
+                }
+            }
+        }
 
         private static string[] CommonSerialization(SearchFieldAttribute attr, Type declaredType, PropertyInfo propertyInfo)
         {
@@ -228,6 +313,11 @@ namespace Redis.OM.Modeling
                 {
                     ret.Add("CASESENSITIVE");
                 }
+            }
+
+            if (searchFieldType == "VECTOR" && attr is IndexedAttribute vector)
+            {
+                ret.AddRange(VectorSerialization(vector, propertyInfo));
             }
 
             if (attr.Sortable || attr.Aggregatable)

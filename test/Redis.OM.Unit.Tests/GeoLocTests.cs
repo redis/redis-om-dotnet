@@ -20,7 +20,7 @@ namespace Redis.OM.Unit.Tests
         [Fact]
         public void TestParsingFromFormattedHash()
         {
-            var hash = new Dictionary<string, string>
+            var hash = new Dictionary<string, RedisReply>
             {
                 {"Name", "Foo"},
                 {"Location", "32.5,22.4"}

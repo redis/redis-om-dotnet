@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,6 +12,7 @@ using System.Text.RegularExpressions;
 using Redis.OM.Aggregation;
 using Redis.OM.Aggregation.AggregationPredicates;
 using Redis.OM.Modeling;
+using Redis.OM.Modeling.Vectors;
 using Redis.OM.Searching.Query;
 
 namespace Redis.OM.Common
@@ -72,18 +74,19 @@ namespace Redis.OM.Common
         /// Gets the operand string from a search.
         /// </summary>
         /// <param name="exp">expression.</param>
+        /// <param name="parameters">The parameters.</param>
         /// <param name="treatEnumsAsInt">Treat enum as an integer.</param>
         /// <param name="negate">Whether or not to negate the result.</param>
         /// <returns>the operand string.</returns>
         /// <exception cref="ArgumentException">thrown if expression is un-parseable.</exception>
-        internal static string GetOperandStringForQueryArgs(Expression exp, bool treatEnumsAsInt = false, bool negate = false)
+        internal static string GetOperandStringForQueryArgs(Expression exp, List<object> parameters, bool treatEnumsAsInt = false, bool negate = false)
         {
             var res = exp switch
             {
                 ConstantExpression constExp => $"{constExp.Value}",
                 MemberExpression member => GetOperandStringForMember(member, treatEnumsAsInt),
-                MethodCallExpression method => TranslateMethodStandardQuerySyntax(method),
-                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, treatEnumsAsInt, unary.NodeType == ExpressionType.Not),
+                MethodCallExpression method => TranslateMethodStandardQuerySyntax(method, parameters),
+                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, parameters, treatEnumsAsInt, unary.NodeType == ExpressionType.Not),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
 
@@ -171,20 +174,22 @@ namespace Redis.OM.Common
         /// Translates the method expression.
         /// </summary>
         /// <param name="exp">the expression.</param>
+        /// <param name="parameters">The parameters to be passed into the query.</param>
         /// <returns>The expression translated.</returns>
         /// <exception cref="ArgumentException">thrown if the method isn't recognized.</exception>
-        internal static string TranslateMethodExpressions(MethodCallExpression exp)
+        internal static string TranslateMethodExpressions(MethodCallExpression exp, List<object> parameters)
         {
             return exp.Method.Name switch
             {
-                "Contains" => TranslateContainsStandardQuerySyntax(exp),
+                "Contains" => TranslateContainsStandardQuerySyntax(exp, parameters),
                 nameof(StringExtension.FuzzyMatch) => TranslateFuzzyMatch(exp),
                 nameof(StringExtension.MatchContains) => TranslateMatchContains(exp),
                 nameof(StringExtension.MatchStartsWith) => TranslateMatchStartsWith(exp),
                 nameof(StringExtension.MatchEndsWith) => TranslateMatchEndsWith(exp),
+                nameof(VectorExtensions.VectorRange) => TranslateVectorRange(exp, parameters),
                 nameof(string.StartsWith) => TranslateStartsWith(exp),
                 nameof(string.EndsWith) => TranslateEndsWith(exp),
-                "Any" => TranslateAnyForEmbeddedObjects(exp),
+                "Any" => TranslateAnyForEmbeddedObjects(exp, parameters),
                 _ => throw new ArgumentException($"Unrecognized method for query translation:{exp.Method.Name}")
             };
         }
@@ -640,16 +645,17 @@ namespace Redis.OM.Common
             while (true);
         }
 
-        private static string TranslateMethodStandardQuerySyntax(MethodCallExpression exp)
+        private static string TranslateMethodStandardQuerySyntax(MethodCallExpression exp, List<object> parameters)
         {
             return exp.Method.Name switch
             {
                 nameof(StringExtension.FuzzyMatch) => TranslateFuzzyMatch(exp),
                 nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
-                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp),
+                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, parameters),
                 nameof(string.StartsWith) => TranslateStartsWith(exp),
                 nameof(string.EndsWith) => TranslateEndsWith(exp),
-                "Any" => TranslateAnyForEmbeddedObjects(exp),
+                nameof(VectorExtensions.VectorRange) => TranslateVectorRange(exp, parameters),
+                "Any" => TranslateAnyForEmbeddedObjects(exp, parameters),
                 _ => throw new InvalidOperationException($"Unable to parse method {exp.Method.Name}")
             };
         }
@@ -786,7 +792,7 @@ namespace Redis.OM.Common
             };
         }
 
-        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp)
+        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp, List<object> parameters)
         {
             MemberExpression? expression = null;
             Type type;
@@ -797,7 +803,7 @@ namespace Redis.OM.Common
             {
                 var propertyExpression = (MemberExpression)exp.Arguments.Last();
                 var valuesExpression = (MemberExpression)exp.Arguments.First();
-                literal = GetOperandStringForQueryArgs(propertyExpression);
+                literal = GetOperandStringForQueryArgs(propertyExpression, parameters);
                 if (!literal.StartsWith("@"))
                 {
                     if (exp.Arguments.Count == 1 && exp.Object != null)
@@ -836,7 +842,7 @@ namespace Redis.OM.Common
                 var valueType = Nullable.GetUnderlyingType(valuesExpression.Type) ?? valuesExpression.Type;
                 memberName = GetOperandStringForMember(propertyExpression);
                 var treatEnumsAsInts = type.IsEnum && !(propertyExpression.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() is JsonConverterAttribute converter && converter.ConverterType == typeof(JsonStringEnumConverter));
-                literal = GetOperandStringForQueryArgs(valuesExpression, treatEnumsAsInts);
+                literal = GetOperandStringForQueryArgs(valuesExpression, parameters, treatEnumsAsInts);
 
                 if ((valueType == typeof(List<string>) || valueType == typeof(string[]) || type == typeof(string[]) || type == typeof(List<string>) || type == typeof(Guid) || type == typeof(Guid[]) || type == typeof(List<Guid>) || type == typeof(Guid[]) || type == typeof(List<Guid>) || type == typeof(Ulid) || (type.IsEnum && !treatEnumsAsInts)) && attribute is IndexedAttribute)
                 {
@@ -887,7 +893,7 @@ namespace Redis.OM.Common
 
             type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
             memberName = GetOperandStringForMember(expression);
-            literal = GetOperandStringForQueryArgs(exp.Arguments.Last());
+            literal = GetOperandStringForQueryArgs(exp.Arguments.Last(), parameters);
 
             if (searchFieldAttribute is not null && searchFieldAttribute is SearchableAttribute)
             {
@@ -936,12 +942,12 @@ namespace Redis.OM.Common
             return sb.ToString();
         }
 
-        private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp)
+        private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp, List<object> parameters)
         {
             var type = exp.Arguments.Last().Type;
             var prefix = GetOperandString(exp.Arguments[0]);
             var lambda = (LambdaExpression)exp.Arguments.Last();
-            var tempQuery = ExpressionTranslator.TranslateBinaryExpression((BinaryExpression)lambda.Body);
+            var tempQuery = ExpressionTranslator.TranslateBinaryExpression((BinaryExpression)lambda.Body, parameters);
             return tempQuery.Replace("@", $"{prefix}_");
         }
 
@@ -977,6 +983,59 @@ namespace Redis.OM.Common
             }
 
             return $"{valueAsString}";
+        }
+
+        private static object GetOperand(Expression expression)
+        {
+            return expression switch
+            {
+                MemberExpression me => GetValue(me.Member, ((ConstantExpression)me.Expression).Value),
+                ConstantExpression ce => ce.Value,
+                _ => throw new InvalidOperationException("Could not determine value.")
+            };
+        }
+
+        private static string TranslateVectorRange(MethodCallExpression exp, List<object> parameters)
+        {
+            if (exp.Arguments[0] is not MemberExpression member)
+            {
+                throw new InvalidOperationException("Vector Range must be called on a member");
+            }
+
+            var field = GetOperandStringForMember(member);
+            var vectorizer = member.Member.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+            byte[] bytes;
+
+            var operand = GetOperand(exp.Arguments[1]);
+            if (vectorizer is null)
+            {
+                throw new InvalidOperationException(
+                    $"Attempting to run a vector range on a {member.Type} with no provided vectorizer");
+            }
+
+            if (operand is not Vector vector)
+            {
+                bytes = vectorizer.Vectorize(operand);
+            }
+            else
+            {
+                vector.Embed(vectorizer);
+
+                bytes = vector.Embedding ?? throw new InvalidOperationException("Embedding was null");
+            }
+
+            var distance = (double)((ConstantExpression)exp.Arguments[2]).Value;
+            var distanceArgName = parameters.Count.ToString();
+            parameters.Add(distance);
+            var vectorArgName = parameters.Count.ToString();
+            parameters.Add(bytes);
+            if (exp.Arguments.Count > 3)
+            {
+                var scoreName = $"{GetOperand(exp.Arguments[3])}{VectorScores.RangeScoreSuffix}";
+                return $"{field}:[VECTOR_RANGE ${distanceArgName} ${vectorArgName}]=>{{$YIELD_DISTANCE_AS: {scoreName}}}";
+            }
+
+            return $"{field}:[VECTOR_RANGE ${distanceArgName} ${vectorArgName}]";
         }
     }
 }

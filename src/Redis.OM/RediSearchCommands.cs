@@ -95,6 +95,56 @@ namespace Redis.OM
         /// Get index information.
         /// </summary>
         /// <param name="connection">the connection.</param>
+        /// <param name="indexName">The index name.</param>
+        /// <returns>Strong-typed result of FT.INFO idx.</returns>
+        public static RedisIndexInfo? GetIndexInfo(this IRedisConnection connection, string indexName)
+        {
+            try
+            {
+                var redisReply = connection.Execute("FT.INFO", indexName);
+                var redisIndexInfo = new RedisIndexInfo(redisReply);
+                return redisIndexInfo;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.ToLower().Contains("unknown index name"))
+                {
+                    return null;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get index information.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
+        /// <param name="indexName">the index name.</param>
+        /// <returns>Strong-typed result of FT.INFO idx.</returns>
+        public static async Task<RedisIndexInfo?> GetIndexInfoAsync(this IRedisConnection connection, string indexName)
+        {
+            try
+            {
+                var redisReply = await connection.ExecuteAsync("FT.INFO", indexName).ConfigureAwait(false);
+                var redisIndexInfo = new RedisIndexInfo(redisReply);
+                return redisIndexInfo;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.ToLower().Contains("unknown index name"))
+                {
+                    return null;
+                }
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get index information.
+        /// </summary>
+        /// <param name="connection">the connection.</param>
         /// <param name="type">the type that maps to the index.</param>
         /// <returns>Strong-typed result of FT.INFO idx.</returns>
         public static RedisIndexInfo? GetIndexInfo(this IRedisConnection connection, Type type)

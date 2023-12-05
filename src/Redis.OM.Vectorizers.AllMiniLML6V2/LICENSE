@@ -1,0 +1,35 @@
+Copyright (c) 2023 Redis Inc.
+
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+ ===============================================
+
+ Third Party Licenses:
+
+ The BERT tokenization code heavily influenced by the BertTokenizers
+ Project: https://github.com/NMZivkovic/BertTokenizers which is
+ licensed under an MIT license:
+ https://github.com/NMZivkovic/BertTokenizers/blob/master/LICENSE.txt
+
+ Some parts of the pre/post processing pipeline were adapted
+ from Curiosity AI's MiniLM project, which uses an MIT license:
+ https://github.com/curiosity-ai/MiniLM/blob/4a7c629c223b6244cb8a394f17920ea1de363dce/MiniLM/MiniLM.csproj#L13

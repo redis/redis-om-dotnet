@@ -13,15 +13,6 @@ namespace Redis.OM
     {
         public IDictionary<string,T> Messages { get; set; }
 
-        public XRangeResponse(StreamEntry[] entries)
-        {
-            Messages = new Dictionary<string, T>();
-            foreach(var entry in entries)
-            {
-                var innerDict = entry.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
-                Messages.Add(entry.Id, (T)RedisObjectHandler.FromHashSet<T>(innerDict));
-            }
-        }
         public XRangeResponse(RedisResult[] vals, string streamName)
         {
             Messages = new Dictionary<string, T>();
@@ -43,10 +34,10 @@ namespace Redis.OM
             {
                 var id = (string)((RedisResult[])obj.ToArray()[0])[i];
                 var pairs = ((RedisResult[])((RedisResult[])obj.ToArray()[0])[i + 1]);
-                var messageDict = new Dictionary<string, string>();
+                var messageDict = new Dictionary<string, RedisReply>();
                 for (var j = 0; j < pairs.Length; j += 2)
                 {
-                    messageDict.Add(((string)pairs[j]), ((string)pairs[j + 1]));
+                    messageDict.Add(((string)pairs[j]), new RedisReply(pairs[j + 1]));
                 }
                 Messages.Add(id, (T)RedisObjectHandler.FromHashSet<T>(messageDict));
             }
@@ -70,7 +61,7 @@ namespace Redis.OM
             {
                 var id = (string)obj.ToArray()[0].ToArray()[i];
                 var pairs = obj.ToArray()[0].ToArray()[i + 1].ToArray();
-                var messageDict = new Dictionary<string, string>();
+                var messageDict = new Dictionary<string, RedisReply>();
                 for (var j = 0; j < pairs.Length; j+=2)
                 {
                     messageDict.Add(pairs[j], pairs[j + 1]);
