@@ -81,7 +81,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 }
                 else
                 {
-                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right);
+                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right, new List<object>()); // hack - will need to revisit when integrating vectors into aggregations.
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, val));
                 }
             }
@@ -92,7 +92,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
             else if (expression is MethodCallExpression method)
             {
-                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method));
+                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>()));
             }
             else if (expression is UnaryExpression uni)
             {

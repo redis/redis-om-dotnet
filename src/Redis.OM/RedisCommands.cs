@@ -82,9 +82,9 @@ namespace Redis.OM
         /// <param name="key">the key.</param>
         /// <param name="fieldValues">the field value pairs to set.</param>
         /// <returns>How many new fields were created.</returns>
-        public static async Task<int> HSetAsync(this IRedisConnection connection, string key, params KeyValuePair<string, string>[] fieldValues)
+        public static async Task<int> HSetAsync(this IRedisConnection connection, string key, params KeyValuePair<string, object>[] fieldValues)
         {
-            var args = new List<string> { key };
+            var args = new List<object> { key };
             foreach (var kvp in fieldValues)
             {
                 args.Add(kvp.Key);
@@ -102,9 +102,9 @@ namespace Redis.OM
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <param name="fieldValues">the field value pairs to set.</param>
         /// <returns>How many new fields were created.</returns>
-        public static async Task<int> HSetAsync(this IRedisConnection connection, string key, TimeSpan timeSpan, params KeyValuePair<string, string>[] fieldValues)
+        public static async Task<int> HSetAsync(this IRedisConnection connection, string key, TimeSpan timeSpan, params KeyValuePair<string, object>[] fieldValues)
         {
-            var args = new List<string> { key };
+            var args = new List<object> { key };
             foreach (var kvp in fieldValues)
             {
                 args.Add(kvp.Key);
@@ -224,9 +224,9 @@ namespace Redis.OM
         /// <param name="timeSpan">the the timespan to set for your (TTL).</param>
         /// <param name="fieldValues">the field value pairs to set.</param>
         /// <returns>How many new fields were created.</returns>
-        public static int HSet(this IRedisConnection connection, string key, TimeSpan timeSpan, params KeyValuePair<string, string>[] fieldValues)
+        public static int HSet(this IRedisConnection connection, string key, TimeSpan timeSpan, params KeyValuePair<string, object>[] fieldValues)
         {
-            var args = new List<string>();
+            var args = new List<object>();
             args.Add(key);
             foreach (var kvp in fieldValues)
             {
@@ -244,9 +244,9 @@ namespace Redis.OM
         /// <param name="key">the key.</param>
         /// <param name="fieldValues">the field value pairs to set.</param>
         /// <returns>How many new fields were created.</returns>
-        public static int HSet(this IRedisConnection connection, string key, params KeyValuePair<string, string>[] fieldValues)
+        public static int HSet(this IRedisConnection connection, string key, params KeyValuePair<string, object>[] fieldValues)
         {
-            var args = new List<string> { key };
+            var args = new List<object> { key };
             foreach (var kvp in fieldValues)
             {
                 args.Add(kvp.Key);
@@ -413,7 +413,7 @@ namespace Redis.OM
                 }
 
                 var kvps = obj.BuildHashSet();
-                var argsList = new List<string>();
+                var argsList = new List<object>();
                 int? res = null;
                 argsList.Add(timespan != null ? ((long)timespan.Value.TotalMilliseconds).ToString() : "-1");
                 foreach (var kvp in kvps)
@@ -464,7 +464,7 @@ namespace Redis.OM
                 }
 
                 var kvps = obj.BuildHashSet();
-                var argsList = new List<string>();
+                var argsList = new List<object>();
                 int? res = null;
                 argsList.Add(timespan != null ? ((long)timespan.Value.TotalMilliseconds).ToString() : "-1");
                 foreach (var kvp in kvps)
@@ -598,9 +598,9 @@ namespace Redis.OM
         /// <param name="connection">the connection.</param>
         /// <param name="keyName">the key name.</param>
         /// <returns>the object serialized into a dictionary.</returns>
-        public static IDictionary<string, string> HGetAll(this IRedisConnection connection, string keyName)
+        public static IDictionary<string, RedisReply> HGetAll(this IRedisConnection connection, string keyName)
         {
-            var ret = new Dictionary<string, string>();
+            var ret = new Dictionary<string, RedisReply>();
             var res = connection.Execute("HGETALL", keyName).ToArray();
             for (var i = 0; i < res.Length; i += 2)
             {
@@ -616,9 +616,9 @@ namespace Redis.OM
         /// <param name="connection">the connection.</param>
         /// <param name="keyName">the key name.</param>
         /// <returns>the object serialized into a dictionary.</returns>
-        public static async Task<IDictionary<string, string>> HGetAllAsync(this IRedisConnection connection, string keyName)
+        public static async Task<IDictionary<string, RedisReply>> HGetAllAsync(this IRedisConnection connection, string keyName)
         {
-            var ret = new Dictionary<string, string>();
+            var ret = new Dictionary<string, RedisReply>();
             var res = (await connection.ExecuteAsync("HGETALL", keyName)).ToArray();
             for (var i = 0; i < res.Length; i += 2)
             {
@@ -638,7 +638,7 @@ namespace Redis.OM
         /// <param name="fullScript">the full script.</param>
         /// <returns>the result.</returns>
         /// <exception cref="ArgumentException">Thrown if the script cannot be resolved either the script is empty or the script name has not been encountered.</exception>
-        public static async Task<int?> CreateAndEvalAsync(this IRedisConnection connection, string scriptName, string[] keys, string[] argv, string fullScript = "")
+        public static async Task<int?> CreateAndEvalAsync(this IRedisConnection connection, string scriptName, string[] keys, object[] argv, string fullScript = "")
         {
             string sha;
             if (!Scripts.ShaCollection.TryGetValue(scriptName, out sha))
@@ -659,7 +659,7 @@ namespace Redis.OM
                 Scripts.ShaCollection[scriptName] = sha;
             }
 
-            var args = new List<string>
+            var args = new List<object>
             {
                 sha,
                 keys.Count().ToString(),
@@ -691,7 +691,7 @@ namespace Redis.OM
         /// <param name="fullScript">the full script.</param>
         /// <returns>the result.</returns>
         /// <exception cref="ArgumentException">Thrown if the script cannot be resolved either the script is empty or the script name has not been encountered.</exception>
-        public static int? CreateAndEval(this IRedisConnection connection, string scriptName, string[] keys, string[] argv, string fullScript = "")
+        public static int? CreateAndEval(this IRedisConnection connection, string scriptName, string[] keys, object[] argv, string fullScript = "")
         {
             if (!Scripts.ShaCollection.ContainsKey(scriptName))
             {
@@ -712,7 +712,7 @@ namespace Redis.OM
                 Scripts.ShaCollection[scriptName] = sha;
             }
 
-            var args = new List<string>
+            var args = new List<object>
             {
                 Scripts.ShaCollection[scriptName],
                 keys.Count().ToString(),
@@ -784,7 +784,7 @@ namespace Redis.OM
             else
             {
                 var hash = value.BuildHashSet();
-                var args = new List<string>((hash.Keys.Count * 2) + 1);
+                var args = new List<object>((hash.Keys.Count * 2) + 1);
                 args.Add(hash.Keys.Count.ToString());
                 foreach (var pair in hash)
                 {
@@ -815,7 +815,7 @@ namespace Redis.OM
             else
             {
                 var hash = value.BuildHashSet();
-                var args = new List<string>((hash.Keys.Count * 2) + 1);
+                var args = new List<object>((hash.Keys.Count * 2) + 1);
                 args.Add(hash.Keys.Count.ToString());
                 foreach (var pair in hash)
                 {
@@ -830,24 +830,24 @@ namespace Redis.OM
         private static RedisReply[] SendCommandWithExpiry(
             this IRedisConnection connection,
             string command,
-            string[] args,
+            object[] args,
             string keyToExpire,
             TimeSpan ts)
         {
             var commandTuple = Tuple.Create(command, args);
-            var expireTuple = Tuple.Create("PEXPIRE", new[] { keyToExpire, ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
+            var expireTuple = Tuple.Create("PEXPIRE", new object[] { keyToExpire, ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
             return connection.ExecuteInTransaction(new[] { commandTuple, expireTuple });
         }
 
         private static Task<RedisReply[]> SendCommandWithExpiryAsync(
             this IRedisConnection connection,
             string command,
-            string[] args,
+            object[] args,
             string keyToExpire,
             TimeSpan ts)
         {
             var commandTuple = Tuple.Create(command, args);
-            var expireTuple = Tuple.Create("PEXPIRE", new[] { keyToExpire, ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
+            var expireTuple = Tuple.Create("PEXPIRE", new object[] { keyToExpire, ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
             return connection.ExecuteInTransactionAsync(new[] { commandTuple, expireTuple });
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Redis.OM;
 using Redis.OM.Modeling;
 using Xunit;
 

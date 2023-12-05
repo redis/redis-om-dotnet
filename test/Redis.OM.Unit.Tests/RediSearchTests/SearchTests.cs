@@ -52,7 +52,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age < 33).ToList();
@@ -68,7 +68,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicNegationQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => !(x.Age < 33)).ToList();
             _substitute.Received().Execute(
@@ -84,7 +84,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithVariable()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var y = 33;
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age < y).ToList();
@@ -101,7 +101,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestFirstOrDefaultWithMixedLocals()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var heightList = new List<double> { 70.0, 68.0 };
             var y = 33;
             foreach (var height in heightList)
@@ -122,7 +122,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithExactIntegerMatch()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var y = 33;
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age == y).ToList();
@@ -165,7 +165,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicFirstOrDefaultQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var y = 33;
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.FirstOrDefault(x => x.Age == y);
@@ -182,7 +182,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryNoNameIndex()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var y = 33;
             var collection = new RedisCollection<PersonNoName>(_substitute);
             _ = collection.FirstOrDefault(x => x.Age == y);
@@ -199,7 +199,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicOrQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age < 33 || x.TagField == "Steve").ToList();
@@ -216,7 +216,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicOrQueryTwoTags()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.TagField == "Bob" || x.TagField == "Steve").ToList();
@@ -233,7 +233,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicOrQueryWithNegation()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age < 33 || x.TagField != "Steve" || x.Name != "Steve").ToList();
@@ -250,7 +250,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicAndQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age < 33 && x.TagField == "Steve").ToList();
@@ -267,7 +267,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicTagQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age < 33 && x.TagField == "Steve").ToList();
@@ -284,7 +284,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicThreeClauseQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age < 33 && x.TagField == "Steve" && x.Height >= 70).ToList();
@@ -301,7 +301,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestGroupedThreeClauseQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age < 33 && (x.TagField == "Steve" || x.Height >= 70)).ToList();
@@ -318,7 +318,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithContains()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.Contains("Ste")).ToList();
@@ -335,7 +335,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithStartsWith()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.StartsWith("Ste")).ToList();
@@ -352,7 +352,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestFuzzy()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.FuzzyMatch("Ste", 2)).ToList();
@@ -369,7 +369,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMatchStartsWith()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.MatchStartsWith("Ste")).ToList();
@@ -386,7 +386,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMatchEndsWith()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.MatchEndsWith("Ste")).ToList();
@@ -403,7 +403,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMatchContains()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.MatchContains("Ste")).ToList();
@@ -420,7 +420,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestTagContains()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var ste = "Ste";
             var person = new Person() { TagField = "ath" };
@@ -448,7 +448,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestTagStartsWith()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.TagField.StartsWith("Ste")).ToList();
@@ -465,7 +465,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestTagEndsWith()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.TagField.EndsWith("Ste")).ToList();
@@ -482,7 +482,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestTextEndsWith()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.EndsWith("Ste")).ToList();
@@ -499,7 +499,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestTextStartsWith()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.StartsWith("Ste")).ToList();
@@ -516,7 +516,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithEndsWith()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.EndsWith("Ste")).ToList();
@@ -533,7 +533,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryFromPropertyOfModel()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             var modelObject = new Person() { Name = "Steve" };
@@ -551,7 +551,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryFromPropertyOfModelWithStringInterpolation()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             var modelObject = new Person() { Name = "Steve" };
@@ -569,7 +569,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryFromPropertyOfModelWithStringFormatFourArgs()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             var modelObject = new Person() { Name = "Steve" };
@@ -589,7 +589,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithContainsWithNegation()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => !x.Name.Contains("Ste")).ToList();
@@ -606,7 +606,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestTwoPredicateQueryWithContains()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.Contains("Ste") || x.TagField == "John").ToList();
@@ -623,7 +623,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestTwoPredicateQueryWithPrefixMatching()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.Contains("Ste*") || x.TagField == "John").ToList();
@@ -640,7 +640,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestGeoFilter()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.GeoFilter(x => x.Home, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
@@ -665,7 +665,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestGeoFilterWithWhereClause()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             var res = collection.Where(x => x.TagField == "Steve").GeoFilter(x => x.Home, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
@@ -690,7 +690,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSelect()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Select(x => x.Name).ToList();
@@ -711,7 +711,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSelectComplexAnonType()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Select(x => new { x.Name }).ToList();
@@ -733,7 +733,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TextEqualityExpression()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name == "Steve").ToList();
@@ -750,7 +750,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestPaginationChunkSizesSinglePredicate()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.Name == "Steve").ToList();
@@ -767,7 +767,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestPaginationChunkSizesMultiplePredicates()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.TagField == "Steve").GeoFilter(x => x.Home, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
@@ -791,7 +791,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedObjectStringSearch()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.Address.City == "Newark").ToList();
@@ -809,7 +809,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedObjectStringSearchNested2Levels()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.Address.ForwardingAddress.City == "Newark").ToList();
@@ -827,7 +827,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedObjectNumericSearch()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.Address.HouseNumber == 4).ToList();
@@ -845,7 +845,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedObjectNumericSearch2Levels()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.Address.ForwardingAddress.HouseNumber == 4).ToList();
@@ -863,7 +863,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedQueryOfGeo()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.GeoFilter(x => x.Address.Location, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
@@ -887,7 +887,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedQueryOfGeo2Levels()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.GeoFilter(x => x.Address.ForwardingAddress.Location, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
@@ -911,7 +911,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestArrayContains()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.NickNames.Contains("Steve")).ToList();
@@ -929,7 +929,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestArrayContainsSpecialChar()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.NickNames.Contains("Steve@redis.com")).ToList();
@@ -947,7 +947,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestArrayContainsVar()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             var steve = "Steve";
@@ -966,7 +966,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestArrayContainsNested()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute, 1000);
             _ = collection.Where(x => x.Mother.NickNames.Contains("Di")).ToList();
@@ -983,10 +983,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestUpdateJson()
         {
-            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockReply);
             
-            _substitute.ExecuteAsync("EVALSHA", Arg.Any<string[]>()).Returns(Task.FromResult(new RedisReply("42")));
-            _substitute.ExecuteAsync("SCRIPT", Arg.Any<string[]>())
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(Task.FromResult(new RedisReply("42")));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>())
                 .Returns(Task.FromResult(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb")));
             var collection = new RedisCollection<Person>(_substitute);
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
@@ -1000,12 +1000,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestUpdateJsonUnloadedScriptAsync()
         {
 
-            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockReply);
 
-            _substitute.ExecuteAsync("EVALSHA", Arg.Any<string[]>())
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>())
                 .Throws(new RedisServerException("Failed on EVALSHA"));
-            _substitute.ExecuteAsync("EVAL", Arg.Any<string[]>()).Returns(Task.FromResult(new RedisReply("42")));
-            _substitute.ExecuteAsync("SCRIPT", Arg.Any<string[]>()).Returns(Task.FromResult(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb")));
+            _substitute.ExecuteAsync("EVAL", Arg.Any<object[]>()).Returns(Task.FromResult(new RedisReply("42")));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>()).Returns(Task.FromResult(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb")));
             var collection = new RedisCollection<Person>(_substitute);
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
             steve.Age = 33;
@@ -1018,12 +1018,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void TestUpdateJsonUnloadedScript()
         {
-            _substitute.Execute("FT.SEARCH", Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockReply);
 
-            _substitute.Execute("EVALSHA", Arg.Any<string[]>())
+            _substitute.Execute("EVALSHA", Arg.Any<object[]>())
                 .Throws(new RedisServerException("Failed on EVALSHA"));
-            _substitute.Execute("EVAL", Arg.Any<string[]>()).Returns(new RedisReply("42"));
-            _substitute.Execute("SCRIPT", Arg.Any<string[]>()).Returns(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb"));
+            _substitute.Execute("EVAL", Arg.Any<object[]>()).Returns(new RedisReply("42"));
+            _substitute.Execute("SCRIPT", Arg.Any<object[]>()).Returns(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb"));
             var collection = new RedisCollection<Person>(_substitute);
             var steve = collection.First(x => x.Name == "Steve");
             steve.Age = 33;
@@ -1036,9 +1036,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestUpdateJsonName()
         {
-            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<string[]>()).Returns(_mockReply);
-            _substitute.ExecuteAsync("EVALSHA", Arg.Any<string[]>()).Returns(new RedisReply("42"));
-            _substitute.ExecuteAsync("SCRIPT", Arg.Any<string[]>()).Returns(new RedisReply("42"));
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(new RedisReply("42"));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>()).Returns(new RedisReply("42"));
             var collection = new RedisCollection<Person>(_substitute);
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
             steve.Name = "Bob";
@@ -1050,9 +1050,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestUpdateJsonNestedObject()
         {
-            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<string[]>()).Returns(_mockReply);
-            _substitute.ExecuteAsync("EVALSHA", Arg.Any<string[]>()).Returns(new RedisReply("42"));
-            _substitute.ExecuteAsync("SCRIPT", Arg.Any<string[]>()).Returns(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb"));
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(new RedisReply("42"));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>()).Returns(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb"));
             var collection = new RedisCollection<Person>(_substitute);
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
             steve.Address = new Address { State = "Florida" };
@@ -1071,9 +1071,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestUpdateJsonWithDouble()
         {
-            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<string[]>()).Returns(_mockReply);
-            _substitute.ExecuteAsync("EVALSHA", Arg.Any<string[]>()).Returns(new RedisReply("42"));
-            _substitute.ExecuteAsync("SCRIPT", Arg.Any<string[]>()).Returns(new RedisReply("42"));
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(new RedisReply("42"));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>()).Returns(new RedisReply("42"));
             var collection = new RedisCollection<Person>(_substitute);
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
             steve.Age = 33;
@@ -1096,8 +1096,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestDeleteAsync()
         {
             const string key = "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N";
-            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<string[]>()).Returns(_mockReply);
-            _substitute.ExecuteAsync("UNLINK", Arg.Any<string[]>()).Returns("1");
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync("UNLINK", Arg.Any<object[]>()).Returns("1");
             var collection = new RedisCollection<Person>(_substitute);
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
             Assert.True(collection.StateManager.Data.ContainsKey(key));
@@ -1112,8 +1112,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestDelete()
         {
             const string key = "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N";
-            _substitute.Execute("FT.SEARCH", Arg.Any<string[]>()).Returns(_mockReply);
-            _substitute.Execute("UNLINK", Arg.Any<string[]>()).Returns(new RedisReply("1"));
+            _substitute.Execute("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockReply);
+            _substitute.Execute("UNLINK", Arg.Any<object[]>()).Returns(new RedisReply("1"));
             var collection = new RedisCollection<Person>(_substitute);
             var steve = collection.First(x => x.Name == "Steve");
             Assert.True(collection.StateManager.Data.ContainsKey(key));
@@ -1129,7 +1129,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [InlineData(false)]
         public async Task TestFirstAsync(bool useExpression)
         {
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var expectedPredicate = useExpression ? "(@TagField:{bob})" : "*";
 
@@ -1158,7 +1158,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestFirstAsyncNone(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReplyNone);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReplyNone);
 
             var expectedPredicate = useExpression ? "(@TagField:{bob})" : "*";
 
@@ -1186,7 +1186,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestFirstOrDefaultAsync(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var expectedPredicate = useExpression ? "(@TagField:{bob})" : "*";
 
@@ -1216,7 +1216,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [InlineData(false)]
         public async Task TestFirstOrDefaultAsyncNone(bool useExpression)
         {
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReplyNone);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReplyNone);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1248,7 +1248,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestSingleAsync(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var expectedPredicate = useExpression ? "(@TagField:{bob})" : "*";
             var collection = new RedisCollection<Person>(_substitute);
@@ -1277,7 +1277,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestSingleAsyncNone(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReplyNone);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReplyNone);
 
             var collection = new RedisCollection<Person>(_substitute);
             var expectedPredicate = useExpression ? "(@TagField:{bob})" : "*";
@@ -1305,7 +1305,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestSingleAsyncTwo(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
 
             var collection = new RedisCollection<Person>(_substitute);
             var expectedPredicate = useExpression ? "(@TagField:{bob})" : "*";
@@ -1333,7 +1333,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestSingleOrDefaultAsync(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1365,7 +1365,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestSingleOrDefaultAsyncNone(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReplyNone);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReplyNone);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1397,7 +1397,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestSingleOrDefaultAsyncTwo(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1429,7 +1429,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyAsync(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var expectedPredicate = useExpression ? "(@TagField:{bob})" : "*";
 
@@ -1453,7 +1453,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyAsyncNone(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReplyNone);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReplyNone);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1476,7 +1476,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCountAsync(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1498,7 +1498,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCount2Async(bool useExpression)
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
 
             var collection = new RedisCollection<Person>(_substitute);
             var expectedPredicate = useExpression ? "(@TagField:{bob})" : "*";
@@ -1517,7 +1517,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestOrderByWithAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
             var collection = new RedisCollection<Person>(_substitute);
             var expectedPredicate = "*";
             _ = await collection.OrderBy(x => x.Age).ToListAsync();
@@ -1537,7 +1537,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestOrderByDescendingWithAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
             var collection = new RedisCollection<Person>(_substitute);
             var expectedPredicate = "*";
             _ = await collection.OrderByDescending(x => x.Age).ToListAsync();
@@ -1557,7 +1557,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task CombinedExpressionsWithFirstOrDefaultAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1577,7 +1577,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task CombinedExpressionsWithFirstAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1597,7 +1597,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task CombinedExpressionsWithAnyAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1617,7 +1617,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task CombinedExpressionsSingleOrDefaultAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1637,7 +1637,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task CombinedExpressionsSingleAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1657,7 +1657,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task CombinedExpressionsCountAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1677,7 +1677,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCombinedExpressionWithExpressionFirstOrDefaultAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply2Count);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply2Count);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1703,7 +1703,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCombinedExpressionWithExpressionFirstAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1729,7 +1729,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCombinedExpressionWithExpressionAnyAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1755,7 +1755,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCombinedExpressionWithExpressionSingleAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1781,7 +1781,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCombinedExpressionWithExpressionSingleOrDefaultAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1807,7 +1807,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCombinedExpressionWithExpressionCountAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -1833,7 +1833,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCreateIndexWithNoStopwords()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns("OK");
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns("OK");
 
             await _substitute.CreateIndexAsync(typeof(ObjectWithZeroStopwords));
 
@@ -1854,7 +1854,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCreateIndexWithTwoStopwords()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns("OK");
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns("OK");
 
             await _substitute.CreateIndexAsync(typeof(ObjectWithTwoStopwords));
 
@@ -1874,7 +1874,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCreateIndexWithStringLikeValueTypes()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns("OK");
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns("OK");
 
             await _substitute.CreateIndexAsync(typeof(ObjectWithStringLikeValueTypes));
 
@@ -1899,7 +1899,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCreateIndexWithStringLikeValueTypesHash()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns("OK");
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns("OK");
 
             await _substitute.CreateIndexAsync(typeof(ObjectWithStringLikeValueTypesHash));
 
@@ -1922,7 +1922,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestCreateIndexWithDatetimeValue()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns("OK");
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns("OK");
 
             await _substitute.CreateIndexAsync(typeof(ObjectWithDateTime));
             await _substitute.CreateIndexAsync(typeof(ObjectWithDateTimeHash));
@@ -1956,7 +1956,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestQueryOfUlid()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
 
@@ -1972,7 +1972,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestQueryOfGuid()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
 
@@ -1989,7 +1989,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestQueryOfBoolean()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
 
@@ -2006,7 +2006,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestQueryOfEnum()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
 
@@ -2023,7 +2023,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestQueryOfEnumHash()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithStringLikeValueTypesHash>(_substitute);
             
@@ -2038,7 +2038,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestGreaterThanEnumQuery()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
 
@@ -2052,7 +2052,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestIndexCreationWithEmbeddedListOfDocuments()
         {
-            _substitute.ExecuteAsync("FT.CREATE", Arg.Any<string[]>()).Returns("OK");
+            _substitute.ExecuteAsync("FT.CREATE", Arg.Any<object[]>()).Returns("OK");
             await _substitute.CreateIndexAsync(typeof(ObjectWithEmbeddedArrayOfObjects));
             await _substitute.Received().ExecuteAsync("FT.CREATE",
                 "objectwithembeddedarrayofobjects-idx",
@@ -2077,7 +2077,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyQueryForArrayOfEmbeddedObjects()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_substitute);
 
@@ -2097,7 +2097,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsEnum()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_substitute);
 
@@ -2117,7 +2117,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsExtraPredicate()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_substitute);
 
@@ -2137,7 +2137,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultipleAnyCalls()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_substitute);
 
@@ -2157,7 +2157,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultiplePredicatesInsideAny()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_substitute);
 
@@ -2177,7 +2177,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsOtherTypes()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var boolean = true;
             var ulid = Ulid.NewUlid();
@@ -2201,7 +2201,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyQueryForListOfEmbeddedObjects()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_substitute);
 
@@ -2221,7 +2221,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAnyQueryForArrayOfEmbeddedObjectsMultiVariant()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_substitute);
 
@@ -2241,7 +2241,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task SearchWithMultipleWhereClauses()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
 
@@ -2263,7 +2263,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task TestAsyncMaterializationMethodsWithCombinedQueries()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute);
             _ = await collection.Where(x => x.TagField == "CountAsync")
                 .CountAsync(x => x.Age == 32);
@@ -2327,7 +2327,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMaterializationMethodsWithCombinedQueries()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute).Where(x => x.Age == 32);
             _ = collection.Count(x => x.TagField == "Count");
             _ = collection.Any(x => x.TagField == "Any");
@@ -2386,7 +2386,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var potentialTagFieldValues = new [] { "Steve", "Alice", "Bob" };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute).Where(x => potentialTagFieldValues.Contains(x.TagField));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -2403,7 +2403,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var potentialTextFieldValues = new [] { "Steve", "Alice", "Bob" };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute).Where(x => potentialTextFieldValues.Contains(x.Name));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -2420,7 +2420,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var potentialTagFieldValues = new int?[] { 35, 50, 60 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute).Where(x => potentialTagFieldValues.Contains(x.Age));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -2436,7 +2436,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void Issue201()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var p1 = new Person() { Name = "Steve" };
             var collection = new RedisCollection<Person>(_substitute, 1000);
@@ -2456,7 +2456,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void RangeOnDateTimeWithMultiplePredicates()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var fromDto = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromHours(4));
             var toDto = DateTimeOffset.UtcNow;
@@ -2534,7 +2534,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void RangeOnDatetime()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var timestamp = DateTime.Now;
             var timeAnHourAgo = timestamp.Subtract(TimeSpan.FromHours(1));
@@ -2624,7 +2624,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task RangeOnDatetimeAsync()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var timestamp = DateTime.Now;
             var timeAnHourAgo = timestamp.Subtract(TimeSpan.FromHours(1));
@@ -2713,7 +2713,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public async Task RangeOnDatetimeAsyncHash()
         {
             _substitute.ClearSubstitute();
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var timestamp = DateTime.Now;
             var timeAnHourAgo = timestamp.Subtract(TimeSpan.FromHours(1));
@@ -2816,7 +2816,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var potentialTagFieldValues = new List<int?> { 35, 50, 60 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute).Where(x => potentialTagFieldValues.Contains(x.Age));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -2833,7 +2833,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var potentialTagFieldValues = new List<string> { "Steve", "Alice", "Bob" };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute).Where(x => potentialTagFieldValues.Contains(x.TagField) || potentialTagFieldValues.Contains(x.Name));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -2854,7 +2854,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var query = new RedisQuery("fake-idx");
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>())
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>())
                 .Returns((RedisReply)res);
 
             _ = _substitute.Search<Person>(query);
@@ -2865,7 +2865,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var potentialTagFieldValues = new List<string> { "steve@example.com", "alice@example.com", "bob@example.com" };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute).Where(x => potentialTagFieldValues.Contains(x.TagField) || potentialTagFieldValues.Contains(x.Name));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -2881,7 +2881,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void SearchWithEmptyAny()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute);
             var any = collection.Any();
             _substitute.Received().Execute(
@@ -2909,7 +2909,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestContainsFromLocal()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute);
             const string steve = "steve";
             _ = collection.Where(x => x.NickNamesList.Contains(steve)).ToList();
@@ -2933,7 +2933,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var guid3Str = ExpressionParserUtilities.EscapeTagField(guid3.ToString());
             var potentialFieldValues = new [] { guid1, guid2, guid3 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute).Where(x => potentialFieldValues.Contains(x.Guid));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -2949,7 +2949,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestContainsFromProperty()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute);
             var steve = new Person
             {
@@ -2974,7 +2974,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var potentialFieldValues = new [] { ulid1, ulid2, ulid3 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute).Where(x => potentialFieldValues.Contains(x.Ulid));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -2995,7 +2995,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var potentialFieldValues = new [] { enum1, enum2, enum3 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute).Where(x => potentialFieldValues.Contains(x.AnEnum));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -3016,7 +3016,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var potentialFieldValues = new [] { enum1, enum2, enum3 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute).Where(x => potentialFieldValues.Contains(x.AnEnumAsInt));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -3037,7 +3037,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var potentialFieldValues = new List<AnEnum> { enum1, enum2, enum3 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute).Where(x => potentialFieldValues.Contains(x.AnEnum));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -3058,7 +3058,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var potentialFieldValues = new List<AnEnum> { enum1, enum2, enum3 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute).Where(x => potentialFieldValues.Contains(x.AnEnumAsInt));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -3079,7 +3079,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var potentialFieldValues = new { list = new List<AnEnum> { enum1, enum2, enum3 } };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute).Where(x => potentialFieldValues.list.Contains(x.AnEnum));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -3100,7 +3100,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var potentialFieldValues = new { list = new List<AnEnum> { enum1, enum2, enum3 } };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute).Where(x => potentialFieldValues.list.Contains(x.AnEnumAsInt));
             _ = collection.ToList();
             _substitute.Received().Execute(
@@ -3116,7 +3116,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedOrderBy()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             _ = new RedisCollection<Person>(_substitute).OrderBy(x => x.Address.State).ToList();
             _substitute.Received().Execute("FT.SEARCH", "person-idx", "*", "LIMIT", "0", "100", "SORTBY", "Address_State", "ASC");
         }
@@ -3125,7 +3125,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestGeoFilterNested()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.GeoFilter(x => x.Address.Location, 5, 6.7, 50, GeoLocDistanceUnit.Kilometers).ToList();
@@ -3149,7 +3149,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSelectWithWhere()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Age == 33).Select(x => x.Name).ToList();
             _substitute.Received().Execute(
@@ -3169,7 +3169,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ObjectWithNullableEnum>(_substitute);
             _ = collection.Where(x => x.AnEnum == AnEnum.one && x.NullableStringEnum == AnEnum.two).ToList();
@@ -3187,7 +3187,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestEscapeForwardSlash()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.TagField == "a/test/string").ToList();
@@ -3205,7 +3205,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMixedNestingIndexCreation()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(new RedisReply("OK"));
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply("OK"));
 
             _substitute.CreateIndex(typeof(ComplexObjectWithCascadeAndJsonPath));
 
@@ -3231,7 +3231,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMixedNestingQuerying()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<ComplexObjectWithCascadeAndJsonPath>(_substitute);
 
@@ -3269,7 +3269,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public async Task TestCreateIndexWithJsonPropertyName()
         {
-            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<string[]>()).Returns("OK");
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns("OK");
 
             await _substitute.CreateIndexAsync(typeof(ObjectWithPropertyNamesDefined));
 
@@ -3288,7 +3288,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void QueryNamedPropertiesJson()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithPropertyNamesDefined>(_substitute);
 
             _ = collection.FirstOrDefault(x => x.Key == "hello");
@@ -3307,7 +3307,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMultipleContains()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithMultipleSearchableFields>(_substitute);
             Expression<Func<ObjectWithMultipleSearchableFields, bool>> whereExpressionFail = a => !a.FirstName.Contains("Andrey") && !a.LastName.Contains("Bred");
 
@@ -3337,7 +3337,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSelectNestedObject()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Select(x => x.Address).ToList();
@@ -3383,7 +3383,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var ushorts = new ushort[] { 28, 29, 30 };
             var decimals = new decimal[] { 31.5M, 32, 33 };
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithNumerics>(_substitute).Where(x => ints.Contains(x.Integer));
             _ = collection.ToList();
             var expected = $"@{nameof(ObjectWithNumerics.Integer)}:[1 1]|@{nameof(ObjectWithNumerics.Integer)}:[2 2]|@{nameof(ObjectWithNumerics.Integer)}:[3 3]";
@@ -3510,7 +3510,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestConstantExpressionContains()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<Person>(_substitute);
             var parameter = Expression.Parameter(typeof(Person), "b");
             var property = Expression.Property(parameter, "TagField");

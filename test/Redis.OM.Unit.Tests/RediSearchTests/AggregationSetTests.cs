@@ -349,8 +349,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestLoad()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.Load(x => x.RecordShell.Name).ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx","*","LOAD","1","Name","WITHCURSOR", "COUNT","10000");
         }
@@ -359,8 +359,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMultiVariant()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.Load(x => new {x.RecordShell.Name, x.RecordShell.Age}).ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx","*","LOAD","2","Name", "Age","WITHCURSOR", "COUNT","10000");
         }
@@ -369,8 +369,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestLoadAll()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.LoadAll().ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "*", "LOAD", "*", "WITHCURSOR", "COUNT", "10000");
         }
@@ -379,8 +379,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMultipleOrderBys()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.OrderBy(x => x.RecordShell.Name).OrderByDescending(x => x.RecordShell.Age).ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "SORTBY", "4", "@Name", "ASC", "@Age", "DESC", "WITHCURSOR", "COUNT", "10000");
         }
@@ -389,8 +389,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestRightSideStringTypeFilter()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);    
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);    
             _ = collection.Apply(x => string.Format("{0} {1}", x.RecordShell.FirstName, x.RecordShell.LastName),
                 "FullName").Filter(p => p.Aggregations["FullName"] == "Bruce Wayne").ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "*", "APPLY", "format(\"%s %s\",@FirstName,@LastName)", "AS", "FullName", "FILTER", "@FullName == 'Bruce Wayne'", "WITHCURSOR", "COUNT", "10000");
@@ -400,8 +400,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedOrderBy()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.OrderBy(x => x.RecordShell.Address.State).ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "SORTBY", "2", "@Address_State", "ASC", "WITHCURSOR", "COUNT", "10000");
         }
@@ -410,8 +410,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedGroup()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.GroupBy(x => x.RecordShell.Address.State).ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "GROUPBY", "1", "@Address_State", "WITHCURSOR", "COUNT", "10000");
         }
@@ -420,8 +420,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedGroupMulti()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.GroupBy(x => new {x.RecordShell.Address.State, x.RecordShell.Address.ForwardingAddress.City}).ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "GROUPBY", "2", "@Address_State", "@Address_ForwardingAddress_City", "WITHCURSOR", "COUNT", "10000");
         }
@@ -430,8 +430,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestNestedApply()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.Apply(x => x.RecordShell.Address.HouseNumber + 4, "house_num_modified").ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "APPLY", "@Address_HouseNumber + 4", "AS", "house_num_modified", "WITHCURSOR", "COUNT", "10000");
         }
@@ -440,8 +440,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestMissedBinExpression()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.Apply(x => x.RecordShell.Address.HouseNumber + 4, "house_num_modified")
                 .Apply(x=>x.RecordShell.Age + x["house_num_modified"] * 4 + x.RecordShell.Sales, "arbitrary_calculation").ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "APPLY", "@Address_HouseNumber + 4", "AS", "house_num_modified", "APPLY", "@Age + @house_num_modified * 4 + @Sales", "AS", "arbitrary_calculation", "WITHCURSOR", "COUNT", "10000");
@@ -456,8 +456,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 LastName = "Bond"
             };
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.Where(x =>x.RecordShell.FirstName==customerFilter.FirstName) .ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "@FirstName:{James}", "WITHCURSOR", "COUNT", "10000");
         }
@@ -471,8 +471,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 LastName = "Bond"
             };
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.Where(x => x.RecordShell.FirstName == customerFilter.FirstName).Where(p=>p.RecordShell.LastName==customerFilter.LastName).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "@LastName:{Bond} @FirstName:{James}", "WITHCURSOR", "COUNT", "10000");
         }
@@ -480,8 +480,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestSkipTakeTranslatedLimit()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             _ = collection.OrderByDescending(p=>p.RecordShell.Age).Skip(0).Take(10).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx","*","SORTBY","2","@Age","DESC","LIMIT","0","10", "WITHCURSOR", "COUNT", "10000");
         }
@@ -490,8 +490,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void RightBinExpressionOperator()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Age == 0 && (a.RecordShell!.Age == 2 || a.RecordShell!.Age == 50);
 
             _ = collection.Where(query).ToList();
@@ -502,8 +502,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void RightBinExpressionWithUniaryOperator()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Name.Contains("Steve") && (a.RecordShell!.Age == 2 || a.RecordShell!.Age == 50);
 
             _ = collection.Where(query).ToList();
@@ -514,8 +514,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void LeftBinExpressionWithUniaryOperator()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             Expression<Func<AggregationResult<Person>, bool>> query = a => (a.RecordShell!.Age == 2 || a.RecordShell!.Age == 50) && a.RecordShell!.Name.Contains("Steve");
 
             _ = collection.Where(query).ToList();
@@ -531,8 +531,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 LastName = "White"
             };
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
             Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell.FirstName == customerFilter.FirstName;
             _ = collection.Where(query).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "@FirstName:{Walter\\-Junior}", "WITHCURSOR", "COUNT", "10000");
@@ -542,8 +542,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void CustomPropertyNamesInQuery()
         {
             //Arrange
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
 
             var collection = new RedisAggregationSet<ObjectWithPropertyNamesDefined>(_substitute, true, 10);
 
@@ -568,8 +568,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var dto = DateTimeOffset.Now.Subtract(TimeSpan.FromHours(3));
             var dtoMs = dto.ToUnixTimeMilliseconds();
             var collection = new RedisAggregationSet<ObjectWithDateTime>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
 
             Expression<Func<AggregationResult<ObjectWithDateTime>, bool>> query = a => a.RecordShell.Timestamp > dt;
             _ = collection.Where(query).ToList();

@@ -101,6 +101,55 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Finds nearest neighbors to provided vector.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="expression">The expression yielding the field to search on.</param>
+        /// <param name="numNeighbors">Number of neighbors to search for.</param>
+        /// <param name="item">The vector or item to search on.</param>
+        /// <typeparam name="T">The indexed type.</typeparam>
+        /// <typeparam name="TKnnType">The type of the vector.</typeparam>
+        /// <returns>A Redis Collection with a nearest neighbors expression attached to it.</returns>
+        public static IRedisCollection<T> NearestNeighbors<T, TKnnType>(this IRedisCollection<T> source, Expression<Func<T, Vector<TKnnType>>> expression, int numNeighbors, Vector<TKnnType> item)
+            where T : notnull
+            where TKnnType : class
+        {
+            var collection = (RedisCollection<T>)source;
+            var booleanExpression = collection.BooleanExpression;
+
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(NearestNeighbors, source, expression, numNeighbors, item),
+                new[] { source.Expression, Expression.Quote(expression), Expression.Constant(numNeighbors), Expression.Constant(item) });
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, booleanExpression, source.SaveState, source.ChunkSize);
+        }
+
+        /// <summary>
+        /// Finds nearest neighbors to provided vector.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="expression">The expression yielding the field to search on.</param>
+        /// <param name="numNeighbors">Number of neighbors to search for.</param>
+        /// <param name="item">The vector or item to search on.</param>
+        /// <typeparam name="T">The indexed type.</typeparam>
+        /// <typeparam name="TKnnType">The type of the vector.</typeparam>
+        /// <returns>A Redis Collection with a nearest neighbors expression attached to it.</returns>
+        public static IRedisCollection<T> NearestNeighbors<T, TKnnType>(this IRedisCollection<T> source, Expression<Func<T, Vector<TKnnType>>> expression, int numNeighbors, TKnnType item)
+            where T : notnull
+            where TKnnType : class
+        {
+            var collection = (RedisCollection<T>)source;
+            var booleanExpression = collection.BooleanExpression;
+
+            var vector = Vector.Of(item);
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(NearestNeighbors, source, expression, numNeighbors, vector),
+                new[] { source.Expression, Expression.Quote(expression), Expression.Constant(numNeighbors), Expression.Constant(vector) });
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, booleanExpression, source.SaveState, source.ChunkSize);
+        }
+
+        /// <summary>
         /// Specifies which items to pull out of Redis.
         /// </summary>
         /// <param name="source">The Redis Collection.</param>
