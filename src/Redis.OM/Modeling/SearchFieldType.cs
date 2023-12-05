@@ -29,5 +29,10 @@
         /// A generically indexed field - the library will figure out how to index.
         /// </summary>
         INDEXED = 4,
+
+        /// <summary>
+        /// A vector index field.
+        /// </summary>
+        VECTOR = 5,
     }
 }

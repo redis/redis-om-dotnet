@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using StackExchange.Redis;
 
 namespace Redis.OM
@@ -15,7 +16,7 @@ namespace Redis.OM
 #pragma warning restore SA1018
         private readonly double? _internalDouble;
         private readonly int? _internalInt;
-        private readonly string? _internalString;
+        private readonly byte[]? _raw;
         private readonly long? _internalLong;
 
         /// <summary>
@@ -30,11 +31,11 @@ namespace Redis.OM
                     break;
                 case ResultType.SimpleString:
                 case ResultType.BulkString:
-                    _internalString = (string)result;
+                    _raw = (byte[])result;
                     break;
                 case ResultType.Error:
                     Error = true;
-                    _internalString = result.ToString();
+                    _raw = (byte[])result;
                     break;
                 case ResultType.Integer:
                     _internalLong = (long)result;
@@ -43,6 +44,15 @@ namespace Redis.OM
                     _values = ((RedisResult[])result).Select(x => new RedisReply(x)).ToArray();
                     break;
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisReply"/> class.
+        /// </summary>
+        /// <param name="raw">the raw bytes.</param>
+        internal RedisReply(byte[] raw)
+        {
+            _raw = raw;
         }
 
         /// <summary>
@@ -60,7 +70,7 @@ namespace Redis.OM
         /// <param name="val">the value.</param>
         internal RedisReply(string val)
         {
-            _internalString = val;
+            _raw = Encoding.UTF8.GetBytes(val);
         }
 
         /// <summary>
@@ -108,7 +118,7 @@ namespace Redis.OM
                 return (double)v._internalDouble;
             }
 
-            if (v._internalString != null && double.TryParse(v._internalString, NumberStyles.Number, CultureInfo.InvariantCulture, out var ret))
+            if (v._raw != null && double.TryParse(Encoding.UTF8.GetString(v._raw), NumberStyles.Number, CultureInfo.InvariantCulture, out var ret))
             {
                 return ret;
             }
@@ -125,6 +135,13 @@ namespace Redis.OM
 
             throw new InvalidCastException("Could not cast to double");
         }
+
+        /// <summary>
+        /// implicitly converts the reply to a byte array.
+        /// </summary>
+        /// <param name="v">the <see cref="RedisReply"/>.</param>
+        /// <returns>the byte array.</returns>
+        public static implicit operator byte[]?(RedisReply v) => v._raw;
 
         /// <summary>
         /// implicitly converts the reply to a double.
@@ -160,7 +177,7 @@ namespace Redis.OM
         /// </summary>
         /// <param name="v">the reply.</param>
         /// <returns>the string.</returns>
-        public static implicit operator string(RedisReply v) => v._internalString ?? string.Empty;
+        public static implicit operator string(RedisReply v) => v._raw is not null ? Encoding.UTF8.GetString(v._raw) : string.Empty;
 
         /// <summary>
         /// implicitly converts a string into a redis reply.
@@ -182,7 +199,7 @@ namespace Redis.OM
                 return (int)v._internalInt;
             }
 
-            if (v._internalString != null && int.TryParse(v._internalString, out var ret))
+            if (v._raw != null && int.TryParse(Encoding.UTF8.GetString(v._raw), out var ret))
             {
                 return ret;
             }
@@ -227,7 +244,7 @@ namespace Redis.OM
                 return (long)v._internalLong;
             }
 
-            if (v._internalString != null && long.TryParse(v._internalString, out var ret))
+            if (v._raw != null && long.TryParse(Encoding.UTF8.GetString(v._raw), out var ret))
             {
                 return ret;
             }
@@ -293,9 +310,9 @@ namespace Redis.OM
                 return _internalInt.ToString();
             }
 
-            if (_internalString != null)
+            if (_raw != null)
             {
-                return _internalString;
+                return Encoding.UTF8.GetString(_raw);
             }
 
             return base.ToString();
@@ -325,7 +342,7 @@ namespace Redis.OM
                 return TypeCode.Int64;
             }
 
-            if (_internalString != null)
+            if (_raw != null)
             {
                 return TypeCode.String;
             }

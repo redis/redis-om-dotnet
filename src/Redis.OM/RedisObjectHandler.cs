@@ -6,8 +6,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Modeling.Vectors;
 
 [assembly: InternalsVisibleTo("Redis.OM.POC")]
 
@@ -28,41 +30,6 @@ namespace Redis.OM
             { typeof(uint), default(uint) },
             { typeof(ulong), default(ulong) },
         };
-
-        /// <summary>
-        /// Builds object from provided hash set.
-        /// </summary>
-        /// <param name="hash">Hash set to build item from.</param>
-        /// <typeparam name="T">The type to construct.</typeparam>
-        /// <returns>An instance of the requested object.</returns>
-        /// <exception cref="Exception">Throws an exception if Deserialization fails.</exception>
-        internal static T FromHashSet<T>(IDictionary<string, string> hash)
-            where T : notnull
-        {
-            if (typeof(IRedisHydrateable).IsAssignableFrom(typeof(T)))
-            {
-                var obj = Activator.CreateInstance<T>();
-                ((IRedisHydrateable)obj).Hydrate(hash);
-                return obj;
-            }
-
-            var attr = Attribute.GetCustomAttribute(typeof(T), typeof(DocumentAttribute)) as DocumentAttribute;
-            string asJson;
-            if (attr != null && attr.StorageType == StorageType.Json && hash.ContainsKey("$"))
-            {
-                asJson = hash["$"];
-            }
-            else if (hash.Keys.Count > 0 && hash.Keys.All(x => x.StartsWith("$")))
-            {
-                asJson = hash.Values.First();
-            }
-            else
-            {
-                asJson = SendToJson(hash, typeof(T));
-            }
-
-            return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
-        }
 
         /// <summary>
         /// Tries to parse the hash set into a fully or partially hydrated object.
@@ -87,16 +54,39 @@ namespace Redis.OM
             {
                 asJson = hash["$"];
             }
-            else if (attr != null)
+            else if (hash.Keys.Count > 0 && hash.Keys.All(x => x.StartsWith("$")))
             {
-                asJson = SendToJson(stringDictionary, typeof(T));
+                asJson = hash.Values.First();
             }
             else
             {
-                throw new ArgumentException("Type must be decorated with a DocumentAttribute");
+                asJson = SendToJson(hash, typeof(T));
             }
 
-            return JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            var res = JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            if (hash.ContainsKey(VectorScores.NearestNeighborScoreName) || hash.Keys.Any(x => x.EndsWith(VectorScores.RangeScoreSuffix)))
+            {
+                var vectorScores = new VectorScores();
+                if (hash.ContainsKey(VectorScores.NearestNeighborScoreName))
+                {
+                    vectorScores.NearestNeighborsScore = ParseScoreFromString(hash[VectorScores.NearestNeighborScoreName]);
+                }
+
+                foreach (var key in hash.Keys.Where(x => x.EndsWith(VectorScores.RangeScoreSuffix)))
+                {
+                    var strippedKey = key.Substring(0, key.Length - VectorScores.RangeScoreSuffix.Length);
+                    var score = ParseScoreFromString(hash[key]);
+                    vectorScores.RangeScores.Add(strippedKey, score);
+                }
+
+                var scoreProperties = typeof(T).GetProperties().Where(x => x.PropertyType == typeof(VectorScores));
+                foreach (var p in scoreProperties)
+                {
+                    p.SetValue(res, vectorScores);
+                }
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -105,7 +95,7 @@ namespace Redis.OM
         /// <param name="hash">The hash.</param>
         /// <param name="type">The type to deserialize to.</param>
         /// <returns>the deserialized object.</returns>
-        internal static object? FromHashSet(IDictionary<string, string> hash, Type type)
+        internal static object? FromHashSet(IDictionary<string, RedisReply> hash, Type type)
         {
             var asJson = SendToJson(hash, type);
             return JsonSerializer.Deserialize(asJson, type);
@@ -299,7 +289,7 @@ namespace Redis.OM
         internal static T ToObject<T>(this RedisReply val)
             where T : notnull
         {
-            var hash = new Dictionary<string, string>();
+            var hash = new Dictionary<string, RedisReply>();
             var vals = val.ToArray();
             for (var i = 0; i < vals.Length; i += 2)
             {
@@ -314,24 +304,47 @@ namespace Redis.OM
         /// </summary>
         /// <param name="obj">object to be turned into a hash set.</param>
         /// <returns>A hash set generated from the object.</returns>
-        internal static IDictionary<string, string> BuildHashSet(this object obj)
+        internal static IDictionary<string, object> BuildHashSet(this object obj)
         {
             if (obj is IRedisHydrateable hydrateable)
             {
-                return hydrateable.BuildHashSet();
+                return hydrateable.BuildHashSet().ToDictionary(x => x.Key, x => (object)x.Value);
             }
 
             var properties = obj
                               .GetType()
                               .GetProperties()
                               .Where(x => x.GetValue(obj) != null);
-            var hash = new Dictionary<string, string>();
+            var hash = new Dictionary<string, object>();
             foreach (var property in properties)
             {
                 var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
 
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
+                if (property.GetCustomAttributes<VectorizerAttribute>().Any())
+                {
+                    var val = property.GetValue(obj);
+                    var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().First();
+                    if (val is not Vector vector)
+                    {
+                        throw new InvalidOperationException("VectorizerAttribute must decorate vectors");
+                    }
+
+                    vector.Embed(vectorizer);
+                    if (vectorizer is FloatVectorizerAttribute or DoubleVectorizerAttribute)
+                    {
+                        hash.Add(propertyName, vector.Embedding!);
+                    }
+                    else
+                    {
+                        hash.Add($"{propertyName}.Vector", vector.Embedding!);
+                        hash.Add($"{propertyName}.Value", JsonSerializer.Serialize(vector.Obj));
+                    }
+
+                    continue;
+                }
+
                 if (type.IsPrimitive || type == typeof(decimal) || type == typeof(string) || type == typeof(GeoLoc) || type == typeof(Ulid) || type == typeof(Guid))
                 {
                     var val = property.GetValue(obj);
@@ -360,6 +373,16 @@ namespace Redis.OM
                     {
                         hash.Add(propertyName, new DateTimeOffset(val).ToUnixTimeMilliseconds().ToString());
                     }
+                }
+                else if (type == typeof(Vector))
+                {
+                    var val = (Vector)obj;
+                    if (val.Embedding is null)
+                    {
+                        throw new InvalidOperationException("Could not use null embedding.");
+                    }
+
+                    hash.Add(propertyName, val.Embedding);
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
@@ -410,7 +433,7 @@ namespace Redis.OM
             return hash;
         }
 
-        private static string SendToJson(IDictionary<string, string> hash, Type t)
+        private static string SendToJson(IDictionary<string, RedisReply> hash, Type t)
         {
             var properties = t.GetProperties();
             if ((!properties.Any() || t == typeof(Ulid) || t == typeof(Ulid?)) && hash.Count == 1)
@@ -424,37 +447,97 @@ namespace Redis.OM
                 var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
                 var propertyName = property.Name;
                 ExtractPropertyName(property, ref propertyName);
-                if (!hash.Any(x => x.Key.StartsWith(propertyName)))
+                var vectorizer = property.GetCustomAttributes<VectorizerAttribute>().FirstOrDefault();
+                if (vectorizer is FloatVectorizerAttribute || vectorizer is DoubleVectorizerAttribute)
+                {
+                    if (hash.ContainsKey(propertyName))
+                    {
+                        string arrString;
+                        if (vectorizer.VectorType == VectorType.FLOAT32)
+                        {
+                            var floats = VectorUtils.VectorStrToFloats(hash[propertyName]);
+                            arrString = string.Join(",", floats);
+                        }
+                        else
+                        {
+                            var doubles = VectorUtils.VecStrToDoubles(hash[propertyName]);
+                            arrString = string.Join(",", doubles);
+                        }
+
+                        var valueStr = $"[{arrString}]";
+                        ret += $"\"{propertyName}\":{valueStr},";
+                    }
+
+                    continue;
+                }
+
+                var isVectorized = vectorizer != null;
+                var lookupPropertyName = propertyName + (isVectorized ? ".Value" : string.Empty);
+                var vectorPropertyName = $"{propertyName}.Vector";
+                if (isVectorized && !hash.ContainsKey($"{propertyName}.Value") && !hash.ContainsKey($"{propertyName}.Vector"))
+                {
+                    continue;
+                }
+
+                if (isVectorized)
+                {
+                    ret += $"\"{propertyName}\":{{";
+                    propertyName = "Value";
+                }
+
+                if (!hash.Any(x => x.Key.StartsWith(lookupPropertyName)))
                 {
                     continue;
                 }
 
                 if (type == typeof(bool) || type == typeof(bool?))
                 {
-                    if (!hash.ContainsKey(propertyName))
+                    if (!hash.ContainsKey(lookupPropertyName))
                     {
                         continue;
                     }
 
-                    ret += $"\"{propertyName}\":{hash[propertyName].ToLower()},";
+                    ret += $"\"{propertyName}\":{((string)hash[lookupPropertyName]).ToLower()},";
                 }
                 else if (type.IsPrimitive || type == typeof(decimal) || type.IsEnum)
                 {
-                    if (!hash.ContainsKey(propertyName))
+                    if (!hash.ContainsKey(lookupPropertyName))
                     {
                         continue;
                     }
 
-                    ret += $"\"{propertyName}\":{hash[propertyName]},";
+                    ret += $"\"{propertyName}\":{hash[lookupPropertyName]},";
                 }
                 else if (type == typeof(string) || type == typeof(GeoLoc) || type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateTimeOffset) || type == typeof(Guid) || type == typeof(Guid?) || type == typeof(Ulid) || type == typeof(Ulid?))
                 {
-                    if (!hash.ContainsKey(propertyName))
+                    if (!hash.ContainsKey(lookupPropertyName))
                     {
                         continue;
                     }
 
-                    ret += $"\"{propertyName}\":\"{hash[propertyName]}\",";
+                    ret += $"\"{propertyName}\":\"{HttpUtility.JavaScriptStringEncode(hash[lookupPropertyName])}\",";
+                }
+                else if (type == typeof(Vector))
+                {
+                    if (!hash.ContainsKey(lookupPropertyName))
+                    {
+                        continue;
+                    }
+
+                    string arrString;
+                    if (type == typeof(float[]))
+                    {
+                        var floats = VectorUtils.VectorStrToFloats(hash[lookupPropertyName]);
+                        arrString = string.Join(",", floats);
+                    }
+                    else
+                    {
+                        var doubles = VectorUtils.VecStrToDoubles(hash[lookupPropertyName]);
+                        arrString = string.Join(",", doubles);
+                    }
+
+                    var valueStr = $"[{arrString}]";
+                    ret += $"\"{lookupPropertyName}\":{valueStr},";
                 }
                 else if (type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 {
@@ -481,7 +564,7 @@ namespace Redis.OM
                             if (innerType == typeof(bool) || innerType == typeof(bool?))
                             {
                                 var val = entries[$"{propertyName}[{i}]"];
-                                ret += $"{val.ToLower()},";
+                                ret += $"{((string)val).ToLower()},";
                             }
                             else if (innerType.IsPrimitive || innerType == typeof(decimal))
                             {
@@ -514,7 +597,7 @@ namespace Redis.OM
                 else
                 {
                     var entries = hash.Where(x => x.Key.StartsWith($"{propertyName}."))
-                        .Select(x => new KeyValuePair<string, string>(x.Key.Substring($"{propertyName}.".Length), x.Value))
+                        .Select(x => new KeyValuePair<string, RedisReply>(x.Key.Substring($"{propertyName}.".Length), x.Value))
                         .ToDictionary(x => x.Key, x => x.Value);
                     if (entries.Any())
                     {
@@ -525,15 +608,60 @@ namespace Redis.OM
                     else if (hash.ContainsKey(propertyName))
                     {
                         ret += $"\"{propertyName}\":";
-                        ret += hash[propertyName];
+                        ret += hash[lookupPropertyName];
                         ret += ",";
                     }
+                }
+
+                if (isVectorized)
+                {
+                    if (vectorizer is null)
+                    {
+                        throw new InvalidOperationException(
+                            "Vector field must be decorated with a vectorizer attribute");
+                    }
+
+                    if (hash.ContainsKey(lookupPropertyName))
+                    {
+                        ret += $"\"Value\":\"{HttpUtility.JavaScriptStringEncode(hash[lookupPropertyName])}\",";
+                    }
+
+                    string arrString;
+                    if (vectorizer.VectorType == VectorType.FLOAT32)
+                    {
+                        var floats = VectorUtils.VectorStrToFloats(hash[vectorPropertyName]);
+                        arrString = string.Join(",", floats);
+                    }
+                    else
+                    {
+                        var doubles = VectorUtils.VecStrToDoubles(hash[vectorPropertyName]);
+                        arrString = string.Join(",", doubles);
+                    }
+
+                    var valueStr = $"[{arrString}]";
+                    ret += $"\"Vector\":{valueStr}}}";
                 }
             }
 
             ret = ret.TrimEnd(',');
             ret += "}";
             return ret;
+        }
+
+        private static double ParseScoreFromString(string scoreStr)
+        {
+            if (double.TryParse(scoreStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var score))
+            {
+                return score;
+            }
+
+            return scoreStr switch
+            {
+                "inf" => double.PositiveInfinity,
+                "-inf" => double.NegativeInfinity,
+                "nan" => double.NaN,
+                _ => throw new ArgumentException($"Could not parse score from {scoreStr}", nameof(scoreStr))
+            };
         }
 
         private static Type GetEnumerableType(PropertyInfo pi)
@@ -551,6 +679,21 @@ namespace Redis.OM
 
             type = Nullable.GetUnderlyingType(type) ?? type;
             return type;
+        }
+
+        private static byte[] PrimitiveCollectionToVectorBytes(PropertyInfo pi, object obj, Type type)
+        {
+            if (type == typeof(double))
+            {
+                return ((IEnumerable<double>)pi.GetValue(obj)).SelectMany(BitConverter.GetBytes).ToArray();
+            }
+
+            if (type == typeof(float))
+            {
+                return ((IEnumerable<float>)pi.GetValue(obj)).SelectMany(BitConverter.GetBytes).ToArray();
+            }
+
+            throw new ArgumentException("Could not pull a usable type out from property info");
         }
 
         private static IEnumerable<string> PrimitiveCollectionToStrings(PropertyInfo pi, object obj, Type type)

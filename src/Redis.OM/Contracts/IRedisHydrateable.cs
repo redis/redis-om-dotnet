@@ -17,6 +17,6 @@ namespace Redis.OM.Contracts
         /// Converts object to dictionary for Redis.
         /// </summary>
         /// <returns>A dictionary for Redis.</returns>
-        IDictionary<string, string> BuildHashSet();
+        IDictionary<string, object> BuildHashSet();
     }
 }

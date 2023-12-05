@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Redis.OM.Modeling.Vectors;
 
 namespace Redis.OM.Searching.Query
 {
@@ -17,6 +19,16 @@ namespace Redis.OM.Searching.Query
         {
             this.Index = index;
         }
+
+        /// <summary>
+        /// Gets or sets the nearest neighbors query.
+        /// </summary>
+        public NearestNeighbors? NearestNeighbors { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parameters for the query.
+        /// </summary>
+        public List<object> Parameters { get; set; } = new ();
 
         /// <summary>
         /// Gets or sets the flags for the query options.
@@ -63,16 +75,42 @@ namespace Redis.OM.Searching.Query
         /// </summary>
         /// <returns>the serialized arguments.</returns>
         /// <exception cref="ArgumentException">thrown if the index is null.</exception>
-        internal string[] SerializeQuery()
+        internal object[] SerializeQuery()
         {
-            var ret = new List<string>();
+            var parameters = new List<object>(Parameters);
+            var ret = new List<object>();
             if (string.IsNullOrEmpty(Index))
             {
                 throw new ArgumentException("Index cannot be null");
             }
 
             ret.Add(Index);
-            ret.Add(QueryText);
+
+            if (NearestNeighbors is not null)
+            {
+                var queryText = $"({QueryText})=>[KNN {NearestNeighbors.NumNeighbors} @{NearestNeighbors.PropertyName} ${parameters.Count} AS {VectorScores.NearestNeighborScoreName}]";
+                ret.Add(queryText);
+                parameters.Add(NearestNeighbors.VectorBlob);
+            }
+            else
+            {
+                ret.Add(QueryText);
+            }
+
+            if (parameters.Any())
+            {
+                ret.Add("PARAMS");
+                ret.Add(parameters.Count * 2);
+                for (var i = 0; i < parameters.Count; i++)
+                {
+                    ret.Add(i.ToString());
+                    ret.Add(parameters[i]);
+                }
+
+                ret.Add("DIALECT");
+                ret.Add(2);
+            }
+
             foreach (var flag in (QueryFlags[])Enum.GetValues(typeof(QueryFlags)))
             {
                 if ((Flags & (long)flag) == (long)flag)

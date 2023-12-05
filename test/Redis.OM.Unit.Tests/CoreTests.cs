@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using StackExchange.Redis;
 using System.Linq;
 using System.IO;
-using Redis.OM;
 using Redis.OM.Modeling;
 using System.Threading;
 using System.Threading.Tasks;

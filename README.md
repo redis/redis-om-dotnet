@@ -288,6 +288,110 @@ customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
 customers.Where(x=>x.NickNames.Contains("Jim"));
 ```
 
+### Vectors
+
+Redis OM .NET also supports storing and querying Vectors stored in Redis. 
+
+A `Vector<T>` is a representation of an object that can be transformed into a vector by a Vectorizer.
+
+A `VectorizerAttribute` is the abstract class you use to decorate your Vector fields, it is responsible for defining the logic to convert the object's that `Vector<T>` is a container for into actual vector embeddings needed. In the package `Redis.OM.Vectorizers` we provide vectorizers for HuggingFace, OpenAI, and AzureOpenAI to allow you to easily integrate them into your workflows.
+
+#### Define a Vector in your Model.
+
+To define a vector in your model, simply decorate a `Vector<T>` field with an `Indexed` attribute which defines the algorithm and algorithmic parameters and a `Vectorizer` attribute which defines the shape of the vectors, (in this case we'll use OpenAI):
+
+```cs
+[Document(StorageType = StorageType.Json)]
+public class OpenAICompletionResponse
+{
+    [RedisIdField]
+    public string Id { get; set; }
+
+    [Indexed(DistanceMetric = DistanceMetric.COSINE, Algorithm = VectorAlgorithm.HNSW, M = 16)]
+    [OpenAIVectorizer]
+    public Vector<string> Prompt { get; set; }
+
+    public string Response { get; set; }
+
+    [Indexed]
+    public string Language { get; set; }
+    
+    [Indexed]
+    public DateTime TimeStamp { get; set; }
+}
+```
+
+#### Insert Vectors into Redis
+
+With the vector defined in our model, all we need to do is create Vectors of the generic type, and insert them with our model. Using our `RedisCollection`, you can do this by simply using `Insert`:
+
+```cs
+var collection = _provider.RedisCollection<OpenAICompletionResponse>();
+var completionResult = new OpenAICompletionResponse
+{
+    Language = "en_us", 
+    Prompt = Vector.Of("What is the Capital of France?"), 
+    Response = "Paris", 
+    TimeStamp = DateTime.Now - TimeSpan.FromHours(3)
+};
+collection.Insert(completionResult);
+```
+
+The Vectorizer will manage the embedding generation for you without you having to intervene.
+
+#### Query Vectors in Redis
+
+To query vector fields in Redis, all you need to do is use the `VectorRange` method on a vector within our normal LINQ queries, and/or use the `NearestNeighbors` with whatever other filters you want to use, here's some examples:
+
+```cs
+var prompt = "What really is the Capital of France?";
+
+// simple vector range, find first within .15
+var result = collection.First(x => x.Prompt.VectorRange(prompt, .15));
+
+// simple nearest neighbors query, finds first nearest neighbor
+result = collection.NearestNeighbors(x => x.Prompt, 1, prompt).First();
+
+// hybrid query, pre-filters result set for english responses, then runs a nearest neighbors search.
+result = collection.Where(x=>x.Language == "en_us").NearestNeighbors(x => x.Prompt, 1, prompt).First();
+
+// hybrid query, pre-filters responses newer than 4 hours, and finds first result within .15
+var ts = DateTimeOffset.Now - TimeSpan.FromHours(4);
+result = collection.First(x=>x.TimeStamp > ts && x.Prompt.VectorRange(prompt, .15));
+```
+
+#### What Happens to the Embeddings?
+
+With Redis OM, the embeddings can be completely transparent to you, they are generated and bound to the `Vector<T>` when you query/insert your vectors. If however you needed your embedding after the insertion/Query, they are available at `Vector<T>.Embedding`, and be queried either as the raw bytes, as an array of doubles or as an array of floats (depending on your vectorizer).
+
+#### Configuration
+
+The Vectorizers provided by the `Redis.OM.Vectorizers` package have some configuration parameters that it will pull in either from your `appsettings.json` file, or your environment variables (with your appsettings taking precedence).
+
+| Configuration Parameter            | Description                                   |
+|--------------------------------    |-----------------------------------------------|
+| REDIS_OM_HF_TOKEN                  | HuggingFace Authorization token.              |
+| REDIS_OM_OAI_TOKEN                 | OpenAI Authorization token                    |
+| REDIS_OM_OAI_API_URL               | OpenAI URL                                    |
+| REDIS_OM_AZURE_OAI_TOKEN           | Azure OpenAI api key                          |
+| REDIS_OM_AZURE_OAI_RESOURCE_NAME   | Azure resource name                           |
+| REDIS_OM_AZURE_OAI_DEPLOYMENT_NAME | Azure deployment                              |
+
+### Semantic Caching
+
+Redis OM also provides the ability to use Semantic Caching, as well as providers for OpenAI, HuggingFace, and Azure OpenAI to perform semantic caching. To use a Semantic Cache, simply pull one out of the RedisConnectionProvider and use `Store` to insert items, and `GetSimilar` to retrieve items. For example:
+
+```cs
+var cache = _provider.OpenAISemanticCache(token, threshold: .15);
+cache.Store("What is the capital of France?", "Paris");
+var res = cache.GetSimilar("What really is the capital of France?").First();
+```
+
+### ML.NET Based Vectorizers
+
+We also provide the packages `Redis.OM.Vectorizers.ResNet18` and `Redis.OM.Vectorizers.AllMiniLML6V2` which have embedded models / ML Pipelines in them to
+allow you to easily Vectorize Images and Sentences respectively without the need to depend on an external API.
+
 ### 🖩 Aggregations
 
 We can also run aggregations on the customer object, again using expressions in LINQ:
