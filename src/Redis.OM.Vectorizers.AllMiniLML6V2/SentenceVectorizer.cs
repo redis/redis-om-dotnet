@@ -37,7 +37,7 @@ public class SentenceVectorizer : IVectorizer<string>
     /// <inheritdoc />
     public byte[] Vectorize(string obj)
     {
-        return Encode(new[] { obj })[0].SelectMany(BitConverter.GetBytes).ToArray();
+        return Vectorize(new[] { obj })[0].SelectMany(BitConverter.GetBytes).ToArray();
     }
 
      private static Lazy<string[]> OutputNames => new (() => InferenceSession.Value.OutputMetadata.Keys.ToArray());
@@ -47,7 +47,7 @@ public class SentenceVectorizer : IVectorizer<string>
     /// </summary>
     /// <param name="sentences">The Sentences</param>
     /// <returns></returns>
-    public static float[][] Encode(string[] sentences)
+    public static float[][] Vectorize(string[] sentences)
     {
         const int MaxTokens = 512;
         var numSentences = sentences.Length;
