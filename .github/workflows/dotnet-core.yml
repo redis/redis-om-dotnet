@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest    
     steps:
       - uses: actions/checkout@v2
-        with:
-          lfs: true
+      - name: fetch-models
+        run: sh fetch-models.sh
       - name: execute
         run: docker-compose -f ./docker/docker-compose.yaml run dotnet
