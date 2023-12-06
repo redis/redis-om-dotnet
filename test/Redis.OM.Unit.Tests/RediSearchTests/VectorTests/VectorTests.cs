@@ -53,7 +53,7 @@ public class VectorIndexCreationTests
             "Name", "TAG", "SEPARATOR", "|", 
             "Num", "NUMERIC",
             "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2",
-            "SimpleVectorizedVector.Vector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2"
+            "SimpleVectorizedVector.Vector", "AS", "SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2"
         );
     }
 
