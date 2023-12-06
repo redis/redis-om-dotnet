@@ -139,7 +139,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestBasicQueryWithExactDecimalMatch()
         {
             _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<string[]>()).Returns(_mockReply);
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var y = 90.5M;
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Salary == y).ToList();

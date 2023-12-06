@@ -592,8 +592,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestDecimalQuery()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            _substitute.Execute("FT.AGGREGATE", Arg.Any<string[]>()).Returns(MockedResult);
-            _substitute.Execute("FT.CURSOR", Arg.Any<string[]>()).Returns(MockedResultCursorEnd);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
 
             var y = 30.55M;
             Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Salary > y;
