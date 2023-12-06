@@ -83,7 +83,7 @@ namespace Redis.OM.Common
         {
             var res = exp switch
             {
-                ConstantExpression constExp => $"{constExp.Value}",
+                ConstantExpression constExp => ValueToString(constExp.Value),
                 MemberExpression member => GetOperandStringForMember(member, treatEnumsAsInt),
                 MethodCallExpression method => TranslateMethodStandardQuerySyntax(method, parameters),
                 UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, parameters, treatEnumsAsInt, unary.NodeType == ExpressionType.Not),
@@ -958,6 +958,16 @@ namespace Redis.OM.Common
             if (valueType == typeof(double) || Nullable.GetUnderlyingType(valueType) == typeof(double))
             {
                 return ((double)value).ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (valueType == typeof(float) || Nullable.GetUnderlyingType(valueType) == typeof(float))
+            {
+                return ((float)value).ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (valueType == typeof(decimal) || Nullable.GetUnderlyingType(valueType) == typeof(decimal))
+            {
+                return ((decimal)value).ToString(CultureInfo.InvariantCulture);
             }
 
             if (value is DateTimeOffset dto)

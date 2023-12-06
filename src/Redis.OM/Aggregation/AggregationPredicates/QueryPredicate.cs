@@ -57,32 +57,32 @@ namespace Redis.OM.Aggregation.AggregationPredicates
 
                 if (binaryExpression.Right is ConstantExpression constantExpression)
                 {
-                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, constantExpression));
+                    var constVal = ExpressionParserUtilities.GetOperandString(constantExpression);
+                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, constVal));
                 }
                 else if (binaryExpression.Right is UnaryExpression uni)
                 {
                     switch (uni.Operand)
                     {
                         case ConstantExpression c:
-                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, c));
+                            var constVal = ExpressionParserUtilities.GetOperandString(c);
+                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, constVal));
                             break;
                         case MemberExpression mem:
-                        {
                             var val = ExpressionParserUtilities.GetOperandString(mem);
-                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, System.Linq.Expressions.Expression.Constant(val)));
+                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, val));
                             break;
-                        }
                     }
                 }
                 else if (binaryExpression.Right is MemberExpression mem)
                 {
                     var val = ExpressionParserUtilities.GetOperandString(mem);
-                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, System.Linq.Expressions.Expression.Constant(val)));
+                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, val));
                 }
                 else
                 {
                     var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right, new List<object>()); // hack - will need to revisit when integrating vectors into aggregations.
-                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, System.Linq.Expressions.Expression.Constant(val)));
+                    stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, val));
                 }
             }
             else if (expression is ConstantExpression c
@@ -169,7 +169,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
         }
 
-        private static string BuildEqualityPredicate(MemberInfo member, ConstantExpression expression, string memberStr, bool negated = false)
+        private static string BuildEqualityPredicate(MemberInfo member, string queryValue, string memberStr, bool negated = false)
         {
             var sb = new StringBuilder();
             var fieldAttribute = member.GetCustomAttribute<SearchFieldAttribute>();
@@ -190,13 +190,13 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             switch (searchFieldType)
             {
                 case SearchFieldType.TAG:
-                    sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(expression.Value.ToString())}}}");
+                    sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(queryValue)}}}");
                     break;
                 case SearchFieldType.TEXT:
-                    sb.Append(expression.Value);
+                    sb.Append(queryValue);
                     break;
                 case SearchFieldType.NUMERIC:
-                    sb.Append($"[{expression.Value} {expression.Value}]");
+                    sb.Append($"[{queryValue} {queryValue}]");
                     break;
                 default:
                     throw new InvalidOperationException("Could not translate query equality searches only supported for Tag, text, and numeric fields");
@@ -205,17 +205,17 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             return sb.ToString();
         }
 
-        private string BuildQueryPredicate(ExpressionType expType, MemberExpression member, ConstantExpression constExpression)
+        private string BuildQueryPredicate(ExpressionType expType, MemberExpression member, string queryValue)
         {
             var memberStr = ExpressionParserUtilities.GetOperandString(member);
             var queryPredicate = expType switch
             {
-                ExpressionType.GreaterThan => $"{memberStr}:[({constExpression.Value} inf]",
-                ExpressionType.LessThan => $"{memberStr}:[-inf ({constExpression.Value}]",
-                ExpressionType.GreaterThanOrEqual => $"{memberStr}:[{constExpression.Value} inf]",
-                ExpressionType.LessThanOrEqual => $"{memberStr}:[-inf {constExpression.Value}]",
-                ExpressionType.Equal => BuildEqualityPredicate(member.Member, constExpression, memberStr),
-                ExpressionType.NotEqual => BuildEqualityPredicate(member.Member, constExpression, memberStr, true),
+                ExpressionType.GreaterThan => $"{memberStr}:[({queryValue} inf]",
+                ExpressionType.LessThan => $"{memberStr}:[-inf ({queryValue}]",
+                ExpressionType.GreaterThanOrEqual => $"{memberStr}:[{queryValue} inf]",
+                ExpressionType.LessThanOrEqual => $"{memberStr}:[-inf {queryValue}]",
+                ExpressionType.Equal => BuildEqualityPredicate(member.Member, queryValue, memberStr),
+                ExpressionType.NotEqual => BuildEqualityPredicate(member.Member, queryValue, memberStr, true),
                 _ => string.Empty
             };
             return queryPredicate;

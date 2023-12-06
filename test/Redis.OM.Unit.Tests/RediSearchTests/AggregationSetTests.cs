@@ -587,5 +587,35 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.Where(query).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "objectwithdatetime-idx", $"@TimestampOffset:[({dtMs} inf]", "WITHCURSOR", "COUNT", "10000");
         }
+
+        [Fact]
+        public void TestDecimalQuery()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+
+            var y = 30.55M;
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Salary > y;
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "@Salary:[(30.55 inf]", "WITHCURSOR", "COUNT", "10000");
+
+            query = a => a.RecordShell!.Salary > 85.99M;
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "@Salary:[(85.99 inf]", "WITHCURSOR", "COUNT", "10000");
+
+            query = a => a.RecordShell!.Salary == 70.5M;
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "@Salary:[70.5 70.5]", "WITHCURSOR", "COUNT", "10000");
+        }
+
+        [Theory]
+        [InlineData("en-DE")]
+        [InlineData("it-IT")]
+        [InlineData("es-ES")]
+        public void TestDecimalQueryTestingInvariantCultureCompliance(string lcid)
+        {
+            Helper.RunTestUnderDifferentCulture(lcid, _ => TestDecimalQuery());
+        }
     }
 }
