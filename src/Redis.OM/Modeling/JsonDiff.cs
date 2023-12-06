@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Globalization;
 using System.Text.Json;
 using System.Web;
 using Newtonsoft.Json.Linq;
@@ -37,6 +37,7 @@ namespace Redis.OM.Modeling
             return _value.Type switch
             {
                 JTokenType.String => new[] { _operation, _path, $"\"{HttpUtility.JavaScriptStringEncode(_value.ToString())}\"" },
+                JTokenType.Float => new[] { _operation, _path, ((JValue)_value).ToString(CultureInfo.InvariantCulture) },
                 JTokenType.Boolean => new[] { _operation, _path, _value.ToString().ToLower() },
                 JTokenType.Date => SerializeAsDateTime(),
                 _ => new[] { _operation, _path, _value.ToString() }

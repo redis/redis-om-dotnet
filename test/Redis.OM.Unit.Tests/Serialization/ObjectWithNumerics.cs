@@ -25,4 +25,6 @@ public class ObjectWithNumerics
     public double Double { get; set; }
     [Indexed]
     public float Float { get; set; }
+    [Indexed]
+    public decimal Decimal { get; set; }
 }
