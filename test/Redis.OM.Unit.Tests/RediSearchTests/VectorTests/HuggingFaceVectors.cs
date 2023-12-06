@@ -4,7 +4,7 @@ using Redis.OM.Modeling.Vectors;
 
 namespace Redis.OM.Unit.Tests;
 
-[Document(StorageType = StorageType.Json)]
+[Document]
 public class HuggingFaceVectors
 {
     [RedisIdField]

@@ -119,7 +119,13 @@ namespace Redis.OM.Modeling
                 }
             }
 
-            var ret = new List<string> { !string.IsNullOrEmpty(attr.PropertyName) ? $"attr.PropertyName{suffix}" : $"{info.Name}{suffix}" };
+            var ret = new List<string> { !string.IsNullOrEmpty(attr.PropertyName) ? $"{attr.PropertyName}{suffix}" : $"{info.Name}{suffix}" };
+            if (!string.IsNullOrEmpty(suffix))
+            {
+                ret.Add("AS");
+                ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? attr.PropertyName : info.Name);
+            }
+
             var innerType = Nullable.GetUnderlyingType(info.PropertyType);
             ret.AddRange(CommonSerialization(attr, innerType ?? info.PropertyType, info));
             return ret.ToArray();

@@ -639,7 +639,7 @@ namespace Redis.OM
                     }
 
                     var valueStr = $"[{arrString}]";
-                    ret += $"\"Vector\":{valueStr}}}";
+                    ret += $"\"Vector\":{valueStr}}},";
                 }
             }
 
