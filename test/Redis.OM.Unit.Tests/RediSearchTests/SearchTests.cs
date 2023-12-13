@@ -2878,6 +2878,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void SearchWithEmptyCount()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            var count = collection.Where(x => x.Boolean).Count();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithstringlikevaluetypes-idx",
+                "@Boolean:{true}",
+                "LIMIT",
+                "0",
+                "0");
+            Assert.Equal(1, count);
+        }
+
+        [Fact]
         public void SearchWithEmptyAny()
         {
             _substitute.ClearSubstitute();
