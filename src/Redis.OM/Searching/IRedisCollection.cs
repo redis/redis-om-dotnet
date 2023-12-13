@@ -276,6 +276,12 @@ namespace Redis.OM.Searching
         int Count(Expression<Func<T, bool>> expression);
 
         /// <summary>
+        /// Retrieves the count of the collection async.
+        /// </summary>
+        /// <returns>The Collection's count.</returns>
+        int Count();
+
+        /// <summary>
         /// Returns the first item asynchronously.
         /// </summary>
         /// <param name="expression">The predicate match.</param>
