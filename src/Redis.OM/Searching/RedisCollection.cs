@@ -460,6 +460,14 @@ namespace Redis.OM.Searching
         }
 
         /// <inheritdoc />
+        public int Count()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
+            query.Limit = new SearchLimit { Number = 0, Offset = 0 };
+            return (int)_connection.Search<T>(query).DocumentCount;
+        }
+
+        /// <inheritdoc />
         public T First(Expression<Func<T, bool>> expression)
         {
             var exp = Expression.Call(null, GetMethodInfo(this.Where, expression), new[] { Expression, Expression.Quote(expression) });

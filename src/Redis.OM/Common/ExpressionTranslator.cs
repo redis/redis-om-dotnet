@@ -349,22 +349,22 @@ namespace Redis.OM.Common
                 sb.Append("(");
                 sb.Append(TranslateBinaryExpression(left, parameters));
                 sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters));
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters, treatBooleanMemberAsUnary: true));
                 sb.Append(")");
             }
             else if (binExpression.Right is BinaryExpression right)
             {
                 sb.Append("(");
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters));
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters, treatBooleanMemberAsUnary: true));
                 sb.Append(SplitPredicateSeporators(binExpression.NodeType));
                 sb.Append(TranslateBinaryExpression(right, parameters));
                 sb.Append(")");
             }
             else
             {
-                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters);
+                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters, treatBooleanMemberAsUnary: true);
 
-                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters);
+                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters, treatBooleanMemberAsUnary: true);
 
                 if (binExpression.Left is MemberExpression member)
                 {
@@ -737,6 +737,24 @@ namespace Redis.OM.Common
             return sb;
         }
 
+        private static string TranslateUnaryOrMemberExpressionIntoBooleanQuery(Expression expression, List<object> parameters)
+        {
+            if (expression is MemberExpression member && member.Type == typeof(bool))
+            {
+                var propertyName = ExpressionParserUtilities.GetOperandStringForQueryArgs(member, parameters);
+                return $"{propertyName}:{{true}}";
+            }
+
+            if (expression is UnaryExpression uni && uni.Operand is MemberExpression uniMember && uniMember.Type == typeof(bool) && uni.NodeType is ExpressionType.Not)
+            {
+                var propertyName = ExpressionParserUtilities.GetOperandStringForQueryArgs(uniMember, parameters);
+                return $"{propertyName}:{{false}}";
+            }
+
+            throw new InvalidOperationException(
+                $"Could not translate expression of type {expression.Type} to a boolean expression");
+        }
+
         private static string BuildQueryFromExpression(Expression exp, List<object> parameters)
         {
             if (exp is BinaryExpression binExp)
@@ -751,6 +769,12 @@ namespace Redis.OM.Common
 
             if (exp is UnaryExpression uni)
             {
+                if (uni.Operand is MemberExpression uniMember && uniMember.Type == typeof(bool) && uni.NodeType is ExpressionType.Not)
+                {
+                    var propertyName = ExpressionParserUtilities.GetOperandString(uniMember);
+                    return $"{propertyName}:{{false}}";
+                }
+
                 var operandString = BuildQueryFromExpression(uni.Operand, parameters);
                 if (uni.NodeType == ExpressionType.Not)
                 {
@@ -786,6 +810,8 @@ namespace Redis.OM.Common
                 ExpressionType.LessThanOrEqual => $"{left}:[-inf {right}]",
                 ExpressionType.Equal => BuildEqualityPredicate(memberExpression, right),
                 ExpressionType.NotEqual => BuildEqualityPredicate(memberExpression, right, true),
+                ExpressionType.And or ExpressionType.AndAlso => $"{left} {right}",
+                ExpressionType.Or or ExpressionType.OrElse => $"{left} | {right}",
                 _ => string.Empty
             };
             return queryPredicate;
