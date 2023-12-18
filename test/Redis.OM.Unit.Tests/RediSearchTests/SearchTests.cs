@@ -2878,16 +2878,85 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void ChainTwoBooleans()
+        {
+            int count;
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            IRedisCollection<ObjectWithStringLikeValueTypes> collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => x.Boolean);
+            collection = collection.Where((x => x.Boolean));
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "(@Boolean:{true} @Boolean:{true})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+            
+            collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => x.Boolean || x.Boolean);
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "(@Boolean:{true} | @Boolean:{true})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+            
+            collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => !x.Boolean || x.Boolean);
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "(@Boolean:{false} | @Boolean:{true})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+            
+            collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => !x.Boolean);
+            collection = collection.Where((x => !x.Boolean));
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "(@Boolean:{false} @Boolean:{false})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+            
+            collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => x.Boolean);
+            collection = collection.Where((x => !x.Boolean));
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "(@Boolean:{true} @Boolean:{false})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+            
+            collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => !x.Boolean);
+            collection = collection.Where((x => x.Boolean));
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "(@Boolean:{false} @Boolean:{true})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+            
+            collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => !x.Boolean);
+            collection = collection.Where((x => x.Boolean));
+            collection = collection.Where((x => x.Boolean));
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "((@Boolean:{false} @Boolean:{true}) @Boolean:{true})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+            
+            collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => !x.Boolean);
+            collection = collection.Where((x => x.Boolean));
+            collection = collection.Where((x => !x.Boolean));
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "((@Boolean:{false} @Boolean:{true}) @Boolean:{false})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+            
+            collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
+            collection = collection.Where(x => !x.Boolean || x.Boolean || !x.Boolean);
+            count = collection.Count();
+            _substitute.Received().Execute("FT.SEARCH", "objectwithstringlikevaluetypes-idx", "((@Boolean:{false} | @Boolean:{true}) | @Boolean:{false})", "LIMIT", "0", "0");
+            Assert.Equal(1, count);
+        }
+        
+        [Fact]
         public void SearchWithEmptyCount()
         {
             _substitute.ClearSubstitute();
             _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
             var collection = new RedisCollection<ObjectWithStringLikeValueTypes>(_substitute);
-            var count = collection.Where(x => x.Boolean).Count();
+            var count = collection.Count(x => x.Boolean && x.AnEnum == AnEnum.three && x.Boolean == false);
             _substitute.Received().Execute(
                 "FT.SEARCH",
                 "objectwithstringlikevaluetypes-idx",
-                "@Boolean:{true}",
+                "((@Boolean:{true} (@AnEnum:{three})) (@Boolean:{False}))",
                 "LIMIT",
                 "0",
                 "0");
