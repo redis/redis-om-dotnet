@@ -25,23 +25,23 @@ namespace Redis.OM
         /// <param name="result">the redisResult.</param>
         public RedisReply(RedisResult result)
         {
-            switch (result.Type)
+            switch (result.Resp2Type)
             {
                 case ResultType.None:
                     break;
                 case ResultType.SimpleString:
                 case ResultType.BulkString:
-                    _raw = (byte[])result;
+                    _raw = (byte[])result!;
                     break;
                 case ResultType.Error:
                     Error = true;
-                    _raw = (byte[])result;
+                    _raw = (byte[])result!;
                     break;
                 case ResultType.Integer:
                     _internalLong = (long)result;
                     break;
-                case ResultType.MultiBulk:
-                    _values = ((RedisResult[])result).Select(x => new RedisReply(x)).ToArray();
+                case ResultType.Array:
+                    _values = ((RedisResult[])result!).Select(x => new RedisReply(x)).ToArray();
                     break;
             }
         }
