@@ -479,5 +479,19 @@ namespace Redis.OM.Unit.Tests
             var ex = await Assert.ThrowsAsync<TimeoutException>(async () => await collection.Take(10000).ToListAsync());
             Assert.Equal("Encountered timeout when searching - check the duration of your query.", ex.Message);
         }
+
+        [Fact]
+        public void TestUnlink()
+        {
+            string key1 = $"test:{Ulid.NewUlid()}";
+            string key2 = $"test:{Ulid.NewUlid()}";
+            var hostInfo = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost:6379";
+            var provider = new RedisConnectionProvider($"redis://{hostInfo}");
+            var connection = provider.Connection;
+            var res = connection.Unlink(key1);
+            Assert.Equal(0, res);
+            connection.Execute("SET", key1, "bar");
+            Assert.Equal(1,connection.Unlink(new []{key1, key2}));
+        }
     }
 }
