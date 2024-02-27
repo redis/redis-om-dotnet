@@ -617,5 +617,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             Helper.RunTestUnderDifferentCulture(lcid, _ => TestDecimalQuery());
         }
+
+        [Fact]
+        public void TestMultiPredicateFilter()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.TagField  == "foo" && a.RecordShell.Address.State == "FL";
+            _ = collection.Filter(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "*", "FILTER", "@TagField == 'foo' && @Address_State == 'FL'", "WITHCURSOR", "COUNT", "10000");
+        }
     }
 }
