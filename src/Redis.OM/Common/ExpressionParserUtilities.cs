@@ -35,8 +35,9 @@ namespace Redis.OM.Common
         /// Get's the operand string.
         /// </summary>
         /// <param name="exp">the expression to parse.</param>
+        /// <param name="filterFormat">whether the operand should be filter formatted.</param>
         /// <returns>The operand string.</returns>
-        internal static string GetOperandString(Expression exp)
+        internal static string GetOperandString(Expression exp, bool filterFormat = false)
         {
             return exp switch
             {
@@ -46,7 +47,7 @@ namespace Redis.OM.Common
                     $"@{((ConstantExpression)method.Arguments[0]).Value}",
                 MethodCallExpression method => GetOperandString(method),
                 UnaryExpression unary => GetOperandString(unary.Operand),
-                BinaryExpression binExpression => ParseBinaryExpression(binExpression),
+                BinaryExpression binExpression => ParseBinaryExpression(binExpression, filterFormat),
                 LambdaExpression lambda => GetOperandString(lambda.Body),
                 _ => string.Empty
             };
@@ -156,8 +157,8 @@ namespace Redis.OM.Common
             var binExpressions = SplitBinaryExpression(rootBinaryExpression);
             foreach (var expression in binExpressions)
             {
-                var right = GetOperandString(expression.Right);
-                var left = GetOperandString(expression.Left);
+                var right = GetOperandString(expression.Right, filterFormat);
+                var left = GetOperandString(expression.Left, filterFormat);
                 if (filterFormat && ((expression.Left is MemberExpression mem &&
                                       mem.Type == typeof(string)) || (expression.Left is UnaryExpression uni &&
                                                                       uni.Type == typeof(string))))
@@ -678,7 +679,7 @@ namespace Redis.OM.Common
             string[] args;
             if (exp.Arguments[1] is NewArrayExpression newArrayExpression)
             {
-                args = newArrayExpression.Expressions.Select(GetOperandString).ToArray();
+                args = newArrayExpression.Expressions.Select(x => GetOperandString(x)).ToArray();
             }
             else
             {
