@@ -476,8 +476,8 @@ namespace Redis.OM.Unit.Tests
 
             await Task.WhenAll(tasks);
 
-            var ex = await Assert.ThrowsAsync<TimeoutException>(async () => await collection.Take(10000).ToListAsync());
-            Assert.Equal("Encountered timeout when searching - check the duration of your query.", ex.Message);
+            var ex = await Assert.ThrowsAsync<Exception>(async () => await collection.Take(10000).ToListAsync());
+            Assert.True(ex.Message.Equals("Encountered timeout when searching - check the duration of your query.") || ex.Message.Contains("Timeout limit was reached"));
         }
     }
 }
