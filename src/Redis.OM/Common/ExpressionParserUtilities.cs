@@ -77,18 +77,24 @@ namespace Redis.OM.Common
         /// <param name="parameters">The parameters.</param>
         /// <param name="treatEnumsAsInt">Treat enum as an integer.</param>
         /// <param name="negate">Whether or not to negate the result.</param>
+        /// <param name="treatBooleanMemberAsUnary">Treats a boolean member expression as unary.</param>
         /// <returns>the operand string.</returns>
         /// <exception cref="ArgumentException">thrown if expression is un-parseable.</exception>
-        internal static string GetOperandStringForQueryArgs(Expression exp, List<object> parameters, bool treatEnumsAsInt = false, bool negate = false)
+        internal static string GetOperandStringForQueryArgs(Expression exp, List<object> parameters, bool treatEnumsAsInt = false, bool negate = false, bool treatBooleanMemberAsUnary = false)
         {
             var res = exp switch
             {
                 ConstantExpression constExp => ValueToString(constExp.Value),
-                MemberExpression member => GetOperandStringForMember(member, treatEnumsAsInt),
+                MemberExpression member => GetOperandStringForMember(member, treatEnumsAsInt, negate: negate, treatBooleanMemberAsUnary: treatBooleanMemberAsUnary),
                 MethodCallExpression method => TranslateMethodStandardQuerySyntax(method, parameters),
-                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, parameters, treatEnumsAsInt, unary.NodeType == ExpressionType.Not),
+                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, parameters, treatEnumsAsInt, unary.NodeType == ExpressionType.Not, treatBooleanMemberAsUnary: treatBooleanMemberAsUnary),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
+
+            if (treatBooleanMemberAsUnary && exp is MemberExpression memberExp && memberExp.Type == typeof(bool) && negate)
+            {
+                negate = false;
+            }
 
             if (negate)
             {
@@ -308,7 +314,7 @@ namespace Redis.OM.Common
             return sb.ToString();
         }
 
-        private static string GetOperandStringForMember(MemberExpression member, bool treatEnumsAsInt = false)
+        private static string GetOperandStringForMember(MemberExpression member, bool treatEnumsAsInt = false, bool negate = false,  bool treatBooleanMemberAsUnary = false)
         {
             var memberPath = new List<string>();
             var parentExpression = member.Expression;
@@ -414,6 +420,12 @@ namespace Redis.OM.Common
             if (searchField != null)
             {
                 var propertyName = GetSearchFieldNameFromMember(member);
+                if (member.Type == typeof(bool) && treatBooleanMemberAsUnary)
+                {
+                    var val = negate ? "false" : "true";
+                    return $"@{propertyName}:{{{val}}}";
+                }
+
                 return $"@{propertyName}";
             }
 
