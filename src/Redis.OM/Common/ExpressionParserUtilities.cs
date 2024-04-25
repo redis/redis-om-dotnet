@@ -1049,10 +1049,8 @@ namespace Redis.OM.Common
 
             var distance = exp.Arguments[2] switch
             {
-                UnaryExpression ue => (double)Expression.Lambda(ue).Compile().DynamicInvoke(),
                 ConstantExpression ce => (double)ce.Value,
-                MemberExpression me => (double)Expression.Lambda(me).Compile().DynamicInvoke(),
-                Expression e => throw new NotSupportedException($"Unsupported expression type: {e.NodeType}"),
+                Expression e => (double)Expression.Lambda(e).Compile().DynamicInvoke(),
                 _ => throw new ArgumentException("The expression at position [2] was not an expression"),
             };
 

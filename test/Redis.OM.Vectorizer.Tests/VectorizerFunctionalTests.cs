@@ -46,8 +46,7 @@ public class VectorizerFunctionalTests
             ImagePath = Vector.Of("hal.jpg")
         });
         
-        // int expression value being implicitly converted to a double yields a unary expression.
-        int variableRange = 5;
+        var variableRange = 5;
         var collection = new RedisCollection<DocWithVectors>(connection);
 
         // images
@@ -72,7 +71,7 @@ public class VectorizerFunctionalTests
             ImagePath = Vector.Of("hal.jpg")
         });
         
-        double variableRange = 5;
+        double variableRange = 5 + 5;
         var collection = new RedisCollection<DocWithVectors>(connection);
 
         // images
@@ -83,8 +82,35 @@ public class VectorizerFunctionalTests
         Assert.InRange(res.First().Scores!.RangeScore!.Value, 0, 1);
 
         // sentences
-        var knnRange = 5;
-        collection.NearestNeighbors(x => x.Sentence!, knnRange, "Hello world this really is Hal.");
+        collection.NearestNeighbors(x => x.Sentence!, 5, "Hello world this really is Hal.");
+    }
+
+    private static double GetVectorRange() => 5;
+    private static int GetKnnNeighbours() => 5;
+
+    [Fact]
+    public void VectorRangeMethodExpressionTest()
+    {
+        var connection = _provider.Connection;
+        connection.DropIndex(typeof(DocWithVectors));
+        connection.CreateIndex(typeof(DocWithVectors));
+        connection.Set(new DocWithVectors
+        {
+            Sentence = Vector.Of("Hello world this is Hal."),
+            ImagePath = Vector.Of("hal.jpg")
+        });
+        
+        var collection = new RedisCollection<DocWithVectors>(connection);
+
+        // images
+        
+        var res = collection.Where(x => x.Sentence!.VectorRange("Hal", GetVectorRange(), "score"));
+
+        Assert.NotNull(res.First().Scores!.RangeScore);
+        Assert.InRange(res.First().Scores!.RangeScore!.Value, 0, 1);
+
+        // sentences
+        collection.NearestNeighbors(x => x.Sentence!, GetKnnNeighbours(), "Hello world this really is Hal.");
     }
 
     [Fact]
