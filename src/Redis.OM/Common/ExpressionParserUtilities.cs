@@ -1047,7 +1047,15 @@ namespace Redis.OM.Common
                 bytes = vector.Embedding ?? throw new InvalidOperationException("Embedding was null");
             }
 
-            var distance = (double)((ConstantExpression)exp.Arguments[2]).Value;
+            var distance = exp.Arguments[2] switch
+            {
+                UnaryExpression ue => (double)Expression.Lambda(ue).Compile().DynamicInvoke(),
+                ConstantExpression ce => (double)ce.Value,
+                MemberExpression me => (double)Expression.Lambda(me).Compile().DynamicInvoke(),
+                Expression e => throw new NotSupportedException($"Unsupported expression type: {e.NodeType}"),
+                _ => throw new ArgumentException("The expression at position [2] was not an expression"),
+            };
+
             var distanceArgName = parameters.Count.ToString();
             parameters.Add(distance);
             var vectorArgName = parameters.Count.ToString();
