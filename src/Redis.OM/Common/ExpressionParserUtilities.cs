@@ -1014,6 +1014,8 @@ namespace Redis.OM.Common
             {
                 MemberExpression me => GetValue(me.Member, ((ConstantExpression)me.Expression).Value),
                 ConstantExpression ce => ce.Value,
+                UnaryExpression ue when ue.NodeType == ExpressionType.Convert => Convert.ChangeType(GetOperand(ue.Operand), ue.Type),
+                MethodCallExpression me => me.Method.Invoke(me.Object, me.Arguments.Select(GetOperand).ToArray()),
                 _ => throw new InvalidOperationException("Could not determine value.")
             };
         }
@@ -1047,12 +1049,7 @@ namespace Redis.OM.Common
                 bytes = vector.Embedding ?? throw new InvalidOperationException("Embedding was null");
             }
 
-            var distance = exp.Arguments[2] switch
-            {
-                ConstantExpression ce => (double)ce.Value,
-                Expression e => (double)Expression.Lambda(e).Compile().DynamicInvoke(),
-                _ => throw new ArgumentException("The expression at position [2] was not an expression"),
-            };
+            var distance = (double)GetOperand(exp.Arguments[2]);
 
             var distanceArgName = parameters.Count.ToString();
             parameters.Add(distance);
