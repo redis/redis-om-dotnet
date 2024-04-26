@@ -470,6 +470,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@mdrakib](https://github.com/mdrakib)
 * [@jrpavoncello](https://github.com/jrpavoncello)
 * [@axnetg](https://github.com/axnetg)
+* [@PrudiusVladislav](https://github.com/PrudiusVladislav)
 
 <!-- Logo -->
 [Logo]: images/logo.svg

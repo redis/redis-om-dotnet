@@ -960,8 +960,17 @@ namespace Redis.OM.Common
             var type = exp.Arguments.Last().Type;
             var prefix = GetOperandString(exp.Arguments[0]);
             var lambda = (LambdaExpression)exp.Arguments.Last();
-            var tempQuery = ExpressionTranslator.TranslateBinaryExpression((BinaryExpression)lambda.Body, parameters);
-            return tempQuery.Replace("@", $"{prefix}_");
+
+            if (lambda.Body is MethodCallExpression methodCall)
+            {
+                var tempQuery = TranslateMethodExpressions(methodCall, parameters);
+                return tempQuery.Replace("@", $"{prefix}_");
+            }
+            else
+            {
+                var tempQuery = ExpressionTranslator.TranslateBinaryExpression((BinaryExpression)lambda.Body, parameters);
+                return tempQuery.Replace("@", $"{prefix}_");
+            }
         }
 
         private static string ValueToString(object value)
