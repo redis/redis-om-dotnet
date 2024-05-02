@@ -2238,6 +2238,46 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task TestAnyQueryForArrayOfEmbeddedObjectsMethodCallExpression()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<ObjectWithEmbeddedArrayOfObjects>(_substitute);
+
+            await collection.Where(x => 
+                x.Addresses.Any(a => a.City.Contains("Beach"))).ToListAsync();
+            await collection.Where(x =>
+                x.Addresses.Any(a => a.City.StartsWith("Satellite"))).ToListAsync();
+            await collection.Where(x =>
+                x.Addresses.Any(a => a.City.EndsWith("Beach"))).ToListAsync();
+
+            await _substitute.Received().ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "(@Addresses_City:{*Beach*})",
+                "LIMIT",
+                "0",
+                "100");
+            
+            await _substitute.Received().ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "(@Addresses_City:{Satellite*})",
+                "LIMIT",
+                "0",
+                "100");
+            
+            await _substitute.Received().ExecuteAsync(
+                "FT.SEARCH",
+                "objectwithembeddedarrayofobjects-idx",
+                "(@Addresses_City:{*Beach})",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
+        [Fact]
         public async Task SearchWithMultipleWhereClauses()
         {
             _substitute.ClearSubstitute();
