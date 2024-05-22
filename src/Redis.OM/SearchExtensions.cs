@@ -1417,6 +1417,25 @@ namespace Redis.OM
             return await ((RedisQueryProvider)source.Provider).ExecuteReductiveAggregationAsync<T>(exp, typeof(T));
         }
 
+        /// <summary>
+        /// Removes all filters from the redis collection.
+        /// </summary>
+        /// <typeparam name="T">The type the collection will be retrieving.</typeparam>
+        /// <param name="source">The RedisCollection.</param>
+        /// <returns>The unfiltered RedisCollection.</returns>
+        public static IRedisCollection<T> IgnoreQueryFilter<T>(this IRedisCollection<T> source)
+            where T : notnull
+        {
+            var collection = (RedisCollection<T>)source;
+
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(IgnoreQueryFilter, source),
+                new[] { source.Expression });
+
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, collection.StateManager, null, collection.SaveState, collection.ChunkSize);
+        }
+
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f)
         {
             return f.Method;

@@ -472,6 +472,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@axnetg](https://github.com/axnetg)
 * [@abbottdev](https://github.com/abbottdev)
 * [@PrudiusVladislav](https://github.com/PrudiusVladislav)
+* [@kirollosonsi](https://github.com/kirollosonsi)
 
 <!-- Logo -->
 [Logo]: images/logo.svg

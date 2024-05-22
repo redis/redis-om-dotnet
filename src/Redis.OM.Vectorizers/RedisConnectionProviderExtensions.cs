@@ -1,4 +1,6 @@
 using Redis.OM.Contracts;
+using Redis.OM.Searching;
+using System.Linq.Expressions;
 
 namespace Redis.OM.Vectorizers;
 
@@ -84,4 +86,36 @@ public static class RedisConnectionProviderExtensions
 
         return cache;
     }
+
+	/// <summary>
+	/// Gets a redis collection.
+	/// </summary>
+	/// <typeparam name="T">The type the collection will be retrieving.</typeparam>
+	/// <param name="provider">The RedisConnectionProvider.</param>
+	/// <param name="expression">the expression to be matched.</param>
+	/// <param name="chunkSize">Size of chunks to use during pagination, larger chunks = larger payloads returned but fewer round trips.</param>
+	/// <returns>A RedisCollection.</returns>
+	public static IRedisCollection<T> RedisCollectionWithQueryFilter<T>(this IRedisConnectionProvider provider, Expression<Func<T, bool>> expression, int chunkSize = 100)
+		where T : notnull
+	{
+        return provider
+            .RedisCollection<T>(chunkSize)
+            .Where(expression);
+	}
+
+	/// <summary>
+	/// Gets a redis collection.
+	/// </summary>
+	/// <typeparam name="T">The type the collection will be retrieving.</typeparam>
+	/// <param name="provider">The RedisConnectionProvider.</param>
+	/// <param name="expression">the expression to be matched.</param><param name="saveState">Whether or not the RedisCollection should maintain the state of documents it enumerates.</param>
+	/// <param name="chunkSize">Size of chunks to use during pagination, larger chunks = larger payloads returned but fewer round trips.</param>
+	/// <returns>A RedisCollection.</returns>
+	public static IRedisCollection<T> RedisCollection<T>(this IRedisConnectionProvider provider, Expression<Func<T, bool>> expression, bool saveState, int chunkSize = 100)
+		where T : notnull
+    {
+		return provider
+			.RedisCollection<T>(saveState, chunkSize)
+			.Where(expression);
+	}
 }
