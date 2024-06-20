@@ -84,7 +84,11 @@ namespace Redis.OM.Searching
                    (IQueryable)Activator.CreateInstance(
                        typeof(RedisCollection<>).MakeGenericType(elementType),
                        this,
-                       expression);
+                       expression,
+                       StateManager,
+                       null,
+                       _saveState,
+                       _chunkSize);
             }
             catch (TargetInvocationException e)
             {
@@ -102,7 +106,7 @@ namespace Redis.OM.Searching
             where TElement : notnull
         {
             var booleanExpression = expression as Expression<Func<TElement, bool>>;
-            return new RedisCollection<TElement>(this, expression, StateManager, booleanExpression, true);
+            return new RedisCollection<TElement>(this, expression, StateManager, booleanExpression, true, _chunkSize);
         }
 
         /// <inheritdoc/>
