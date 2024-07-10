@@ -106,7 +106,7 @@ namespace Redis.OM.Searching
             where TElement : notnull
         {
             var booleanExpression = expression as Expression<Func<TElement, bool>>;
-            return new RedisCollection<TElement>(this, expression, StateManager, booleanExpression, true, _chunkSize);
+            return new RedisCollection<TElement>(this, expression, StateManager, booleanExpression, _saveState, _chunkSize);
         }
 
         /// <inheritdoc/>
