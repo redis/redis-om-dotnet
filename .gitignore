@@ -390,3 +390,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 test/Redis.OM.Unit.Tests/appsettings.json.local
+
+src/Redis.OM.Vectorizers.AllMiniLML6V2/Resources/
+src/Redis.OM.Vectorizers.Resnet18/Resources/
