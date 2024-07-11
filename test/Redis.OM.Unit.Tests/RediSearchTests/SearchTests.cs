@@ -3822,5 +3822,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Empty(people);
         }
+
+        [Fact]
+        public void TestBasicQueryCastToIQueryable()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var y = 33;
+            var collection = new RedisCollection<Person>(_substitute, 1234) as IQueryable<Person>;
+            _ = collection.Where(x => x.Age < y).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Age:[-inf (33])",
+                "LIMIT",
+                "0",
+                "1234");
+        }
     }
 }
