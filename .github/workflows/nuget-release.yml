@@ -1,0 +1,55 @@
+name: Nuget Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version.
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: fetch-models
+        run: sh fetch-models.sh
+      - name: Build
+        run : dotnet build -c Release
+      - name: Pack
+        run: dotnet pack -c Release --output .
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            8
+            7
+            6
+      - name: Publish
+        uses: alirezanet/publish-nuget@v3.1.0
+        with:
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          PROJECT_FILE_PATH: src/Redis.OM/Redis.OM.csproj
+          PACKAGE_NAME: Redis.OM
+          TAG_COMMIT: false
+      - name: Publish
+        uses: alirezanet/publish-nuget@v3.1.0
+        with:
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          PROJECT_FILE_PATH: src/Redis.OM.Vectorizers/Redis.OM.Vectorizers.csproj
+          PACKAGE_NAME: Redis.OM.Vectorizers
+          TAG_COMMIT: false
+      - name: Publish
+        uses: alirezanet/publish-nuget@v3.1.0
+        with:
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          PROJECT_FILE_PATH: src/Redis.OM.Vectorizers.AllMiniLML6V2/Redis.OM.Vectorizers.AllMiniLML6V2.csproj
+          PACKAGE_NAME: Redis.OM.Vectorizers.AllMiniLML6V2
+          TAG_COMMIT: false
+      - name: Publish
+        uses: alirezanet/publish-nuget@v3.1.0
+        with:
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          PROJECT_FILE_PATH: src/Redis.OM.Vectorizers.Resnet18/Redis.OM.Vectorizers.Resnet18.csproj
+          PACKAGE_NAME: Redis.OM.Vectorizers.Resnet18
+          TAG_COMMIT: false
