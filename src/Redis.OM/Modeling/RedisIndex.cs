@@ -77,7 +77,7 @@ namespace Redis.OM.Modeling
 
             if (!string.IsNullOrEmpty(objAttribute.LanguageField))
             {
-                args.Add("LANGUAGE");
+                args.Add("LANGUAGE_FIELD");
                 args.Add(objAttribute.LanguageField!);
             }
 
