@@ -5,9 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Redis.OM</RootNamespace>
-        <PackageVersion>0.7.2</PackageVersion>
-        <Version>0.7.2</Version>
-        <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.7.2</PackageReleaseNotes>
+        <PackageVersion>0.7.3</PackageVersion>
+        <Version>0.7.3</Version>
+        <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.7.3</PackageReleaseNotes>
         <Description>Core Vectorizers for Redis OM .NET.</Description>
         <Title>Redis OM Vectorizers</Title>
         <Authors>Steve Lorello</Authors>
