@@ -31,6 +31,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             }
         }
 
+        RedisReply MockedResultWithoutCursor
+        {
+            get
+            {
+                var replyList = new List<RedisReply>();
+                replyList.Add(new RedisReply(1));
+                for(var i = 0; i < 1000; i++)
+                {
+                    replyList.Add(new RedisReply(new RedisReply[]
+                    {
+                        $"FakeResult",
+                        "blah"
+                    }));
+                }
+                return replyList.ToArray();
+            }
+        }
+
         RedisReply MockedResultCursorEnd
         {
             get
@@ -628,6 +646,18 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.TagField  == "foo" && a.RecordShell.Address.State == "FL";
             _ = collection.Filter(query).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "*", "FILTER", "@TagField == 'foo' && @Address_State == 'FL'", "WITHCURSOR", "COUNT", "10000");
+        }
+
+        [Fact]
+        public async Task TestNoCursorDelete()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute);
+            _substitute.ExecuteAsync("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResultWithoutCursor);
+
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.TagField  == "foo" && a.RecordShell.Address.State == "FL";
+            _ = await collection.Filter(query).ToListAsync();
+            await _substitute.Received().ExecuteAsync("FT.AGGREGATE", "person-idx", "*", "FILTER", "@TagField == 'foo' && @Address_State == 'FL'");
+            await _substitute.DidNotReceive().ExecuteAsync("FT.CURSOR", Arg.Any<object[]>());
         }
     }
 }
