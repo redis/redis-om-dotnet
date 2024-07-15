@@ -39,6 +39,10 @@ namespace Redis.OM.Aggregation
             _aggregation = ExpressionTranslator.BuildAggregationFromExpression(exp, typeof(T));
             _connection = connection;
             _useCursor = useCursor;
+            if (!_useCursor)
+            {
+                _cursor = 0;
+            }
         }
 
         /// <summary>
@@ -164,7 +168,11 @@ namespace Redis.OM.Aggregation
         /// <inheritdoc/>
         public void Reset()
         {
-            _cursor = -1;
+            if (_useCursor)
+            {
+                _cursor = -1;
+            }
+
             _index = 0;
             _chunk = Array.Empty<AggregationResult<T>>();
         }
