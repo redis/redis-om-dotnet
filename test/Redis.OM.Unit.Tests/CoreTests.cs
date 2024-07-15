@@ -493,5 +493,25 @@ namespace Redis.OM.Unit.Tests
             connection.Execute("SET", key1, "bar");
             Assert.Equal(1,connection.Unlink(new []{key1, key2}));
         }
+
+        [SkipIfMissingEnvVar("CLUSTER_HOST_PORT")]
+        public async Task TestClusterOperations()
+        {
+            var hostInfo = System.Environment.GetEnvironmentVariable("CLUSTER_HOST_PORT");
+            Console.WriteLine($"Current host info: {hostInfo}");
+            var connectionString = $"redis://{hostInfo}";
+            var provider = new RedisConnectionProvider(connectionString);
+            var connection = provider.Connection;
+
+            var tasks = new List<Task>();
+            for(var i = 0; i < 10_000; i++)
+            {
+                var person = new Person();
+                tasks.Add(connection.SetAsync(person));
+            }
+
+            await Task.WhenAll(tasks);
+        }
+        
     }
 }

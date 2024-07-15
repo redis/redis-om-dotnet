@@ -992,7 +992,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
             steve.Age = 33;
             await collection.UpdateAsync(steve);
-            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33");
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Age", "33");
             Scripts.ShaCollection.Clear();
         }
 
@@ -1010,8 +1010,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
             steve.Age = 33;
             await collection.UpdateAsync(steve);
-            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33");
-            await _substitute.Received().ExecuteAsync("EVAL", Scripts.JsonDiffResolution, "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33");
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Age", "33");
+            await _substitute.Received().ExecuteAsync("EVAL", Scripts.JsonDiffResolution, "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Age", "33");
             Scripts.ShaCollection.Clear();
         }
 
@@ -1028,8 +1028,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = collection.First(x => x.Name == "Steve");
             steve.Age = 33;
             collection.Update(steve);
-            _substitute.Received().Execute("EVALSHA", Arg.Any<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33");
-            _substitute.Received().Execute("EVAL", Scripts.JsonDiffResolution, "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33");
+            _substitute.Received().Execute("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Age", "33");
+            _substitute.Received().Execute("EVAL", Scripts.JsonDiffResolution, "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Age", "33");
             Scripts.ShaCollection.Clear();
         }
 
@@ -1043,7 +1043,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var steve = await collection.FirstAsync(x => x.Name == "Steve");
             steve.Name = "Bob";
             await collection.UpdateAsync(steve);
-            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Name", "\"Bob\"");
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Name", "\"Bob\"");
             Scripts.ShaCollection.Clear();
         }
 
@@ -1058,12 +1058,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             steve.Address = new Address { State = "Florida" };
             await collection.UpdateAsync(steve);
             var expected = $"{{{Environment.NewLine}  \"State\": \"Florida\"{Environment.NewLine}}}";
-            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Address", expected);
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Address", expected);
 
             steve.Address.City = "Satellite Beach";
             await collection.UpdateAsync(steve);
             expected = "\"Satellite Beach\"";
-            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Address.City", expected);
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Address.City", expected);
 
             Scripts.ShaCollection.Clear();
         }
@@ -1079,7 +1079,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             steve.Age = 33;
             steve.Height = 71.5;
             await collection.UpdateAsync(steve);
-            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N", "SET", "$.Age", "33", "SET", "$.Height", "71.5");
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Age", "33", "SET", "$.Height", "71.5");
             Scripts.ShaCollection.Clear();
         }
 
@@ -1103,7 +1103,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.True(collection.StateManager.Data.ContainsKey(key));
             Assert.True(collection.StateManager.Snapshot.ContainsKey(key));
             await collection.DeleteAsync(steve);
-            await _substitute.Received().ExecuteAsync("UNLINK", key);
+            await _substitute.Received().ExecuteAsync("UNLINK", new RedisKey(key));
             Assert.False(collection.StateManager.Data.ContainsKey(key));
             Assert.False(collection.StateManager.Snapshot.ContainsKey(key));
         }
@@ -1119,7 +1119,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.True(collection.StateManager.Data.ContainsKey(key));
             Assert.True(collection.StateManager.Snapshot.ContainsKey(key));
             collection.Delete(steve);
-            _substitute.Received().Execute("UNLINK", key);
+            _substitute.Received().Execute("UNLINK", new RedisKey(key));
             Assert.False(collection.StateManager.Data.ContainsKey(key));
             Assert.False(collection.StateManager.Snapshot.ContainsKey(key));
         }
