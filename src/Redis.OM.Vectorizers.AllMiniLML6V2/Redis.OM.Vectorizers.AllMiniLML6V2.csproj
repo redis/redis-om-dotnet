@@ -5,9 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Redis.OM.Vectorizers.AllMiniLML6V2</RootNamespace>
-        <PackageVersion>0.7.3</PackageVersion>
-        <Version>0.7.3</Version>
-        <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.7.3</PackageReleaseNotes>
+        <PackageVersion>0.7.4</PackageVersion>
+        <Version>0.7.4</Version>
+        <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.7.4</PackageReleaseNotes>
         <Description>Sentence Vectorizer for Redis OM .NET using all-MiniLM-L6-v2</Description>
         <Title>Redis OM all-MiniLM-L6-v2 Vectorizers</Title>
         <Authors>Steve Lorello</Authors>
