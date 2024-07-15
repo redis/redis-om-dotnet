@@ -8,6 +8,7 @@ using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Modeling.Vectors;
 using Redis.OM.Searching;
+using StackExchange.Redis;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests;
@@ -189,9 +190,9 @@ public class VectorIndexCreationTests
         _substitute.Execute("JSON.SET", Arg.Any<object[]>()).Returns(new RedisReply("OK"));
         _substitute.Set(hashObj);
         _substitute.Set(jsonObj);
-        _substitute.Received().Execute("HSET", "Redis.OM.Unit.Tests.ObjectWithVectorHash:foo", "Id", "foo", "Num", "0", "SimpleHnswVector",
+        _substitute.Received().Execute("HSET", new RedisKey("Redis.OM.Unit.Tests.ObjectWithVectorHash:foo"), "Id", "foo", "Num", "0", "SimpleHnswVector",
             Arg.Is<byte[]>(x=>x.SequenceEqual(simpleHnswBytes)), "SimpleVectorizedVector.Vector", Arg.Is<byte[]>(x=>x.SequenceEqual(flatVectorizedBytes)), "SimpleVectorizedVector.Value", "\"foobar\"");
-        _substitute.Received().Execute("JSON.SET", "Redis.OM.Unit.Tests.ObjectWithVector:foo", ".", json);
+        _substitute.Received().Execute("JSON.SET", new RedisKey("Redis.OM.Unit.Tests.ObjectWithVector:foo"), ".", json);
         var deseralized = JsonSerializer.Deserialize<ObjectWithVector>(json);
         Assert.Equal("foobar", deseralized.SimpleVectorizedVector.Value);
     }
