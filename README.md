@@ -159,6 +159,16 @@ Those Cities can then be queried with an `Any` predicate within the main `Where`
 collection.Where(c=>c.Addresses.Any(a=>a.City == "Satellite Beach"))
 ```
 
+###### Limitations
+
+The way Redis indexes fields within a collection of embedded objects does not allow multiple predictates to be specified to a given document e.g.
+
+```cs
+collection.Where(c=>c.Addresses.Any(a=>a.City == "Satellite Beach" && a.ZipCode == "32937))
+```
+
+In the above case the query can only check if the Addresses collection contains an entry that is `Satellite Beach`, and Contains an entry that has a zip code of `32937`, rather than an entry that has both the city of `Satellite Beach` and a  zip code of `32937
+
 #### Cascading Index
 
 Alternatively, you can also embedded models by cascading indexes. In this instance you'd simply decorate the property with `Indexed` and set the `CascadeDepth` to whatever to however may levels you want the model to cascade for. The default is 0, so if `CascadeDepth` is not set, indexing an object will be a no-op:
