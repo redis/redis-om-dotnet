@@ -842,7 +842,7 @@ namespace Redis.OM.Common
                     sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(right)}}}");
                     break;
                 case SearchFieldType.TEXT:
-                    sb.Append($"\"{right}\"");
+                    sb.Append($"{right}");
                     break;
                 case SearchFieldType.NUMERIC:
                     sb.Append($"[{right} {right}]");
