@@ -21,7 +21,14 @@ namespace Redis.OM.Modeling
         /// <inheritdoc />
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            writer.WriteNumberValue(new DateTimeOffset(value).ToUnixTimeMilliseconds());
+            if (value == DateTime.MinValue)
+            {
+                writer.WriteNumberValue(0);
+            }
+            else
+            {
+                writer.WriteNumberValue(new DateTimeOffset(value).ToUnixTimeMilliseconds());
+            }
         }
     }
 }

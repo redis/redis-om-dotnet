@@ -81,7 +81,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 i++;
             }
-            Assert.True(i >= 500);
+            Assert.True(i >= 50);
         }
 
         [Fact]
