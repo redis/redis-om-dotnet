@@ -6,7 +6,7 @@ namespace Redis.OM.Modeling
     /// <summary>
     /// Marks a field as searchable within a Redis Document.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public sealed class SearchableAttribute : SearchFieldAttribute
     {
         /// <summary>

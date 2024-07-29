@@ -1227,5 +1227,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(intermediate.Offset,final.Offset);
             Assert.Equal(intermediate.DateTime,final.DateTime);
         }
+
+        [Fact]
+        public void TestMultipleSearchAttributesOnEmbeddedDoc()
+        {
+            var obj = new ObjectWithMultipleSearchableAttributes()
+            {
+                Address = new Address
+                {
+                    City = "Long Beach Island",
+                    State = "New Jersey"
+                }
+            };
+
+            var collection = new RedisCollection<ObjectWithMultipleSearchableAttributes>(_connection);
+            collection.Insert(obj);
+            var res = collection.First(x => x.Address.City == "Long" && x.Address.State == "New");
+            Assert.Equal(obj.Id, res.Id);
+        }
     }
 }
