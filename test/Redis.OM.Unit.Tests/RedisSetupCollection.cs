@@ -30,6 +30,7 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(BasicJsonObjectTestSave));
             Connection.CreateIndex(typeof(SelectTestObject));
             Connection.CreateIndex(typeof(ObjectWithDateTimeOffsetJson));
+            Connection.CreateIndex(typeof(ObjectWithMultipleSearchableAttributes));
         }
 
         private IRedisConnectionProvider _provider;
@@ -62,6 +63,7 @@ namespace Redis.OM.Unit.Tests
             Connection.DropIndexAndAssociatedRecords(typeof(BasicJsonObjectTestSave));
             Connection.DropIndexAndAssociatedRecords(typeof(SelectTestObject));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithDateTimeOffsetJson));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithMultipleSearchableAttributes));
         }
     }
 }
