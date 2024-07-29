@@ -774,8 +774,9 @@ namespace Redis.OM
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <param name="storageType">The storage type of the value.</param>
+        /// <param name="ttl">The ttl for the key.</param>
         /// <typeparam name="T">The type of the value.</typeparam>
-        internal static void UnlinkAndSet<T>(this IRedisConnection connection, string key, T value, StorageType storageType)
+        internal static void UnlinkAndSet<T>(this IRedisConnection connection, string key, T value, StorageType storageType, TimeSpan? ttl)
         {
             _ = value ?? throw new ArgumentNullException(nameof(value));
             if (storageType == StorageType.Json)
@@ -791,6 +792,11 @@ namespace Redis.OM
                 {
                     args.Add(pair.Key);
                     args.Add(pair.Value);
+                    if (ttl is not null)
+                    {
+                        args.Add("EXPIRE");
+                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                    }
                 }
 
                 connection.CreateAndEval(nameof(Scripts.UnlinkAndSetHash), new[] { key }, args.ToArray());
@@ -804,9 +810,10 @@ namespace Redis.OM
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <param name="storageType">The storage type of the value.</param>
+        /// <param name="ttl">The time to live for the key.</param>
         /// <typeparam name="T">The type of the value.</typeparam>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal static async Task UnlinkAndSetAsync<T>(this IRedisConnection connection, string key, T value, StorageType storageType)
+        internal static async Task UnlinkAndSetAsync<T>(this IRedisConnection connection, string key, T value, StorageType storageType, TimeSpan? ttl)
         {
             _ = value ?? throw new ArgumentNullException(nameof(value));
             if (storageType == StorageType.Json)
@@ -822,6 +829,11 @@ namespace Redis.OM
                 {
                     args.Add(pair.Key);
                     args.Add(pair.Value);
+                    if (ttl is not null)
+                    {
+                        args.Add("EXPIRE");
+                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                    }
                 }
 
                 await connection.CreateAndEvalAsync(nameof(Scripts.UnlinkAndSetHash), new[] { key }, args.ToArray());

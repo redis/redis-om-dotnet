@@ -159,6 +159,29 @@ namespace Redis.OM.Searching
         ValueTask UpdateAsync(IEnumerable<T> items);
 
         /// <summary>
+        /// Updates the provided item in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
+        /// </summary>
+        /// <param name="item">The item to update.</param>
+        /// <param name="ttl">The updated ttl for the record.</param>
+        void Update(T item, TimeSpan ttl);
+
+        /// <summary>
+        /// Updates the provided item in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
+        /// </summary>
+        /// <param name="item">The item to update.</param>
+        /// <param name="ttl">The updated ttl for the record.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task UpdateAsync(T item, TimeSpan ttl);
+
+        /// <summary>
+        /// Updates the provided items in Redis. Document must have a property marked with the <see cref="RedisIdFieldAttribute"/>.
+        /// </summary>
+        /// <param name="items">The items to update.</param>
+        /// <param name="ttl">The updated ttl for the record.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        ValueTask UpdateAsync(IEnumerable<T> items, TimeSpan ttl);
+
+        /// <summary>
         /// Deletes the item from Redis.
         /// </summary>
         /// <param name="item">The item to be deleted.</param>

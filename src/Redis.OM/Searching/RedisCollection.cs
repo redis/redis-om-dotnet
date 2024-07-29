@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -144,69 +145,37 @@ namespace Redis.OM.Searching
         /// <inheritdoc />
         public void Update(T item)
         {
-            var key = item.GetKey();
-            IList<IObjectDiff>? diff;
-            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
-            if (diffConstructed)
-            {
-                if (diff!.Any())
-                {
-                    var args = new List<string>();
-                    var scriptName = diff!.First().Script;
-                    foreach (var update in diff!)
-                    {
-                        args.AddRange(update.SerializeScriptArgs());
-                    }
-
-                    _connection.CreateAndEval(scriptName, new[] { key }, args.ToArray());
-                }
-            }
-            else
-            {
-                _connection.UnlinkAndSet(key, item, StateManager.DocumentAttribute.StorageType);
-            }
-
-            SaveToStateManager(key, item);
+            SendUpdate(item);
         }
 
         /// <inheritdoc />
-        public async Task UpdateAsync(T item)
+        public Task UpdateAsync(T item)
         {
-            var key = item.GetKey();
-            IList<IObjectDiff>? diff;
-            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
-            if (diffConstructed)
-            {
-                if (diff!.Any())
-                {
-                    var args = new List<string>();
-                    var scriptName = diff!.First().Script;
-                    foreach (var update in diff!)
-                    {
-                        args.AddRange(update.SerializeScriptArgs());
-                    }
-
-                    await _connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray());
-                }
-            }
-            else
-            {
-                await _connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType);
-            }
-
-            SaveToStateManager(key, item);
+            return SendUpdateAsync(item);
         }
 
         /// <inheritdoc />
-        public async ValueTask UpdateAsync(IEnumerable<T> items)
+        public ValueTask UpdateAsync(IEnumerable<T> items)
         {
-            var tasks = items.Select(UpdateAsyncNoSave);
+            return SendUpdateAsync(items);
+        }
 
-            await Task.WhenAll(tasks);
-            foreach (var kvp in tasks.Select(x => x.Result))
-            {
-                SaveToStateManager(kvp.Key, kvp.Value);
-            }
+        /// <inheritdoc />
+        public void Update(T item, TimeSpan ttl)
+        {
+            SendUpdate(item, ttl);
+        }
+
+        /// <inheritdoc />
+        public Task UpdateAsync(T item, TimeSpan ttl)
+        {
+            return SendUpdateAsync(item, ttl);
+        }
+
+        /// <inheritdoc />
+        public ValueTask UpdateAsync(IEnumerable<T> items, TimeSpan ttl)
+        {
+            return SendUpdateAsync(items, ttl);
         }
 
         /// <inheritdoc />
@@ -774,7 +743,7 @@ namespace Redis.OM.Searching
             return _connection.GetAsync<T>(key).AsTask();
         }
 
-        private async Task<KeyValuePair<string, T>> UpdateAsyncNoSave(T item)
+        private async Task<KeyValuePair<string, T>> UpdateAsyncNoSave(T item, TimeSpan? ttl)
         {
             var key = item.GetKey();
             IList<IObjectDiff>? diff;
@@ -790,12 +759,22 @@ namespace Redis.OM.Searching
                         args.AddRange(update.SerializeScriptArgs());
                     }
 
+                    if (ttl is not null)
+                    {
+                        args.Add("EXPIRE");
+                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                    }
+
                     await _connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray());
+                }
+                else if (ttl is not null)
+                {
+                    await _connection.ExecuteAsync("PEXPIRE", key, ttl.Value.TotalMilliseconds);
                 }
             }
             else
             {
-                await _connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType);
+                await _connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType, ttl);
             }
 
             return new KeyValuePair<string, T>(key, item);
@@ -829,6 +808,98 @@ namespace Redis.OM.Searching
                         "If you do not need to update, consider setting SaveState to false, otherwise, ensure collection is only enumerated on one thread at a time",
                         ex);
                 }
+            }
+        }
+
+        private void SendUpdate(T item, TimeSpan? ttl = null)
+        {
+            var key = item.GetKey();
+            IList<IObjectDiff>? diff;
+            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+            if (diffConstructed)
+            {
+                if (diff!.Any())
+                {
+                    var args = new List<string>();
+                    var scriptName = diff!.First().Script;
+                    foreach (var update in diff!)
+                    {
+                        args.AddRange(update.SerializeScriptArgs());
+                    }
+
+                    if (ttl is not null)
+                    {
+                        args.Add("EXPIRE");
+                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                    }
+
+                    _connection.CreateAndEval(scriptName, new[] { key }, args.ToArray());
+                }
+                else if (ttl is not null)
+                {
+                    _connection.Execute("PEXPIRE", key, ttl.Value.TotalMilliseconds);
+                }
+            }
+            else
+            {
+                _connection.UnlinkAndSet(key, item, StateManager.DocumentAttribute.StorageType, ttl);
+            }
+
+            SaveToStateManager(key, item);
+        }
+
+        private Task SendUpdateAsync(T item, TimeSpan? ttl = null)
+        {
+            var key = item.GetKey();
+            IList<IObjectDiff>? diff;
+            var diffConstructed = StateManager.TryDetectDifferencesSingle(key, item, out diff);
+            Task? task = null;
+            if (diffConstructed)
+            {
+                if (diff!.Any())
+                {
+                    var args = new List<string>();
+                    var scriptName = diff!.First().Script;
+                    foreach (var update in diff!)
+                    {
+                        args.AddRange(update.SerializeScriptArgs());
+                    }
+
+                    if (ttl is not null)
+                    {
+                        args.Add("EXPIRE");
+                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                    }
+
+                    task = _connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray());
+                }
+                else if (ttl is not null)
+                {
+                    task = _connection.ExecuteAsync("PEXPIRE", key, ttl.Value.TotalMilliseconds);
+                }
+            }
+            else
+            {
+                task = _connection.UnlinkAndSetAsync(key, item, StateManager.DocumentAttribute.StorageType, ttl);
+            }
+
+            SaveToStateManager(key, item);
+            if (task is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            return task;
+        }
+
+        private async ValueTask SendUpdateAsync(IEnumerable<T> items, TimeSpan? ttl = null)
+        {
+            var tasks = items.Select(x => UpdateAsyncNoSave(x, ttl)).ToArray();
+
+            await Task.WhenAll(tasks);
+            foreach (var kvp in tasks.Select(x => x.Result))
+            {
+                SaveToStateManager(kvp.Key, kvp.Value);
             }
         }
     }
