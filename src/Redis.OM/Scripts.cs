@@ -19,6 +19,8 @@ for i=1, num_args, 3 do
         if index>=0 then
             redis.call('JSON.ARRPOP', key, ARGV[i+1], index)
         end
+    elseif 'EXPIRE' == ARGV[i] then
+        redis.call('PEXPIRE', key, tonumber(ARGV[i+1]))
     else
         if 'DEL' == ARGV[i] then
             redis.call('JSON.DEL',key,ARGV[i+1])
@@ -38,6 +40,7 @@ local num_args = table.getn(ARGV)
 local num_fields_to_set = ARGV[1]
 local end_index = num_fields_to_set*2+1
 local args = {}
+local expire_time = -1
 for i=2, end_index, 2 do
     args[i-1] = ARGV[i]
     args[i] = ARGV[i+1]
@@ -49,9 +52,19 @@ if end_index < num_args then
     local second_op
     args = {}
     for i = end_index+1, num_args, 1 do
-        args[i-end_index] = ARGV[i]
+        if ARGV[i] == 'EXPIRE' then
+            expire_time = tonumber(ARGV[i+1])
+        else
+            args[i-end_index] = ARGV[i]
+        end
     end
-    redis.call('HDEL',key,unpack(args))
+
+    if table.getn(args) > 0 then
+        redis.call('HDEL',key,unpack(args))
+    end
+end
+if expire_time > -1 then
+    redis.call('PEXPIRE', key, expire_time)
 end
 ";
 
@@ -69,11 +82,19 @@ redis.call('UNLINK',KEYS[1])
 local num_fields = ARGV[1]
 local end_index = num_fields * 2 + 1
 local args = {}
+local expire_time = -1
 for i = 2, end_index, 2 do
-    args[i-1] = ARGV[i]
-    args[i] = ARGV[i+1]
+    if ARGV[i] == 'EXPIRE' then
+        expire_time = tonumber(ARGV[i+1])
+    else
+        args[i-1] = ARGV[i]
+        args[i] = ARGV[i+1]
+    end
 end
 redis.call('HSET',KEYS[1],unpack(args))
+if expire_time > -1 then
+    redis.call('PEXPIRE', KEYS[1], expire_time)
+end
 return 0
 ";
 
@@ -81,7 +102,14 @@ return 0
         /// Unlinks a JSON object and sets the key again with a fresh new JSON object.
         /// </summary>
         internal const string UnlinkAndSendJson = @"
-local expiry = tonumber(redis.call('PTTL', KEYS[1]))
+local num_args = table.getn(ARGV)
+local expiry = -1
+if num_args > 1 and 'EXPIRE' == ARGV[2] then
+    expiry = tonumber(ARGV[3])
+else
+    expiry = tonumber(redis.call('PTTL', KEYS[1]))
+end
+
 redis.call('UNLINK', KEYS[1])
 redis.call('JSON.SET', KEYS[1], '.', ARGV[1])
     if expiry > 0 then

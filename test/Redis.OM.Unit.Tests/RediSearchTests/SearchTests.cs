@@ -3895,5 +3895,37 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "$.Date",
                 $"{timestamp}");
         }
+
+        [Fact]
+        public async Task TestIndexCreationWIthMultipleSearchFieldsForEmbeddedDoc()
+        {
+            _substitute.ExecuteAsync("FT.CREATE", Arg.Any<object[]>()).Returns("OK");
+            await _substitute.CreateIndexAsync(typeof(ObjectWithMultipleSearchableAttributes));
+            await _substitute.Received().ExecuteAsync("FT.CREATE",
+                "objectwithmultiplesearchableattributes-idx",
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithMultipleSearchableAttributes:",
+                "SCHEMA",
+                "$.Address.City", "AS", "Address_City", "TEXT",
+                "$.Address.State", "AS", "Address_State", "TEXT");
+        }
+
+        [Fact]
+        public async Task TestMultipleTextSearchOnEmbeddedDoc()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithMultipleSearchableAttributes>(_substitute);
+            await collection.Where(x => x.Address.City == "Long" && x.Address.State == "New").ToListAsync();
+            await _substitute.Received().ExecuteAsync("FT.SEARCH",
+                "objectwithmultiplesearchableattributes-idx",
+                "((@Address_City:\"Long\") (@Address_State:\"New\"))",
+                "LIMIT",
+                "0",
+                "100");
+        }
     }
 }

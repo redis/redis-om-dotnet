@@ -11,6 +11,7 @@ using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
 using Redis.OM.Searching.Query;
+using StackExchange.Redis;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -350,6 +351,54 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestUpdateWithTimeout()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person { Name = "Steve", Age = 32 };
+            TimeSpan ttl = TimeSpan.FromHours(1);
+            var key = collection.Insert(testP);
+            var queriedP = collection.FindById(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            collection.Update(queriedP, ttl);
+            var ttlOnKey = (long)_connection.Execute("PTTL", key);
+            var secondQueriedP = collection.FindById(key);
+
+            Assert.NotNull(secondQueriedP);
+            Assert.InRange(ttlOnKey, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        [Fact]
+        public async Task TestUpdateWithTimeoutMulti()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person { Name = "Steve", Age = 32 };
+            var testP2 = new Person { Name = "Chris", Age = 37 };
+            TimeSpan ttl = TimeSpan.FromMinutes(5);
+            var keys = (await collection.InsertAsync(new Person[] { testP, testP2 }, WhenKey.Always, ttl)).ToArray();
+            var queriedP = await collection.FindByIdAsync(keys[0]);
+            var queriedP2 = await collection.FindByIdAsync(keys[1]);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            ttl = TimeSpan.FromHours(1);
+            await collection.UpdateAsync(new []{queriedP, queriedP2}, ttl);
+            var ttlOnKey1 = (long) await _connection.ExecuteAsync("PTTL", keys[0]);
+            var ttlOnKey2 = (long) await _connection.ExecuteAsync("PTTL", keys[1]);
+            var secondQueriedP = await collection.FindByIdAsync(keys[0]);
+
+            Assert.NotNull(secondQueriedP);
+            Assert.InRange(ttlOnKey1, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds);
+            Assert.InRange(ttlOnKey2, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        
+        [Fact]
         public void TestUpdateNullCollection()
         {
             var nickNames = new List<string>() { "Bond", "James", "Steve" };
@@ -380,6 +429,29 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var secondQueriedP = await collection.FindByIdAsync(key);
 
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+        
+        [Fact]
+        public async Task TestUpdateWithTtlAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person { Name = "Steve", Age = 32 };
+            var key = await collection.InsertAsync(testP);
+            var queriedP = await collection.FindByIdAsync(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            TimeSpan ttl = TimeSpan.FromHours(1);
+            await collection.UpdateAsync(queriedP, ttl);
+
+            var ttlFromKey = (double) await _connection.ExecuteAsync("PTTL", key);
+
+            var secondQueriedP = await collection.FindByIdAsync(key);
+
+            Assert.InRange(ttlFromKey, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds);
             Assert.NotNull(secondQueriedP);
             Assert.Equal(33, secondQueriedP.Age);
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
@@ -419,6 +491,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var secondQueriedP = await collection.FindByIdAsync(key);
 
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+        
+        [Fact]
+        public async Task TestUpdateHashWithTtl()
+        {
+            var collection = new RedisCollection<HashPerson>(_connection);
+            var testP = new HashPerson { Name = "Steve", Age = 32 };
+            var key = await collection.InsertAsync(testP);
+            var queriedP = await collection.FindByIdAsync(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            var ttl = TimeSpan.FromHours(1);
+            await collection.UpdateAsync(queriedP, ttl);
+
+            var ttlFromKey = (double)await _connection.ExecuteAsync("PTTL", key);
+            var secondQueriedP = await collection.FindByIdAsync(key);
+
+            Assert.InRange(ttlFromKey, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds);
             Assert.NotNull(secondQueriedP);
             Assert.Equal(33, secondQueriedP.Age);
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
@@ -1132,6 +1226,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var final = collection.First(x => x.Id == obj.Id);
             Assert.Equal(intermediate.Offset,final.Offset);
             Assert.Equal(intermediate.DateTime,final.DateTime);
+        }
+
+        [Fact]
+        public void TestMultipleSearchAttributesOnEmbeddedDoc()
+        {
+            var obj = new ObjectWithMultipleSearchableAttributes()
+            {
+                Address = new Address
+                {
+                    City = "Long Beach Island",
+                    State = "New Jersey"
+                }
+            };
+
+            var collection = new RedisCollection<ObjectWithMultipleSearchableAttributes>(_connection);
+            collection.Insert(obj);
+            var res = collection.First(x => x.Address.City == "Long" && x.Address.State == "New");
+            Assert.Equal(obj.Id, res.Id);
         }
     }
 }
