@@ -3852,11 +3852,21 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var dateTime = new DateTime(2024, 01, 01);
+
             var collection = new RedisCollection<Person>(_substitute);
             var item = collection.First();
             item.Date = dateTime;
             collection.Update(item);
-            _substitute.Received(0);
+            
+            var timestamp = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+            _substitute.Received(0).Execute(
+                "EVALSHA",
+                Arg.Any<string>(),
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N",
+                "SET",
+                "$.Date",
+                $"{timestamp}");
         }
 
         [Fact]
