@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Redis.OM;
 using Redis.OM.Modeling;
 
@@ -8,8 +9,73 @@ namespace Redis.OM.Modeling
     /// <summary>
     /// A utility class for serializing objects into Redis Indices.
     /// </summary>
-    internal static class RedisIndex
+    public static class RedisIndex
     {
+        /// <summary>
+        /// Verifies whether the given index schema definition matches the current definition.
+        /// </summary>
+        /// <param name="redisIndexInfo">The index definition.</param>
+        /// <param name="type">The type to be indexed.</param>
+        /// <returns>A bool indicating whether the current index definition has drifted from the current definition, which may be used to determine when to re-create an index..</returns>
+        public static bool IndexDefinitionEquals(this RedisIndexInfo redisIndexInfo, Type type)
+        {
+            var serialisedDefinition = SerializeIndex(type);
+            var existingSet = redisIndexInfo.Attributes?.Select(a => (Property: a.Attribute!, a.Type!)).OrderBy(a => a.Property);
+            var isJson = redisIndexInfo.IndexDefinition?.Identifier == "JSON";
+
+            if (serialisedDefinition.Length < 5)
+            {
+                throw new ArgumentException($"Could not parse the index definition for type: {type.Name}.");
+            }
+
+            if (redisIndexInfo.IndexName != serialisedDefinition[0])
+            {
+                return false;
+            }
+
+            if (redisIndexInfo.IndexDefinition?.Identifier?.Equals(serialisedDefinition[2], StringComparison.OrdinalIgnoreCase) == false)
+            {
+                return false;
+            }
+
+            if (redisIndexInfo.IndexDefinition?.Prefixes.FirstOrDefault().Equals(serialisedDefinition[5]) == false)
+            {
+                return false;
+            }
+
+            var target = redisIndexInfo.Attributes?.SelectMany(a =>
+            {
+                var attr = new List<string>();
+
+                if (a.Identifier == null)
+                {
+                    return Array.Empty<string>();
+                }
+
+                if (isJson)
+                {
+                    attr.Add(a.Identifier);
+                    attr.Add("AS");
+                }
+
+                attr.Add(a.Attribute!);
+
+                if (a.Type != null)
+                {
+                    attr.Add(a.Type);
+                }
+
+                if (a.Sortable == true)
+                {
+                    attr.Add("SORTABLE");
+                }
+
+                return attr.ToArray();
+            });
+
+            return target.SequenceEqual(serialisedDefinition.Skip(7));
+        }
+
         /// <summary>
         /// Pull out the Document attribute from a Type.
         /// </summary>
