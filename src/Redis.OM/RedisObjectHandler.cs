@@ -371,7 +371,7 @@ namespace Redis.OM
                     var val = (DateTime)property.GetValue(obj);
                     if (val != default)
                     {
-                        hash.Add(propertyName, new DateTimeOffset(val).ToUnixTimeMilliseconds().ToString());
+                        hash.Add(propertyName, new DateTimeOffset(val).ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture));
                     }
                 }
                 else if (type == typeof(Vector))
