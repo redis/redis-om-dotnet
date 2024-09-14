@@ -85,6 +85,20 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Checks the source string to see if any tokens within the source matches the pattern.
+        /// </summary>
+        /// <param name="source">The string to check.</param>
+        /// <param name="pattern">The pattern to look for within the string.</param>
+        /// <returns>Whether any token within the source string matches the pattern.</returns>
+        /// <remarks>This is meant to be a shadow method that runs within an expression, a working implementation is
+        /// provided here for completeness.</remarks>
+        public static bool MatchPattern(this string source, string pattern)
+        {
+            var terms = source.Split(SplitChars);
+            return terms.Any(t => t.EndsWith(pattern));
+        }
+
+        /// <summary>
         /// Wagner-Fischer dynamic programming string distance algorithm.
         /// </summary>
         /// <param name="source">The source string to check the distance from.</param>
