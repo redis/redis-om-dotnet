@@ -14,4 +14,4 @@ jobs:
       - name: fetch-models
         run: sh fetch-models.sh
       - name: execute
-        run: docker-compose -f ./docker/docker-compose.yaml run dotnet
+        run: docker compose -f ./docker/docker-compose.yaml run dotnet
