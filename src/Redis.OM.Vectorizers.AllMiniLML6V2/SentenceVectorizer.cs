@@ -17,8 +17,8 @@ public class SentenceVectorizer : IVectorizer<string>
 
     /// <inheritdoc />
     public int Dim => 384;
-    private static Lazy<TokenizerBase> Tokenizer => new Lazy<TokenizerBase>(AllMiniLML6V2Tokenizer.Create);
-    private static Lazy<InferenceSession> InferenceSession => new Lazy<InferenceSession>(LoadInferenceSession);
+    private static readonly Lazy<TokenizerBase> Tokenizer = new(AllMiniLML6V2Tokenizer.Create);
+    private static readonly Lazy<InferenceSession> InferenceSession = new(LoadInferenceSession);
 
     private static InferenceSession LoadInferenceSession()
     {
@@ -40,7 +40,7 @@ public class SentenceVectorizer : IVectorizer<string>
         return Vectorize(new[] { obj })[0].SelectMany(BitConverter.GetBytes).ToArray();
     }
 
-     private static Lazy<string[]> OutputNames => new (() => InferenceSession.Value.OutputMetadata.Keys.ToArray());
+     private static readonly Lazy<string[]> OutputNames = new (() => InferenceSession.Value.OutputMetadata.Keys.ToArray());
 
     /// <summary>
     /// Vectorizers an array of sentences (which are vectorized individually).
