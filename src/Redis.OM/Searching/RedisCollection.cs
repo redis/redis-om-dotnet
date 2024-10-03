@@ -731,6 +731,14 @@ namespace Redis.OM.Searching
             return new RedisCollectionEnumerator<T>(Expression, provider.Connection, ChunkSize, StateManager, BooleanExpression, SaveState, RootType, typeof(T));
         }
 
+        /// <inheritdoc/>
+        public string ToQueryString()
+        {
+            var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
+            query.Limit ??= new SearchLimit { Number = ChunkSize, Offset = 0 };
+            return $"FT.SEARCH {string.Join(" ", query.SerializeQuery())}";
+        }
+
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)
         {
             return f.Method;

@@ -659,5 +659,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await _substitute.Received().ExecuteAsync("FT.AGGREGATE", "person-idx", "*", "FILTER", "@TagField == 'foo' && @Address_State == 'FL'");
             await _substitute.DidNotReceive().ExecuteAsync("FT.CURSOR", Arg.Any<object[]>());
         }
+
+        [Fact]
+        public void TestToQueryString()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            var command = "FT.AGGREGATE person-idx @Salary:[(30.55 inf] LOAD * APPLY @Address_HouseNumber + 4 AS house_num_modified SORTBY 2 @Age DESC LIMIT 0 10 WITHCURSOR COUNT 10000";
+
+            var queryString = collection
+                .LoadAll()
+                .Apply(x => x.RecordShell.Address.HouseNumber + 4, "house_num_modified")
+                .Where(a => a.RecordShell!.Salary > 30.55M)
+                .OrderByDescending(p=>p.RecordShell.Age)
+                .Skip(0)
+                .Take(10)
+                .ToQueryString();
+
+            Assert.Equal(command, queryString);
+        }
     }
 }

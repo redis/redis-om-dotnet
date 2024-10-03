@@ -485,6 +485,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@CormacLennon](https://github.com/CormacLennon)
 * [@ahmedisam99](https://github.com/ahmedisam99)
 * [@kirollosonsi](https://github.com/kirollosonsi)
+* [@tgmoore](https://github.com/tgmoore)
 
 <!-- Logo -->
 [Logo]: images/logo.svg
