@@ -107,18 +107,17 @@ var provider = new RedisConnectionProvider("redis://localhost:6379");
 provider.Connection.CreateIndex(typeof(Customer));
 ```
 
-Redis OM provides limited support for schema and data migration at this time. We provide a small extension method `IndexDefinitionEquals` on the `RedisIndexInfo` type that you may opt in to use to determine when to re-create your indexes when your types change. An example implementation of this would look like:
+Redis OM provides limited support for schema migration at this time. You can check if the index definition in Redis matches your current index definition using the `IsIndexCurrent` method on the `RedisConnection`. Then you may use that output to determine when to re-create your indexes when your types change. An example implementation of this would look like:
 
 ```csharp
 var provider = new RedisConnectionProvider("redis://localhost:6379");
 var definition = provider.Connection.GetIndexInfo(typeof(Customer));
 
-if (definition.IndexDefinitionEquals(typeof(Customer)) == false)
+if (!provider.Connection.IsIndexCurrent(typeof(Customer)))
 {
     provider.Connection.DropIndex(typeof(Customer));
+    provider.Connection.CreateIndex(typeof(Customer));
 }
-
-provider.Connection.CreateIndex(typeof(Customer));
 ```
 
 

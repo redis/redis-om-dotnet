@@ -218,6 +218,34 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestCheckIndexUpToDate()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            connection.DropIndex(typeof(SerialisedJsonType));
+            Assert.False(connection.IsIndexCurrent(typeof(SerialisedJsonType)));
+
+            connection.CreateIndex(typeof(SerialisedJsonType));
+            Assert.False(connection.IsIndexCurrent(typeof(SerialisedJsonTypeNotMatch)));
+            Assert.True(connection.IsIndexCurrent(typeof(SerialisedJsonType)));
+        }
+
+        [Fact]
+        public async Task TestCheckIndexUpToDateAsync()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+            await connection.DropIndexAsync(typeof(SerialisedJsonType));
+            Assert.False(await connection.IsIndexCurrentAsync(typeof(SerialisedJsonType)));
+
+            await connection.CreateIndexAsync(typeof(SerialisedJsonType));
+            Assert.False(await connection.IsIndexCurrentAsync(typeof(SerialisedJsonTypeNotMatch)));
+            Assert.True(await connection.IsIndexCurrentAsync(typeof(SerialisedJsonType)));
+        }
+
+        [Fact]
         public async Task TestGetIndexInfoWhichDoesNotExistAsync()
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
