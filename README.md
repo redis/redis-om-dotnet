@@ -107,6 +107,20 @@ var provider = new RedisConnectionProvider("redis://localhost:6379");
 provider.Connection.CreateIndex(typeof(Customer));
 ```
 
+Redis OM provides limited support for schema migration at this time. You can check if the index definition in Redis matches your current index definition using the `IsIndexCurrent` method on the `RedisConnection`. Then you may use that output to determine when to re-create your indexes when your types change. An example implementation of this would look like:
+
+```csharp
+var provider = new RedisConnectionProvider("redis://localhost:6379");
+var definition = provider.Connection.GetIndexInfo(typeof(Customer));
+
+if (!provider.Connection.IsIndexCurrent(typeof(Customer)))
+{
+    provider.Connection.DropIndex(typeof(Customer));
+    provider.Connection.CreateIndex(typeof(Customer));
+}
+```
+
+
 ### Indexing Embedded Documents
 
 There are two methods for indexing embedded documents with Redis.OM, an embedded document is a complex object, e.g. if our `Customer` model had an `Address` property with the following model:

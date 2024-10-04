@@ -178,7 +178,7 @@ namespace Redis.OM
             try
             {
                 var indexName = type.SerializeIndex().First();
-                var redisReply = await connection.ExecuteAsync("FT.INFO", indexName);
+                var redisReply = await connection.ExecuteAsync("FT.INFO", indexName).ConfigureAwait(false);
                 var redisIndexInfo = new RedisIndexInfo(redisReply);
                 return redisIndexInfo;
             }
@@ -266,6 +266,30 @@ namespace Redis.OM
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Check if the index exists and is up to date.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="type">The type the index was built from.</param>
+        /// <returns>Whether or not the index is current.</returns>
+        public static bool IsIndexCurrent(this IRedisConnection connection, Type type)
+        {
+            var definition = connection.GetIndexInfo(type);
+            return definition?.IndexDefinitionEquals(type) ?? false;
+        }
+
+        /// <summary>
+        /// Check if the index exists and is up to date.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="type">The type the index was built from.</param>
+        /// <returns>Whether or not the index is current.</returns>
+        public static async Task<bool> IsIndexCurrentAsync(this IRedisConnection connection, Type type)
+        {
+            var definition = await connection.GetIndexInfoAsync(type).ConfigureAwait(false);
+            return definition?.IndexDefinitionEquals(type) ?? false;
         }
 
         /// <summary>
