@@ -341,7 +341,7 @@ namespace Redis.OM.Searching
         Task<IDictionary<string, T?>> FindByIdsAsync(IEnumerable<string> ids);
 
         /// <summary>
-        /// A string representation of the Redisearch command and parameters, a serialization of the Expression.
+        /// A string representation of the Redisearch command and parameters, a serialization of the Expression with all parameters explicitly quoted.
         /// Warning: this string may not be suitable for direct execution and is intended only for use in debugging.
         /// </summary>
         /// <returns>A string representing the Expression serialized to a Redisearch command and parameters.</returns>

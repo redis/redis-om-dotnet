@@ -117,7 +117,7 @@ namespace Redis.OM.Aggregation
             => (await ToListAsync()).ToArray();
 
         /// <summary>
-        /// A string representation of the aggregation command and parameters, a serialization of the Expression.
+        /// A string representation of the aggregation command and parameters, a serialization of the Expression with all parameters explicitly quoted.
         /// Warning: this string may not be suitable for direct execution and is intended only for use in debugging.
         /// </summary>
         /// <returns>A string representing the Expression serialized to an aggregation command and parameters.</returns>
@@ -132,7 +132,9 @@ namespace Redis.OM.Aggregation
                 serializedArgs.Add(_chunkSize.ToString());
             }
 
-            return $"FT.AGGREGATE {string.Join(" ", serializedArgs)}";
+            var quotedArgs = serializedArgs.Select(arg => $"\"{arg}\"");
+
+            return $"\"FT.AGGREGATE\" {string.Join(" ", quotedArgs)}";
         }
 
         private void Initialize(RedisQueryProvider provider, Expression? expression, bool useCursor)

@@ -736,7 +736,10 @@ namespace Redis.OM.Searching
         {
             var query = ExpressionTranslator.BuildQueryFromExpression(Expression, typeof(T), BooleanExpression, RootType);
             query.Limit ??= new SearchLimit { Number = ChunkSize, Offset = 0 };
-            return $"FT.SEARCH {string.Join(" ", query.SerializeQuery())}";
+
+            var quotedArgs = query.SerializeQuery().Select(arg => $"\"{arg}\"");
+
+            return $"\"FT.SEARCH\" {string.Join(" ", quotedArgs)}";
         }
 
         private static MethodInfo GetMethodInfo<T1, T2>(Func<T1, T2> f, T1 unused)

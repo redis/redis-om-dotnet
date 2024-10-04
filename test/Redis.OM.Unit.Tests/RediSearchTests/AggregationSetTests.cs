@@ -664,7 +664,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         public void TestToQueryString()
         {
             var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
-            var command = "FT.AGGREGATE person-idx @Salary:[(30.55 inf] LOAD * APPLY @Address_HouseNumber + 4 AS house_num_modified SORTBY 2 @Age DESC LIMIT 0 10 WITHCURSOR COUNT 10000";
+            var command = "\"FT.AGGREGATE\" \"person-idx\" \"@Salary:[(30.55 inf]\" \"LOAD\" \"*\" \"APPLY\" \"@Address_HouseNumber + 4\" \"AS\" \"house_num_modified\" \"SORTBY\" \"2\" \"@Age\" \"DESC\" \"LIMIT\" \"0\" \"10\" \"WITHCURSOR\" \"COUNT\" \"10000\"";
 
             var queryString = collection
                 .LoadAll()
