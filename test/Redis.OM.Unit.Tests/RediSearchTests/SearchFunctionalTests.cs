@@ -1245,5 +1245,30 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var res = collection.First(x => x.Address.City == "Long" && x.Address.State == "New");
             Assert.Equal(obj.Id, res.Id);
         }
+
+        [Theory]
+        [InlineData("Ste*", 1)]
+        [InlineData("*orello*", 1)]
+        [InlineData("Sto* & Lor*", 0)]
+        [InlineData("Sto* | Lor*", 1)]
+        [InlineData("%%Pittor%%", 1)]
+        [InlineData("%Pittor%", 0)]
+        [InlineData("%%%Pittor%%%", 1)]
+        [InlineData("%%Pittor%% & Ha*", 1)]
+        [InlineData("Ste* | Ha*", 2)]
+        public async Task TestSearchByMatchPattern(string pattern, int existingRecordsCount)
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var persons = await collection.ToListAsync();
+            await collection.DeleteAsync(persons);
+
+            var person1 = new Person { Name = "Steve Lorello" };
+            var person2 = new Person { Name = "Harry Potter" };
+            collection.Insert(person1);
+            collection.Insert(person2);
+
+            var res = await collection.Where(x => x.Name.MatchPattern(pattern)).ToListAsync();
+            Assert.Equal(existingRecordsCount, res.Count);
+        }
     }
 }

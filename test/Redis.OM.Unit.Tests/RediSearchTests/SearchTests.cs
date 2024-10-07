@@ -420,7 +420,25 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100");
         }
-        
+
+        [Fact]
+        public void TestMatchPattern()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            var ddfgdf = collection.Where(x => x.Name.MatchPattern("Ste* Lo*")).ToList();
+
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:Ste* Lo*)",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
         [Fact]
         public void TestTagContains()
         {
@@ -3936,6 +3954,18 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "100");
+        }
+        
+        [Fact]
+        public void TestToQueryString()
+        {
+            _substitute.ClearSubstitute();
+            var command = "\"FT.SEARCH\" \"person-idx\" \"(((@Name:Ste) | (@Height:[70 inf])) (@Age:[-inf (33]))\" \"LIMIT\" \"100\" \"10\" \"SORTBY\" \"Age\" \"ASC\"";
+
+            var collection = new RedisCollection<Person>(_substitute);
+            var queryString = collection.Where(x => x.Name.Contains("Ste") || x.Height >= 70).Where(x => x.Age < 33).OrderBy(x => x.Age).Skip(100).Take(10).ToQueryString();
+
+            Assert.Equal(command, queryString);
         }
     }
 }

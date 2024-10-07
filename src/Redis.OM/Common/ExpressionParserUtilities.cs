@@ -191,6 +191,7 @@ namespace Redis.OM.Common
                 "Contains" => TranslateContainsStandardQuerySyntax(exp, parameters),
                 nameof(StringExtension.FuzzyMatch) => TranslateFuzzyMatch(exp),
                 nameof(StringExtension.MatchContains) => TranslateMatchContains(exp),
+                nameof(StringExtension.MatchPattern) => TranslateMatchPattern(exp),
                 nameof(StringExtension.MatchStartsWith) => TranslateMatchStartsWith(exp),
                 nameof(StringExtension.MatchEndsWith) => TranslateMatchEndsWith(exp),
                 nameof(VectorExtensions.VectorRange) => TranslateVectorRange(exp, parameters),
@@ -782,6 +783,13 @@ namespace Redis.OM.Common
             var source = GetOperandString(exp.Arguments[0]);
             var infix = GetOperandString(exp.Arguments[1]);
             return $"({source}:*{infix}*)";
+        }
+
+        private static string TranslateMatchPattern(MethodCallExpression exp)
+        {
+            var source = GetOperandString(exp.Arguments[0]);
+            var pattern = GetOperandString(exp.Arguments[1]);
+            return $"({source}:{pattern})";
         }
 
         private static string TranslateFuzzyMatch(MethodCallExpression exp)
