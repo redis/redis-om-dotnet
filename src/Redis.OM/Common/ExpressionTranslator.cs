@@ -229,7 +229,7 @@ namespace Redis.OM.Common
                                 query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
                                 break;
                             case "Where":
-                                query.QueryText = TranslateWhereMethod(exp, parameters);
+                                query.QueryText = query.QueryText == "*" ? TranslateWhereMethod(exp, parameters) : $"({TranslateWhereMethod(exp, parameters)} {query.QueryText})";
                                 break;
                             case "NearestNeighbors":
                                 query.NearestNeighbors = ParseNearestNeighborsFromExpression(exp);
