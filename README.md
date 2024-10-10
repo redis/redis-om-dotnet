@@ -498,6 +498,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@PrudiusVladislav](https://github.com/PrudiusVladislav)
 * [@CormacLennon](https://github.com/CormacLennon)
 * [@ahmedisam99](https://github.com/ahmedisam99)
+* [@granit1986](https://github.com/granit1986)
 * [@kirollosonsi](https://github.com/kirollosonsi)
 * [@tgmoore](https://github.com/tgmoore)
 

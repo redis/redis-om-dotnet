@@ -11,6 +11,8 @@ namespace Redis.OM.Modeling
     /// </summary>
     public class RedisCollectionStateManager
     {
+        private JsonSerializerSettings _current = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DateFormatHandling = DateFormatHandling.IsoDateFormat, DateParseHandling = DateParseHandling.DateTimeOffset, DateTimeZoneHandling = DateTimeZoneHandling.Utc };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCollectionStateManager"/> class.
         /// </summary>
@@ -76,8 +78,8 @@ namespace Redis.OM.Modeling
 
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
-                var json = JToken.FromObject(value, Newtonsoft.Json.JsonSerializer.Create(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-                Snapshot.Add(key, json);
+                var json = DeserializeValue(value);
+                Snapshot.Add(key, json!);
             }
             else
             {
@@ -103,8 +105,7 @@ namespace Redis.OM.Modeling
 
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
-                var dataJson = JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions);
-                var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DateFormatHandling = DateFormatHandling.IsoDateFormat, DateParseHandling = DateParseHandling.DateTimeOffset, DateTimeZoneHandling = DateTimeZoneHandling.Utc });
+                var current = DeserializeValue(value);
                 var snapshot = (JToken)Snapshot[key];
                 var diff = FindDiff(current!, snapshot);
                 differences = BuildJsonDifference(diff, "$", snapshot);
@@ -333,6 +334,12 @@ namespace Redis.OM.Modeling
             }
 
             return diff;
+        }
+
+        private JObject? DeserializeValue(object value)
+        {
+            var dataJson = JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions);
+            return JsonConvert.DeserializeObject<JObject>(dataJson, _current);
         }
     }
 }

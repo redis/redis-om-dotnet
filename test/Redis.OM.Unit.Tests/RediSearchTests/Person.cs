@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Redis.OM.Modeling;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -72,6 +73,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Indexed(Aggregatable = true)] public string FirstName { get; set; }
         [Indexed(Aggregatable = true)] public string LastName { get; set; }
 
-
+        public DateTime Date { get; set; }
     }
 }

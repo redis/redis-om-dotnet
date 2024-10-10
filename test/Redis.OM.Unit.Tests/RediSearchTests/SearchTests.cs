@@ -20,7 +20,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     public class SearchTests
     {
-        private readonly IRedisConnection _substitute = Substitute.For<IRedisConnection>();
+        private readonly IRedisConnection _substitute;
         private readonly RedisReply _mockReply = new RedisReply[]
         {
             new(1),
@@ -28,7 +28,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             new(new RedisReply[]
             {
                 "$",
-                "{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"01FVN836BNQGYMT80V7RCVY73N\"}"
+                "{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"01FVN836BNQGYMT80V7RCVY73N\", \"Date\":1704056400000}"
             })
         };
 
@@ -47,6 +47,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"01FVN836BNQGYMT80V7RCVY73N\"}"
             })
         };
+
+        public SearchTests()
+        {
+            _substitute = Substitute.For<IRedisConnection>();
+        }
 
         [Fact]
         public void TestBasicQuery()
@@ -3856,6 +3861,67 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "1234");
+        }
+
+        [Fact]
+        public void DontSaveDateTimeIfNotChanged()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var dateTime = new DateTime(2024, 01, 01);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            var item = collection.First();
+            item.Date = dateTime;
+            collection.Update(item);
+            
+            var timestamp = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+            _substitute.Received(0).Execute(
+                "EVALSHA",
+                Arg.Any<string>(),
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N",
+                "SET",
+                "$.Date",
+                $"{timestamp}");
+        }
+
+        [Fact]
+        public void SaveDateTimeIfChanged()
+        {
+            _substitute.ClearSubstitute();
+            var dateTime = new DateTime(2024, 01, 01);
+            var timestamp = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+            var mockReply = (RedisReply)new RedisReply[]
+            {
+                new(1),
+                new("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"),
+                new(new RedisReply[]
+                {
+                    "$",
+                    $"{{\"Name\":\"Steve\",\"Age\":32,\"Height\":71.0, \"Id\":\"01FVN836BNQGYMT80V7RCVY73N\", \"Date\":{timestamp}}}"
+                })
+            };
+
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>())
+                .Returns(Task.FromResult(new RedisReply("x")));
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(mockReply);
+            var collection = new RedisCollection<Person>(_substitute);
+
+            var item = collection.First();
+            item.Date = dateTime.AddMinutes(1);
+            timestamp += 60 * 1000;
+            collection.Update(item);
+
+            _substitute.Received().Execute(
+                "EVALSHA",
+                Arg.Any<string>(),
+                "1",
+                "Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N",
+                "SET",
+                "$.Date",
+                $"{timestamp}");
         }
 
         [Fact]
