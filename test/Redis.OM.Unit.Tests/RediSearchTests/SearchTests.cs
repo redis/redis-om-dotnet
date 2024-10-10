@@ -3309,6 +3309,26 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestSelectWithMultipleWheres()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            IRedisCollection<Person> collection = new RedisCollection<Person>(_substitute);
+            collection = collection.Where(x => x.Name == "Steve");
+            _ = collection.Where(x => x.Age == 33).Select(x => x.Name).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((@Name:\"Steve\") (@Age:[33 33]))",
+                "LIMIT",
+                "0",
+                "100",
+                "RETURN",
+                "1",
+                "Name");
+        }
+
+        [Fact]
         public void TestNullableEnumQueries()
 
         {
