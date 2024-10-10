@@ -415,6 +415,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100");
         }
+        
+        [Fact]
+        public void TestMultipleMatches()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.Name.MatchContains("Ste") && x.Name.MatchStartsWith("Stev") && x.Name.MatchEndsWith("eve") && x.Name.MatchPattern("%Stepe%")).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "((((@Name:*Ste*) (@Name:Stev*)) (@Name:*eve)) (@Name:%Stepe%))",
+                "LIMIT",
+                "0",
+                "100");
+        }
 
         [Fact]
         public void TestMatchPattern()
