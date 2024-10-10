@@ -664,6 +664,10 @@ namespace Redis.OM.Common
             return exp.Method.Name switch
             {
                 nameof(StringExtension.FuzzyMatch) => TranslateFuzzyMatch(exp),
+                nameof(StringExtension.MatchContains) => TranslateMatchContains(exp),
+                nameof(StringExtension.MatchStartsWith) => TranslateMatchStartsWith(exp),
+                nameof(StringExtension.MatchEndsWith) => TranslateEndsWith(exp),
+                nameof(StringExtension.MatchPattern) => TranslateMatchPattern(exp),
                 nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
                 nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, parameters),
                 nameof(string.StartsWith) => TranslateStartsWith(exp),
