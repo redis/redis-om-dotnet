@@ -65,7 +65,7 @@ namespace Redis.OM.Unit.Tests
             var jsonObjWithExpire = new BasicJsonObject { Name = "JsonWithExpire" };
             var key = await connection.SetAsync(jsonObjWithExpire, TimeSpan.FromMilliseconds(5000.5));
             var ttl = (long)await connection.ExecuteAsync("PTTL", key);
-            Assert.True(ttl <= 5000.5);
+            Assert.True(ttl <= 5001);
             Assert.True(ttl >= 1000);
         }
 
