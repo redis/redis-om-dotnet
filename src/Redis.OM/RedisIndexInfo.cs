@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Redis.OM.Modeling;
 
 namespace Redis.OM
 {
@@ -220,6 +221,9 @@ namespace Redis.OM
                         case "key_type": Identifier = value.ToString(CultureInfo.InvariantCulture); break;
                         case "prefixes": Prefixes = value.ToArray().Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray(); break;
                         case "default_score": DefaultScore = value.ToString(CultureInfo.InvariantCulture); break;
+                        case "default_language": DefaultLanguage = value.ToString(CultureInfo.InvariantCulture); break;
+                        case "filter": Filter = value.ToString(CultureInfo.InvariantCulture); break;
+                        case "language_field": LanguageField = value.ToString(CultureInfo.InvariantCulture); break;
                     }
                 }
             }
@@ -238,6 +242,21 @@ namespace Redis.OM
             /// Gets default_score.
             /// </summary>
             public string? DefaultScore { get; }
+
+            /// <summary>
+            /// Gets Filter.
+            /// </summary>
+            public string? Filter { get; }
+
+            /// <summary>
+            /// Gets language.
+            /// </summary>
+            public string? DefaultLanguage { get; }
+
+            /// <summary>
+            /// Gets LanguageField.
+            /// </summary>
+            public string? LanguageField { get; }
         }
 
         /// <summary>
@@ -266,7 +285,19 @@ namespace Redis.OM
                         case "attribute": Attribute = value; break;
                         case "type": Type = value; break;
                         case "SEPARATOR": Separator = value; break;
+                        case "algorithm": Algorithm = value; break;
+                        case "data_type": VectorType = value; break;
+                        case "dim": Dimension = value; break;
+                        case "distance_metric": DistanceMetric = value; break;
+                        case "M": M = value; break;
+                        case "ef_construction": EfConstruction = value; break;
+                        case "WEIGHT": Weight = value; break;
                     }
+                }
+
+                if (responseArray.Any(x => ((string)x).Equals("NOSTEM", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    NoStem = true;
                 }
 
                 if (responseArray.Select(x => x.ToString())
@@ -300,6 +331,46 @@ namespace Redis.OM
             /// Gets SORTABLE.
             /// </summary>
             public bool? Sortable { get; }
+
+            /// <summary>
+            /// Gets NOSTEM.
+            /// </summary>
+            public bool? NoStem { get; }
+
+            /// <summary>
+            /// Gets weight.
+            /// </summary>
+            public string? Weight { get; }
+
+            /// <summary>
+            /// Gets Algorithm.
+            /// </summary>
+            public string? Algorithm { get; }
+
+            /// <summary>
+            /// Gets the VectorType.
+            /// </summary>
+            public string? VectorType { get; }
+
+            /// <summary>
+            /// Gets Dimension.
+            /// </summary>
+            public string? Dimension { get; }
+
+            /// <summary>
+            /// Gets DistanceMetric.
+            /// </summary>
+            public string? DistanceMetric { get; }
+
+            /// <summary>
+            /// Gets M.
+            /// </summary>
+            public string? M { get; }
+
+            /// <summary>
+            /// Gets EF constructor.
+            /// </summary>
+            public string? EfConstruction { get; }
         }
 
         /// <summary>
