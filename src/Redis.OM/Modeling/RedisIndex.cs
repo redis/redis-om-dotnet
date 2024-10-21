@@ -20,27 +20,86 @@ namespace Redis.OM.Modeling
         public static bool IndexDefinitionEquals(this RedisIndexInfo redisIndexInfo, Type type)
         {
             var serialisedDefinition = SerializeIndex(type);
-            var existingSet = redisIndexInfo.Attributes?.Select(a => (Property: a.Attribute!, a.Type!)).OrderBy(a => a.Property);
             var isJson = redisIndexInfo.IndexDefinition?.Identifier == "JSON";
 
+            var currentOffset = 0;
             if (serialisedDefinition.Length < 5)
             {
                 throw new ArgumentException($"Could not parse the index definition for type: {type.Name}.");
             }
 
-            if (redisIndexInfo.IndexName != serialisedDefinition[0])
+            if (redisIndexInfo.IndexDefinition is null)
             {
                 return false;
             }
 
-            if (redisIndexInfo.IndexDefinition?.Identifier?.Equals(serialisedDefinition[2], StringComparison.OrdinalIgnoreCase) == false)
+            // these are properties we cannot process because FT.INFO does not respond with them
+            var unprocessableProperties = new string[] { "EPSILON", "EF_RUNTIME", "PHONETIC", "STOPWORDS" };
+
+            foreach (var property in unprocessableProperties)
+            {
+                if (serialisedDefinition.Any(x => x.Equals(property)))
+                {
+                    throw new ArgumentException($"Could not validate index definition that contains {property}");
+                }
+            }
+
+            if (redisIndexInfo.IndexName != serialisedDefinition[currentOffset])
             {
                 return false;
             }
 
-            if (redisIndexInfo.IndexDefinition?.Prefixes.FirstOrDefault().Equals(serialisedDefinition[5]) == false)
+            currentOffset += 2; // skip to the index type at index 2
+
+            if (redisIndexInfo.IndexDefinition?.Identifier?.Equals(serialisedDefinition[currentOffset], StringComparison.OrdinalIgnoreCase) == false)
             {
                 return false;
+            }
+
+            currentOffset += 2; // skip to prefix count
+
+            if (!int.TryParse(serialisedDefinition[currentOffset], out var numPrefixes))
+            {
+                throw new ArgumentException("Could not parse index with unknown number of prefixes");
+            }
+
+            currentOffset += 2; // skip to first prefix
+
+            if (redisIndexInfo.IndexDefinition?.Prefixes is null || redisIndexInfo.IndexDefinition.Prefixes.Length != numPrefixes || serialisedDefinition.Skip(currentOffset).Take(numPrefixes).SequenceEqual(redisIndexInfo.IndexDefinition.Prefixes))
+            {
+                return false;
+            }
+
+            currentOffset += numPrefixes;
+
+            if (redisIndexInfo.IndexDefinition?.Filter is not null && !redisIndexInfo.IndexDefinition.Filter.Equals(serialisedDefinition.ElementAt(currentOffset)))
+            {
+                return false;
+            }
+
+            if (redisIndexInfo.IndexDefinition?.Filter is not null)
+            {
+                currentOffset += 2;
+            }
+
+            if (redisIndexInfo.IndexDefinition?.DefaultLanguage is not null && !redisIndexInfo.IndexDefinition.DefaultLanguage.Equals(serialisedDefinition.ElementAt(currentOffset)))
+            {
+                return false;
+            }
+
+            if (redisIndexInfo.IndexDefinition?.DefaultLanguage is not null)
+            {
+                currentOffset += 2;
+            }
+
+            if (redisIndexInfo.IndexDefinition?.LanguageField is not null && !redisIndexInfo.IndexDefinition.LanguageField.Equals(serialisedDefinition.ElementAt(currentOffset)))
+            {
+                return false;
+            }
+
+            if (redisIndexInfo.IndexDefinition?.LanguageField is not null)
+            {
+                currentOffset += 2;
             }
 
             var target = redisIndexInfo.Attributes?.SelectMany(a =>
@@ -63,6 +122,70 @@ namespace Redis.OM.Modeling
                 if (a.Type != null)
                 {
                     attr.Add(a.Type);
+                    if (a.Type == "TAG")
+                    {
+                        attr.Add("SEPARATOR");
+                        attr.Add(a.Separator ?? "|");
+                    }
+
+                    if (a.Type == "TEXT")
+                    {
+                        if (a.NoStem == true)
+                        {
+                            attr.Add("NOSTEM");
+                        }
+
+                        if (a.Weight is not null && a.Weight != "1")
+                        {
+                            attr.Add("WEIGHT");
+                            attr.Add(a.Weight);
+                        }
+                    }
+
+                    if (a.Type == "VECTOR")
+                    {
+                        if (a.Algorithm is null)
+                        {
+                            throw new InvalidOperationException("Encountered Vector field with no algorithm");
+                        }
+
+                        attr.Add(a.Algorithm);
+                        if (a.VectorType is null)
+                        {
+                            throw new InvalidOperationException("Encountered vector field with no Vector Type");
+                        }
+
+                        attr.Add(NumVectorArgs(a).ToString());
+
+                        attr.Add("TYPE");
+                        attr.Add(a.VectorType);
+
+                        if (a.Dimension is null)
+                        {
+                            throw new InvalidOperationException("Encountered vector field with no dimension");
+                        }
+
+                        attr.Add("DIM");
+                        attr.Add(a.Dimension);
+
+                        if (a.DistanceMetric is not null)
+                        {
+                            attr.Add("DISTANCE_METRIC");
+                            attr.Add(a.DistanceMetric);
+                        }
+
+                        if (a.M is not null)
+                        {
+                            attr.Add("M");
+                            attr.Add(a.M);
+                        }
+
+                        if (a.EfConstruction is not null)
+                        {
+                            attr.Add("EF_CONSTRUCTION");
+                            attr.Add(a.EfConstruction);
+                        }
+                    }
                 }
 
                 if (a.Sortable == true)
@@ -73,7 +196,21 @@ namespace Redis.OM.Modeling
                 return attr.ToArray();
             });
 
-            return target.SequenceEqual(serialisedDefinition.Skip(7));
+            return target.SequenceEqual(serialisedDefinition.Skip(currentOffset));
+        }
+
+        /// <summary>
+        /// calculates the number of arguments that would be required based to reverse engineer the index based off what
+        /// is in the Info attribute.
+        /// </summary>
+        /// <param name="attr">The attribute.</param>
+        /// <returns>The number of arguments.</returns>
+        internal static int NumVectorArgs(this RedisIndexInfo.RedisIndexInfoAttribute attr)
+        {
+            var numArgs = 6;
+            numArgs += attr.M is not null ? 2 : 0;
+            numArgs += attr.EfConstruction is not null ? 2 : 0;
+            return numArgs;
         }
 
         /// <summary>

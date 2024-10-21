@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
+using Redis.OM.Vectorizers;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -33,8 +34,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Document(IndexName = "SerialisedJson-idx", Prefixes = new []{"Simple"}, StorageType = StorageType.Json)]
         public class SerialisedJsonType
         {
-            [Searchable(Sortable = true)]
+            [Searchable(Sortable = true, NoStem = true, Weight = .8)]
             public string Name { get; set; }
+            
+            [Indexed(Sortable = true)]
+            public string Tag { get; set; }
+            
+            [Indexed] public GeoLoc GeoField { get; set; }
+            
+            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW)] [OpenAIVectorizer]public Vector<String> VectorField { get; set; }
             
             public int Age { get; set; }
         }
@@ -42,11 +50,44 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Document(IndexName = "SerialisedJson-idx", Prefixes = new []{"Simple"}, StorageType = StorageType.Json)]
         public class SerialisedJsonTypeNotMatch
         {
-            [Searchable(Sortable = true)]
+            [Searchable(Sortable = true, NoStem = true, Weight = .8)]
             public string Name { get; set; }
             
             [Indexed(Sortable = true)]
+            public string Tag { get; set; }
+            
+            [Indexed] public GeoLoc GeoField { get; set; }
+            
+            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW)] [OpenAIVectorizer]public Vector<String> VectorField { get; set; }
+            
+            [Indexed(Sortable = true)]
             public int Age { get; set; }
+        }
+
+        [Document(IndexName = "Uncheckable-idx", Prefixes = new[] { "Simple" }, StorageType = StorageType.Json)]
+        public class UncheckableIndex
+        {
+            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW, Epsilon = .02, EfRuntime = 11)] [OpenAIVectorizer]public Vector<String> VectorField { get; set; }
+        }
+
+        [Document(IndexName = "Uncheckable-idx", Prefixes = new[] { "Simple" }, StorageType = StorageType.Json)]
+        public class UncheckableIndexPhoneticMatcher
+        {
+            [Searchable(PhoneticMatcher = "dm:fr")]public string Name { get; set; }
+        }
+
+        [Document(IndexName = "kitchen-sink", Prefixes = new []{"prefix1", "prefix2", "prefix3"}, Language = "norwegian", LanguageField = nameof(Lang), Filter = "@Name == 'foo'")]
+        public class KitchenSinkDocumentIndex
+        {
+            [Indexed]public string Name { get; set; }
+            public string Lang { get; set; }
+        }
+        
+        [Document(IndexName = "kitchen-sink", Prefixes = new []{"prefix1", "prefix2", "prefix3"}, Language = "norwegian", LanguageField = nameof(Lang), Filter = "@Name == 'foo'", Stopwords = new []{"break"})]
+        public class KitchenSinkDocumentIndexFailForStopwords
+        {
+            [Indexed]public string Name { get; set; }
+            public string Lang { get; set; }
         }
 
         [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash, Prefixes = new []{"Person:"})]
@@ -285,5 +326,62 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.False(indexInfo.IndexDefinitionEquals(typeof(SerialisedJsonTypeNotMatch)));
             Assert.True(indexInfo.IndexDefinitionEquals(typeof(SerialisedJsonType)));
         }
+
+        [Fact]
+        public async Task TestArgumentExceptionOnUncheckableIndexType()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            await connection.DropIndexAsync(typeof(UncheckableIndex));
+            await connection.CreateIndexAsync(typeof(UncheckableIndex));
+            var indexInfo = await connection.GetIndexInfoAsync(typeof(UncheckableIndex));
+
+            Assert.Throws<ArgumentException>(()=>indexInfo.IndexDefinitionEquals(typeof(UncheckableIndex)));
+        }
+        
+        [Fact]
+        public async Task TestArgumentExceptionOnUncheckableIndexTypePhonetics()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            await connection.DropIndexAsync(typeof(UncheckableIndexPhoneticMatcher));
+            await connection.CreateIndexAsync(typeof(UncheckableIndexPhoneticMatcher));
+            var indexInfo = await connection.GetIndexInfoAsync(typeof(UncheckableIndexPhoneticMatcher));
+
+            Assert.Throws<ArgumentException>(()=>indexInfo.IndexDefinitionEquals(typeof(UncheckableIndexPhoneticMatcher)));
+        }
+
+        [Fact]
+        public async Task TestKitchenSinkEquality()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            await connection.DropIndexAsync(typeof(KitchenSinkDocumentIndex));
+            await connection.CreateIndexAsync(typeof(KitchenSinkDocumentIndex));
+            var indexInfo = await connection.GetIndexInfoAsync(typeof(KitchenSinkDocumentIndex));
+            
+            Assert.True(indexInfo.IndexDefinitionEquals(typeof(KitchenSinkDocumentIndex)));
+        }
+        
+        [Fact]
+        public async Task TestKitchenSinkEqualityFailForStopwords()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            await connection.DropIndexAsync(typeof(KitchenSinkDocumentIndexFailForStopwords));
+            await connection.CreateIndexAsync(typeof(KitchenSinkDocumentIndexFailForStopwords));
+            var indexInfo = await connection.GetIndexInfoAsync(typeof(KitchenSinkDocumentIndexFailForStopwords));
+            
+            Assert.Throws<ArgumentException>(()=>indexInfo.IndexDefinitionEquals(typeof(KitchenSinkDocumentIndexFailForStopwords)));
+        }
+        
     }
 }
