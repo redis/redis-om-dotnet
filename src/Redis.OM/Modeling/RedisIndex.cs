@@ -117,6 +117,12 @@ namespace Redis.OM.Modeling
                     attr.Add("AS");
                 }
 
+                if (!isJson && a.Type is not null && a.Type == "VECTOR")
+                {
+                    attr.Add($"{a.Attribute!}.Vector");
+                    attr.Add("AS");
+                }
+
                 attr.Add(a.Attribute!);
 
                 if (a.Type != null)

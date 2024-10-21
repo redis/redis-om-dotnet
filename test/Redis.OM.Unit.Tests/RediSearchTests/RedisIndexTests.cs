@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
@@ -11,6 +12,18 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     public class RedisIndexTests
     {
 
+        [Document]
+        public class TestNoExtras
+        {
+            [Searchable] public string Name { get; set; }
+            [Indexed] public int Age { get; set; }
+            [Indexed] public double Height { get; set; }
+            [Indexed] public string[] NickNames { get; set; }
+            [Indexed] public string Tag { get; set; }
+            [Indexed] public GeoLoc GeoLoc { get; set; }
+            [Indexed] [OpenAIVectorizer]public Vector<String> VectorField { get; set; }
+        }
+        
         [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash)]
         public class TestPersonClassHappyPath
         {
@@ -382,6 +395,19 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             
             Assert.Throws<ArgumentException>(()=>indexInfo.IndexDefinitionEquals(typeof(KitchenSinkDocumentIndexFailForStopwords)));
         }
-        
+
+        [Fact]
+        public async Task TestNoExtraStuffInIndex()
+        {
+            var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
+            var provider = new RedisConnectionProvider($"redis://{host}");
+            var connection = provider.Connection;
+
+            await connection.DropIndexAsync(typeof(TestNoExtras));
+            await connection.CreateIndexAsync(typeof(TestNoExtras));
+            var indexInfo = await connection.GetIndexInfoAsync(typeof(TestNoExtras));
+            
+            Assert.True(indexInfo.IndexDefinitionEquals(typeof(TestNoExtras)));
+        }
     }
 }
