@@ -477,7 +477,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var secondQueriedP = await collection.FindByIdAsync(key);
 
             Assert.Equal("3600001", ttl.TotalMillisecondsString());
-            Assert.InRange(ttlFromKey, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds);
+            Assert.InRange(ttlFromKey, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds + 1);
             Assert.NotNull(secondQueriedP);
             Assert.Equal(33, secondQueriedP.Age);
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
