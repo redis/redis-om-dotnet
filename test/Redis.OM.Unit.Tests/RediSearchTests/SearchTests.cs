@@ -48,6 +48,34 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             })
         };
 
+        private readonly RedisReply _mockedReplyObjectWIthMultipleDateTimes = new[]
+        {
+            new RedisReply(1),
+            new RedisReply(
+                "obj:01FVN836BNQGYMT80V7RCVY73N"),
+            new RedisReply(new RedisReply[]
+            {
+                "$",
+                "{\"Id\":\"01FVN836BNQGYMT80V7RCVY73N\",\"DateTime1\":1729592130000,\"DateTime2\":1730475900000}"
+            })
+        };
+        
+        private readonly RedisReply _mockedReplyObjectWIthMultipleDateTimesHash = new[]
+        {
+            new RedisReply(1),
+            new RedisReply(
+                "obj:01FVN836BNQGYMT80V7RCVY73N"),
+            new RedisReply(new RedisReply[]
+            {
+                "Id",
+                "01FVN836BNQGYMT80V7RCVY73N",
+                "DateTime1",
+                "1729592130000",
+                "DateTime2",
+                "1730475900000"
+            })
+        };
+
         [Fact]
         public void TestBasicQuery()
         {
@@ -1028,6 +1056,39 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             steve.Age = 33;
             await collection.UpdateAsync(steve);
             await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.RediSearchTests.Person:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Age", "33");
+            Scripts.ShaCollection.Clear();
+        }
+        
+        [Fact]
+        public async Task TestUpdateJsonWithMultipleDateTimes()
+        {
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockedReplyObjectWIthMultipleDateTimes);
+            
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(Task.FromResult(new RedisReply("42")));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>())
+                .Returns(Task.FromResult(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb")));
+            var collection = new RedisCollection<ObjectWIthMultipleDateTimes>(_substitute);
+            var obj = (await collection.Where(x => x.Id == "01FVN836BNQGYMT80V7RCVY73N").ToListAsync()).First();
+            obj.DateTime1 = obj.DateTime1.AddMilliseconds(1);
+            await collection.UpdateAsync(obj);
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("obj:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.DateTime1", "1729592130001");
+            Scripts.ShaCollection.Clear();
+        }
+        
+                
+        [Fact]
+        public async Task TestUpdateJsonWithMultipleDateTimesHash()
+        {
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockedReplyObjectWIthMultipleDateTimesHash);
+            
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(Task.FromResult(new RedisReply("42")));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>())
+                .Returns(Task.FromResult(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb")));
+            var collection = new RedisCollection<ObjectWIthMultipleDateTimesHash>(_substitute);
+            var obj = (await collection.Where(x => x.Id == "01FVN836BNQGYMT80V7RCVY73N").ToListAsync()).First();
+            obj.DateTime1 = obj.DateTime1.AddMilliseconds(1);
+            await collection.UpdateAsync(obj);
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("obj:01FVN836BNQGYMT80V7RCVY73N"), "1", "DateTime1", "1729592130001");
             Scripts.ShaCollection.Clear();
         }
 
