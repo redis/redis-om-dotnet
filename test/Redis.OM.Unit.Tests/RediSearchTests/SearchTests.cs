@@ -60,6 +60,18 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             })
         };
         
+        private readonly RedisReply _mockedReplyObjectWIthMultipleByteArrays = new[]
+        {
+            new RedisReply(1),
+            new RedisReply(
+                "obj:01FVN836BNQGYMT80V7RCVY73N"),
+            new RedisReply(new RedisReply[]
+            {
+                "$",
+                "{\"Id\":\"01FVN836BNQGYMT80V7RCVY73N\",\"Bytes1\":\"AQID\",\"Bytes2\":\"BAUG\"}"
+            })
+        };
+
         private readonly RedisReply _mockedReplyObjectWIthMultipleDateTimesHash = new[]
         {
             new RedisReply(1),
@@ -1090,6 +1102,21 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await collection.UpdateAsync(obj);
             await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("obj:01FVN836BNQGYMT80V7RCVY73N"), "1", "DateTime1", "1729592130001");
             Scripts.ShaCollection.Clear();
+        }
+
+        [Fact]
+        public async Task TestUpdateJsonWithByteArrays()
+        {
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockedReplyObjectWIthMultipleByteArrays);
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(Task.FromResult(new RedisReply("42")));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>())
+                .Returns(Task.FromResult(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb")));
+
+            var collection = new RedisCollection<ObjectWithByteArray>(_substitute);
+            var obj = (await collection.Where(x => x.Id == "01FVN836BNQGYMT80V7RCVY73N").ToListAsync()).First();
+            obj.Bytes1 = new byte[] { 4, 5, 6 };
+            await collection.UpdateAsync(obj);
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("obj:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.Bytes1","\"BAUG\"");
         }
 
         [Fact]

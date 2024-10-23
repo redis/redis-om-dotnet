@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Redis.OM.Modeling.Vectors;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Redis.OM.Modeling
@@ -329,7 +329,16 @@ namespace Redis.OM.Modeling
 
                     break;
                 default:
-                    if (currentObject.ToString() != snapshotObject.ToString())
+                    if (snapshotObject.Type == JTokenType.Bytes)
+                    {
+                        var snapShotObjectStr = Convert.ToBase64String(snapshotObject.Value<byte[]>());
+
+                        if (snapShotObjectStr != currentObject.ToString())
+                        {
+                            diff["+"] = currentObject.ToString();
+                        }
+                    }
+                    else if (currentObject.ToString() != snapshotObject.ToString())
                     {
                         diff["+"] = currentObject;
                         diff["-"] = snapshotObject;

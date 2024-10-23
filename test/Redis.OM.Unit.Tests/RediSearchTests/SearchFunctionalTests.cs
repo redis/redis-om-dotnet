@@ -1270,5 +1270,20 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             var res = await collection.Where(x => x.Name.MatchPattern(pattern)).ToListAsync();
             Assert.Equal(existingRecordsCount, res.Count);
         }
+
+        [Fact]
+        public async Task TestUpdateByteArray()
+        {
+            var collection = new RedisCollection<ObjectWithByteArray>(_connection);
+            var obj = new ObjectWithByteArray() { Bytes1 = new byte[] { 1, 2, 3 }, Bytes2 = new byte[] { 4, 5, 6 } };
+            var id = await collection.InsertAsync(obj);
+            var res = (await collection.Where(x => x.Id == obj.Id).ToListAsync()).First();
+            res.Bytes1 = new byte[] { 7, 8, 9 };
+            res.Bytes2 = new byte[] { 10, 11, 12 };
+            await collection.UpdateAsync(res);
+            var updated = (await collection.Where(x => x.Id == obj.Id).ToListAsync()).First();
+            Assert.Equal(new byte[] { 7, 8, 9 }, updated.Bytes1);
+            Assert.Equal(new byte[] { 10, 11, 12 }, updated.Bytes2);
+        }
     }
 }
