@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -11,6 +12,11 @@ namespace Redis.OM.Modeling
     /// </summary>
     public class RedisCollectionStateManager
     {
+        private static JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore, Converters = new List<JsonConverter> { new DateTimeJsonConvertNewtonsoft() },
+        };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCollectionStateManager"/> class.
         /// </summary>
@@ -76,7 +82,7 @@ namespace Redis.OM.Modeling
 
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
-                var json = JToken.FromObject(value, Newtonsoft.Json.JsonSerializer.Create(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+                var json = JToken.FromObject(value, Newtonsoft.Json.JsonSerializer.Create(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new List<JsonConverter> { new DateTimeJsonConvertNewtonsoft() } }));
                 Snapshot.Add(key, json);
             }
             else
@@ -115,7 +121,7 @@ namespace Redis.OM.Modeling
                 var snapshotHash = (IDictionary<string, object>)Snapshot[key];
                 var deletedKeys = snapshotHash.Keys.Except(dataHash.Keys).Select(x => new KeyValuePair<string, string>(x, string.Empty));
                 var modifiedKeys = dataHash.Where(x =>
-                    !snapshotHash.Keys.Contains(x.Key) || snapshotHash[x.Key] != x.Value).Select(x =>
+                    !snapshotHash.Keys.Contains(x.Key) || !snapshotHash[x.Key].Equals(x.Value)).Select(x =>
                     new KeyValuePair<string, string>(x.Key, x.Value.ToString()));
                 differences = new List<IObjectDiff>
                 {
@@ -323,7 +329,16 @@ namespace Redis.OM.Modeling
 
                     break;
                 default:
-                    if (currentObject.ToString() != snapshotObject.ToString())
+                    if (snapshotObject.Type == JTokenType.Bytes)
+                    {
+                        var snapShotObjectStr = Convert.ToBase64String(snapshotObject.Value<byte[]>());
+
+                        if (snapShotObjectStr != currentObject.ToString())
+                        {
+                            diff["+"] = currentObject.ToString();
+                        }
+                    }
+                    else if (currentObject.ToString() != snapshotObject.ToString())
                     {
                         diff["+"] = currentObject;
                         diff["-"] = snapshotObject;
