@@ -773,14 +773,14 @@ namespace Redis.OM.Searching
                     if (ttl is not null)
                     {
                         args.Add("EXPIRE");
-                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                        args.Add(ttl.Value.TotalMillisecondsString());
                     }
 
                     await _connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray());
                 }
                 else if (ttl is not null)
                 {
-                    await _connection.ExecuteAsync("PEXPIRE", key, ttl.Value.TotalMilliseconds);
+                    await _connection.ExecuteAsync("PEXPIRE", key, ttl.Value.TotalMillisecondsString());
                 }
             }
             else
@@ -841,14 +841,14 @@ namespace Redis.OM.Searching
                     if (ttl is not null)
                     {
                         args.Add("EXPIRE");
-                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                        args.Add(ttl.Value.TotalMillisecondsString());
                     }
 
                     _connection.CreateAndEval(scriptName, new[] { key }, args.ToArray());
                 }
                 else if (ttl is not null)
                 {
-                    _connection.Execute("PEXPIRE", key, ttl.Value.TotalMilliseconds);
+                    _connection.Execute("PEXPIRE", key, ttl.Value.TotalMillisecondsString());
                 }
             }
             else
@@ -879,14 +879,14 @@ namespace Redis.OM.Searching
                     if (ttl is not null)
                     {
                         args.Add("EXPIRE");
-                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                        args.Add(ttl.Value.TotalMillisecondsString());
                     }
 
                     task = _connection.CreateAndEvalAsync(scriptName, new[] { key }, args.ToArray());
                 }
                 else if (ttl is not null)
                 {
-                    task = _connection.ExecuteAsync("PEXPIRE", key, ttl.Value.TotalMilliseconds);
+                    task = _connection.ExecuteAsync("PEXPIRE", key, ttl.Value.TotalMillisecondsString());
                 }
             }
             else

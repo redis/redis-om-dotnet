@@ -457,6 +457,32 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(secondQueriedP.Id, queriedP.Id);
             Assert.Equal(testP.Id, secondQueriedP.Id);
         }
+        
+        [Fact]
+        public async Task TestUpdateWithTtlAsyncFractionalTimespan()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var testP = new Person { Name = "Steve", Age = 32 };
+            var key = await collection.InsertAsync(testP);
+            var queriedP = await collection.FindByIdAsync(key);
+            Assert.NotNull(queriedP);
+            queriedP.Age = 33;
+            TimeSpan ttl = TimeSpan.FromHours(1);
+            ttl = ttl.Add(TimeSpan.FromTicks(5000));
+            
+            await collection.UpdateAsync(queriedP, ttl);
+
+            var ttlFromKey = (double) await _connection.ExecuteAsync("PTTL", key);
+
+            var secondQueriedP = await collection.FindByIdAsync(key);
+
+            Assert.Equal("3600001", ttl.TotalMillisecondsString());
+            Assert.InRange(ttlFromKey, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds + 1);
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(secondQueriedP.Id, queriedP.Id);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
 
         [Fact]
         public async Task TestUpdateName()

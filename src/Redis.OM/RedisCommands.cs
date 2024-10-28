@@ -187,7 +187,7 @@ namespace Redis.OM
         /// <returns>whether the operation succeeded.</returns>
         public static async Task<bool> JsonSetAsync(this IRedisConnection connection, string key, string path, string json, WhenKey when, TimeSpan? timeSpan = null)
         {
-            var argList = new List<string> { timeSpan != null ? ((long)timeSpan.Value.TotalMilliseconds).ToString() : "-1", path, json };
+            var argList = new List<string> { timeSpan != null ? timeSpan.Value.TotalMillisecondsString() : "-1", path, json };
             switch (when)
             {
                 case WhenKey.Exists:
@@ -328,7 +328,7 @@ namespace Redis.OM
         /// <returns>whether the operation succeeded.</returns>
         public static bool JsonSet(this IRedisConnection connection, string key, string path, string json, WhenKey when, TimeSpan? timeSpan = null)
         {
-            var argList = new List<string> { timeSpan != null ? ((long)timeSpan.Value.TotalMilliseconds).ToString() : "-1", path, json };
+            var argList = new List<string> { timeSpan != null ? timeSpan.Value.TotalMillisecondsString() : "-1", path, json };
             switch (when)
             {
                 case WhenKey.Exists:
@@ -416,7 +416,7 @@ namespace Redis.OM
                 var kvps = obj.BuildHashSet();
                 var argsList = new List<object>();
                 int? res = null;
-                argsList.Add(timespan != null ? ((long)timespan.Value.TotalMilliseconds).ToString() : "-1");
+                argsList.Add(timespan != null ? timespan.Value.TotalMillisecondsString() : "-1");
                 foreach (var kvp in kvps)
                 {
                     argsList.Add(kvp.Key);
@@ -467,7 +467,7 @@ namespace Redis.OM
                 var kvps = obj.BuildHashSet();
                 var argsList = new List<object>();
                 int? res = null;
-                argsList.Add(timespan != null ? ((long)timespan.Value.TotalMilliseconds).ToString() : "-1");
+                argsList.Add(timespan != null ? timespan.Value.TotalMillisecondsString() : "-1");
                 foreach (var kvp in kvps)
                 {
                     argsList.Add(kvp.Key);
@@ -794,8 +794,8 @@ namespace Redis.OM
                     args.Add(pair.Value);
                     if (ttl is not null)
                     {
-                        args.Add("EXPIRE");
-                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                        args.Add("PEXPIRE");
+                        args.Add(ttl.Value.TotalMillisecondsString());
                     }
                 }
 
@@ -831,8 +831,8 @@ namespace Redis.OM
                     args.Add(pair.Value);
                     if (ttl is not null)
                     {
-                        args.Add("EXPIRE");
-                        args.Add(ttl.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                        args.Add("PEXPIRE");
+                        args.Add(ttl.Value.TotalMillisecondsString());
                     }
                 }
 
@@ -848,7 +848,7 @@ namespace Redis.OM
             TimeSpan ts)
         {
             var commandTuple = Tuple.Create(command, args);
-            var expireTuple = Tuple.Create("PEXPIRE", new object[] { new RedisKey(keyToExpire), ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
+            var expireTuple = Tuple.Create("PEXPIRE", new object[] { new RedisKey(keyToExpire), ts.TotalMillisecondsString() });
             return connection.ExecuteInTransaction(new[] { commandTuple, expireTuple });
         }
 
@@ -860,7 +860,7 @@ namespace Redis.OM
             TimeSpan ts)
         {
             var commandTuple = Tuple.Create(command, args);
-            var expireTuple = Tuple.Create("PEXPIRE", new object[] { new RedisKey(keyToExpire), ((long)ts.TotalMilliseconds).ToString(CultureInfo.InvariantCulture) });
+            var expireTuple = Tuple.Create("PEXPIRE", new object[] { new RedisKey(keyToExpire), ts.TotalMillisecondsString() });
             return connection.ExecuteInTransactionAsync(new[] { commandTuple, expireTuple });
         }
     }
