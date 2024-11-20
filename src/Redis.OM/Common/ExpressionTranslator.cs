@@ -364,6 +364,13 @@ namespace Redis.OM.Common
             {
                 var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters, treatBooleanMemberAsUnary: true);
 
+                var rightResolvesToNull = ExpressionParserUtilities.ExpressionResolvesToNull(binExpression.Right);
+
+                if (rightResolvesToNull)
+                {
+                    return $"(ismissing({leftContent}))";
+                }
+
                 var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters, treatBooleanMemberAsUnary: true);
 
                 if (binExpression.Left is MemberExpression member)

@@ -316,6 +316,44 @@ namespace Redis.OM.Common
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Checks the expression if it resolves to null.
+        /// </summary>
+        /// <param name="expression">The expression to check.</param>
+        /// <returns>whether it resolves to null.</returns>
+        internal static bool ExpressionResolvesToNull(Expression expression)
+        {
+            if (expression.NodeType is ExpressionType.Constant && ((ConstantExpression)expression).Value is null)
+            {
+                return true;
+            }
+
+            if (expression.NodeType is ExpressionType.MemberAccess)
+            {
+                var parentExpression = expression;
+                var memberInfos = new Stack<MemberInfo>();
+                while (parentExpression is MemberExpression parentMember)
+                {
+                    var info = ((MemberExpression)parentExpression).Member;
+                    memberInfos.Push(info);
+                    parentExpression = parentMember.Expression;
+                }
+
+                if (parentExpression is ConstantExpression c)
+                {
+                    var resolved = c.Value;
+                    foreach (var info in memberInfos)
+                    {
+                        resolved = GetValue(info, resolved);
+                    }
+
+                    return resolved is null;
+                }
+            }
+
+            return false;
+        }
+
         private static string GetOperandStringForMember(MemberExpression member, bool treatEnumsAsInt = false, bool negate = false,  bool treatBooleanMemberAsUnary = false)
         {
             var memberPath = new List<string>();

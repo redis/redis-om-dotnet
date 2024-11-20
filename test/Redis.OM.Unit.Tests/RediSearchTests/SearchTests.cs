@@ -4026,5 +4026,58 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal(command, queryString);
         }
+
+        [Fact]
+        public async Task TestQueryForNull()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithNullableStrings>(_substitute);
+            string? val = null;
+            await collection.Where(x => x.String1 == null).ToListAsync();
+            await _substitute.Received().ExecuteAsync("FT.SEARCH",
+                $"{nameof(ObjectWithNullableStrings).ToLower()}-idx",
+                "(ismissing(@String1))",
+                "LIMIT",
+                "DIALECT",
+                2,
+                "0",
+                "100");
+            
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            await collection.Where(x => x.String1 == val).ToListAsync();
+            await _substitute.Received().ExecuteAsync("FT.SEARCH",
+                $"{nameof(ObjectWithNullableStrings).ToLower()}-idx",
+                "(ismissing(@String1))",
+                "LIMIT",
+                "DIALECT",
+                2,
+                "0",
+                "100");
+            
+            _substitute.ClearSubstitute();
+
+            var obj = new
+            {
+                inner = new
+                {
+                    val = (string?)null
+                }
+            };
+            
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            await collection.Where(x => x.String2 == obj.inner.val).ToListAsync();
+            await _substitute.Received().ExecuteAsync("FT.SEARCH",
+                $"{nameof(ObjectWithNullableStrings).ToLower()}-idx",
+                "(ismissing(@String2))",
+                "LIMIT",
+                "DIALECT",
+                2,
+                "0",
+                "100");
+            
+        }
+        
     }
 }
