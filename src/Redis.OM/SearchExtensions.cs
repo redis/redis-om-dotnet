@@ -930,6 +930,42 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Order the results by the provided field.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="expression">The expression to order by.</param>
+        /// <param name="max">the number of documents to sort.</param>
+        /// <typeparam name="T">The Indexed type.</typeparam>
+        /// <typeparam name="TField">The field type.</typeparam>
+        /// <returns>A set with the expression applied.</returns>
+        public static RedisAggregationSet<T> OrderBy<T, TField>(this RedisAggregationSet<T> source, Expression<Func<AggregationResult<T>, TField>> expression, int max)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(OrderBy, source, expression, max),
+                new[] { source.Expression, Expression.Quote(expression), Expression.Constant(max) });
+            return new RedisAggregationSet<T>(source, exp);
+        }
+
+        /// <summary>
+        /// Order the results by the provided field.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="expression">The expression to order by.</param>
+        /// <param name="max">The number of documents to sort.</param>
+        /// <typeparam name="T">The Indexed type.</typeparam>
+        /// <typeparam name="TField">The field type.</typeparam>
+        /// <returns>A set with the expression applied.</returns>
+        public static RedisAggregationSet<T> OrderByDescending<T, TField>(this RedisAggregationSet<T> source, Expression<Func<AggregationResult<T>, TField>> expression, int max)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(OrderByDescending, source, expression, max),
+                new[] { source.Expression, Expression.Quote(expression), Expression.Constant(max) });
+            return new RedisAggregationSet<T>(source, exp);
+        }
+
+        /// <summary>
         /// Closes out the group and yields a regular RedisAggregationSet. Use this to flush reductions further
         /// down the pipeline.
         /// </summary>

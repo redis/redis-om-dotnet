@@ -40,7 +40,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <summary>
         /// gets the number of arguments of this predicate.
         /// </summary>
-        internal int NumArgs => Max.HasValue ? 4 : 2;
+        internal static int NumArgs => 2;
 
         /// <inheritdoc/>
         public IEnumerable<string> Serialize()

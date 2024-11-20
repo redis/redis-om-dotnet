@@ -571,6 +571,11 @@ namespace Redis.OM.Common
         {
             var member = GetFieldName(expression.Arguments[1]);
             var sb = new AggregateSortBy(member, dir);
+            if (expression.Arguments.Count == 3)
+            {
+                sb.Max = (int)((ConstantExpression)expression.Arguments[2]).Value;
+            }
+
             return sb;
         }
 
