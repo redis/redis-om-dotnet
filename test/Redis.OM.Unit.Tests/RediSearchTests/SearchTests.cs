@@ -60,6 +60,18 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             })
         };
         
+        private readonly RedisReply _mockedReplyObjectWithDateTimeOffset = new[]
+        {
+            new RedisReply(1),
+            new RedisReply(
+                "Redis.OM.Unit.Tests.ObjectWithDateTimeOffsetJson:01FVN836BNQGYMT80V7RCVY73N"),
+            new RedisReply(new RedisReply[]
+            {
+                "$",
+                "{\"Id\":\"01FVN836BNQGYMT80V7RCVY73N\",\"DateTime\":1729592130000,\"Offset\":\"2024-12-25T00:00:00.000+01:00\"}"
+            })
+        };
+        
         private readonly RedisReply _mockedReplyObjectWIthMultipleByteArrays = new[]
         {
             new RedisReply(1),
@@ -1084,6 +1096,38 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             obj.DateTime1 = obj.DateTime1.AddMilliseconds(1);
             await collection.UpdateAsync(obj);
             await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("obj:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.DateTime1", "1729592130001");
+            Scripts.ShaCollection.Clear();
+        }
+        
+        [Fact]
+        public async Task TestSaveJsonWithDateTimeOffset()
+        {
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockedReplyObjectWithDateTimeOffset);
+            
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(Task.FromResult(new RedisReply("42")));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>())
+                .Returns(Task.FromResult(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb")));
+            var collection = new RedisCollection<ObjectWithDateTimeOffsetJson>(_substitute);
+            var obj = (await collection.Where(x => x.Id == "01FVN836BNQGYMT80V7RCVY73N").ToListAsync()).First();
+            obj.DateTime = obj.DateTime.AddMilliseconds(1);
+            await collection.SaveAsync();
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.ObjectWithDateTimeOffsetJson:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.DateTime", "1729592130001");
+            Scripts.ShaCollection.Clear();
+        }
+        
+        [Fact]
+        public async Task TestUpdateJsonWithDateTimeOffset()
+        {
+            _substitute.ExecuteAsync("FT.SEARCH", Arg.Any<object[]>()).Returns(_mockedReplyObjectWithDateTimeOffset);
+            
+            _substitute.ExecuteAsync("EVALSHA", Arg.Any<object[]>()).Returns(Task.FromResult(new RedisReply("42")));
+            _substitute.ExecuteAsync("SCRIPT", Arg.Any<object[]>())
+                .Returns(Task.FromResult(new RedisReply("cbbf1c4fab5064f419e469cc51c563f8bf51e6fb")));
+            var collection = new RedisCollection<ObjectWithDateTimeOffsetJson>(_substitute);
+            var obj = (await collection.Where(x => x.Id == "01FVN836BNQGYMT80V7RCVY73N").ToListAsync()).First();
+            obj.DateTime = obj.DateTime.AddMilliseconds(1);
+            await collection.UpdateAsync(obj);
+            await _substitute.Received().ExecuteAsync("EVALSHA", Arg.Any<string>(), "1", new RedisKey("Redis.OM.Unit.Tests.ObjectWithDateTimeOffsetJson:01FVN836BNQGYMT80V7RCVY73N"), "SET", "$.DateTime", "1729592130001");
             Scripts.ShaCollection.Clear();
         }
         
