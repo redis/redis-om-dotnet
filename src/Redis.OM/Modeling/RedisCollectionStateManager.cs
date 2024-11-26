@@ -12,9 +12,13 @@ namespace Redis.OM.Modeling
     /// </summary>
     public class RedisCollectionStateManager
     {
-        private static JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+        private static readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
         {
-            NullValueHandling = NullValueHandling.Ignore, Converters = new List<JsonConverter> { new DateTimeJsonConvertNewtonsoft() },
+            NullValueHandling = NullValueHandling.Ignore,
+            DateFormatHandling = DateFormatHandling.IsoDateFormat,
+            DateParseHandling = DateParseHandling.DateTimeOffset,
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+            Converters = new List<JsonConverter> { new DateTimeJsonConvertNewtonsoft() },
         };
 
         /// <summary>
@@ -82,7 +86,7 @@ namespace Redis.OM.Modeling
 
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
-                var json = JToken.FromObject(value, Newtonsoft.Json.JsonSerializer.Create(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new List<JsonConverter> { new DateTimeJsonConvertNewtonsoft() } }));
+                var json = JToken.FromObject(value, Newtonsoft.Json.JsonSerializer.Create(_jsonSerializerSettings));
                 Snapshot.Add(key, json);
             }
             else
@@ -110,7 +114,7 @@ namespace Redis.OM.Modeling
             if (DocumentAttribute.StorageType == StorageType.Json)
             {
                 var dataJson = JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions);
-                var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DateFormatHandling = DateFormatHandling.IsoDateFormat, DateParseHandling = DateParseHandling.DateTimeOffset, DateTimeZoneHandling = DateTimeZoneHandling.Utc });
+                var current = JsonConvert.DeserializeObject<JObject>(dataJson, _jsonSerializerSettings);
                 var snapshot = (JToken)Snapshot[key];
                 var diff = FindDiff(current!, snapshot);
                 differences = BuildJsonDifference(diff, "$", snapshot);
@@ -146,7 +150,7 @@ namespace Redis.OM.Modeling
                     if (Data.ContainsKey(key))
                     {
                         var dataJson = JsonSerializer.Serialize(Data[key], RedisSerializationSettings.JsonSerializerOptions);
-                        var current = JsonConvert.DeserializeObject<JObject>(dataJson, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                        var current = JsonConvert.DeserializeObject<JObject>(dataJson, _jsonSerializerSettings);
                         var snapshot = (JToken)Snapshot[key];
                         var diff = FindDiff(current!, snapshot);
                         var diffArgs = BuildJsonDifference(diff, "$", snapshot);
