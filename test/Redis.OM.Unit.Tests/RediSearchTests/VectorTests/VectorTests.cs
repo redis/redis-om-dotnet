@@ -34,7 +34,7 @@ public class VectorIndexCreationTests
             "1",
             $"Redis.OM.Unit.Tests.{nameof(ObjectWithVector)}:",
             "SCHEMA",
-            "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", 
+            "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", 
             "$.Num", "AS", "Num", "NUMERIC",
             "$.SimpleHnswVector", "AS", "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2",
             "$.SimpleVectorizedVector.Vector", "AS","SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2"
@@ -51,7 +51,7 @@ public class VectorIndexCreationTests
             "1",
             $"Redis.OM.Unit.Tests.{nameof(ObjectWithVectorHash)}:",
             "SCHEMA",
-            "Name", "TAG", "SEPARATOR", "|", 
+            "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", 
             "Num", "NUMERIC",
             "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2",
             "SimpleVectorizedVector.Vector", "AS", "SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2"

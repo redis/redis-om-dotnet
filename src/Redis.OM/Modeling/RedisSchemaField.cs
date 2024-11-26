@@ -300,6 +300,12 @@ namespace Redis.OM.Modeling
                     ret.Add("WEIGHT");
                     ret.Add(text.Weight.ToString(CultureInfo.InvariantCulture));
                 }
+
+                if (text.IndexEmptyAndMissing)
+                {
+                    ret.Add("INDEXMISSING");
+                    ret.Add("INDEXEMPTY");
+                }
             }
 
             if (searchFieldType == "TAG" && attr is IndexedAttribute tag)
@@ -318,6 +324,12 @@ namespace Redis.OM.Modeling
                 if (tag.CaseSensitive)
                 {
                     ret.Add("CASESENSITIVE");
+                }
+
+                if (tag.IndexEmptyAndMissing)
+                {
+                    ret.Add("INDEXMISSING");
+                    ret.Add("INDEXEMPTY");
                 }
             }
 

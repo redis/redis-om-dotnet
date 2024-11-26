@@ -1311,5 +1311,68 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(new byte[] { 7, 8, 9 }, updated.Bytes1);
             Assert.Equal(new byte[] { 10, 11, 12 }, updated.Bytes2);
         }
+
+        [Fact]
+        public async Task TestQueryNullStrings()
+        {
+            var collection = new RedisCollection<ObjectWithNullableStrings>(_connection);
+            var obj = new ObjectWithNullableStrings();
+            await collection.InsertAsync(obj);
+            
+            var res = await collection.FirstAsync(x=>x.Id == obj.Id && x.String1 == null && x.String2 == null && x.Guid == null && x.Bool == null && x.Enum == null);
+            
+            Assert.NotNull(res);
+            Assert.Null(res.String1);
+            Assert.Null(res.String2);
+            Assert.Null(res.Guid);
+            Assert.Null(res.Bool);
+            Assert.Null(res.Enum);
+            Assert.Equal(obj.Id, res.Id);
+            
+            res.Bool = true;
+            res.String1 = "Hello";
+            res.String2 = "World";
+            res.Guid = Guid.NewGuid();
+            res.Enum = AnEnum.one;
+            await collection.UpdateAsync(res);
+            
+            var updated = await collection.FirstAsync(x=>x.Id == obj.Id);
+            Assert.NotNull(updated);
+            Assert.Equal("Hello", updated.String1);
+            Assert.Equal("World", updated.String2);
+            Assert.NotNull(updated.Guid);
+            Assert.True(updated.Bool);
+            Assert.Equal(AnEnum.one, updated.Enum);
+        }
+        
+        [Fact]
+        public async Task TestQueryNullStringsHash()
+        {
+            var collection = new RedisCollection<ObjectWithNullableStringsHash>(_connection);
+            var obj = new ObjectWithNullableStringsHash();
+            await collection.InsertAsync(obj);
+            
+            var res = await collection.FirstAsync(x=>x.Id == obj.Id && x.String1 == null && x.String2 == null && x.Guid == null && x.Bool == null);
+            
+            Assert.NotNull(res);
+            Assert.Null(res.String1);
+            Assert.Null(res.String2);
+            Assert.Null(res.Guid);
+            Assert.Null(res.Bool);
+            Assert.Equal(obj.Id, res.Id);
+            
+            res.Bool = true;
+            res.String1 = "Hello";
+            res.String2 = "World";
+            res.Guid = Guid.NewGuid();
+            await collection.UpdateAsync(res);
+            
+            var updated = await collection.FirstAsync(x=>x.Id == obj.Id);
+            Assert.NotNull(updated);
+            Assert.Equal("Hello", updated.String1);
+            Assert.Equal("World", updated.String2);
+            Assert.NotNull(updated.Guid);
+            Assert.True(updated.Bool);
+        }
     }
 }

@@ -40,6 +40,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <inheritdoc/>
         protected override void ValidateAndPushOperand(Expression expression, Stack<string> stack)
         {
+            var dialect = 1;
             if (expression is BinaryExpression binaryExpression)
             {
                 var memberExpression = binaryExpression.Left as MemberExpression;
@@ -81,7 +82,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 }
                 else
                 {
-                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right, new List<object>()); // hack - will need to revisit when integrating vectors into aggregations.
+                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right, new List<object>(), ref dialect); // hack - will need to revisit when integrating vectors into aggregations.
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, val));
                 }
             }
@@ -92,7 +93,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
             else if (expression is MethodCallExpression method)
             {
-                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>()));
+                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>(), ref dialect));
             }
             else if (expression is UnaryExpression uni)
             {

@@ -119,7 +119,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var expected = new[] { "TestPersonClassHappyPath-idx",
                 "ON", "Hash", "PREFIX", "1", "Redis.OM.Unit.Tests.RediSearchTests.RedisIndexTests+TestPersonClassHappyPath:", "SCHEMA",
-                "Name", "TEXT", "SORTABLE", "Age", "NUMERIC", "SORTABLE" };
+                "Name", "TEXT", "INDEXMISSING", "INDEXEMPTY", "SORTABLE", "Age", "NUMERIC", "SORTABLE" };
             var indexArr = typeof(TestPersonClassHappyPath).SerializeIndex();
 
             Assert.True(expected.SequenceEqual(indexArr));
@@ -130,7 +130,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         {
             var expected = new[] { "TestPersonClassHappyPath-idx",
                 "ON", "Hash", "PREFIX", "1", "Person:", "SCHEMA",
-                "Name", "TEXT", "SORTABLE", "Age", "NUMERIC", "SORTABLE" };
+                "Name", "TEXT", "INDEXMISSING", "INDEXEMPTY", "SORTABLE", "Age", "NUMERIC", "SORTABLE" };
             var indexArr = typeof(TestPersonClassOverridenPrefix).SerializeIndex();
 
             Assert.True(expected.SequenceEqual(indexArr));

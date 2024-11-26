@@ -76,25 +76,32 @@ namespace Redis.OM.Common
         /// </summary>
         /// <param name="exp">expression.</param>
         /// <param name="parameters">The parameters.</param>
+        /// <param name="dialectNeeded">The required dialect by the final query expression.</param>
         /// <param name="treatEnumsAsInt">Treat enum as an integer.</param>
         /// <param name="negate">Whether or not to negate the result.</param>
         /// <param name="treatBooleanMemberAsUnary">Treats a boolean member expression as unary.</param>
         /// <returns>the operand string.</returns>
         /// <exception cref="ArgumentException">thrown if expression is un-parseable.</exception>
-        internal static string GetOperandStringForQueryArgs(Expression exp, List<object> parameters, bool treatEnumsAsInt = false, bool negate = false, bool treatBooleanMemberAsUnary = false)
+        internal static string GetOperandStringForQueryArgs(Expression exp, List<object> parameters, ref int dialectNeeded, bool treatEnumsAsInt = false, bool negate = false, bool treatBooleanMemberAsUnary = false)
         {
             var res = exp switch
             {
                 ConstantExpression constExp => ValueToString(constExp.Value),
                 MemberExpression member => GetOperandStringForMember(member, treatEnumsAsInt, negate: negate, treatBooleanMemberAsUnary: treatBooleanMemberAsUnary),
-                MethodCallExpression method => TranslateMethodStandardQuerySyntax(method, parameters),
-                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, parameters, treatEnumsAsInt, unary.NodeType == ExpressionType.Not, treatBooleanMemberAsUnary: treatBooleanMemberAsUnary),
+                MethodCallExpression method => TranslateMethodStandardQuerySyntax(method, parameters, ref dialectNeeded),
+                UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, parameters, ref dialectNeeded, treatEnumsAsInt, unary.NodeType == ExpressionType.Not, treatBooleanMemberAsUnary: treatBooleanMemberAsUnary),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
 
             if (treatBooleanMemberAsUnary && exp is MemberExpression memberExp && memberExp.Type == typeof(bool) && negate)
             {
                 negate = false;
+            }
+
+            if (string.IsNullOrEmpty(res))
+            {
+                res = "\"\"";
+                dialectNeeded |= 2;
             }
 
             if (negate)
@@ -182,13 +189,14 @@ namespace Redis.OM.Common
         /// </summary>
         /// <param name="exp">the expression.</param>
         /// <param name="parameters">The parameters to be passed into the query.</param>
+        /// <param name="dialectNeeded">The dialect required by the final query expression.</param>
         /// <returns>The expression translated.</returns>
         /// <exception cref="ArgumentException">thrown if the method isn't recognized.</exception>
-        internal static string TranslateMethodExpressions(MethodCallExpression exp, List<object> parameters)
+        internal static string TranslateMethodExpressions(MethodCallExpression exp, List<object> parameters, ref int dialectNeeded)
         {
             return exp.Method.Name switch
             {
-                "Contains" => TranslateContainsStandardQuerySyntax(exp, parameters),
+                "Contains" => TranslateContainsStandardQuerySyntax(exp, parameters, ref dialectNeeded),
                 nameof(StringExtension.FuzzyMatch) => TranslateFuzzyMatch(exp),
                 nameof(StringExtension.MatchContains) => TranslateMatchContains(exp),
                 nameof(StringExtension.MatchPattern) => TranslateMatchPattern(exp),
@@ -197,7 +205,7 @@ namespace Redis.OM.Common
                 nameof(VectorExtensions.VectorRange) => TranslateVectorRange(exp, parameters),
                 nameof(string.StartsWith) => TranslateStartsWith(exp),
                 nameof(string.EndsWith) => TranslateEndsWith(exp),
-                "Any" => TranslateAnyForEmbeddedObjects(exp, parameters),
+                "Any" => TranslateAnyForEmbeddedObjects(exp, parameters, ref dialectNeeded),
                 _ => throw new ArgumentException($"Unrecognized method for query translation:{exp.Method.Name}")
             };
         }
@@ -314,6 +322,44 @@ namespace Redis.OM.Common
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Checks the expression if it resolves to null.
+        /// </summary>
+        /// <param name="expression">The expression to check.</param>
+        /// <returns>whether it resolves to null.</returns>
+        internal static bool ExpressionResolvesToNull(Expression expression)
+        {
+            if (expression.NodeType is ExpressionType.Constant && ((ConstantExpression)expression).Value is null)
+            {
+                return true;
+            }
+
+            if (expression.NodeType is ExpressionType.MemberAccess)
+            {
+                var parentExpression = expression;
+                var memberInfos = new Stack<MemberInfo>();
+                while (parentExpression is MemberExpression parentMember)
+                {
+                    var info = ((MemberExpression)parentExpression).Member;
+                    memberInfos.Push(info);
+                    parentExpression = parentMember.Expression;
+                }
+
+                if (parentExpression is ConstantExpression c)
+                {
+                    var resolved = c.Value;
+                    foreach (var info in memberInfos)
+                    {
+                        resolved = GetValue(info, resolved);
+                    }
+
+                    return resolved is null;
+                }
+            }
+
+            return false;
         }
 
         private static string GetOperandStringForMember(MemberExpression member, bool treatEnumsAsInt = false, bool negate = false,  bool treatBooleanMemberAsUnary = false)
@@ -659,7 +705,7 @@ namespace Redis.OM.Common
             while (true);
         }
 
-        private static string TranslateMethodStandardQuerySyntax(MethodCallExpression exp, List<object> parameters)
+        private static string TranslateMethodStandardQuerySyntax(MethodCallExpression exp, List<object> parameters, ref int dialectNeeded)
         {
             return exp.Method.Name switch
             {
@@ -669,11 +715,11 @@ namespace Redis.OM.Common
                 nameof(StringExtension.MatchEndsWith) => TranslateEndsWith(exp),
                 nameof(StringExtension.MatchPattern) => TranslateMatchPattern(exp),
                 nameof(string.Format) => TranslateFormatMethodStandardQuerySyntax(exp),
-                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, parameters),
+                nameof(string.Contains) => TranslateContainsStandardQuerySyntax(exp, parameters, ref dialectNeeded),
                 nameof(string.StartsWith) => TranslateStartsWith(exp),
                 nameof(string.EndsWith) => TranslateEndsWith(exp),
                 nameof(VectorExtensions.VectorRange) => TranslateVectorRange(exp, parameters),
-                "Any" => TranslateAnyForEmbeddedObjects(exp, parameters),
+                "Any" => TranslateAnyForEmbeddedObjects(exp, parameters, ref dialectNeeded),
                 _ => throw new InvalidOperationException($"Unable to parse method {exp.Method.Name}")
             };
         }
@@ -817,7 +863,7 @@ namespace Redis.OM.Common
             };
         }
 
-        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp, List<object> parameters)
+        private static string TranslateContainsStandardQuerySyntax(MethodCallExpression exp, List<object> parameters, ref int dialectNeeded)
         {
             MemberExpression? expression = null;
             Type type;
@@ -828,7 +874,7 @@ namespace Redis.OM.Common
             {
                 var propertyExpression = (MemberExpression)exp.Arguments.Last();
                 var valuesExpression = (MemberExpression)exp.Arguments.First();
-                literal = GetOperandStringForQueryArgs(propertyExpression, parameters);
+                literal = GetOperandStringForQueryArgs(propertyExpression, parameters, ref dialectNeeded);
                 if (!literal.StartsWith("@"))
                 {
                     if (exp.Arguments.Count == 1 && exp.Object != null)
@@ -867,7 +913,7 @@ namespace Redis.OM.Common
                 var valueType = Nullable.GetUnderlyingType(valuesExpression.Type) ?? valuesExpression.Type;
                 memberName = GetOperandStringForMember(propertyExpression);
                 var treatEnumsAsInts = type.IsEnum && !(propertyExpression.Member.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() is JsonConverterAttribute converter && converter.ConverterType == typeof(JsonStringEnumConverter));
-                literal = GetOperandStringForQueryArgs(valuesExpression, parameters, treatEnumsAsInts);
+                literal = GetOperandStringForQueryArgs(valuesExpression, parameters, ref dialectNeeded, treatEnumsAsInts);
 
                 if ((valueType == typeof(List<string>) || valueType == typeof(string[]) || type == typeof(string[]) || type == typeof(List<string>) || type == typeof(Guid) || type == typeof(Guid[]) || type == typeof(List<Guid>) || type == typeof(Guid[]) || type == typeof(List<Guid>) || type == typeof(Ulid) || (type.IsEnum && !treatEnumsAsInts)) && attribute is IndexedAttribute)
                 {
@@ -918,7 +964,7 @@ namespace Redis.OM.Common
 
             type = Nullable.GetUnderlyingType(expression.Type) ?? expression.Type;
             memberName = GetOperandStringForMember(expression);
-            literal = GetOperandStringForQueryArgs(exp.Arguments.Last(), parameters);
+            literal = GetOperandStringForQueryArgs(exp.Arguments.Last(), parameters, ref dialectNeeded);
 
             if (searchFieldAttribute is not null && searchFieldAttribute is SearchableAttribute)
             {
@@ -967,7 +1013,7 @@ namespace Redis.OM.Common
             return sb.ToString();
         }
 
-        private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp, List<object> parameters)
+        private static string TranslateAnyForEmbeddedObjects(MethodCallExpression exp, List<object> parameters, ref int dialectNeeded)
         {
             var type = exp.Arguments.Last().Type;
             var prefix = GetOperandString(exp.Arguments[0]);
@@ -975,12 +1021,12 @@ namespace Redis.OM.Common
 
             if (lambda.Body is MethodCallExpression methodCall)
             {
-                var tempQuery = TranslateMethodExpressions(methodCall, parameters);
+                var tempQuery = TranslateMethodExpressions(methodCall, parameters, ref dialectNeeded);
                 return tempQuery.Replace("@", $"{prefix}_");
             }
             else
             {
-                var tempQuery = ExpressionTranslator.TranslateBinaryExpression((BinaryExpression)lambda.Body, parameters);
+                var tempQuery = ExpressionTranslator.TranslateBinaryExpression((BinaryExpression)lambda.Body, parameters, ref dialectNeeded);
                 return tempQuery.Replace("@", $"{prefix}_");
             }
         }
