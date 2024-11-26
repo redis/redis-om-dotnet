@@ -273,11 +273,11 @@ namespace Redis.OM
                 var responseArray = redisReply.ToArray();
                 var infoIndex = 0;
 
-                while (infoIndex < responseArray.Length - 1)
+                while (infoIndex < responseArray.Length)
                 {
                     var key = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
                     infoIndex++;
-                    var value = responseArray[infoIndex].ToString(CultureInfo.InvariantCulture);
+                    var value = infoIndex < responseArray.Length ? responseArray[infoIndex].ToString(CultureInfo.InvariantCulture) : string.Empty;
 
                     switch (key)
                     {
@@ -292,6 +292,8 @@ namespace Redis.OM
                         case "M": M = value; break;
                         case "ef_construction": EfConstruction = value; break;
                         case "WEIGHT": Weight = value; break;
+                        case "INDEXMISSING": IndexMissing = true; break;
+                        case "INDEXEMPTY": IndexEmpty = true; break;
                     }
                 }
 
@@ -336,6 +338,16 @@ namespace Redis.OM
             /// Gets NOSTEM.
             /// </summary>
             public bool? NoStem { get; }
+
+            /// <summary>
+            /// Gets INDEXMISSING.
+            /// </summary>
+            public bool? IndexMissing { get; }
+
+            /// <summary>
+            /// Gets INDEXEMPTY.
+            /// </summary>
+            public bool? IndexEmpty { get; }
 
             /// <summary>
             /// Gets weight.

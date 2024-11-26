@@ -187,6 +187,7 @@ namespace Redis.OM.Common
             var parameters = new List<object>();
             var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}-idx" : attr.IndexName;
             var query = new RedisQuery(indexName!) { QueryText = "*" };
+            var dialect = 1;
             switch (expression)
             {
                 case MethodCallExpression methodExpression:
@@ -229,7 +230,8 @@ namespace Redis.OM.Common
                                 query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
                                 break;
                             case "Where":
-                                query.QueryText = query.QueryText == "*" ? TranslateWhereMethod(exp, parameters) : $"({TranslateWhereMethod(exp, parameters)} {query.QueryText})";
+                                query.QueryText = query.QueryText == "*" ? TranslateWhereMethod(exp, parameters, ref dialect) : $"({TranslateWhereMethod(exp, parameters, ref dialect)} {query.QueryText})";
+                                query.Dialect = dialect;
                                 break;
                             case "NearestNeighbors":
                                 query.NearestNeighbors = ParseNearestNeighborsFromExpression(exp);
@@ -241,14 +243,16 @@ namespace Redis.OM.Common
                 }
 
                 case LambdaExpression lambda:
-                    query.QueryText = BuildQueryFromExpression(lambda.Body, parameters);
+                    query.QueryText = BuildQueryFromExpression(lambda.Body, parameters, ref dialect);
+                    query.Dialect = dialect;
                     break;
             }
 
             if (mainBooleanExpression != null)
             {
                 parameters = new List<object>();
-                query.QueryText = BuildQueryFromExpression(((LambdaExpression)mainBooleanExpression).Body, parameters);
+                query.QueryText = BuildQueryFromExpression(((LambdaExpression)mainBooleanExpression).Body, parameters, ref dialect);
+                query.Dialect = dialect;
             }
 
             query.Parameters = parameters;
@@ -331,51 +335,53 @@ namespace Redis.OM.Common
         /// </summary>
         /// <param name="binExpression">The Binary Expression.</param>
         /// <param name="parameters">The parameters of the query.</param>
+        /// <param name="dialectNeeded">The dialect needed for the final query expression.</param>
         /// <returns>The query string formatted from the binary expression.</returns>
         /// <exception cref="ArgumentException">Thrown if expression is not parsable because of the arguments passed into it.</exception>
-        internal static string TranslateBinaryExpression(BinaryExpression binExpression, List<object> parameters)
+        internal static string TranslateBinaryExpression(BinaryExpression binExpression, List<object> parameters, ref int dialectNeeded)
         {
             var sb = new StringBuilder();
             if (binExpression.Left is BinaryExpression leftBin && binExpression.Right is BinaryExpression rightBin)
             {
                 sb.Append("(");
-                sb.Append(TranslateBinaryExpression(leftBin, parameters));
+                sb.Append(TranslateBinaryExpression(leftBin, parameters, ref dialectNeeded));
                 sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(TranslateBinaryExpression(rightBin, parameters));
+                sb.Append(TranslateBinaryExpression(rightBin, parameters, ref dialectNeeded));
                 sb.Append(")");
             }
             else if (binExpression.Left is BinaryExpression left)
             {
                 sb.Append("(");
-                sb.Append(TranslateBinaryExpression(left, parameters));
+                sb.Append(TranslateBinaryExpression(left, parameters,  ref dialectNeeded));
                 sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters, treatBooleanMemberAsUnary: true));
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters, ref dialectNeeded, treatBooleanMemberAsUnary: true));
                 sb.Append(")");
             }
             else if (binExpression.Right is BinaryExpression right)
             {
                 sb.Append("(");
-                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters, treatBooleanMemberAsUnary: true));
+                sb.Append(ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters, ref dialectNeeded, treatBooleanMemberAsUnary: true));
                 sb.Append(SplitPredicateSeporators(binExpression.NodeType));
-                sb.Append(TranslateBinaryExpression(right, parameters));
+                sb.Append(TranslateBinaryExpression(right, parameters,  ref dialectNeeded));
                 sb.Append(")");
             }
             else
             {
-                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters, treatBooleanMemberAsUnary: true);
+                var leftContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Left, parameters, ref dialectNeeded, treatBooleanMemberAsUnary: true);
 
                 var rightResolvesToNull = ExpressionParserUtilities.ExpressionResolvesToNull(binExpression.Right);
 
                 if (rightResolvesToNull)
                 {
+                    dialectNeeded |= 1 << 1;
                     return $"(ismissing({leftContent}))";
                 }
 
-                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters, treatBooleanMemberAsUnary: true);
+                var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters, ref dialectNeeded, treatBooleanMemberAsUnary: true);
 
                 if (binExpression.Left is MemberExpression member)
                 {
-                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
+                    var predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member, dialectNeeded);
                     sb.Append("(");
                     sb.Append(predicate);
                     sb.Append(")");
@@ -403,7 +409,7 @@ namespace Redis.OM.Common
                             }
                         }
 
-                        predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member);
+                        predicate = BuildQueryPredicate(binExpression.NodeType, leftContent, rightContent, member, dialectNeeded);
                     }
                     else
                     {
@@ -744,34 +750,16 @@ namespace Redis.OM.Common
             return sb;
         }
 
-        private static string TranslateUnaryOrMemberExpressionIntoBooleanQuery(Expression expression, List<object> parameters)
-        {
-            if (expression is MemberExpression member && member.Type == typeof(bool))
-            {
-                var propertyName = ExpressionParserUtilities.GetOperandStringForQueryArgs(member, parameters);
-                return $"{propertyName}:{{true}}";
-            }
-
-            if (expression is UnaryExpression uni && uni.Operand is MemberExpression uniMember && uniMember.Type == typeof(bool) && uni.NodeType is ExpressionType.Not)
-            {
-                var propertyName = ExpressionParserUtilities.GetOperandStringForQueryArgs(uniMember, parameters);
-                return $"{propertyName}:{{false}}";
-            }
-
-            throw new InvalidOperationException(
-                $"Could not translate expression of type {expression.Type} to a boolean expression");
-        }
-
-        private static string BuildQueryFromExpression(Expression exp, List<object> parameters)
+        private static string BuildQueryFromExpression(Expression exp, List<object> parameters, ref int dialect)
         {
             if (exp is BinaryExpression binExp)
             {
-                return TranslateBinaryExpression(binExp, parameters);
+                return TranslateBinaryExpression(binExp, parameters, ref dialect);
             }
 
             if (exp is MethodCallExpression method)
             {
-                return ExpressionParserUtilities.TranslateMethodExpressions(method, parameters);
+                return ExpressionParserUtilities.TranslateMethodExpressions(method, parameters, ref dialect);
             }
 
             if (exp is UnaryExpression uni)
@@ -782,7 +770,7 @@ namespace Redis.OM.Common
                     return $"{propertyName}:{{false}}";
                 }
 
-                var operandString = BuildQueryFromExpression(uni.Operand, parameters);
+                var operandString = BuildQueryFromExpression(uni.Operand, parameters, ref dialect);
                 if (uni.NodeType == ExpressionType.Not)
                 {
                     operandString = $"-{operandString}";
@@ -800,14 +788,14 @@ namespace Redis.OM.Common
             throw new ArgumentException("Unparseable Lambda Body detected");
         }
 
-        private static string TranslateWhereMethod(MethodCallExpression expression, List<object> parameters)
+        private static string TranslateWhereMethod(MethodCallExpression expression, List<object> parameters, ref int dialect)
         {
             var predicate = (UnaryExpression)expression.Arguments[1];
             var lambda = (LambdaExpression)predicate.Operand;
-            return BuildQueryFromExpression(lambda.Body, parameters);
+            return BuildQueryFromExpression(lambda.Body, parameters, ref dialect);
         }
 
-        private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberExpression memberExpression)
+        private static string BuildQueryPredicate(ExpressionType expType, string left, string right, MemberExpression memberExpression, int dialect)
         {
             var queryPredicate = expType switch
             {
@@ -815,8 +803,8 @@ namespace Redis.OM.Common
                 ExpressionType.LessThan => $"{left}:[-inf ({right}]",
                 ExpressionType.GreaterThanOrEqual => $"{left}:[{right} inf]",
                 ExpressionType.LessThanOrEqual => $"{left}:[-inf {right}]",
-                ExpressionType.Equal => BuildEqualityPredicate(memberExpression, right),
-                ExpressionType.NotEqual => BuildEqualityPredicate(memberExpression, right, true),
+                ExpressionType.Equal => BuildEqualityPredicate(memberExpression, right, dialect),
+                ExpressionType.NotEqual => BuildEqualityPredicate(memberExpression, right, dialect, true),
                 ExpressionType.And or ExpressionType.AndAlso => $"{left} {right}",
                 ExpressionType.Or or ExpressionType.OrElse => $"{left} | {right}",
                 _ => string.Empty
@@ -824,7 +812,7 @@ namespace Redis.OM.Common
             return queryPredicate;
         }
 
-        private static string BuildEqualityPredicate(MemberExpression member, string right, bool negated = false)
+        private static string BuildEqualityPredicate(MemberExpression member, string right, int dialect, bool negated = false)
         {
             var sb = new StringBuilder();
             var fieldAttribute = ExpressionParserUtilities.DetermineSearchAttribute(member);
@@ -846,7 +834,16 @@ namespace Redis.OM.Common
             switch (searchFieldType)
             {
                 case SearchFieldType.TAG:
-                    sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(right)}}}");
+                    // special case for sending empty string query.
+                    if (dialect > 1 && right.Equals("\"\""))
+                    {
+                        sb.Append($"{{{right}}}");
+                    }
+                    else
+                    {
+                        sb.Append($"{{{ExpressionParserUtilities.EscapeTagField(right)}}}");
+                    }
+
                     break;
                 case SearchFieldType.TEXT:
                     sb.Append($"\"{right}\"");

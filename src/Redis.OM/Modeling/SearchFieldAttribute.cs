@@ -39,6 +39,12 @@ namespace Redis.OM.Modeling
         public int CascadeDepth { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to index empty and missing values.
+        /// If this is true (the default) you will be able to query null and empty string values in Redis.
+        /// </summary>
+        public bool IndexEmptyAndMissing { get; set; } = true;
+
+        /// <summary>
         /// Gets the type of index.
         /// </summary>
         internal abstract SearchFieldType SearchFieldType { get; }

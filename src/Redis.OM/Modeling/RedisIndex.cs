@@ -132,6 +132,16 @@ namespace Redis.OM.Modeling
                     {
                         attr.Add("SEPARATOR");
                         attr.Add(a.Separator ?? "|");
+
+                        if (a.IndexMissing == true)
+                        {
+                            attr.Add("INDEXMISSING");
+                        }
+
+                        if (a.IndexEmpty == true)
+                        {
+                            attr.Add("INDEXEMPTY");
+                        }
                     }
 
                     if (a.Type == "TEXT")
@@ -145,6 +155,16 @@ namespace Redis.OM.Modeling
                         {
                             attr.Add("WEIGHT");
                             attr.Add(a.Weight);
+                        }
+
+                        if (a.IndexMissing == true)
+                        {
+                            attr.Add("INDEXMISSING");
+                        }
+
+                        if (a.IndexEmpty == true)
+                        {
+                            attr.Add("INDEXEMPTY");
                         }
                     }
 

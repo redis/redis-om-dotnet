@@ -71,6 +71,11 @@ namespace Redis.OM.Searching.Query
         public RedisSortBy? SortBy { get; set; }
 
         /// <summary>
+        /// Gets or sets The Dialect to use in the query.
+        /// </summary>
+        public int Dialect { get; set; } = 1;
+
+        /// <summary>
         /// Serializes the query into a set of arguments.
         /// </summary>
         /// <returns>the serialized arguments.</returns>
@@ -107,8 +112,13 @@ namespace Redis.OM.Searching.Query
                     ret.Add(parameters[i]);
                 }
 
+                Dialect |= 1 << 1;
+            }
+
+            if (DialectToSend() > 1)
+            {
                 ret.Add("DIALECT");
-                ret.Add(2);
+                ret.Add(DialectToSend());
             }
 
             foreach (var flag in (QueryFlags[])Enum.GetValues(typeof(QueryFlags)))
@@ -145,6 +155,17 @@ namespace Redis.OM.Searching.Query
             }
 
             return ret.ToArray();
+        }
+
+        private int DialectToSend()
+        {
+            const int DIALECT_TWO_MASK = 0x2;
+            if ((Dialect & DIALECT_TWO_MASK) == DIALECT_TWO_MASK)
+            {
+                return 2;
+            }
+
+            return 1;
         }
     }
 }
