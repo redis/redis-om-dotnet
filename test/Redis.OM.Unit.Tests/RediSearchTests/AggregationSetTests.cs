@@ -402,6 +402,26 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.OrderBy(x => x.RecordShell.Name).OrderByDescending(x => x.RecordShell.Age).ToList();
             _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "SORTBY", "4", "@Name", "ASC", "@Age", "DESC", "WITHCURSOR", "COUNT", "10000");
         }
+        
+        [Fact]
+        public void TestMultipleOrderByWithMax()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+            _ = collection.OrderBy(x => x.RecordShell.Name, 42).OrderByDescending(x=>x.RecordShell.Age).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "SORTBY", "4", "@Name", "ASC", "@Age", "DESC", "MAX", "42", "WITHCURSOR", "COUNT", "10000");
+        }
+        
+        [Fact]
+        public void TestOrderByWithMax()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+            _ = collection.OrderBy(x => x.RecordShell.Name, 42).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE","person-idx", "*", "SORTBY", "2", "@Name", "ASC", "MAX", "42", "WITHCURSOR", "COUNT", "10000");
+        }
 
         [Fact]
         public void TestRightSideStringTypeFilter()

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Redis.OM.Searching;
 
 namespace Redis.OM.Aggregation.AggregationPredicates
 {
@@ -22,11 +23,19 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <inheritdoc />
         public IEnumerable<string> Serialize()
         {
-            var numArgs = _subPredicates.Sum(x => x.NumArgs);
-            List<string> args = new List<string>(numArgs) { "SORTBY", numArgs.ToString() };
+            var numArgs = _subPredicates.Sum(x => AggregateSortBy.NumArgs);
+            var max = _subPredicates.FirstOrDefault(x => x.Max.HasValue)?.Max;
+            var args = new List<string>(numArgs) { "SORTBY", numArgs.ToString() };
             foreach (var predicate in _subPredicates)
             {
-                args.AddRange(predicate.Serialize().Skip(2));
+                args.Add($"@{predicate.Property}");
+                args.Add(predicate.Direction == SortDirection.Ascending ? "ASC" : "DESC");
+            }
+
+            if (max.HasValue)
+            {
+                args.Add("MAX");
+                args.Add(max.ToString());
             }
 
             return args;
