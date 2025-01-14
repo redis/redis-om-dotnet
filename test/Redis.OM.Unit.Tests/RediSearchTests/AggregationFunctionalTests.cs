@@ -147,12 +147,30 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Fact]
         public void GetDepartmentBySales()
         {
+            Setup();
             var collection = new RedisAggregationSet<Person>(_connection);
             var departments = collection
                 .Apply(x => x.RecordShell.Sales * x.RecordShell.SalesAdjustment, "AdjustedSales")
                 .GroupBy(x => x.RecordShell.DepartmentNumber)
                 .Sum(x => x["AdjustedSales"])
                 .OrderByDescending(x => x["AdjustedSales_SUM"])
+                .ToArray();
+            Assert.Equal(1, (int)departments[0]["DepartmentNumber"]);
+            Assert.Equal(4, (int)departments[1]["DepartmentNumber"]);
+            Assert.Equal(3, (int)departments[2]["DepartmentNumber"]);
+            Assert.Equal(2, (int)departments[3]["DepartmentNumber"]);
+        }
+        
+        [Fact]
+        public void GetDepartmentBySalesWithMax()
+        {
+            Setup();
+            var collection = new RedisAggregationSet<Person>(_connection);
+            var departments = collection
+                .Apply(x => x.RecordShell.Sales * x.RecordShell.SalesAdjustment, "AdjustedSales")
+                .GroupBy(x => x.RecordShell.DepartmentNumber)
+                .Sum(x => x["AdjustedSales"])
+                .OrderByDescending(x => x["AdjustedSales_SUM"], int.MaxValue)
                 .ToArray();
             Assert.Equal(1, (int)departments[0]["DepartmentNumber"]);
             Assert.Equal(4, (int)departments[1]["DepartmentNumber"]);
