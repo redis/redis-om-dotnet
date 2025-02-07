@@ -497,7 +497,13 @@ namespace Redis.OM
                         continue;
                     }
 
-                    ret += $"\"{propertyName}\":{((string)hash[lookupPropertyName]).ToLower()},";
+                    var propValue = ((string)hash[lookupPropertyName]).ToLower();
+                    propValue = propValue == "0"
+                        ? "false"
+                        : propValue == "1"
+                            ? "true"
+                            : propValue;
+                    ret += $"\"{propertyName}\":{propValue},";
                 }
                 else if (type.IsPrimitive || type == typeof(decimal) || type.IsEnum)
                 {

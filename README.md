@@ -500,6 +500,7 @@ We'd love your contributions! If you want to contribute please read our [Contrib
 * [@ahmedisam99](https://github.com/ahmedisam99)
 * [@kirollosonsi](https://github.com/kirollosonsi)
 * [@tgmoore](https://github.com/tgmoore)
+* [@mfaulcon](https://github.com/mfaulcon)
 
 <!-- Logo -->
 [Logo]: images/logo.svg
