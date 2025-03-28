@@ -469,6 +469,9 @@ Don't want to run Redis yourself? Redis Stack is also available on Redis Cloud. 
 
 We'd love your contributions! If you want to contribute please read our [Contributing](CONTRIBUTING.md) document.
 
+extra sentence
+
+
 ## ❤️ Our Contributors
 
 * [@slorello89](https://github.com/slorello89)

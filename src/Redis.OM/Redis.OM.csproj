@@ -6,8 +6,8 @@
     <RootNamespace>Redis.OM</RootNamespace>
     <Nullable>enable</Nullable>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <PackageVersion>0.7.6</PackageVersion>
-    <Version>0.7.6</Version>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Version>1.0.0</Version>
     <PackageReleaseNotes>https://github.com/redis/redis-om-dotnet/releases/tag/v0.7.6</PackageReleaseNotes>
     <Description>Object Mapping and More for Redis</Description>
     <Title>Redis OM</Title>
