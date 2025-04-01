@@ -388,4 +388,27 @@ public class VectorFunctionalTests
         result = collection.First(x=>x.TimeStamp > ts && x.Prompt.VectorRange(queryPrompt, .15));
         Assert.Equal("Paris", result.Response);
     }
+    
+    [SkipIfMissingEnvVar("REDIS_OM_AZURE_OAI_TOKEN")]
+    public void TestAzureOpenAIVectorizer()
+    {
+        _connection.DropIndexAndAssociatedRecords(typeof(AzureOpenAIVectors));
+        _connection.CreateIndex(typeof(AzureOpenAIVectors));
+        var collection = new RedisCollection<AzureOpenAIVectors>(_connection);
+        var sentenceVector = Vector.Of("Hello World this is Hal."); 
+        var obj = new AzureOpenAIVectors
+        {
+            Age = 45,
+            Sentence = sentenceVector,
+            Name = "Hal"
+        };
+
+        collection.Insert(obj);
+        var queryVector = Vector.Of("Hello World this is Hal.");
+        var res = collection.NearestNeighbors(x => x.Sentence, 2, queryVector).First();
+        Assert.Equal(obj.Id, res.Id);
+        Assert.True(res.VectorScore.NearestNeighborsScore < .01);
+        Assert.Equal(obj.Sentence.Value, res.Sentence.Value);
+        Assert.Equal(obj.Sentence.Embedding, res.Sentence.Embedding);
+    }
 }

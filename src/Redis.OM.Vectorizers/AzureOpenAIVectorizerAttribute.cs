@@ -1,3 +1,5 @@
+using Azure.Core;
+using Azure.Identity;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 
@@ -6,13 +8,19 @@ namespace Redis.OM.Vectorizers;
 /// <inheritdoc />
 public class AzureOpenAIVectorizerAttribute : VectorizerAttribute<string>
 {
+    private readonly string? _apikey;
+    private readonly TokenCredential? _tokenCredential;
+    
     /// <inheritdoc />
     public AzureOpenAIVectorizerAttribute(string deploymentName, string resourceName, int dim)
     {
         DeploymentName = deploymentName;
         ResourceName = resourceName;
         Dim = dim;
-        Vectorizer = new AzureOpenAIVectorizer(Configuration.Instance.AzureOpenAIApiKey, ResourceName, DeploymentName, Dim);
+        _apikey = Configuration.Instance.AzureOpenAIApiKey;
+        _tokenCredential = new DefaultAzureCredential();
+        Vectorizer = string.IsNullOrEmpty(Configuration.Instance.AzureOpenAIApiKey) ? new AzureOpenAIVectorizer(resourceName, deploymentName, dim) : new AzureOpenAIVectorizer(Configuration.Instance.AzureOpenAIApiKey, ResourceName, DeploymentName, dim);
+        
     }
 
     /// <summary>
@@ -42,7 +50,7 @@ public class AzureOpenAIVectorizerAttribute : VectorizerAttribute<string>
             throw new ArgumentException("Object must be a string to be embedded", nameof(obj));
         }
         
-        var floats = AzureOpenAIVectorizer.GetFloats(s, ResourceName, DeploymentName, Configuration.Instance.AzureOpenAIApiKey);
+        var floats = AzureOpenAIVectorizer.GetFloats(s, ResourceName, DeploymentName, _apikey, _tokenCredential);
         return floats.SelectMany(BitConverter.GetBytes).ToArray();
     }
 }
