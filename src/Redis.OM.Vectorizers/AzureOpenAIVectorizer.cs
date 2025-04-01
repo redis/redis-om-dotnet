@@ -40,7 +40,7 @@ public class AzureOpenAIVectorizer : IVectorizer<string>
     /// </summary>
     /// <param name="resourceName">The Azure Resource's name</param>
     /// <param name="deploymentName">The Azure deployment name</param>
-    /// <param name="dim">The dimensions of the model addressed by this resource/deploymmennt.</param>
+    /// <param name="dim">The dimensions of the model addressed by this resource/deployment.</param>
     public AzureOpenAIVectorizer(string resourceName, string deploymentName, int dim)
     {
         _apiKey = null;
