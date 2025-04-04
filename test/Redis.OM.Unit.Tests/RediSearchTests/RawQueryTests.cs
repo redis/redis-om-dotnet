@@ -186,7 +186,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
-                "(@Age:[30 40] (@Name:\"Steve\"))",
+                "((@Name:\"Steve\") @Age:[30 40])",
                 "LIMIT",
                 "0",
                 "100");
@@ -242,7 +242,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var aggSet = new RedisAggregationSet<Person>(_substitute);
             // Raw should only set the query part (@Age:[30 +inf])
-            var result = aggSet.Raw("@Age:[30 +inf]")
+            var result = aggSet.Raw("@Age:[30 inf]")
                 .GroupBy(x => x.RecordShell.DepartmentNumber)
                 .Average(x => x.RecordShell.Age)
                 .ToList();
@@ -250,11 +250,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _substitute.Received().Execute(
                 Arg.Is<string>(s => s == "FT.AGGREGATE"),
                 Arg.Is<string>(s => s == "person-idx"),
-                Arg.Is<string>(s => s == "@Age:[30 +inf]"),
+                Arg.Is<string>(s => s == "@Age:[30 inf]"),
                 Arg.Any<string>(),
                 Arg.Any<object>(),
                 Arg.Any<object>(),
                 Arg.Any<string>(),
+                Arg.Any<object>(),
+                Arg.Any<object>(),
+                Arg.Any<object>(),
                 Arg.Any<object>(),
                 Arg.Any<object>());
 
@@ -310,6 +313,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 Arg.Any<object>(),
                 Arg.Any<object>(),
                 Arg.Any<string>(),
+                Arg.Any<object>(),
+                Arg.Any<object>(),
                 Arg.Any<object>(),
                 Arg.Any<object>());
         }

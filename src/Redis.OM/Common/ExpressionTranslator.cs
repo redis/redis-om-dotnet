@@ -192,6 +192,7 @@ namespace Redis.OM.Common
             var indexName = string.IsNullOrEmpty(attr.IndexName) ? $"{type.Name.ToLower()}-idx" : attr.IndexName;
             var query = new RedisQuery(indexName!) { QueryText = "*" };
             var dialect = 1;
+            string? rawQuery = null;  // Store the raw query string if one is encountered
             switch (expression)
             {
                 case MethodCallExpression methodExpression:
@@ -234,14 +235,34 @@ namespace Redis.OM.Common
                                 query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
                                 break;
                             case "Where":
-                                query.QueryText = query.QueryText == "*" ? TranslateWhereMethod(exp, parameters, ref dialect) : $"({TranslateWhereMethod(exp, parameters, ref dialect)} {query.QueryText})";
+                                // Combine Where clause with existing query
+                                var whereClause = TranslateWhereMethod(exp, parameters, ref dialect);
+                                query.QueryText = query.QueryText == "*" ?
+                                    whereClause :
+                                    $"({whereClause} {query.QueryText})";
                                 query.Dialect = dialect;
                                 break;
                             case "NearestNeighbors":
                                 query.NearestNeighbors = ParseNearestNeighborsFromExpression(exp);
                                 break;
                             case "Raw":
-                                query.QueryText = ((ConstantExpression)exp.Arguments[1]).Value.ToString();
+                                // Get the current raw query
+                                var currentRawQuery = ((ConstantExpression)exp.Arguments[1]).Value.ToString();
+
+                                // If we've seen a raw query before, combine them
+                                if (rawQuery != null)
+                                {
+                                    rawQuery = $"({rawQuery} {currentRawQuery})";
+                                }
+                                else
+                                {
+                                    rawQuery = currentRawQuery;
+                                }
+
+                                // Set the query text appropriately
+                                query.QueryText = query.QueryText == "*" ?
+                                    rawQuery :
+                                    $"({query.QueryText} {rawQuery})";
                                 break;
                         }
                     }
@@ -258,7 +279,20 @@ namespace Redis.OM.Common
             if (mainBooleanExpression != null)
             {
                 parameters = new List<object>();
-                query.QueryText = BuildQueryFromExpression(((LambdaExpression)mainBooleanExpression).Body, parameters, ref dialect);
+                var booleanExpressionQuery = BuildQueryFromExpression(((LambdaExpression)mainBooleanExpression).Body, parameters, ref dialect);
+
+                // If we have a raw query, make sure to preserve it
+                if (rawQuery != null)
+                {
+                    // Combine the boolean expression with the raw query
+                    query.QueryText = $"({booleanExpressionQuery} {rawQuery})";
+                }
+                else
+                {
+                    // No raw query, just use the boolean expression
+                    query.QueryText = booleanExpressionQuery;
+                }
+
                 query.Dialect = dialect;
             }
 
