@@ -161,6 +161,10 @@ namespace Redis.OM.Common
                     case "LoadAll":
                         aggregation.Predicates.Push(new LoadAll());
                         break;
+                    case "Raw":
+                        var rawQuery = ((ConstantExpression)exp.Arguments[1]).Value.ToString();
+                        aggregation.RawQuery = rawQuery;
+                        break;
                 }
             }
 
@@ -235,6 +239,9 @@ namespace Redis.OM.Common
                                 break;
                             case "NearestNeighbors":
                                 query.NearestNeighbors = ParseNearestNeighborsFromExpression(exp);
+                                break;
+                            case "Raw":
+                                query.QueryText = ((ConstantExpression)exp.Arguments[1]).Value.ToString();
                                 break;
                         }
                     }

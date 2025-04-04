@@ -1374,5 +1374,53 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.NotNull(updated.Guid);
             Assert.True(updated.Bool);
         }
+        
+        [Fact]
+        public void TestRawQuery()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person = new Person { Name = "RawQueryTest", Age = 42, Sales = 500000};
+            collection.Insert(person);
+            
+            // Test basic raw query
+            var result1 = collection.Raw("RawQueryTest").ToList();
+            Assert.Single(result1);
+            Assert.Equal("RawQueryTest", result1[0].Name);
+            Assert.Equal(42, result1[0].Age);
+            
+            // Test raw query with numeric range
+            var result2 = collection.Raw("@Age:[40 45]").Where(p => p.Name == "RawQueryTest").ToList();
+            Assert.Single(result2);
+            Assert.Equal("RawQueryTest", result2[0].Name);
+            
+            // Test raw query with OR condition
+            var result3 = collection.Raw("@Age:[40 45] | @Name:Steve").ToList();
+            Assert.Contains(result3, p => p.Name == "RawQueryTest");
+            
+            // Test raw query with multiple conditions
+            var result4 = collection.Raw("@Age:[40 45] @Name:RawQueryTest").ToList();
+            Assert.Single(result4);
+            Assert.Equal("RawQueryTest", result4[0].Name);
+            
+            // Cleanup
+            collection.Delete(person);
+        }
+        
+        [Fact]
+        public async Task TestRawQueryAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var person = new Person { Name = "AsyncRawQueryTest", Age = 33, Sales = 50000};
+            await collection.InsertAsync(person);
+            
+            // Test basic raw query async
+            var result = await collection.Raw("AsyncRawQueryTest").ToListAsync();
+            Assert.Single(result);
+            Assert.Equal("AsyncRawQueryTest", result[0].Name);
+            Assert.Equal(33, result[0].Age);
+            
+            // Cleanup
+            await collection.DeleteAsync(person);
+        }
     }
 }

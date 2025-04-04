@@ -312,6 +312,44 @@ customers.Where(x => x.LastName == "Bond" && x.FirstName == "James");
 customers.Where(x=>x.NickNames.Contains("Jim"));
 ```
 
+#### Using Raw Queries
+
+For advanced scenarios where you need direct control over the filter syntax, Redis OM provides a Raw extension method that lets you write the query filter using the Redis Search query syntax directly:
+
+```csharp
+// Use raw query to find customers named Bond with exact tag matching
+var results = customers.Raw("@LastName:{Bond}").ToList();
+```
+
+**Important**: The Raw method ONLY sets the filter portion of the query. For all other query parameters such as sorting, pagination, etc., you should continue to use the LINQ methods:
+
+```csharp
+// Raw for filter + OrderBy for sorting
+var results = customers.Raw("@LastName:{Bond}")
+    .OrderBy(c => c.Age)
+    .ToList();
+
+// Raw for filter + Skip/Take for pagination
+var results = customers.Raw("@Age:[30 70]")
+    .Skip(10)
+    .Take(5)
+    .ToList();
+```
+
+This is also true for aggregations, where Raw only sets the initial filter, and you should use the full aggregation API for the rest of the pipeline:
+
+```csharp
+var aggSet = customers.AggregationSet();
+
+// Raw sets ONLY the filter, then use the aggregation API for operations
+var results = aggSet.Raw("@Age:[30 70]")
+    .GroupBy(x => x.RecordShell.LastName)
+    .Average(x => x.RecordShell.Age)
+    .ToList();
+```
+
+For more details on the Redis Search query syntax for filters, refer to the [RediSearch Query Syntax Documentation](https://redis.io/docs/stack/search/reference/query_syntax/).
+
 ### Vectors
 
 Redis OM .NET also supports storing and querying Vectors stored in Redis. 
