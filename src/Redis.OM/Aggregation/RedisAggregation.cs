@@ -44,6 +44,11 @@ namespace Redis.OM.Aggregation
         public Stack<IAggregationPredicate> Predicates { get; } = new ();
 
         /// <summary>
+        /// Gets or sets the raw query string for direct execution.
+        /// </summary>
+        public string? RawQuery { get; set; }
+
+        /// <summary>
         /// serializes the aggregation into an array of arguments for redis.
         /// </summary>
         /// <returns>The serialized arguments.</returns>
@@ -51,7 +56,11 @@ namespace Redis.OM.Aggregation
         {
             var queries = new List<string>();
             var ret = new List<string>() { IndexName };
-            if (Queries.Any())
+            if (!string.IsNullOrEmpty(RawQuery))
+            {
+                ret.Add(RawQuery!);
+            }
+            else if (Queries.Any())
             {
                 foreach (var query in Queries)
                 {

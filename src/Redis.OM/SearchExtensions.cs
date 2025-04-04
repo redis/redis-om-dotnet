@@ -15,6 +15,40 @@ namespace Redis.OM
     public static class SearchExtensions
     {
         /// <summary>
+        /// Executes a raw search query string directly against Redis.
+        /// </summary>
+        /// <param name="source">The source collection.</param>
+        /// <param name="rawQuery">Raw query string to be used directly in Redis search.</param>
+        /// <typeparam name="T">The indexed type.</typeparam>
+        /// <returns>A Redis Collection with the raw query expression applied.</returns>
+        public static IRedisCollection<T> Raw<T>(this IRedisCollection<T> source, string rawQuery)
+            where T : notnull
+        {
+            var collection = (RedisCollection<T>)source;
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(Raw, source, rawQuery),
+                new[] { source.Expression, Expression.Constant(rawQuery) });
+            return new RedisCollection<T>((RedisQueryProvider)source.Provider, exp, source.StateManager, collection.BooleanExpression, source.SaveState, source.ChunkSize);
+        }
+
+        /// <summary>
+        /// Executes a raw aggregation query string directly against Redis.
+        /// </summary>
+        /// <param name="source">The source aggregation set.</param>
+        /// <param name="rawQuery">Raw query string to be used directly in Redis aggregation.</param>
+        /// <typeparam name="T">The indexed type.</typeparam>
+        /// <returns>A Redis AggregationSet with the raw query expression applied.</returns>
+        public static RedisAggregationSet<T> Raw<T>(this RedisAggregationSet<T> source, string rawQuery)
+        {
+            var exp = Expression.Call(
+                null,
+                GetMethodInfo(Raw, source, rawQuery),
+                new[] { source.Expression, Expression.Constant(rawQuery) });
+            return new RedisAggregationSet<T>(source, exp);
+        }
+
+        /// <summary>
         /// Apply the provided expression to data in Redis.
         /// </summary>
         /// <param name="source">The Aggregation set.</param>
