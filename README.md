@@ -44,6 +44,9 @@
   - [Why this is important](#why-this-is-important)
   - [So how do you get Redis Stack?](#so-how-do-you-get-redis-stack)
 - [❤️ Contributing](#-contributing)
+- [Connecting to Azure Managed Redis with EntraId](#connecting-to-azure-managed-redis-with-entraid)
+  - [Prerequisites](#prerequisites)
+  - [Connecting with EntraId](#connecting-with-entraid)
 - [❤️ Our Contributors](#-our-contributors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -468,6 +471,84 @@ Don't want to run Redis yourself? Redis Stack is also available on Redis Cloud. 
 ## ❤️ Contributing
 
 We'd love your contributions! If you want to contribute please read our [Contributing](CONTRIBUTING.md) document.
+
+## Connecting to Azure Managed Redis with EntraId
+
+Redis OM .NET supports connecting to Azure Managed Redis instances using EntraId (formerly Azure AD) authentication. This allows you to securely connect to your Azure Redis instance without embedding connection secrets in your code.
+
+### Prerequisites
+
+1. Install the required NuGet packages:
+   ```
+   dotnet add package Microsoft.Azure.StackExchangeRedis
+   dotnet add package Azure.Identity
+   ```
+
+2. Configure your Azure Redis instance to use EntraId authentication
+
+### Connecting with EntraId
+
+```csharp
+using Azure.Identity;
+using Redis.OM;
+using StackExchange.Redis;
+
+// Create configuration options for your Azure Redis endpoint
+// Standard format for Azure Managed Redis: your-instance-name.region.redis.azure.net:10000
+ConfigurationOptions options = new ConfigurationOptions
+{
+    EndPoints = { "your-instance-name.region.redis.azure.net:10000" }
+};
+
+// Configure for Azure with DefaultAzureCredential
+await options.ConfigureForAzureWithTokenCredentialAsync(new DefaultAzureCredential());
+
+// Connect to Redis using EntraId authentication
+var muxer = ConnectionMultiplexer.Connect(options);
+
+// Create Redis OM connection provider using the authenticated connection
+var provider = new RedisConnectionProvider(muxer);
+
+// Define a model for Redis OM
+[Document(StorageType = StorageType.Json)]
+public class Customer
+{
+    [RedisIdField] public string Id { get; set; }
+    [Indexed] public string Name { get; set; }
+    [Indexed] public string Email { get; set; }
+    [Indexed(Sortable = true)] public int Age { get; set; }
+}
+
+// Create index if it doesn't exist
+await provider.Connection.CreateIndexAsync(typeof(Customer));
+
+// Get a Redis collection for your model
+var customers = provider.RedisCollection<Customer>();
+
+// Insert a new customer
+await customers.InsertAsync(new Customer 
+{
+    Name = "Jane Smith",
+    Email = "jane@example.com",
+    Age = 32
+});
+
+// Query customers
+var youngCustomers = await customers.Where(c => c.Age < 35).ToListAsync();
+foreach (var customer in youngCustomers)
+{
+    Console.WriteLine($"Name: {customer.Name}, Email: {customer.Email}, Age: {customer.Age}");
+}
+```
+
+The `DefaultAzureCredential` class will automatically try various authentication methods, including:
+- Environment variables
+- Managed Identity
+- Visual Studio credentials
+- Azure CLI credentials
+- Interactive browser login
+
+This approach is particularly useful for services deployed to Azure, as it allows you to use Managed Identity without hardcoding any secrets.
 
 ## ❤️ Our Contributors
 
