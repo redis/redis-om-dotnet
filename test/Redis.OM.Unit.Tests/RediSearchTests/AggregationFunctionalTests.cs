@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using System.Threading.Tasks;
 using System.Linq;
+using Redis.OM.Searching;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -319,6 +321,43 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Contains(people, x => x.Hydrate().Name == "Statler");
             Assert.DoesNotContain(people, x => x.Hydrate().Name == "Beaker");
+        }
+        
+        [Fact]
+        public void TestRawAggregationQuery()
+        {
+            Setup();
+            var aggSet = new RedisAggregationSet<Person>(_connection);
+            
+            
+            // Test raw query with aggregation operations
+            // Raw sets only the filter part (*), then we use proper aggregation API
+            var result = aggSet.Raw("@DepartmentNumber:[1 2]")
+                .GroupBy(x => x.RecordShell.DepartmentNumber)
+                .Average(x => x.RecordShell.Age)
+                .ToList();
+            
+            // Verify results
+            Assert.Equal(2, result.Count);
+            
+            var dept1 = result.FirstOrDefault(r => r["DepartmentNumber"].ToString() == "1");
+            var dept2 = result.FirstOrDefault(r => r["DepartmentNumber"].ToString() == "2");
+            
+            Assert.NotNull(dept1);
+            Assert.NotNull(dept2);
+            
+            // Check average ages (converting to double for comparison)
+            Assert.True(Math.Abs(52.0 - double.Parse(dept1["Age_AVG"].ToString(CultureInfo.InvariantCulture))) < 0.01);
+            Assert.True(Math.Abs(45.0 - double.Parse(dept2["Age_AVG"].ToString(CultureInfo.InvariantCulture))) < 0.01);
+            
+            // Test complex filter with aggregation operations
+            // Raw sets only the filter part (@Age > 30), then we use proper aggregation API
+            var complexResult = aggSet.Raw("@Age:[30 inf]")
+                .GroupBy(x => x.RecordShell.DepartmentNumber)
+                .CountGroupMembers()
+                .ToList();
+            
+            Assert.Equal(4, complexResult.Count);
         }
     }
 }
