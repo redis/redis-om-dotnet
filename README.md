@@ -57,7 +57,7 @@
 
 Redis OM provides high-level abstractions for using Redis in .NET, making it easy to model and query your Redis domain objects.
 
-This **preview** release contains the following features:
+Redis OM contains the following features:
 
 * Declarative object mapping for Redis objects
 * Declarative secondary-index generation
