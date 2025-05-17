@@ -129,6 +129,59 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestFirstOrDefaultWithExpression()
+        {
+            var person = new Person[] {
+                new Person { Name = "Q1", Age = 110 },
+                new Person { Name = "Q2", Age = 112 },
+                new Person { Name = "Q3", Age = 115 },
+                new Person { Name = "Q1", Age = 120 },
+                new Person { Name = "Q2", Age = 122 },
+                new Person { Name = "Q1", Age = 130 },
+                new Person { Name = "Q2", Age = 132 },
+            };
+
+            var collection = new RedisCollection<Person>(_connection, 10000);
+            IQueryable<Person> query = collection;
+
+            foreach (var p in person)
+            {
+                collection.Insert(p);
+            }
+
+            var firstInCollection = collection.FirstOrDefault(x => x.Name == "Q3");
+            var firstInQuery = query.FirstOrDefault(x => x.Name == "Q3");
+
+            Assert.NotNull(firstInCollection);
+            Assert.NotNull(firstInQuery);
+
+            Assert.Equal("Q3", firstInCollection.Name);
+            Assert.Equal("Q3", firstInQuery.Name);
+
+            firstInCollection = collection.FirstOrDefault(x => x.Name == "Q2" && x.Age > 115);
+            firstInQuery = query.FirstOrDefault(x => x.Name == "Q2" && x.Age > 115);
+
+            Assert.NotNull(firstInCollection);
+            Assert.NotNull(firstInQuery);
+
+            Assert.Equal("Q2", firstInCollection.Name);
+            Assert.Equal("Q2", firstInQuery.Name);
+            Assert.Equal(122, firstInCollection.Age);
+            Assert.Equal(122, firstInQuery.Age);
+
+            firstInCollection = collection.Where(x => x.Age > 115).FirstOrDefault(x => x.Name == "Q1");
+            firstInQuery = query.Where(x => x.Age > 115).FirstOrDefault(x => x.Name == "Q1");
+
+            Assert.NotNull(firstInCollection);
+            Assert.NotNull(firstInQuery);
+
+            Assert.Equal("Q1", firstInCollection.Name);
+            Assert.Equal("Q1", firstInQuery.Name);
+            Assert.Equal(120, firstInCollection.Age);
+            Assert.Equal(120, firstInQuery.Age);
+        }
+
+        [Fact]
         public void TestAny()
         {
             var collection = new RedisCollection<Person>(_connection);
