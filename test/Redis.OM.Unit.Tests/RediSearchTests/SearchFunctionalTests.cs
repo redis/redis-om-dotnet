@@ -332,6 +332,77 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestCountWithOrElseMethodCallExpression()
+        {
+            const string name = "TestCountWithOrElseMethodCallExpression";
+            var person = new Person[] {
+                new Person { Name = name + "-AAA", Age = 110 },
+                new Person { Name = name + "-BBB", Age = 112 },
+                new Person { Name = name + "-CCC", Age = 115 },
+                new Person { Name = name + "-AAA", Age = 120 },
+                new Person { Name = name + "-BBB", Age = 122 },
+                new Person { Name = name + "-AAA", Age = 130 },
+                new Person { Name = name + "-BBB", Age = 132 },
+            };
+
+            var collection = new RedisCollection<Person>(_connection, 10000);
+            IQueryable<Person> query = collection;
+
+            if (collection.Where(x => x.Name.Contains(name + "-CCC")).Count() == 0)
+            {
+                foreach (var p in person)
+                {
+                    collection.Insert(p);
+                }
+            }
+
+            var countCollection1 = collection.Where(x => x.Name.Contains(name + "-CCC") || x.Age > 125).Count(); // for reference (3 items)
+            var countQuery1 = query.Where(x => x.Name.Contains(name + "-CCC") || x.Age > 125).Count();
+            var countCollection2 = collection.Where(x => x.Age > 125 || x.Name.Contains(name + "-CCC")).Count();
+            var countQuery2 = query.Where(x => x.Age > 125 || x.Name.Contains(name + "-CCC")).Count();
+
+            Assert.Equal(countCollection1, countQuery1);
+            Assert.Equal(countCollection1, countCollection2);
+            Assert.Equal(countCollection1, countQuery2);
+        }
+
+        [Fact]
+        public void TestCountWhereLeftAndRightAreMethodCallExpression()
+        {
+            const string name = "TestCountWhereLeftAndRightAreMethodCallExpression";
+            var person = new Person[] {
+                new Person { Name = name + "-AAA", Age = 110 },
+                new Person { Name = name + "-BBB", Age = 112 },
+                new Person { Name = name + "-CCC", Age = 115 },
+                new Person { Name = name + "-AAA", Age = 120 },
+                new Person { Name = name + "-BBB", Age = 122 },
+                new Person { Name = name + "-AAA", Age = 130 },
+                new Person { Name = name + "-BBB", Age = 132 },
+            };
+
+            var collection = new RedisCollection<Person>(_connection, 10000);
+            IQueryable<Person> query = collection;
+
+            if (collection.Where(x => x.Name.Contains(name + "-CCC")).Count() == 0)
+            {
+                foreach (var p in person)
+                {
+                    collection.Insert(p);
+                }
+            }
+
+            var countInCollection = collection.Where(x => x.Name.Contains(name + "-CCC")).Count(); // for reference (1 items)
+            var countInQuery = query.Where(x => x.Name.Contains(name + "-CCC")).Count();
+
+            Assert.Equal(countInCollection, countInQuery);
+
+            countInCollection = collection.Where(x => x.Name.Contains(name + "-CCC") || x.Name.Contains(name + "-AAA")).Count(); // for reference (4 items)
+            countInQuery = query.Where(x => x.Name.Contains(name + "-CCC") || x.Name.Contains(name + "-AAA")).Count();
+
+            Assert.Equal(countInCollection, countInQuery);
+        }
+
+        [Fact]
         public void TestUpdate()
         {
             var collection = new RedisCollection<Person>(_connection);
