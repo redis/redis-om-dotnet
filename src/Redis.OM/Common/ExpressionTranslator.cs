@@ -228,6 +228,16 @@ namespace Redis.OM.Common
                             case "First":
                             case "Any":
                             case "FirstOrDefault":
+                                if (exp.Arguments.Count > 1)
+                                {
+                                    // Combine Where clause with existing query
+                                    var condition = TranslateWhereMethod(exp, parameters, ref dialect);
+                                    query.QueryText = query.QueryText == "*" ?
+                                        condition :
+                                        $"({condition} {query.QueryText})";
+                                    query.Dialect = dialect;
+                                }
+
                                 query.Limit ??= new SearchLimit { Offset = 0 };
                                 query.Limit.Number = 1;
                                 break;
