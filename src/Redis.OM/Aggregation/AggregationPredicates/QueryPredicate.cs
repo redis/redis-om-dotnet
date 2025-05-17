@@ -147,7 +147,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             else if (left != null)
             {
                 ValidateAndPushOperand(expression.Right, stack);
-                if (expression.NodeType == ExpressionType.Or)
+                if (expression.NodeType == ExpressionType.Or || expression.NodeType == ExpressionType.OrElse)
                 {
                     stack.Push("|");
                 }
@@ -157,7 +157,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             else if (right != null)
             {
                 SplitBinaryExpression(right, stack);
-                if (expression.NodeType == ExpressionType.Or)
+                if (expression.NodeType == ExpressionType.Or || expression.NodeType == ExpressionType.OrElse)
                 {
                     stack.Push("|");
                 }
@@ -166,7 +166,23 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
             else
             {
-                ValidateAndPushOperand(expression, stack);
+                var leftCall = expression.Left as MethodCallExpression;
+                var rightCall = expression.Right as MethodCallExpression;
+
+                if (leftCall != null && rightCall != null)
+                {
+                    ValidateAndPushOperand(leftCall, stack);
+                    if (expression.NodeType == ExpressionType.Or || expression.NodeType == ExpressionType.OrElse)
+                    {
+                        stack.Push("|");
+                    }
+
+                    ValidateAndPushOperand(rightCall, stack);
+                }
+                else
+                {
+                    ValidateAndPushOperand(expression, stack);
+                }
             }
         }
 
