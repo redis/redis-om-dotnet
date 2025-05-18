@@ -193,5 +193,42 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
+
+        [Fact]
+        public void TestFilterEnum()
+        {
+            var expectedPredicate = "@Feel == 2";
+            _substitute.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "FILTER",
+                expectedPredicate)
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
+
+            var res = collection.Filter(x => x.RecordShell.Feel == PersonFeel.Happy).ToArray();
+
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
+
+        [Fact]
+        public void TestFilterEnumFromVariable()
+        {
+            var expectedPredicate = "@Feel == 2";
+            _substitute.Execute(
+                "FT.AGGREGATE",
+                "person-idx",
+                "*",
+                "FILTER",
+                expectedPredicate)
+                .Returns(_mockReply);
+            var collection = new RedisAggregationSet<Person>(_substitute);
+
+            PersonFeel feel = PersonFeel.Happy;
+            var res = collection.Filter(x => x.RecordShell.Feel == feel).ToArray();
+
+            Assert.Equal("Blah", res[0]["FakeResult"]);
+        }
     }
 }

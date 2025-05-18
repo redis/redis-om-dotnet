@@ -3,6 +3,14 @@ using Redis.OM.Modeling;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
 {
+    public enum PersonFeel : byte
+    {
+        Sad = 0,
+        Upset,
+        Happy,
+        Angry,
+    }
+
     [Document(StorageType = StorageType.Json, IndexName = "person-idx")]
     public partial class Person
     {
@@ -72,6 +80,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Indexed(Aggregatable = true)] public string FirstName { get; set; }
         [Indexed(Aggregatable = true)] public string LastName { get; set; }
 
-
+        [Indexed]
+        public PersonFeel Feel { get; set; }
     }
 }
