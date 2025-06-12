@@ -411,6 +411,11 @@ namespace Redis.OM.Common
                     return string.Join("|", ulids);
                 }
 
+                if (resolvedType.IsEnum && member.Expression is ConstantExpression enumValue)
+                {
+                    return Convert.ToInt32(resolved).ToString();
+                }
+
                 if (resolvedType.IsArray || resolvedType.GetInterfaces().Contains(typeof(IEnumerable)))
                 {
                     var asEnumerable = (IEnumerable)resolved;
