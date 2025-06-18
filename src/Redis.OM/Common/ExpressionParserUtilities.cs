@@ -590,11 +590,11 @@ namespace Redis.OM.Common
 
             var matches = Regex.Matches(formatString, pattern);
             args.AddRange(from Match? match in matches
-                select match.Value.Substring(1, match.Length - 2)
+                          select match.Value.Substring(1, match.Length - 2)
                 into subStr
-                select int.Parse(subStr)
+                          select int.Parse(subStr)
                 into matchIndex
-                select formatArgs[matchIndex]);
+                          select formatArgs[matchIndex]);
             sb.Append(string.Join(",", args));
             sb.Append(")");
             return sb.ToString();
@@ -642,37 +642,37 @@ namespace Redis.OM.Common
                 switch (arg)
                 {
                     case MemberExpression { Expression: ConstantExpression constExp } member:
-                    {
-                        var innerArgList = new List<string>();
-                        if (member.Type == typeof(char[]))
                         {
-                            var charArr = (char[])GetValue(member.Member, constExp.Value);
-                            innerArgList.AddRange(charArr.Select(c => c.ToString()));
-                        }
-                        else if (member.Type == typeof(string[]))
-                        {
-                            var stringArr = (string[])GetValue(member.Member, constExp.Value);
-                            innerArgList.AddRange(stringArr);
-                        }
+                            var innerArgList = new List<string>();
+                            if (member.Type == typeof(char[]))
+                            {
+                                var charArr = (char[])GetValue(member.Member, constExp.Value);
+                                innerArgList.AddRange(charArr.Select(c => c.ToString()));
+                            }
+                            else if (member.Type == typeof(string[]))
+                            {
+                                var stringArr = (string[])GetValue(member.Member, constExp.Value);
+                                innerArgList.AddRange(stringArr);
+                            }
 
-                        args.Add($"\"{string.Join(",", innerArgList)}\"");
-                        break;
-                    }
+                            args.Add($"\"{string.Join(",", innerArgList)}\"");
+                            break;
+                        }
 
                     case NewArrayExpression arrayExpression:
-                    {
-                        var innerArgList = new List<string>();
-                        foreach (var item in arrayExpression.Expressions)
                         {
-                            if (item is ConstantExpression constant)
+                            var innerArgList = new List<string>();
+                            foreach (var item in arrayExpression.Expressions)
                             {
-                                innerArgList.Add(GetConstantStringForArgs(constant));
+                                if (item is ConstantExpression constant)
+                                {
+                                    innerArgList.Add(GetConstantStringForArgs(constant));
+                                }
                             }
-                        }
 
-                        args.Add($"\"{string.Join(",", innerArgList)}\"");
-                        break;
-                    }
+                            args.Add($"\"{string.Join(",", innerArgList)}\"");
+                            break;
+                        }
                 }
             }
 
@@ -1038,6 +1038,11 @@ namespace Redis.OM.Common
 
         private static string ValueToString(object value)
         {
+            if (value is null)
+            {
+                return "null";
+            }
+
             Type valueType = value.GetType();
 
             if (valueType == typeof(double) || Nullable.GetUnderlyingType(valueType) == typeof(double))
