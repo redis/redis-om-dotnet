@@ -1038,6 +1038,11 @@ namespace Redis.OM.Common
 
         private static string ValueToString(object value)
         {
+            if (value is null)
+            {
+                return "null";
+            }
+
             Type valueType = value.GetType();
 
             if (valueType == typeof(double) || Nullable.GetUnderlyingType(valueType) == typeof(double))

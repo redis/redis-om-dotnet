@@ -4156,5 +4156,22 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100");
         }
+
+        [Fact]
+        public async Task TestIsNotNull()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithNullableStrings>(_substitute);
+            await collection.Where(x => x.String1 != null).ToListAsync();
+            await _substitute.Received().ExecuteAsync("FT.SEARCH",
+                $"{nameof(ObjectWithNullableStrings).ToLower()}-idx",
+                "-(ismissing(@String1))",
+                "DIALECT",
+                2,
+                "LIMIT",
+                "0",
+                "100");
+        }
     }
 }

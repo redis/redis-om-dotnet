@@ -415,7 +415,12 @@ namespace Redis.OM.Common
                 if (rightResolvesToNull)
                 {
                     dialectNeeded |= 1 << 1;
-                    return $"(ismissing({leftContent}))";
+                    return binExpression.NodeType switch
+                    {
+                        ExpressionType.Equal => $"(ismissing({leftContent}))",
+                        ExpressionType.NotEqual => $"-(ismissing({leftContent}))",
+                        _ => throw new ArgumentException($"The expression node type {binExpression.NodeType} is not supported"),
+                    };
                 }
 
                 var rightContent = ExpressionParserUtilities.GetOperandStringForQueryArgs(binExpression.Right, parameters, ref dialectNeeded, treatBooleanMemberAsUnary: true);
