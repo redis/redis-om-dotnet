@@ -196,79 +196,79 @@ namespace Redis.OM.Common
             switch (expression)
             {
                 case MethodCallExpression methodExpression:
+                {
+                    var expressions = new List<MethodCallExpression> { methodExpression };
+                    while (methodExpression.Arguments[0] is MethodCallExpression innerExpression)
                     {
-                        var expressions = new List<MethodCallExpression> { methodExpression };
-                        while (methodExpression.Arguments[0] is MethodCallExpression innerExpression)
-                        {
-                            expressions.Add(innerExpression);
-                            methodExpression = innerExpression;
-                        }
-
-                        foreach (var exp in expressions)
-                        {
-                            switch (exp.Method.Name)
-                            {
-                                case "OrderBy":
-                                    query.SortBy = TranslateOrderByMethod(exp, true);
-                                    break;
-                                case "OrderByDescending":
-                                    query.SortBy = TranslateOrderByMethod(exp, false);
-                                    break;
-                                case "Select":
-                                    query.Return = TranslateSelectMethod(exp, rootType, attr);
-                                    break;
-                                case "Take":
-                                    query.Limit ??= new SearchLimit { Offset = 0 };
-                                    query.Limit.Number = TranslateTake(exp);
-                                    break;
-                                case "Skip":
-                                    query.Limit ??= new SearchLimit { Number = 100 };
-                                    query.Limit.Offset = TranslateSkip(exp);
-                                    break;
-                                case "First":
-                                case "Any":
-                                case "FirstOrDefault":
-                                    query.Limit ??= new SearchLimit { Offset = 0 };
-                                    query.Limit.Number = 1;
-                                    break;
-                                case "GeoFilter":
-                                    query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
-                                    break;
-                                case "Where":
-                                    // Combine Where clause with existing query
-                                    var whereClause = TranslateWhereMethod(exp, parameters, ref dialect);
-                                    query.QueryText = query.QueryText == "*" ?
-                                        whereClause :
-                                        $"({whereClause} {query.QueryText})";
-                                    query.Dialect = dialect;
-                                    break;
-                                case "NearestNeighbors":
-                                    query.NearestNeighbors = ParseNearestNeighborsFromExpression(exp);
-                                    break;
-                                case "Raw":
-                                    // Get the current raw query
-                                    var currentRawQuery = ((ConstantExpression)exp.Arguments[1]).Value.ToString();
-
-                                    // If we've seen a raw query before, combine them
-                                    if (rawQuery != null)
-                                    {
-                                        rawQuery = $"({rawQuery} {currentRawQuery})";
-                                    }
-                                    else
-                                    {
-                                        rawQuery = currentRawQuery;
-                                    }
-
-                                    // Set the query text appropriately
-                                    query.QueryText = query.QueryText == "*" ?
-                                        rawQuery :
-                                        $"({query.QueryText} {rawQuery})";
-                                    break;
-                            }
-                        }
-
-                        break;
+                        expressions.Add(innerExpression);
+                        methodExpression = innerExpression;
                     }
+
+                    foreach (var exp in expressions)
+                    {
+                        switch (exp.Method.Name)
+                        {
+                            case "OrderBy":
+                                query.SortBy = TranslateOrderByMethod(exp, true);
+                                break;
+                            case "OrderByDescending":
+                                query.SortBy = TranslateOrderByMethod(exp, false);
+                                break;
+                            case "Select":
+                                query.Return = TranslateSelectMethod(exp, rootType, attr);
+                                break;
+                            case "Take":
+                                query.Limit ??= new SearchLimit { Offset = 0 };
+                                query.Limit.Number = TranslateTake(exp);
+                                break;
+                            case "Skip":
+                                query.Limit ??= new SearchLimit { Number = 100 };
+                                query.Limit.Offset = TranslateSkip(exp);
+                                break;
+                            case "First":
+                            case "Any":
+                            case "FirstOrDefault":
+                                query.Limit ??= new SearchLimit { Offset = 0 };
+                                query.Limit.Number = 1;
+                                break;
+                            case "GeoFilter":
+                                query.GeoFilter = ExpressionParserUtilities.TranslateGeoFilter(exp);
+                                break;
+                            case "Where":
+                                // Combine Where clause with existing query
+                                var whereClause = TranslateWhereMethod(exp, parameters, ref dialect);
+                                query.QueryText = query.QueryText == "*" ?
+                                    whereClause :
+                                    $"({whereClause} {query.QueryText})";
+                                query.Dialect = dialect;
+                                break;
+                            case "NearestNeighbors":
+                                query.NearestNeighbors = ParseNearestNeighborsFromExpression(exp);
+                                break;
+                            case "Raw":
+                                // Get the current raw query
+                                var currentRawQuery = ((ConstantExpression)exp.Arguments[1]).Value.ToString();
+
+                                // If we've seen a raw query before, combine them
+                                if (rawQuery != null)
+                                {
+                                    rawQuery = $"({rawQuery} {currentRawQuery})";
+                                }
+                                else
+                                {
+                                    rawQuery = currentRawQuery;
+                                }
+
+                                // Set the query text appropriately
+                                query.QueryText = query.QueryText == "*" ?
+                                    rawQuery :
+                                    $"({query.QueryText} {rawQuery})";
+                                break;
+                        }
+                    }
+
+                    break;
+                }
 
                 case LambdaExpression lambda:
                     query.QueryText = BuildQueryFromExpression(lambda.Body, parameters, ref dialect);

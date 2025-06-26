@@ -590,11 +590,11 @@ namespace Redis.OM.Common
 
             var matches = Regex.Matches(formatString, pattern);
             args.AddRange(from Match? match in matches
-                          select match.Value.Substring(1, match.Length - 2)
+                select match.Value.Substring(1, match.Length - 2)
                 into subStr
-                          select int.Parse(subStr)
+                select int.Parse(subStr)
                 into matchIndex
-                          select formatArgs[matchIndex]);
+                select formatArgs[matchIndex]);
             sb.Append(string.Join(",", args));
             sb.Append(")");
             return sb.ToString();
