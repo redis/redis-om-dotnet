@@ -642,37 +642,37 @@ namespace Redis.OM.Common
                 switch (arg)
                 {
                     case MemberExpression { Expression: ConstantExpression constExp } member:
+                    {
+                        var innerArgList = new List<string>();
+                        if (member.Type == typeof(char[]))
                         {
-                            var innerArgList = new List<string>();
-                            if (member.Type == typeof(char[]))
-                            {
-                                var charArr = (char[])GetValue(member.Member, constExp.Value);
-                                innerArgList.AddRange(charArr.Select(c => c.ToString()));
-                            }
-                            else if (member.Type == typeof(string[]))
-                            {
-                                var stringArr = (string[])GetValue(member.Member, constExp.Value);
-                                innerArgList.AddRange(stringArr);
-                            }
-
-                            args.Add($"\"{string.Join(",", innerArgList)}\"");
-                            break;
+                            var charArr = (char[])GetValue(member.Member, constExp.Value);
+                            innerArgList.AddRange(charArr.Select(c => c.ToString()));
                         }
+                        else if (member.Type == typeof(string[]))
+                        {
+                            var stringArr = (string[])GetValue(member.Member, constExp.Value);
+                            innerArgList.AddRange(stringArr);
+                        }
+
+                        args.Add($"\"{string.Join(",", innerArgList)}\"");
+                        break;
+                    }
 
                     case NewArrayExpression arrayExpression:
+                    {
+                        var innerArgList = new List<string>();
+                        foreach (var item in arrayExpression.Expressions)
                         {
-                            var innerArgList = new List<string>();
-                            foreach (var item in arrayExpression.Expressions)
+                            if (item is ConstantExpression constant)
                             {
-                                if (item is ConstantExpression constant)
-                                {
-                                    innerArgList.Add(GetConstantStringForArgs(constant));
-                                }
+                                innerArgList.Add(GetConstantStringForArgs(constant));
                             }
-
-                            args.Add($"\"{string.Join(",", innerArgList)}\"");
-                            break;
                         }
+
+                        args.Add($"\"{string.Join(",", innerArgList)}\"");
+                        break;
+                    }
                 }
             }
 
