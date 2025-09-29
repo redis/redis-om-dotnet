@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
+using Microsoft.VisualStudio.TestPlatform.Common.ExtensionFramework;
 using Newtonsoft.Json.Linq;
 using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
@@ -1545,6 +1546,80 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             
             // Cleanup
             await collection.DeleteAsync(person);
+        }
+
+        [Fact]
+        public async Task QueryNumericArrays()
+        {
+            var collection = new RedisCollection<ObjectWithNumericArrays>(_connection);
+            var obj = new ObjectWithNumericArrays
+            {
+                IntArray = new[] {1, 2, 3, 4, 5},
+                LongArray = new long[] {10, 20, 30, 40, 50},
+                DoubleArray = new double[] {5.5, 6.6, 7.7},
+                ShortArray = new short[] {100, 200, 300}
+            };
+            
+            await collection.InsertAsync(obj);
+            var res = await collection.Where(x => x.IntArray.Contains(3) && x.LongArray.Contains(20) && x.DoubleArray.Contains(6.6) && x.ShortArray.Contains((short)200)).ToListAsync();
+            Assert.Single(res);
+            
+        }
+
+        [Fact]
+        public async Task TestNestedObjectWithNumericArrays()
+        {
+            var collection = new RedisCollection<NestedObjectWithNumericArrays>(_connection);
+            var obj = new NestedObjectWithNumericArrays
+            {
+                Inner = new ObjectWithNumericArrays
+                {
+                    IntArray = new[] {1, 2, 3, 4, 5},
+                    LongArray = new long[] {10, 20, 30, 40, 50},
+                    DoubleArray = new double[] {5.5, 6.6, 7.7},
+                    ShortArray = new short[] {100, 200, 300}
+                }
+            };
+            await collection.InsertAsync(obj);
+            var res = await collection.Where(x => x.Inner.IntArray.Contains(3) && x.Inner.LongArray.Contains(20) && x.Inner.DoubleArray.Contains(6.6) && x.Inner.ShortArray.Contains((short)200)).ToListAsync();
+            Assert.Single(res);
+        }
+
+        [Fact]
+        public async Task QueryNumericLists()
+        {
+            var collection = new RedisCollection<ObjectWithNumericLists>(_connection);
+            var obj = new ObjectWithNumericLists
+            {
+                IntList = new List<int> {1, 2, 3, 4, 5},
+                LongList = new List<long> {10, 20, 30, 40, 50},
+                DoubleList = new List<double> {5.5, 6.6, 7.7},
+                ShortList = new List<short> {100, 200, 300}
+            };
+            await collection.InsertAsync(obj);
+            var res = await collection.Where(x => x.IntList.Contains(3) && x.LongList.Contains(20) && x.DoubleList.Contains(6.6) && x.ShortList.Contains((short)200)).ToListAsync();
+            Assert.Single(res);
+        }
+
+        [Fact]
+        public async Task TestNestedObjectWithNumericLists()
+        {
+            var collection = new RedisCollection<NestedObjectWithNumericLists>(_connection);
+            var obj = new NestedObjectWithNumericLists
+            {
+                Inner = new ObjectWithNumericLists
+                {
+                    IntList = new List<int> { 1, 2, 3, 4, 5 },
+                    LongList = new List<long> { 10, 20, 30, 40, 50 },
+                    DoubleList = new List<double> { 5.5, 6.6, 7.7 },
+                    ShortList = new List<short> { 100, 200, 300 }
+                }
+            };
+            await collection.InsertAsync(obj);
+            var res = await collection.Where(x =>
+                x.Inner.IntList.Contains(3) && x.Inner.LongList.Contains(20) && x.Inner.DoubleList.Contains(6.6) &&
+                x.Inner.ShortList.Contains((short)200)).ToListAsync();
+            Assert.Single(res);
         }
     }
 }

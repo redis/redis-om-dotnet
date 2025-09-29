@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -935,6 +934,11 @@ namespace Redis.OM.Common
                     return $"({memberName}:{literal})";
                 }
 
+                if (TypeDeterminationUtilities.IsNumericEnumerable(type))
+                {
+                    return $"({memberName}:[{literal} {literal}])";
+                }
+
                 var ret = literal.Replace("|", $"{memberName}:");
                 ret = ret.Replace("]", "]|");
                 ret = ret.Substring(0, ret.Length - 1);
@@ -974,6 +978,11 @@ namespace Redis.OM.Common
             if (searchFieldAttribute is not null && searchFieldAttribute is SearchableAttribute)
             {
                 return $"({memberName}:{literal})";
+            }
+
+            if (TypeDeterminationUtilities.IsNumericEnumerable(type))
+            {
+                return $"({memberName}:[{literal} {literal}])";
             }
 
             return (type == typeof(string)) ? $"({memberName}:{{*{EscapeTagField(literal)}*}})" : $"({memberName}:{{{EscapeTagField(literal)}}})";

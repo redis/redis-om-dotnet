@@ -32,6 +32,17 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             })
         };
 
+        private readonly RedisReply _mockReplyNumericArraysObj = new RedisReply[]
+        {
+            new(1),
+            new("Redis.OM.Unit.Tests.RediSearchTests.ObjectWithNumericArrays:01FVN836BNQGYMT80V7RCVY73N"),
+            new(new RedisReply[]
+            {
+                "$",
+                "{\"Id\":\"01FVN836BNQGYMT80V7RCVY73N\",\"IntArray\":[1,2,3],\"LongArray\":[1234567890123,1234567890124],\"DoubleArray\":[1.5,2.5,3.5],\"ShortArray\":[10,20,30]}"
+            })
+        };
+
         private readonly RedisReply _mockReplyNone = new RedisReply[]
         {
             new (0),
@@ -1006,6 +1017,130 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "FT.SEARCH",
                 "person-idx",
                 "(@NickNames:{Steve})",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+        }
+
+        [Fact]
+        public void TestArrayContainsNumeric()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithNumericArrays>(_substitute, 1000);
+            _ = collection.Where(x=>x.IntArray.Contains(42)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericarrays-idx",
+                "(@IntArray:[42 42])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            
+            _ = collection.Where(x=>x.LongArray.Contains(42000000000)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericarrays-idx",
+                "(@LongArray:[42000000000 42000000000])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            
+            _ = collection.Where(x=>x.DoubleArray.Contains(4.2)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericarrays-idx",
+                "(@DoubleArray:[4.2 4.2])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            
+            _ = collection.Where(x=>x.ShortArray.Contains((short)4)).ToList();
+            
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericarrays-idx",
+                "(@ShortArray:[4 4])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            
+            short s = 41;
+            _ = collection.Where(x=>x.ShortArray.Contains(s)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericarrays-idx",
+                "(@ShortArray:[41 41])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            
+            var obj = new { s = (short)40 };
+            _ = collection.Where(x=>x.ShortArray.Contains(obj.s)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericarrays-idx",
+                "(@ShortArray:[40 40])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+        }
+
+        [Fact]
+        public void TestArrayContainsNumericLists()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithNumericLists>(_substitute, 1000);
+            _ = collection.Where(x=>x.IntList.Contains(42)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericlists-idx",
+                "(@IntList:[42 42])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            _ = collection.Where(x=>x.LongList.Contains(42000000000)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericlists-idx",
+                "(@LongList:[42000000000 42000000000])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            _ = collection.Where(x=>x.DoubleList.Contains(4.2)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericlists-idx",
+                "(@DoubleList:[4.2 4.2])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            _ = collection.Where(x=>x.ShortList.Contains((short)4)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericlists-idx",
+                "(@ShortList:[4 4])",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+            short s = 41;
+            _ = collection.Where(x=>x.ShortList.Contains(s)).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnumericlists-idx",
+                "(@ShortList:[41 41])",
                 "LIMIT",
                 "0",
                 "1000"
@@ -3514,6 +3649,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             );
         }
 
+        [Fact]
+        public void TestCreateIndexWithNumericArrays()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(new RedisReply("OK"));
+            
+            _substitute.CreateIndex(typeof(ObjectWithNumericArrays));
+
+            _substitute.Received().Execute(
+                "FT.CREATE",
+                $"{nameof(ObjectWithNumericArrays).ToLower()}-idx",
+                "ON",
+                "Json",
+                "PREFIX",
+                "1",
+                $"Redis.OM.Unit.Tests.RediSearchTests.{nameof(ObjectWithNumericArrays)}:",
+                "SCHEMA", "$.IntArray[*]", "AS", "IntArray", "NUMERIC",
+                "$.LongArray[*]", "AS", "LongArray", "NUMERIC",
+                "$.DoubleArray[*]", "AS", "DoubleArray", "NUMERIC",
+                "$.ShortArray[*]", "AS", "ShortArray", "NUMERIC");
+        }
+        
         [Fact]
         public void TestMixedNestingIndexCreation()
         {

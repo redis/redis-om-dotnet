@@ -131,7 +131,7 @@ namespace Redis.OM.Modeling
             return ret.ToArray();
         }
 
-        private static bool IsTypeIndexableArray(Type t) => t == typeof(string[]) || t == typeof(bool[]) || t == typeof(Guid[]) || t == typeof(List<string>) || t == typeof(List<bool>) || t == typeof(List<Guid>);
+        private static bool IsTypeIndexableArray(Type t) => t == typeof(string[]) || t == typeof(bool[]) || t == typeof(Guid[]) || t == typeof(List<string>) || t == typeof(List<bool>) || t == typeof(List<Guid>) || TypeDeterminationUtilities.IsNumericEnumerable(t);
 
         private static IEnumerable<string> SerializeIndexFromJsonPaths(PropertyInfo parentInfo, SearchFieldAttribute attribute, string prefix = "$.", string aliasPrefix = "", int remainingDepth = -1)
         {
@@ -212,6 +212,11 @@ namespace Redis.OM.Modeling
             if (declaredType.IsEnum)
             {
                 return propertyInfo.GetCustomAttributes(typeof(JsonConverterAttribute)).FirstOrDefault() is JsonConverterAttribute converter && converter.ConverterType == typeof(JsonStringEnumConverter) ? "TAG" : "NUMERIC";
+            }
+
+            if (TypeDeterminationUtilities.IsNumericEnumerable(declaredType))
+            {
+                return "NUMERIC";
             }
 
             return TypeDeterminationUtilities.IsNumeric(declaredType) ? "NUMERIC" : "TAG";

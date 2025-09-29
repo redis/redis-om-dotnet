@@ -46,6 +46,28 @@ namespace Redis.OM.Modeling
         }
 
         /// <summary>
+        /// Determins whether the type is a numeric enumerable.
+        /// </summary>
+        /// <param name="type">The Type.</param>
+        /// <returns>Whether or not the type is some kind of numeric enumerable.</returns>
+        internal static bool IsNumericEnumerable(Type type)
+        {
+            if (!typeof(IEnumerable).IsAssignableFrom(type))
+            {
+                return false;
+            }
+
+            var elementType = type.IsArray ? type.GetElementType() : type.GenericTypeArguments.FirstOrDefault();
+            if (elementType is null)
+            {
+                return false;
+            }
+
+            var underlyingType = Nullable.GetUnderlyingType(elementType) ?? elementType;
+            return NumericTypes.Contains(underlyingType);
+        }
+
+        /// <summary>
         /// Is the type numeric.
         /// </summary>
         /// <param name="type">The type to check.</param>
