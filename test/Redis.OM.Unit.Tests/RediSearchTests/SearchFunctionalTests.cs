@@ -2,17 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.VisualBasic;
-using Microsoft.VisualStudio.TestPlatform.Common.ExtensionFramework;
 using Newtonsoft.Json.Linq;
-using Redis.OM.Aggregation;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
-using Redis.OM.Searching.Query;
-using StackExchange.Redis;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
