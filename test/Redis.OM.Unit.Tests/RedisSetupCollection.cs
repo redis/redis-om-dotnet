@@ -34,6 +34,10 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(ObjectWithByteArray));
             Connection.CreateIndex(typeof(ObjectWithNullableStrings));
             Connection.CreateIndex(typeof(ObjectWithNullableStringsHash));
+            Connection.CreateIndex(typeof(ObjectWithNumericArrays));
+            Connection.CreateIndex(typeof(NestedObjectWithNumericArrays));
+            Connection.CreateIndex(typeof(ObjectWithNumericLists));
+            Connection.CreateIndex(typeof(NestedObjectWithNumericLists));
         }
 
         private IRedisConnectionProvider _provider;
@@ -70,6 +74,10 @@ namespace Redis.OM.Unit.Tests
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithByteArray));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNullableStrings));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNullableStringsHash));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNumericArrays));
+            Connection.DropIndexAndAssociatedRecords(typeof(NestedObjectWithNumericArrays));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNumericLists));
+            Connection.DropIndexAndAssociatedRecords(typeof(NestedObjectWithNumericLists));
         }
     }
 }
