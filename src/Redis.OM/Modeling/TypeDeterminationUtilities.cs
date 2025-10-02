@@ -46,7 +46,7 @@ namespace Redis.OM.Modeling
         }
 
         /// <summary>
-        /// Determins whether the type is a numeric enumerable.
+        /// Determines whether the type is a numeric enumerable.
         /// </summary>
         /// <param name="type">The Type.</param>
         /// <returns>Whether or not the type is some kind of numeric enumerable.</returns>
