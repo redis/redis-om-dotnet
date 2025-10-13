@@ -23,7 +23,7 @@ ShowCustomers("FirstName == Customer", customerWithFirstNameCustomer);
 // match by numeric
 // Find all customers with Age is 20
 var customerWithAge20 = customerCollection.Where(x => x.Age == 20).ToList();
-ShowCustomers("Age == 20", customerWithFirstNameCustomer);
+ShowCustomers("Age == 20", customerWithAge20);
 
 // Find all customers with Age is more than 20
 var customerWithAgeMoreThan20 = customerCollection.Where(x => x.Age > 20).ToList();
@@ -32,12 +32,12 @@ ShowCustomers("Age > 20", customerWithAgeMoreThan20);
 // match by boolean
 // Find all customers with IsActive is true
 var activeCustomer = customerCollection.Where(x => x.IsActive).ToList();
-ShowCustomers("IsActive == true", customerWithFirstNameCustomer);
+ShowCustomers("IsActive == true", activeCustomer);
 
 // match by enums
 // Find all customers with Gender is Male
 var maleCustomer = customerCollection.Where(x => x.Gender == Gender.Male).ToList();
-ShowCustomers("Gender == Gender.Male", customerWithFirstNameCustomer);
+ShowCustomers("Gender == Gender.Male", maleCustomer);
 
 // multiple matches
 
