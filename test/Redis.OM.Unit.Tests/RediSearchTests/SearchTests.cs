@@ -463,7 +463,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestMatchContains()
+        public void TestMatchContainsOfString()
         {
             _substitute.ClearSubstitute();
             _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
@@ -478,7 +478,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "0",
                 "100");
         }
-        
+
+        [Fact]
+        public void TestMatchContainsOfStringArray()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.NickNames.MatchContains("Ste")).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNames:{*Ste*})",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
         [Fact]
         public void TestMultipleMatches()
         {
@@ -497,7 +514,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
-        public void TestMatchPattern()
+        public void TestMatchPatternOfString()
         {
             _substitute.ClearSubstitute();
             _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
@@ -509,6 +526,24 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:Ste* Lo*)",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
+        [Fact]
+        public void TestMatchPatternOfStringArray()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            var ddfgdf = collection.Where(x => x.NickNames.MatchPattern("Ste* Lo*")).ToList();
+
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNames:{Ste* Lo*})",
                 "LIMIT",
                 "0",
                 "100");
