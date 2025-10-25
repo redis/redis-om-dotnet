@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Redis.OM
 {
@@ -81,7 +81,7 @@ namespace Redis.OM
         public static bool MatchContains(this string source, string infix)
         {
             var terms = source.Split(SplitChars);
-            return terms.Any(t => t.EndsWith(infix));
+            return terms.Any(t => t.Contains(infix));
         }
 
         /// <summary>
@@ -94,8 +94,139 @@ namespace Redis.OM
         /// provided here for completeness.</remarks>
         public static bool MatchPattern(this string source, string pattern)
         {
+            var regex = new Regex(WildcardToRegex(pattern));
             var terms = source.Split(SplitChars);
-            return terms.Any(t => t.EndsWith(pattern));
+            return terms.Any(t => regex.IsMatch(t));
+        }
+
+        /// <summary>
+        /// Checks the source array string to see if any tokens within the source string start with the prefix.
+        /// </summary>
+        /// <param name="source">The array string to check.</param>
+        /// <param name="prefix">The prefix to look for within the each string in array.</param>
+        /// <returns>Whether any token within the source string starts with the prefix.</returns>
+        /// <remarks>This is meant to be a shadow method that runs within an expression, a working implementation is
+        /// provided here for completeness.</remarks>
+        public static bool MatchStartsWith(this IEnumerable<string> source, string prefix)
+        {
+            foreach (var str in source)
+            {
+                var terms = str.Split(SplitChars);
+                return terms.Any(t => t.StartsWith(prefix));
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks the source array string to see if any tokens within the source string ends with the suffix.
+        /// </summary>
+        /// <param name="source">The array string to check.</param>
+        /// <param name="suffix">The suffix to look for within the each string in array.</param>
+        /// <returns>Whether any token within the source string ends with the suffix.</returns>
+        /// <remarks>This is meant to be a shadow method that runs within an expression, a working implementation is
+        /// provided here for completeness.</remarks>
+        public static bool MatchEndsWith(this IEnumerable<string> source, string suffix)
+        {
+            foreach (var str in source)
+            {
+                var terms = str.Split(SplitChars);
+                return terms.Any(t => t.EndsWith(suffix));
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks the source array string to see if any tokens within the source contains the infix.
+        /// </summary>
+        /// <param name="source">The array string to check.</param>
+        /// <param name="infix">The infix to look for within the each string in array.</param>
+        /// <returns>Whether any token within the source string contains the infix.</returns>
+        /// <remarks>This is meant to be a shadow method that runs within an expression, a working implementation is
+        /// provided here for completeness.</remarks>
+        public static bool MatchContains(this IEnumerable<string> source, string infix)
+        {
+            foreach (var str in source)
+            {
+                var terms = str.Split(SplitChars);
+                return terms.Any(t => t.Contains(infix));
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks the source array string to see if any tokens within the source matches the pattern.
+        /// </summary>
+        /// <param name="source">The array string to check.</param>
+        /// <param name="pattern">The pattern to look for within the each string in array.</param>
+        /// <returns>Whether any token within the source string matches the pattern.</returns>
+        /// <remarks>This is meant to be a shadow method that runs within an expression, a working implementation is
+        /// provided here for completeness.</remarks>
+        public static bool MatchPattern(this IEnumerable<string> source, string pattern)
+        {
+            var regex = new Regex(WildcardToRegex(pattern));
+            foreach (var str in source)
+            {
+                var terms = str.Split(SplitChars);
+                return terms.Any(t => regex.IsMatch(t));
+            }
+
+            return false;
+        }
+
+        /*
+         * See: https://redis.io/docs/latest/develop/ai/search-and-query/advanced-concepts/query_syntax/#wildcard-matching
+                ? - for any single character
+                * - for any character repeating zero or more times
+                \ - for escaping; other special characters are ignored
+        */
+
+        /// <summary>
+        /// Converts a wildcard pattern to a regex pattern.
+        /// </summary>
+        /// <param name="wildcardPattern">The wildcard pattern like '*foo?bar*'. Use '\' to escape.</param>
+        /// <returns>Return regex pattern and support escaping.</returns>
+        private static string WildcardToRegex(string wildcardPattern)
+        {
+            var regexPattern = new StringBuilder();
+            regexPattern.Append("^");
+
+            int i = 0;
+            while (i < wildcardPattern.Length)
+            {
+                char current = wildcardPattern[i];
+
+                if (current == '\\' && i + 1 < wildcardPattern.Length)
+                {
+                    // Escape the next character
+                    char nextChar = wildcardPattern[i + 1];
+                    regexPattern.Append(Regex.Escape(nextChar.ToString()));
+                    i += 2;
+                }
+                else if (current == '*')
+                {
+                    // Match any character zero or more times
+                    regexPattern.Append(".*");
+                    i++;
+                }
+                else if (current == '?')
+                {
+                    // Match any single character
+                    regexPattern.Append(".");
+                    i++;
+                }
+                else
+                {
+                    // Escape special regex characters
+                    regexPattern.Append(Regex.Escape(current.ToString()));
+                    i++;
+                }
+            }
+
+            regexPattern.Append("$");
+            return regexPattern.ToString();
         }
 
         /// <summary>
