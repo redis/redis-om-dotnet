@@ -53,7 +53,7 @@ namespace Redis.OM
         public static bool MatchStartsWith(this string source, string prefix)
         {
             var terms = source.Split(SplitChars);
-            return terms.Any(t => t.StartsWith(prefix));
+            return terms.Any(t => t.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Redis.OM
         public static bool MatchEndsWith(this string source, string suffix)
         {
             var terms = source.Split(SplitChars);
-            return terms.Any(t => t.EndsWith(suffix));
+            return terms.Any(t => t.EndsWith(suffix, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Redis.OM
         public static bool MatchContains(this string source, string infix)
         {
             var terms = source.Split(SplitChars);
-            return terms.Any(t => t.Contains(infix));
+            return terms.Any(t => t.IndexOf(infix, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Redis.OM
         /// provided here for completeness.</remarks>
         public static bool MatchPattern(this string source, string pattern)
         {
-            var regex = new Regex(WildcardToRegex(pattern));
+            var regex = new Regex(WildcardToRegex(pattern), RegexOptions.IgnoreCase | RegexOptions.Compiled);
             var terms = source.Split(SplitChars);
             return terms.Any(t => regex.IsMatch(t));
         }
@@ -112,7 +112,10 @@ namespace Redis.OM
             foreach (var str in source)
             {
                 var terms = str.Split(SplitChars);
-                return terms.Any(t => t.StartsWith(prefix));
+                if (terms.Any(t => t.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -131,7 +134,10 @@ namespace Redis.OM
             foreach (var str in source)
             {
                 var terms = str.Split(SplitChars);
-                return terms.Any(t => t.EndsWith(suffix));
+                if (terms.Any(t => t.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -150,7 +156,10 @@ namespace Redis.OM
             foreach (var str in source)
             {
                 var terms = str.Split(SplitChars);
-                return terms.Any(t => t.Contains(infix));
+                if (terms.Any(t => t.IndexOf(infix, StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -166,11 +175,14 @@ namespace Redis.OM
         /// provided here for completeness.</remarks>
         public static bool MatchPattern(this IEnumerable<string> source, string pattern)
         {
-            var regex = new Regex(WildcardToRegex(pattern));
+            var regex = new Regex(WildcardToRegex(pattern), RegexOptions.IgnoreCase | RegexOptions.Compiled);
             foreach (var str in source)
             {
                 var terms = str.Split(SplitChars);
-                return terms.Any(t => regex.IsMatch(t));
+                if (terms.Any(t => regex.IsMatch(t)))
+                {
+                    return true;
+                }
             }
 
             return false;
