@@ -2149,7 +2149,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 $"Redis.OM.Unit.Tests.{nameof(ObjectWithZeroStopwords)}:",
                 "STOPWORDS",
                 "0",
-                "SCHEMA", "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY");
+                "SCHEMA", "Name", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING");
         }
 
         [Fact]
@@ -2169,7 +2169,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 $"Redis.OM.Unit.Tests.{nameof(ObjectWithTwoStopwords)}:",
                 "STOPWORDS", "2", "foo", "bar",
-                "SCHEMA", "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY");
+                "SCHEMA", "Name", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING");
         }
 
         [Fact]
@@ -2188,12 +2188,12 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypes:",
                 "SCHEMA",
-                "$.Ulid", "AS", "Ulid", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.Boolean", "AS", "Boolean", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.Guid", "AS", "Guid", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.AnEnum", "AS", "AnEnum", "TAG", "INDEXMISSING", "INDEXEMPTY",
+                "$.Ulid", "AS", "Ulid", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.Boolean", "AS", "Boolean", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.Guid", "AS", "Guid", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.AnEnum", "AS", "AnEnum", "TAG", "INDEXEMPTY", "INDEXMISSING",
                 "$.AnEnumAsInt", "AS", "AnEnumAsInt", "NUMERIC",
-                "$.Flags", "AS", "Flags", "TAG", "SEPARATOR", ",", "INDEXMISSING", "INDEXEMPTY"
+                "$.Flags", "AS", "Flags", "TAG", "SEPARATOR", ",", "INDEXEMPTY", "INDEXMISSING"
             );
         }
 
@@ -2214,9 +2214,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithStringLikeValueTypesHash:",
                 "SCHEMA",
                 "Ulid",
-                "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
+                "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
                 "Boolean",
-                "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", "Guid", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", "AnEnum", "NUMERIC"
+                "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING", "Guid", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING", "AnEnum", "NUMERIC"
             );
         }
 
@@ -2238,7 +2238,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithDateTime:",
                 "SCHEMA",
                 "$.Timestamp", "AS", "Timestamp", "NUMERIC", "SORTABLE",
-                "$.NullableTimestamp", "AS", "NullableTimestamp", "NUMERIC"
+                "$.NullableTimestamp", "AS", "NullableTimestamp", "NUMERIC", "INDEXMISSING"
             );
 
             await _substitute.Received().ExecuteAsync("FT.CREATE",
@@ -2250,7 +2250,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithDateTimeHash:",
                 "SCHEMA",
                 "Timestamp", "NUMERIC",
-                "NullableTimestamp", "NUMERIC"
+                "NullableTimestamp", "NUMERIC", "INDEXMISSING"
             );
         }
 
@@ -2364,15 +2364,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithEmbeddedArrayOfObjects:",
                 "SCHEMA",
-                "$.Addresses[*].City", "AS", "Addresses_City", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.Addresses[*].State", "AS", "Addresses_State", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.Addresses[*].AddressType", "AS", "Addresses_AddressType", "TAG", "INDEXMISSING", "INDEXEMPTY",
-                "$.Addresses[*].Boolean", "AS", "Addresses_Boolean", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.Addresses[*].Guid", "AS", "Addresses_Guid", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.Addresses[*].Ulid", "AS", "Addresses_Ulid", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.AddressList[*].City", "AS", "AddressList_City", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.AddressList[*].State", "AS", "AddressList_State", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", "$.Numeric", "AS", "Numeric", "NUMERIC");
+                "$.Addresses[*].City", "AS", "Addresses_City", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.Addresses[*].State", "AS", "Addresses_State", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.Addresses[*].AddressType", "AS", "Addresses_AddressType", "TAG", "INDEXEMPTY", "INDEXMISSING",
+                "$.Addresses[*].Boolean", "AS", "Addresses_Boolean", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.Addresses[*].Guid", "AS", "Addresses_Guid", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.Addresses[*].Ulid", "AS", "Addresses_Ulid", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.AddressList[*].City", "AS", "AddressList_City", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.AddressList[*].State", "AS", "AddressList_State", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING", "$.Numeric", "AS", "Numeric", "NUMERIC");
         }
 
         [Fact]
@@ -3687,14 +3687,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "PREFIX",
                 "1",
                 $"Redis.OM.Unit.Tests.{nameof(ComplexObjectWithCascadeAndJsonPath)}:",
-                "SCHEMA", "$.InnerCascade.InnerInnerJson.Tag", "AS", "InnerCascade_InnerInnerJson_Tag", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.InnerCascade.InnerInnerCascade.Tag", "AS", "InnerCascade_InnerInnerCascade_Tag", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
+                "SCHEMA", "$.InnerCascade.InnerInnerJson.Tag", "AS", "InnerCascade_InnerInnerJson_Tag", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.InnerCascade.InnerInnerCascade.Tag", "AS", "InnerCascade_InnerInnerCascade_Tag", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
                 "$.InnerCascade.InnerInnerCascade.Num", "AS", "InnerCascade_InnerInnerCascade_Num", "NUMERIC",
-                "$.InnerCascade.InnerInnerCascade.Arr[*]", "AS", "InnerCascade_InnerInnerCascade_Arr", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.InnerCascade.InnerInnerCollection[*].Tag", "AS", "InnerCascade_InnerInnerCollection_Tag", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
-                "$.InnerJson.InnerInnerCascade.Tag", "AS", "InnerJson_InnerInnerCascade_Tag", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY",
+                "$.InnerCascade.InnerInnerCascade.Arr[*]", "AS", "InnerCascade_InnerInnerCascade_Arr", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.InnerCascade.InnerInnerCollection[*].Tag", "AS", "InnerCascade_InnerInnerCollection_Tag", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
+                "$.InnerJson.InnerInnerCascade.Tag", "AS", "InnerJson_InnerInnerCascade_Tag", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING",
                 "$.InnerJson.InnerInnerCascade.Num", "AS", "InnerJson_InnerInnerCascade_Num", "NUMERIC",
-                "$.InnerJson.InnerInnerCascade.Arr[*]", "AS", "InnerJson_InnerInnerCascade_Arr", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY");
+                "$.InnerJson.InnerInnerCascade.Arr[*]", "AS", "InnerJson_InnerInnerCascade_Arr", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING");
         }
 
         [Fact]
@@ -3751,7 +3751,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "PREFIX",
                 "1",
                 $"Redis.OM.Unit.Tests.{nameof(ObjectWithPropertyNamesDefined)}:",
-                "SCHEMA", "$.notKey", "AS", "notKey", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY");
+                "SCHEMA", "$.notKey", "AS", "notKey", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING");
         }
 
         [Fact]
@@ -4197,8 +4197,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "1",
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithMultipleSearchableAttributes:",
                 "SCHEMA",
-                "$.Address.City", "AS", "Address_City", "TEXT", "INDEXMISSING", "INDEXEMPTY",
-                "$.Address.State", "AS", "Address_State", "TEXT", "INDEXMISSING", "INDEXEMPTY");
+                "$.Address.City", "AS", "Address_City", "TEXT", "INDEXEMPTY", "INDEXMISSING",
+                "$.Address.State", "AS", "Address_State", "TEXT", "INDEXEMPTY", "INDEXMISSING");
         }
 
         [Fact]

@@ -284,7 +284,11 @@ namespace Redis.OM.Modeling
 
         private static string[] CommonSerialization(SearchFieldAttribute attr, Type type, PropertyInfo propertyInfo)
         {
-            var declaredType = Nullable.GetUnderlyingType(type) ?? type;
+            var declaredType = Nullable.GetUnderlyingType(type);
+            var typeNullable = declaredType != null;
+
+            declaredType ??= type;
+
             var searchFieldType = GetSearchFieldType(declaredType, attr, propertyInfo);
             var ret = new List<string> { searchFieldType };
 
@@ -309,39 +313,44 @@ namespace Redis.OM.Modeling
 
                 if (text.IndexEmptyAndMissing)
                 {
-                    ret.Add("INDEXMISSING");
                     ret.Add("INDEXEMPTY");
                 }
             }
 
-            if (searchFieldType == "TAG" && attr is IndexedAttribute tag)
+            if (attr is IndexedAttribute indexed)
             {
-                if (tag.Separator != ',' && !declaredType.IsEnum)
+                if (searchFieldType == "TAG")
                 {
-                    ret.Add("SEPARATOR");
-                    ret.Add(tag.Separator.ToString());
-                }
-                else if (declaredType.IsEnum && IsEnumTypeFlags(declaredType))
-                {
-                    ret.Add("SEPARATOR");
-                    ret.Add(",");
-                }
+                    if (indexed.Separator != ',' && !declaredType.IsEnum)
+                    {
+                        ret.Add("SEPARATOR");
+                        ret.Add(indexed.Separator.ToString());
+                    }
+                    else if (declaredType.IsEnum && IsEnumTypeFlags(declaredType))
+                    {
+                        ret.Add("SEPARATOR");
+                        ret.Add(",");
+                    }
 
-                if (tag.CaseSensitive)
-                {
-                    ret.Add("CASESENSITIVE");
-                }
+                    if (indexed.CaseSensitive)
+                    {
+                        ret.Add("CASESENSITIVE");
+                    }
 
-                if (tag.IndexEmptyAndMissing)
+                    if (indexed.IndexEmptyAndMissing)
+                    {
+                        ret.Add("INDEXEMPTY");
+                    }
+                }
+                else if (searchFieldType == "VECTOR")
                 {
-                    ret.Add("INDEXMISSING");
-                    ret.Add("INDEXEMPTY");
+                    ret.AddRange(VectorSerialization(indexed, propertyInfo));
                 }
             }
 
-            if (searchFieldType == "VECTOR" && attr is IndexedAttribute vector)
+            if (attr.IndexEmptyAndMissing && (searchFieldType != "NUMERIC" || typeNullable))
             {
-                ret.AddRange(VectorSerialization(vector, propertyInfo));
+                ret.Add("INDEXMISSING");
             }
 
             if (attr.Sortable || attr.Aggregatable)
