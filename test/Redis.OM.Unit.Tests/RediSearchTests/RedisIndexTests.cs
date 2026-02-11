@@ -11,7 +11,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 {
     public class RedisIndexTests
     {
-
         [Document]
         public class TestNoExtras
         {
@@ -21,58 +20,62 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             [Indexed] public string[] NickNames { get; set; }
             [Indexed] public string Tag { get; set; }
             [Indexed] public GeoLoc GeoLoc { get; set; }
-            [Indexed] [OpenAIVectorizer]public Vector<String> VectorField { get; set; }
+            [Indexed][OpenAIVectorizer] public Vector<String> VectorField { get; set; }
         }
-        
+
         [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash)]
         public class TestPersonClassHappyPath
         {
             [Searchable(Sortable = true)]
             public string Name { get; set; }
+
             [Indexed(Sortable = true)]
             public int Age { get; set; }
+
             public double Height { get; set; }
             public string[] NickNames { get; set; }
         }
 
-        [Document(IndexName = "TestPersonClassHappyPath-idx", Prefixes = new []{"Simple"}, StorageType = StorageType.Hash)]
+        [Document(IndexName = "TestPersonClassHappyPath-idx", Prefixes = new[] { "Simple" }, StorageType = StorageType.Hash)]
         public class TestPersonClassHappyPathWithMutatedDefinition
         {
             public string Name { get; set; }
+
             [Indexed(Sortable = true)]
             public int Age { get; set; }
+
             public double Height { get; set; }
         }
 
-        [Document(IndexName = "SerialisedJson-idx", Prefixes = new []{"Simple"}, StorageType = StorageType.Json)]
+        [Document(IndexName = "SerialisedJson-idx", Prefixes = new[] { "Simple" }, StorageType = StorageType.Json)]
         public class SerialisedJsonType
         {
             [Searchable(Sortable = true, NoStem = true, Weight = .8)]
             public string Name { get; set; }
-            
+
             [Indexed(Sortable = true)]
             public string Tag { get; set; }
-            
+
             [Indexed] public GeoLoc GeoField { get; set; }
-            
-            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW)] [OpenAIVectorizer]public Vector<String> VectorField { get; set; }
-            
+
+            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW)][OpenAIVectorizer] public Vector<String> VectorField { get; set; }
+
             public int Age { get; set; }
         }
 
-        [Document(IndexName = "SerialisedJson-idx", Prefixes = new []{"Simple"}, StorageType = StorageType.Json)]
+        [Document(IndexName = "SerialisedJson-idx", Prefixes = new[] { "Simple" }, StorageType = StorageType.Json)]
         public class SerialisedJsonTypeNotMatch
         {
             [Searchable(Sortable = true, NoStem = true, Weight = .8)]
             public string Name { get; set; }
-            
+
             [Indexed(Sortable = true)]
             public string Tag { get; set; }
-            
+
             [Indexed] public GeoLoc GeoField { get; set; }
-            
-            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW)] [OpenAIVectorizer]public Vector<String> VectorField { get; set; }
-            
+
+            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW)][OpenAIVectorizer] public Vector<String> VectorField { get; set; }
+
             [Indexed(Sortable = true)]
             public int Age { get; set; }
         }
@@ -80,36 +83,38 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         [Document(IndexName = "Uncheckable-idx", Prefixes = new[] { "Simple" }, StorageType = StorageType.Json)]
         public class UncheckableIndex
         {
-            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW, Epsilon = .02, EfRuntime = 11)] [OpenAIVectorizer]public Vector<String> VectorField { get; set; }
+            [Indexed(M = 40, EfConstructor = 250, Algorithm = VectorAlgorithm.HNSW, Epsilon = .02, EfRuntime = 11)][OpenAIVectorizer] public Vector<String> VectorField { get; set; }
         }
 
         [Document(IndexName = "Uncheckable-idx", Prefixes = new[] { "Simple" }, StorageType = StorageType.Json)]
         public class UncheckableIndexPhoneticMatcher
         {
-            [Searchable(PhoneticMatcher = "dm:fr")]public string Name { get; set; }
+            [Searchable(PhoneticMatcher = "dm:fr")] public string Name { get; set; }
         }
 
-        [Document(IndexName = "kitchen-sink", Prefixes = new []{"prefix1", "prefix2", "prefix3"}, Language = "norwegian", LanguageField = nameof(Lang), Filter = "@Name == 'foo'")]
+        [Document(IndexName = "kitchen-sink", Prefixes = new[] { "prefix1", "prefix2", "prefix3" }, Language = "norwegian", LanguageField = nameof(Lang), Filter = "@Name == 'foo'")]
         public class KitchenSinkDocumentIndex
         {
-            [Indexed]public string Name { get; set; }
-            public string Lang { get; set; }
-        }
-        
-        [Document(IndexName = "kitchen-sink", Prefixes = new []{"prefix1", "prefix2", "prefix3"}, Language = "norwegian", LanguageField = nameof(Lang), Filter = "@Name == 'foo'", Stopwords = new []{"break"})]
-        public class KitchenSinkDocumentIndexFailForStopwords
-        {
-            [Indexed]public string Name { get; set; }
+            [Indexed] public string Name { get; set; }
             public string Lang { get; set; }
         }
 
-        [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash, Prefixes = new []{"Person:"})]
+        [Document(IndexName = "kitchen-sink", Prefixes = new[] { "prefix1", "prefix2", "prefix3" }, Language = "norwegian", LanguageField = nameof(Lang), Filter = "@Name == 'foo'", Stopwords = new[] { "break" })]
+        public class KitchenSinkDocumentIndexFailForStopwords
+        {
+            [Indexed] public string Name { get; set; }
+            public string Lang { get; set; }
+        }
+
+        [Document(IndexName = "TestPersonClassHappyPath-idx", StorageType = StorageType.Hash, Prefixes = new[] { "Person:" })]
         public class TestPersonClassOverridenPrefix
         {
             [Searchable(Sortable = true)]
             public string Name { get; set; }
+
             [Indexed(Sortable = true)]
             public int Age { get; set; }
+
             public double Height { get; set; }
             public string[] NickNames { get; set; }
         }
@@ -351,9 +356,9 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await connection.CreateIndexAsync(typeof(UncheckableIndex));
             var indexInfo = await connection.GetIndexInfoAsync(typeof(UncheckableIndex));
 
-            Assert.Throws<ArgumentException>(()=>indexInfo.IndexDefinitionEquals(typeof(UncheckableIndex)));
+            Assert.Throws<ArgumentException>(() => indexInfo.IndexDefinitionEquals(typeof(UncheckableIndex)));
         }
-        
+
         [Fact]
         public async Task TestArgumentExceptionOnUncheckableIndexTypePhonetics()
         {
@@ -365,7 +370,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await connection.CreateIndexAsync(typeof(UncheckableIndexPhoneticMatcher));
             var indexInfo = await connection.GetIndexInfoAsync(typeof(UncheckableIndexPhoneticMatcher));
 
-            Assert.Throws<ArgumentException>(()=>indexInfo.IndexDefinitionEquals(typeof(UncheckableIndexPhoneticMatcher)));
+            Assert.Throws<ArgumentException>(() => indexInfo.IndexDefinitionEquals(typeof(UncheckableIndexPhoneticMatcher)));
         }
 
         [Fact]
@@ -378,10 +383,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await connection.DropIndexAsync(typeof(KitchenSinkDocumentIndex));
             await connection.CreateIndexAsync(typeof(KitchenSinkDocumentIndex));
             var indexInfo = await connection.GetIndexInfoAsync(typeof(KitchenSinkDocumentIndex));
-            
+
             Assert.True(indexInfo.IndexDefinitionEquals(typeof(KitchenSinkDocumentIndex)));
         }
-        
+
         [Fact]
         public async Task TestKitchenSinkEqualityFailForStopwords()
         {
@@ -392,8 +397,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await connection.DropIndexAsync(typeof(KitchenSinkDocumentIndexFailForStopwords));
             await connection.CreateIndexAsync(typeof(KitchenSinkDocumentIndexFailForStopwords));
             var indexInfo = await connection.GetIndexInfoAsync(typeof(KitchenSinkDocumentIndexFailForStopwords));
-            
-            Assert.Throws<ArgumentException>(()=>indexInfo.IndexDefinitionEquals(typeof(KitchenSinkDocumentIndexFailForStopwords)));
+
+            Assert.Throws<ArgumentException>(() => indexInfo.IndexDefinitionEquals(typeof(KitchenSinkDocumentIndexFailForStopwords)));
         }
 
         [Fact]
@@ -406,7 +411,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             await connection.DropIndexAsync(typeof(TestNoExtras));
             await connection.CreateIndexAsync(typeof(TestNoExtras));
             var indexInfo = await connection.GetIndexInfoAsync(typeof(TestNoExtras));
-            
+
             Assert.True(indexInfo.IndexDefinitionEquals(typeof(TestNoExtras)));
         }
     }

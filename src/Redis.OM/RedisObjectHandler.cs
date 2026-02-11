@@ -436,7 +436,7 @@ namespace Redis.OM
         private static string SendToJson(IDictionary<string, RedisReply> hash, Type t)
         {
             var properties = t.GetProperties();
-            if ((!properties.Any() || t == typeof(Ulid) || t == typeof(Ulid?)) && hash.Count == 1)
+            if ((!properties.Any() || t == typeof(Ulid) || t == typeof(Ulid?) || t == typeof(Guid) || t == typeof(Guid?)) && hash.Count == 1)
             {
                 return $"\"{hash.First().Value}\"";
             }

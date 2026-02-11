@@ -10,8 +10,8 @@ using Redis.OM.Modeling;
 
 namespace Redis.OM.Generators
 {
-    [Generator]
-    public class RedisHashableGenerator : ISourceGenerator
+     [Generator]
+     public class RedisHashableGenerator : ISourceGenerator
     { 
         private static bool IsPrimitive(PropertyDeclarationSyntax p)
         {
