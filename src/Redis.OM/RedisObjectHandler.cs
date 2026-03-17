@@ -42,19 +42,15 @@ namespace Redis.OM
         internal static T FromHashSet<T>(IDictionary<string, RedisReply> hash)
         {
             var stringDictionary = hash.ToDictionary(x => x.Key, x => x.Value.ToString());
-            if (typeof(IRedisHydrateable).IsAssignableFrom(typeof(T)))
-            {
-                var obj = Activator.CreateInstance<T>();
-                ((IRedisHydrateable)obj!).Hydrate(stringDictionary);
-            }
-
             var attr = Attribute.GetCustomAttribute(typeof(T), typeof(DocumentAttribute)) as DocumentAttribute;
+            var isJsonDocument = attr != null && attr.StorageType == StorageType.Json && hash.ContainsKey("$");
+            var isProjectedJsonDocument = hash.Keys.Count > 0 && hash.Keys.All(x => x.StartsWith("$"));
             string asJson;
-            if (attr != null && attr.StorageType == StorageType.Json && hash.ContainsKey("$"))
+            if (isJsonDocument)
             {
                 asJson = hash["$"];
             }
-            else if (hash.Keys.Count > 0 && hash.Keys.All(x => x.StartsWith("$")))
+            else if (isProjectedJsonDocument)
             {
                 asJson = hash.Values.First();
             }
@@ -64,6 +60,11 @@ namespace Redis.OM
             }
 
             var res = JsonSerializer.Deserialize<T>(asJson, RedisSerializationSettings.JsonSerializerOptions) ?? throw new Exception("Deserialization fail");
+            if (!isJsonDocument && !isProjectedJsonDocument && res is IRedisHydrateable hydrateable)
+            {
+                hydrateable.Hydrate(stringDictionary);
+            }
+
             if (hash.ContainsKey(VectorScores.NearestNeighborScoreName) || hash.Keys.Any(x => x.EndsWith(VectorScores.RangeScoreSuffix)))
             {
                 var vectorScores = new VectorScores();
