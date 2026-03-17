@@ -322,6 +322,29 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Contains(people, x => x.Hydrate().Name == "Statler");
             Assert.DoesNotContain(people, x => x.Hydrate().Name == "Beaker");
         }
+
+        [Fact]
+        public async Task AggregationCountMatchesSearchCountForNullPredicate()
+        {
+            var searchCollection = new RedisCollection<ObjectWithNullableStrings>(_connection);
+            var aggregationCollection = new RedisAggregationSet<ObjectWithNullableStrings>(_connection);
+
+            var nullRecord = new ObjectWithNullableStrings();
+            var nonNullRecord = new ObjectWithNullableStrings
+            {
+                String1 = "filled"
+            };
+
+            await searchCollection.InsertAsync(nullRecord);
+            await searchCollection.InsertAsync(nonNullRecord);
+
+            var searchMatches = await searchCollection.Where(x => x.String1 == null).ToListAsync();
+            var aggregationCount = aggregationCollection.Where(x => x.RecordShell.String1 == null).Count();
+
+            Assert.Contains(searchMatches, x => x.Id == nullRecord.Id);
+            Assert.DoesNotContain(searchMatches, x => x.Id == nonNullRecord.Id);
+            Assert.Equal(searchMatches.Count, aggregationCount);
+        }
         
         [Fact]
         public void TestRawAggregationQuery()

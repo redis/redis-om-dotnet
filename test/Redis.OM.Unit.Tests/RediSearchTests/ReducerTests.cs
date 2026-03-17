@@ -313,6 +313,41 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestCountNoGroupPredicateWithNullQueryUsesDialectTwo()
+        {
+            var mockReply = new[]
+            {
+                new RedisReply(1),
+                new RedisReply(new RedisReply[]
+                {
+                    "COUNT",
+                    1
+                })
+            };
+
+            _substitute.Execute(
+                "FT.AGGREGATE",
+                $"{nameof(ObjectWithNullableStrings).ToLower()}-idx",
+                "(ismissing(@String1))",
+                "GROUPBY",
+                "0",
+                "REDUCE",
+                "COUNT",
+                "0",
+                "AS",
+                "COUNT",
+                "DIALECT",
+                "2")
+                .Returns((RedisReply)mockReply);
+
+            var collection = new RedisAggregationSet<ObjectWithNullableStrings>(_substitute);
+
+            var res = collection.Where(x => x.RecordShell.String1 == null).Count();
+
+            Assert.Equal(1, res);
+        }
+
+        [Fact]
         public void TestCountWithGroupPredicate()
         {
             var mockReply = new []

@@ -123,14 +123,7 @@ namespace Redis.OM.Aggregation
         /// <returns>A string representing the Expression serialized to an aggregation command and parameters.</returns>
         public string ToQueryString()
         {
-            var serializedArgs = ExpressionTranslator.BuildAggregationFromExpression(Expression, typeof(T)).Serialize().ToList();
-
-            if (_useCursor)
-            {
-                serializedArgs.Add("WITHCURSOR");
-                serializedArgs.Add("COUNT");
-                serializedArgs.Add(_chunkSize.ToString());
-            }
+            var serializedArgs = ExpressionTranslator.BuildAggregationFromExpression(Expression, typeof(T)).Serialize(_useCursor, _chunkSize).ToList();
 
             var quotedArgs = serializedArgs.Select(arg => $"\"{arg}\"");
 

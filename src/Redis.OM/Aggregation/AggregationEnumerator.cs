@@ -65,18 +65,7 @@ namespace Redis.OM.Aggregation
 
         private string[] SerializedArgs
         {
-            get
-            {
-                var serializedArgs = _aggregation.Serialize().ToList();
-                if (_useCursor)
-                {
-                    serializedArgs.Add("WITHCURSOR");
-                    serializedArgs.Add("COUNT");
-                    serializedArgs.Add(_chunkSize.ToString());
-                }
-
-                return serializedArgs.ToArray();
-            }
+            get => _aggregation.Serialize(_useCursor, _chunkSize);
         }
 
         /// <inheritdoc/>

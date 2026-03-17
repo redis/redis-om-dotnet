@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Redis.OM.Aggregation.AggregationPredicates;
 
@@ -51,11 +52,14 @@ namespace Redis.OM.Aggregation
         /// <summary>
         /// serializes the aggregation into an array of arguments for redis.
         /// </summary>
+        /// <param name="withCursor">Whether to serialize cursor arguments.</param>
+        /// <param name="cursorCount">The cursor page size.</param>
         /// <returns>The serialized arguments.</returns>
-        public string[] Serialize()
+        public string[] Serialize(bool withCursor = false, int cursorCount = 1000)
         {
             var queries = new List<string>();
             var ret = new List<string>() { IndexName };
+            var dialect = 1;
             if (!string.IsNullOrEmpty(RawQuery))
             {
                 ret.Add(RawQuery!);
@@ -65,6 +69,7 @@ namespace Redis.OM.Aggregation
                 foreach (var query in Queries)
                 {
                     queries.AddRange(query.Serialize());
+                    dialect = Math.Max(dialect, query.Dialect);
                 }
 
                 ret.AddRange(new[] { string.Join(" ", queries) });
@@ -82,6 +87,19 @@ namespace Redis.OM.Aggregation
             if (Limit != null)
             {
                 ret.AddRange(Limit.Serialize());
+            }
+
+            if (withCursor)
+            {
+                ret.Add("WITHCURSOR");
+                ret.Add("COUNT");
+                ret.Add(cursorCount.ToString());
+            }
+
+            if (dialect > 1)
+            {
+                ret.Add("DIALECT");
+                ret.Add(dialect.ToString());
             }
 
             return ret.ToArray();
