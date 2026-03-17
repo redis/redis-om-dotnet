@@ -35,7 +35,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <summary>
         /// Gets the dialect required by the serialized query.
         /// </summary>
-        public int Dialect => (_dialect & (1 << 1)) == (1 << 1) ? 2 : 1;
+        public int Dialect => _dialect;
 
         /// <inheritdoc/>
         public IEnumerable<string> Serialize()
@@ -65,7 +65,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
 
                 if (ExpressionParserUtilities.ExpressionResolvesToNull(binaryExpression.Right))
                 {
-                    _dialect |= 1 << 1;
+                    _dialect = 2;
                     stack.Push(BuildNullQueryPredicate(binaryExpression.NodeType, memberExpression));
                 }
                 else if (binaryExpression.Right is ConstantExpression constantExpression)
@@ -94,7 +94,9 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 }
                 else
                 {
-                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right, new List<object>(), ref _dialect); // hack - will need to revisit when integrating vectors into aggregations.
+                    var dialect = 1;
+                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right, new List<object>(), ref dialect); // hack - will need to revisit when integrating vectors into aggregations.
+                    PromoteDialect(dialect);
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, val));
                 }
             }
@@ -105,7 +107,9 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
             else if (expression is MethodCallExpression method)
             {
-                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>(), ref _dialect));
+                var dialect = 1;
+                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>(), ref dialect));
+                PromoteDialect(dialect);
             }
             else if (expression is UnaryExpression uni)
             {
@@ -243,6 +247,14 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 ExpressionType.NotEqual => $"-(ismissing({memberStr}))",
                 _ => throw new ArgumentException($"The expression node type {expType} is not supported"),
             };
+        }
+
+        private void PromoteDialect(int dialect)
+        {
+            if (dialect > _dialect)
+            {
+                _dialect = dialect;
+            }
         }
 
         private string BuildQueryPredicate(ExpressionType expType, MemberExpression member, string queryValue)
