@@ -219,6 +219,9 @@ csx/
 ecf/
 rcf/
 
+# Local triage notes
+triage.md
+
 # Windows Store app package directories and files
 AppPackages/
 BundleArtifacts/

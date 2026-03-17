@@ -13,6 +13,8 @@ namespace Redis.OM.Aggregation.AggregationPredicates
     /// </summary>
     public class QueryPredicate : BooleanExpression, IAggregationPredicate
     {
+        private int _dialect = 1;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryPredicate"/> class.
         /// </summary>
@@ -30,9 +32,15 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         {
         }
 
+        /// <summary>
+        /// Gets the dialect required by the serialized query.
+        /// </summary>
+        public int Dialect => (_dialect & (1 << 1)) == (1 << 1) ? 2 : 1;
+
         /// <inheritdoc/>
         public IEnumerable<string> Serialize()
         {
+            _dialect = 1;
             var predicateStack = SplitExpression();
             return new[] { string.Join(" ", predicateStack) };
         }
@@ -40,7 +48,6 @@ namespace Redis.OM.Aggregation.AggregationPredicates
         /// <inheritdoc/>
         protected override void ValidateAndPushOperand(Expression expression, Stack<string> stack)
         {
-            var dialect = 1;
             if (expression is BinaryExpression binaryExpression)
             {
                 var memberExpression = binaryExpression.Left as MemberExpression;
@@ -56,7 +63,12 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                     }
                 }
 
-                if (binaryExpression.Right is ConstantExpression constantExpression)
+                if (ExpressionParserUtilities.ExpressionResolvesToNull(binaryExpression.Right))
+                {
+                    _dialect |= 1 << 1;
+                    stack.Push(BuildNullQueryPredicate(binaryExpression.NodeType, memberExpression));
+                }
+                else if (binaryExpression.Right is ConstantExpression constantExpression)
                 {
                     var constVal = ExpressionParserUtilities.GetOperandString(constantExpression);
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, constVal));
@@ -82,7 +94,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 }
                 else
                 {
-                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right, new List<object>(), ref dialect); // hack - will need to revisit when integrating vectors into aggregations.
+                    var val = ExpressionParserUtilities.GetOperandStringForQueryArgs(binaryExpression.Right, new List<object>(), ref _dialect); // hack - will need to revisit when integrating vectors into aggregations.
                     stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, val));
                 }
             }
@@ -93,7 +105,7 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
             else if (expression is MethodCallExpression method)
             {
-                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>(), ref dialect));
+                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>(), ref _dialect));
             }
             else if (expression is UnaryExpression uni)
             {
@@ -220,6 +232,17 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             }
 
             return sb.ToString();
+        }
+
+        private static string BuildNullQueryPredicate(ExpressionType expType, MemberExpression member)
+        {
+            var memberStr = ExpressionParserUtilities.GetOperandString(member);
+            return expType switch
+            {
+                ExpressionType.Equal => $"(ismissing({memberStr}))",
+                ExpressionType.NotEqual => $"-(ismissing({memberStr}))",
+                _ => throw new ArgumentException($"The expression node type {expType} is not supported"),
+            };
         }
 
         private string BuildQueryPredicate(ExpressionType expType, MemberExpression member, string queryValue)

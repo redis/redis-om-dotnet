@@ -575,6 +575,27 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.Where(query).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "@FirstName:{Walter\\-Junior}", "WITHCURSOR", "COUNT", "10000");
         }
+
+        [Fact]
+        public void TestQueryForNullIncludesDialectTwo()
+        {
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+
+            var collection = new RedisAggregationSet<ObjectWithNullableStrings>(_substitute, true, chunkSize: 10000);
+
+            _ = collection.Where(x => x.RecordShell.String1 == null).ToList();
+
+            _substitute.Received().Execute(
+                "FT.AGGREGATE",
+                $"{nameof(ObjectWithNullableStrings).ToLower()}-idx",
+                "(ismissing(@String1))",
+                "WITHCURSOR",
+                "COUNT",
+                "10000",
+                "DIALECT",
+                "2");
+        }
         
         [Fact]
         public void CustomPropertyNamesInQuery()
