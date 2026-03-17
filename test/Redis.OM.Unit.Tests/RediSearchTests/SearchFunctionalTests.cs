@@ -670,6 +670,48 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task TestStatelessUpdateJsonWithTtl()
+        {
+            var statefulCollection = new RedisCollection<Person>(_connection);
+            var testP = new Person { Name = "Steve", Age = 32 };
+            var key = await statefulCollection.InsertAsync(testP, TimeSpan.FromMinutes(5));
+            var statelessCollection = new RedisCollection<Person>(_connection, false, 100);
+
+            testP.Age = 33;
+            var ttl = TimeSpan.FromHours(1);
+            await statelessCollection.UpdateAsync(testP, ttl);
+
+            var ttlFromKey = (double)await _connection.ExecuteAsync("PTTL", key);
+            var secondQueriedP = await statefulCollection.FindByIdAsync(key);
+
+            Assert.InRange(ttlFromKey, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds);
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        [Fact]
+        public async Task TestStatelessUpdateHashWithTtl()
+        {
+            var statefulCollection = new RedisCollection<HashPerson>(_connection);
+            var testP = new HashPerson { Name = "Steve", Age = 32 };
+            var key = await statefulCollection.InsertAsync(testP, TimeSpan.FromMinutes(5));
+            var statelessCollection = new RedisCollection<HashPerson>(_connection, false, 100);
+
+            testP.Age = 33;
+            var ttl = TimeSpan.FromHours(1);
+            await statelessCollection.UpdateAsync(testP, ttl);
+
+            var ttlFromKey = (double)await _connection.ExecuteAsync("PTTL", key);
+            var secondQueriedP = await statefulCollection.FindByIdAsync(key);
+
+            Assert.InRange(ttlFromKey, ttl.TotalMilliseconds - 2000, ttl.TotalMilliseconds);
+            Assert.NotNull(secondQueriedP);
+            Assert.Equal(33, secondQueriedP.Age);
+            Assert.Equal(testP.Id, secondQueriedP.Id);
+        }
+
+        [Fact]
         public async Task TestToListAsync()
         {
             var collection = new RedisCollection<Person>(_connection, 10000);

@@ -781,22 +781,31 @@ namespace Redis.OM
             _ = value ?? throw new ArgumentNullException(nameof(value));
             if (storageType == StorageType.Json)
             {
-                connection.CreateAndEval(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions) });
+                var args = new List<object> { JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions) };
+                if (ttl is not null)
+                {
+                    args.Add("EXPIRE");
+                    args.Add(ttl.Value.TotalMillisecondsString());
+                }
+
+                connection.CreateAndEval(nameof(Scripts.UnlinkAndSendJson), new[] { key }, args.ToArray());
             }
             else
             {
                 var hash = value.BuildHashSet();
-                var args = new List<object>((hash.Keys.Count * 2) + 1);
-                args.Add(hash.Keys.Count.ToString());
+                var numArgsToSet = hash.Keys.Count + (ttl is not null ? 1 : 0);
+                var args = new List<object>((numArgsToSet * 2) + 1);
+                args.Add(numArgsToSet.ToString());
                 foreach (var pair in hash)
                 {
                     args.Add(pair.Key);
                     args.Add(pair.Value);
-                    if (ttl is not null)
-                    {
-                        args.Add("PEXPIRE");
-                        args.Add(ttl.Value.TotalMillisecondsString());
-                    }
+                }
+
+                if (ttl is not null)
+                {
+                    args.Add("EXPIRE");
+                    args.Add(ttl.Value.TotalMillisecondsString());
                 }
 
                 connection.CreateAndEval(nameof(Scripts.UnlinkAndSetHash), new[] { key }, args.ToArray());
@@ -818,22 +827,31 @@ namespace Redis.OM
             _ = value ?? throw new ArgumentNullException(nameof(value));
             if (storageType == StorageType.Json)
             {
-                await connection.CreateAndEvalAsync(nameof(Scripts.UnlinkAndSendJson), new[] { key }, new[] { JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions) });
+                var args = new List<object> { JsonSerializer.Serialize(value, RedisSerializationSettings.JsonSerializerOptions) };
+                if (ttl is not null)
+                {
+                    args.Add("EXPIRE");
+                    args.Add(ttl.Value.TotalMillisecondsString());
+                }
+
+                await connection.CreateAndEvalAsync(nameof(Scripts.UnlinkAndSendJson), new[] { key }, args.ToArray());
             }
             else
             {
                 var hash = value.BuildHashSet();
-                var args = new List<object>((hash.Keys.Count * 2) + 1);
-                args.Add(hash.Keys.Count.ToString());
+                var numArgsToSet = hash.Keys.Count + (ttl is not null ? 1 : 0);
+                var args = new List<object>((numArgsToSet * 2) + 1);
+                args.Add(numArgsToSet.ToString());
                 foreach (var pair in hash)
                 {
                     args.Add(pair.Key);
                     args.Add(pair.Value);
-                    if (ttl is not null)
-                    {
-                        args.Add("PEXPIRE");
-                        args.Add(ttl.Value.TotalMillisecondsString());
-                    }
+                }
+
+                if (ttl is not null)
+                {
+                    args.Add("EXPIRE");
+                    args.Add(ttl.Value.TotalMillisecondsString());
                 }
 
                 await connection.CreateAndEvalAsync(nameof(Scripts.UnlinkAndSetHash), new[] { key }, args.ToArray());
