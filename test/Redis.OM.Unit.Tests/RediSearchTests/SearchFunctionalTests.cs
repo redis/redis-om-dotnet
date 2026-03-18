@@ -128,6 +128,40 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void SelectObjectProjectionViaNonGenericQueryProvider()
+        {
+            var marker = $"issue-507-object-{Guid.NewGuid():N}";
+            var collection = new RedisCollection<SelectTestObject>(_connection);
+            collection.Insert(new SelectTestObject
+            {
+                Name = marker,
+                Field1 = new InnerObject(),
+                Field2 = new InnerObject(),
+            });
+
+            var selectParameter = Expression.Parameter(typeof(SelectTestObject), "x");
+            var projectionConstructor = typeof(ProjectedSelectName).GetConstructor(Type.EmptyTypes);
+            var selectMethod = typeof(Queryable).GetMethods()
+                .Single(m => m.Name == nameof(Queryable.Select)
+                    && m.GetParameters().Length == 2
+                    && m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2)
+                .MakeGenericMethod(typeof(SelectTestObject), typeof(ProjectedSelectName));
+            var selector = Expression.Lambda<Func<SelectTestObject, ProjectedSelectName>>(
+                Expression.MemberInit(
+                    Expression.New(projectionConstructor!),
+                    Expression.Bind(
+                        typeof(ProjectedSelectName).GetProperty(nameof(ProjectedSelectName.Name))!,
+                        Expression.PropertyOrField(selectParameter, nameof(SelectTestObject.Name)))),
+                selectParameter);
+            var selectCall = Expression.Call(null, selectMethod, collection.Expression, Expression.Quote(selector));
+
+            var projected = (IQueryable<ProjectedSelectName>)collection.Provider.CreateQuery(selectCall);
+            var names = projected.Select(x => x.Name).ToArray();
+
+            Assert.Contains(marker, names);
+        }
+
+        [Fact]
         public void TestLimit()
         {
             var collection = new RedisCollection<Person>(_connection);
@@ -1682,5 +1716,10 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 x.Inner.ShortList.Contains((short)200)).ToListAsync();
             Assert.Single(res);
         }
+    }
+
+    public class ProjectedSelectName
+    {
+        public string Name { get; set; }
     }
 }
