@@ -137,6 +137,14 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestIndexSerializationNormalizesPrefixDelimiter()
+        {
+            var indexArr = typeof(TestPersonClassHappyPathWithMutatedDefinition).SerializeIndex();
+
+            Assert.Equal("Simple:", indexArr[5]);
+        }
+
+        [Fact]
         public void TestCreateIndex()
         {
             var host = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost";
