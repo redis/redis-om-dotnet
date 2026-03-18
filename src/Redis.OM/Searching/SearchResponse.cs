@@ -18,17 +18,24 @@ namespace Redis.OM.Searching
             var vals = val.ToArray();
             DocumentCount = vals[0];
             Documents = new Dictionary<string, IDictionary<string, string>>();
-            for (var i = 1; i < vals.Count(); i += 2)
+            for (var i = 1; i < vals.Count();)
             {
                 var docId = (string)vals[i];
+                var documentIndex = GetDocumentIndex(vals, i + 1);
+                if (documentIndex >= vals.Length)
+                {
+                    break;
+                }
+
                 var documentHash = new Dictionary<string, string>();
-                var docArray = vals[i + 1].ToArray();
+                var docArray = vals[documentIndex].ToArray();
                 for (var j = 0; j < docArray.Length; j += 2)
                 {
                     documentHash.Add(docArray[j], docArray[j + 1]);
                 }
 
                 Documents.Add(docId, documentHash);
+                i = documentIndex + 1;
             }
         }
 
@@ -59,6 +66,16 @@ namespace Redis.OM.Searching
             }
 
             return dict;
+        }
+
+        private static int GetDocumentIndex(RedisReply[] values, int startIndex)
+        {
+            while (startIndex < values.Length && values[startIndex].ToArray().Length == 1)
+            {
+                startIndex++;
+            }
+
+            return startIndex;
         }
     }
 
@@ -109,11 +126,17 @@ namespace Redis.OM.Searching
 
                 DocumentCount = vals[0];
                 Documents = new Dictionary<string, T>();
-                for (var i = 1; i < vals.Count(); i += 2)
+                for (var i = 1; i < vals.Count();)
                 {
                     var docId = (string)vals[i];
+                    var documentIndex = GetDocumentIndex(vals, i + 1);
+                    if (documentIndex >= vals.Length)
+                    {
+                        break;
+                    }
+
                     var documentHash = new Dictionary<string, RedisReply>();
-                    var docArray = vals[i + 1].ToArray();
+                    var docArray = vals[documentIndex].ToArray();
                     if (docArray.Length > 1)
                     {
                         for (var j = 0; j < docArray.Length; j += 2)
@@ -128,6 +151,8 @@ namespace Redis.OM.Searching
                     {
                         DocumentsSkippedCount++; // needed when a key expired while it was being enumerated by Redis.
                     }
+
+                    i = documentIndex + 1;
                 }
             }
         }
@@ -172,14 +197,31 @@ namespace Redis.OM.Searching
             var arr = redisReply.ToArray();
             var response = new SearchResponse<T>();
             response.DocumentCount = arr[0];
-            for (var i = 1; i < arr.Count(); i += 2)
+            for (var i = 1; i < arr.Count();)
             {
                 var docId = (string)arr[i];
-                T? primitive = arr[i + 1].ToArray().Length > 1 ? (T)Convert.ChangeType(arr[i + 1].ToArray()[1], typeof(T)) : default;
+                var documentIndex = GetDocumentIndex(arr, i + 1);
+                if (documentIndex >= arr.Length)
+                {
+                    break;
+                }
+
+                T? primitive = arr[documentIndex].ToArray().Length > 1 ? (T)Convert.ChangeType(arr[documentIndex].ToArray()[1], typeof(T)) : default;
                 response.Documents.Add(docId, primitive!);
+                i = documentIndex + 1;
             }
 
             return response;
+        }
+
+        private static int GetDocumentIndex(RedisReply[] values, int startIndex)
+        {
+            while (startIndex < values.Length && values[startIndex].ToArray().Length == 1)
+            {
+                startIndex++;
+            }
+
+            return startIndex;
         }
     }
 }
