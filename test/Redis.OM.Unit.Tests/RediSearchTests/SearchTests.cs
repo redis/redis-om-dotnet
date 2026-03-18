@@ -4357,6 +4357,28 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestContainsOnNullableSearchableStringWithSelectAndNotNull()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<ObjectWithNullableStrings>(_substitute);
+            var queryString = collection
+                .Where(x => x.String2 != null && x.String2.Contains("Fal"))
+                .Select(x => new ObjectWithNullableStrings
+                {
+                    Id = x.Id,
+                    String2 = x.String2
+                })
+                .Take(11)
+                .ToQueryString();
+
+            Assert.Equal(
+                "\"FT.SEARCH\" \"objectwithnullablestrings-idx\" \"(-(ismissing(@String2)) (@String2:Fal))\" \"DIALECT\" \"2\" \"LIMIT\" \"0\" \"11\" \"RETURN\" \"6\" \"Id\" \"AS\" \"Id\" \"String2\" \"AS\" \"String2\"",
+                queryString);
+        }
+
+        [Fact]
         public async Task TestIsNotNull()
         {
             _substitute.ClearSubstitute();
