@@ -31,6 +31,14 @@ namespace Redis.OM
                 var result = _db.Execute(command, args);
                 return new RedisReply(result);
             }
+            catch (RedisConnectionException ex)
+            {
+                throw new RedisConnectionException(
+                    ex.FailureType,
+                    $"{ex.Message}{Environment.NewLine}Failed on {command} {string.Join(" ", args)}",
+                    ex,
+                    ex.CommandStatus);
+            }
             catch (Exception ex)
             {
                 throw new Exception($"{ex.Message}{Environment.NewLine}Failed on {command} {string.Join(" ", args)}", ex);
@@ -44,6 +52,14 @@ namespace Redis.OM
             {
                 var result = await _db.ExecuteAsync(command, args).ConfigureAwait(false);
                 return new RedisReply(result);
+            }
+            catch (RedisConnectionException ex)
+            {
+                throw new RedisConnectionException(
+                    ex.FailureType,
+                    $"{ex.Message}{Environment.NewLine}Failed on {command} {string.Join(" ", args)}",
+                    ex,
+                    ex.CommandStatus);
             }
             catch (Exception ex)
             {

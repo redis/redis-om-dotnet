@@ -1,5 +1,10 @@
-﻿using StackExchange.Redis;
-using System;
+﻿using System;
+using System.Threading.Tasks;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using Redis.OM;
+using Redis.OM.Contracts;
+using StackExchange.Redis;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests
@@ -8,6 +13,18 @@ namespace Redis.OM.Unit.Tests
     {
         private string STANDALONE_CONNECTION_STRING = "redis://localhost:6379";
         private string SENTINEL_CONNECTION_STRING = "redis://localhost:26379?sentinel_primary_name=redismaster";
+
+        private static IRedisConnection CreateThrowingConnection(Exception exception)
+        {
+            var multiplexer = Substitute.For<IConnectionMultiplexer>();
+            var database = Substitute.For<IDatabase>();
+
+            multiplexer.GetDatabase().Returns(database);
+            database.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Throws(exception);
+            database.ExecuteAsync(Arg.Any<string>(), Arg.Any<object[]>()).Returns(Task.FromException<RedisResult>(exception));
+
+            return new RedisConnectionProvider(multiplexer).Connection;
+        }
 
         [Fact]
         public void TestConnectStandalone()
@@ -83,6 +100,32 @@ namespace Redis.OM.Unit.Tests
             connection.Execute("SET", "Foo", "Bar");
             var res = connection.Execute("GET", "Foo");
             Assert.Equal("Bar",res);
+        }
+
+        [Fact]
+        public void Execute_PreservesRedisConnectionExceptionType()
+        {
+            var exception = new RedisConnectionException(ConnectionFailureType.SocketFailure, "connection failed");
+            var connection = CreateThrowingConnection(exception);
+
+            var ex = Assert.Throws<RedisConnectionException>(() => connection.Execute("PING", "foo"));
+
+            Assert.Equal(ConnectionFailureType.SocketFailure, ex.FailureType);
+            Assert.Same(exception, ex.InnerException);
+            Assert.Contains("Failed on PING foo", ex.Message);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_PreservesRedisConnectionExceptionType()
+        {
+            var exception = new RedisConnectionException(ConnectionFailureType.SocketFailure, "connection failed");
+            var connection = CreateThrowingConnection(exception);
+
+            var ex = await Assert.ThrowsAsync<RedisConnectionException>(() => connection.ExecuteAsync("PING", "foo"));
+
+            Assert.Equal(ConnectionFailureType.SocketFailure, ex.FailureType);
+            Assert.Same(exception, ex.InnerException);
+            Assert.Contains("Failed on PING foo", ex.Message);
         }
     }
 }
