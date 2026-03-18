@@ -424,7 +424,9 @@ namespace Redis.OM.Common
                         elementType = resolvedType.GenericTypeArguments.FirstOrDefault();
                     }
 
-                    if (elementType != null && TypeDeterminationUtilities.IsNumeric(elementType))
+                    var resolvedElementType = elementType == null ? null : Nullable.GetUnderlyingType(elementType) ?? elementType;
+
+                    if (resolvedElementType != null && TypeDeterminationUtilities.IsNumeric(resolvedElementType))
                     {
                         var sb = new StringBuilder();
                         sb.Append('|');
@@ -438,7 +440,7 @@ namespace Redis.OM.Common
                         return sb.ToString();
                     }
 
-                    if (elementType != null && elementType.IsEnum)
+                    if (resolvedElementType != null && resolvedElementType.IsEnum)
                     {
                         if (treatEnumsAsInt)
                         {

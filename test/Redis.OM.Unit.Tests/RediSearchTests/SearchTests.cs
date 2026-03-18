@@ -3541,6 +3541,48 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void SearchNullableNumericEnumFieldContainsList()
+        {
+            AnEnum? enum1 = AnEnum.one;
+            AnEnum? enum2 = AnEnum.two;
+            AnEnum? enum3 = AnEnum.three;
+
+            var potentialFieldValues = new List<AnEnum?> { enum1, enum2, enum3 };
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithNullableEnum>(_substitute).Where(x => potentialFieldValues.Contains(x.AnEnum));
+            _ = collection.ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnullableenum-idx",
+                "@AnEnum:[0 0]|@AnEnum:[1 1]|@AnEnum:[2 2]",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
+        [Fact]
+        public void SearchNullableNumericEnumFieldContainsListAsProperty()
+        {
+            AnEnum? enum1 = AnEnum.one;
+            AnEnum? enum2 = AnEnum.two;
+            AnEnum? enum3 = AnEnum.three;
+
+            var potentialFieldValues = new { list = new List<AnEnum?> { enum1, enum2, enum3 } };
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+            var collection = new RedisCollection<ObjectWithNullableEnum>(_substitute).Where(x => potentialFieldValues.list.Contains(x.AnEnum));
+            _ = collection.ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "objectwithnullableenum-idx",
+                "@AnEnum:[0 0]|@AnEnum:[1 1]|@AnEnum:[2 2]",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
+        [Fact]
         public void TestNestedOrderBy()
         {
             _substitute.ClearSubstitute();
