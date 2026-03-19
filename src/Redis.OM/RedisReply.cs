@@ -455,20 +455,49 @@ namespace Redis.OM
         public object ToType(Type conversionType, IFormatProvider provider)
         {
             var underlyingType = Nullable.GetUnderlyingType(conversionType);
-            if (underlyingType != null)
-            {
-                switch (underlyingType.Name)
+            var targetType = underlyingType ?? conversionType;
+
+            if (targetType == typeof(int) || targetType.Name == "Int32")
                 {
-                    case "Int32":
-                        return (int)this;
-                    case "Int64":
-                        return (long)this;
-                    case "Single":
-                        return (float)this;
-                    case "Double":
-                        return (double)this;
+                    return (int)this;
                 }
+
+            if (targetType == typeof(long) || targetType.Name == "Int64")
+                {
+                    return (long)this;
+                }
+
+            if (targetType == typeof(float) || targetType.Name == "Single")
+                {
+                    return (float)this;
+                }
+
+            if (targetType == typeof(double) || targetType.Name == "Double")
+                {
+                    return (double)this;
+                }
+
+            var stringValue = this.ToString();
+
+            if (targetType == typeof(Guid))
+            {
+                return Guid.Parse(stringValue);
             }
+
+            if (targetType == typeof(Ulid))
+                {
+                    return Ulid.Parse(stringValue);
+                }
+
+            if (targetType == typeof(DateTimeOffset))
+                {
+                    return DateTimeOffset.Parse(stringValue, provider);
+                }
+
+            if (targetType == typeof(string))
+                {
+                    return stringValue;
+                }
 
             throw new NotImplementedException();
         }

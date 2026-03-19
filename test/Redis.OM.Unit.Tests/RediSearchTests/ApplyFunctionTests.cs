@@ -12,7 +12,8 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
     public class ApplyFunctionTests
     {
         private readonly IRedisConnection _substitute = Substitute.For<IRedisConnection>();
-        private readonly RedisReply _mockReply = new []
+
+        private readonly RedisReply _mockReply = new[]
         {
             new RedisReply(1),
             new RedisReply(new RedisReply[]
@@ -282,7 +283,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisAggregationSet<Person>(_substitute);
-            var res = collection.Apply(x => x.RecordShell.Name.Split('e', 'g'), "Name").ToArray();
+            var res = collection.Apply(x => x.RecordShell.Name.Split(new[] { 'e', 'g' }), "Name").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
@@ -1191,7 +1192,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
-        
+
         [Fact]
         public void TestMultipleOperations()
         {
@@ -1201,7 +1202,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
             var collection = new RedisAggregationSet<Person>(_substitute);
             var res = collection.Apply(
-                x=>x.RecordShell.Age + 5 - 6, "res").ToArray();
+                x => x.RecordShell.Age + 5 - 6, "res").ToArray();
 
             _substitute.Received().Execute(
                 "FT.AGGREGATE",

@@ -173,9 +173,11 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 };
             var keys = await collection.InsertAsync(onepiece);
             var people = collection.Where(x => x.NickNames.Contains("Luffy") || x.NickNames.Contains("Shanks")).ToList();
-            Assert.Equal(onepiece[0].Age, people[0].Age);
-            people[0].Age = 25;
-            people[1].Age = 52;
+            var peoplDic = people.ToDictionary(x => x.Name, x => x);
+            var onepieceDic = onepiece.ToDictionary(x => x.Name, x => x);
+            Assert.Equal(onepieceDic["Monkey D.Luffy"].Age, peoplDic["Monkey D.Luffy"].Age);
+            onepieceDic["Monkey D.Luffy"].Age = 25;
+            peoplDic["Shanks"].Age = 52;
             await collection.UpdateAsync(people);
             Assert.NotEqual(onepiece[0].Age, people[0].Age);
         }
@@ -192,12 +194,15 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 };
             var keys = collection.InsertAsync(onepiece);
             var people = collection.Where(x => x.Name.Contains("Luffy") || x.Name.Contains("Shanks")).ToList();
-            Assert.Equal(onepiece[0].Age, people[0].Age);
-            people[0].Height = 20.2;
-            people[0].Age = 25;
-            people[1].Age = 52;
+            var peoplDic = people.ToDictionary(x => x.Name, x => x);
+            var onepieceDic = onepiece.ToDictionary(x => x.Name, x => x);
+
+            Assert.Equal(onepieceDic["Monkey D.Luffy"].Age, peoplDic["Monkey D.Luffy"].Age);
+            onepieceDic["Monkey D.Luffy"].Height = 20.2;
+            onepieceDic["Monkey D.Luffy"].Age = 25;
+            onepieceDic["Monkey D.Luffy"].Age = 52;
             await collection.UpdateAsync(people);
-            Assert.NotEqual(onepiece[0].Age, people[0].Age);
+            Assert.NotEqual(onepieceDic["Monkey D.Luffy"].Age, peoplDic["Monkey D.Luffy"].Age);
         }
 
         [Fact]

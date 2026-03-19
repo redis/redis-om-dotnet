@@ -94,6 +94,12 @@ namespace Redis.OM.Searching
                 Documents = @this.Documents;
                 DocumentCount = @this.DocumentCount;
             }
+            else if (type == typeof(Guid) || type == typeof(Guid?) || type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?) || type == typeof(Ulid) || type == typeof(Ulid?))
+            {
+                var @this = PrimitiveSearchResponse(val);
+                Documents = @this.Documents;
+                DocumentCount = @this.DocumentCount;
+            }
             else
             {
                 var vals = val.ToArray();
