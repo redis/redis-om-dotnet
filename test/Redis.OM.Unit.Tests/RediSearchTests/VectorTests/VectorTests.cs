@@ -34,10 +34,10 @@ public class VectorIndexCreationTests
             "1",
             $"Redis.OM.Unit.Tests.{nameof(ObjectWithVector)}:",
             "SCHEMA",
-            "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", 
+            "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING", 
             "$.Num", "AS", "Num", "NUMERIC",
-            "$.SimpleHnswVector", "AS", "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2",
-            "$.SimpleVectorizedVector.Vector", "AS","SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2"
+            "$.SimpleHnswVector", "AS", "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2", "INDEXMISSING",
+            "$.SimpleVectorizedVector.Vector", "AS","SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2", "INDEXMISSING"
         );
 
         _substitute.ClearSubstitute();
@@ -51,10 +51,10 @@ public class VectorIndexCreationTests
             "1",
             $"Redis.OM.Unit.Tests.{nameof(ObjectWithVectorHash)}:",
             "SCHEMA",
-            "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", 
+            "Name", "TAG", "SEPARATOR", "|", "INDEXEMPTY", "INDEXMISSING", 
             "Num", "NUMERIC",
-            "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2",
-            "SimpleVectorizedVector.Vector", "AS", "SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2"
+            "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2", "INDEXMISSING",
+            "SimpleVectorizedVector.Vector", "AS", "SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2", "INDEXMISSING"
         );
     }
 

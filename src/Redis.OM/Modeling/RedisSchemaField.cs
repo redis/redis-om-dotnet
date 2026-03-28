@@ -70,7 +70,7 @@ namespace Redis.OM.Modeling
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPostfix}" : $"{pathPrefix}{info.Name}{pathPostfix}");
                         ret.Add("AS");
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{aliasPrefix}{attr.PropertyName}" : $"{aliasPrefix}{info.Name}");
-                        ret.AddRange(CommonSerialization(attr, innerType, info));
+                        ret.AddRange(CommonSerialization(attr, info.PropertyType, info));
                     }
                     else if (IsComplexType(innerType))
                     {
@@ -88,7 +88,7 @@ namespace Redis.OM.Modeling
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{pathPrefix}{attr.PropertyName}{pathPostFix}" : $"{pathPrefix}{info.Name}{pathPostFix}");
                         ret.Add("AS");
                         ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? $"{aliasPrefix}{attr.PropertyName}" : $"{aliasPrefix}{info.Name}");
-                        ret.AddRange(CommonSerialization(attr, innerType, info));
+                        ret.AddRange(CommonSerialization(attr, info.PropertyType, info));
                     }
                 }
             }
@@ -126,8 +126,7 @@ namespace Redis.OM.Modeling
                 ret.Add(!string.IsNullOrEmpty(attr.PropertyName) ? attr.PropertyName : info.Name);
             }
 
-            var innerType = Nullable.GetUnderlyingType(info.PropertyType);
-            ret.AddRange(CommonSerialization(attr, innerType ?? info.PropertyType, info));
+            ret.AddRange(CommonSerialization(attr, info.PropertyType, info));
             return ret.ToArray();
         }
 
@@ -172,7 +171,7 @@ namespace Redis.OM.Modeling
                 indexArgs.Add($"{prefix}{parentInfo.Name}{arrayStr}{path.Substring(1)}");
                 indexArgs.Add("AS");
                 indexArgs.Add($"{aliasPrefix}{parentInfo.Name}_{string.Join("_", propertyNames)}");
-                indexArgs.AddRange(CommonSerialization(attribute, underlyingType, propertyInfo));
+                indexArgs.AddRange(CommonSerialization(attribute, type, propertyInfo));
             }
             else
             {
@@ -283,10 +282,16 @@ namespace Redis.OM.Modeling
             }
         }
 
-        private static string[] CommonSerialization(SearchFieldAttribute attr, Type declaredType, PropertyInfo propertyInfo)
+        private static string[] CommonSerialization(SearchFieldAttribute attr, Type type, PropertyInfo propertyInfo)
         {
+            var declaredType = Nullable.GetUnderlyingType(type);
+            var typeNullable = declaredType != null;
+
+            declaredType ??= type;
+
             var searchFieldType = GetSearchFieldType(declaredType, attr, propertyInfo);
             var ret = new List<string> { searchFieldType };
+
             if (attr is SearchableAttribute text)
             {
                 if (text.NoStem)
@@ -308,39 +313,44 @@ namespace Redis.OM.Modeling
 
                 if (text.IndexEmptyAndMissing)
                 {
-                    ret.Add("INDEXMISSING");
                     ret.Add("INDEXEMPTY");
                 }
             }
 
-            if (searchFieldType == "TAG" && attr is IndexedAttribute tag)
+            if (attr is IndexedAttribute indexed)
             {
-                if (tag.Separator != ',' && !declaredType.IsEnum)
+                if (searchFieldType == "TAG")
                 {
-                    ret.Add("SEPARATOR");
-                    ret.Add(tag.Separator.ToString());
-                }
-                else if (declaredType.IsEnum && IsEnumTypeFlags(declaredType))
-                {
-                    ret.Add("SEPARATOR");
-                    ret.Add(",");
-                }
+                    if (indexed.Separator != ',' && !declaredType.IsEnum)
+                    {
+                        ret.Add("SEPARATOR");
+                        ret.Add(indexed.Separator.ToString());
+                    }
+                    else if (declaredType.IsEnum && IsEnumTypeFlags(declaredType))
+                    {
+                        ret.Add("SEPARATOR");
+                        ret.Add(",");
+                    }
 
-                if (tag.CaseSensitive)
-                {
-                    ret.Add("CASESENSITIVE");
-                }
+                    if (indexed.CaseSensitive)
+                    {
+                        ret.Add("CASESENSITIVE");
+                    }
 
-                if (tag.IndexEmptyAndMissing)
+                    if (indexed.IndexEmptyAndMissing)
+                    {
+                        ret.Add("INDEXEMPTY");
+                    }
+                }
+                else if (searchFieldType == "VECTOR")
                 {
-                    ret.Add("INDEXMISSING");
-                    ret.Add("INDEXEMPTY");
+                    ret.AddRange(VectorSerialization(indexed, propertyInfo));
                 }
             }
 
-            if (searchFieldType == "VECTOR" && attr is IndexedAttribute vector)
+            if (attr.IndexEmptyAndMissing && (searchFieldType != "NUMERIC" || typeNullable))
             {
-                ret.AddRange(VectorSerialization(vector, propertyInfo));
+                ret.Add("INDEXMISSING");
             }
 
             if (attr.Sortable || attr.Aggregatable)
