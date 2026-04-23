@@ -1474,6 +1474,66 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task TestQueryNullNumerics()
+        {
+            var collection = new RedisCollection<ObjectWithNullableNumerics>(_connection);
+            var obj = new ObjectWithNullableNumerics();
+            await collection.InsertAsync(obj);
+            
+            var res = await collection.FirstAsync(x=>x.Id == obj.Id && x.Int == null && x.Long == null && x.DateTime == null);
+            
+            Assert.NotNull(res);
+            Assert.Null(res.Int);
+            Assert.Null(res.Long);
+            Assert.Null(res.DateTime);
+            Assert.Equal(obj.Id, res.Id);
+
+            DateTime now = DateTime.Now;
+
+            res.Int = 1;
+            res.Long = 2;
+            res.DateTime = now;
+            await collection.UpdateAsync(res);
+            
+            var updated = await collection.FirstAsync(x=>x.Id == obj.Id);
+            Assert.NotNull(updated);
+            Assert.Equal(1, updated.Int);
+            Assert.Equal(2, updated.Long);
+            Assert.NotNull(updated.DateTime);
+            Assert.InRange(updated.DateTime.Value, now.AddMilliseconds(-1), now.AddMilliseconds(1));
+        }
+
+        [Fact]
+        public async Task TestQueryNullNumericsHash()
+        {
+            var collection = new RedisCollection<ObjectWithNullableNumericsHash>(_connection);
+            var obj = new ObjectWithNullableNumericsHash();
+            await collection.InsertAsync(obj);
+            
+            var res = await collection.FirstAsync(x=>x.Id == obj.Id && x.Int == null && x.Long == null && x.DateTime == null);
+            
+            Assert.NotNull(res);
+            Assert.Null(res.Int);
+            Assert.Null(res.Long);
+            Assert.Null(res.DateTime);
+            Assert.Equal(obj.Id, res.Id);
+
+            DateTime now = DateTime.Now;
+
+            res.Int = 1;
+            res.Long = 2;
+            res.DateTime = now;
+            await collection.UpdateAsync(res);
+            
+            var updated = await collection.FirstAsync(x=>x.Id == obj.Id);
+            Assert.NotNull(updated);
+            Assert.Equal(1, updated.Int);
+            Assert.Equal(2, updated.Long);
+            Assert.NotNull(updated.DateTime);
+            Assert.InRange(updated.DateTime.Value, now.AddMilliseconds(-1), now.AddMilliseconds(1));
+        }
+
+        [Fact]
         public async Task TestQueryNullStrings()
         {
             var collection = new RedisCollection<ObjectWithNullableStrings>(_connection);
