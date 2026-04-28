@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">    
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+        <TargetFrameworks>net10.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Redis.OM.Vectorizers.Resnet18</RootNamespace>
@@ -21,10 +21,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.ML" Version="3.0.0" />
-        <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="3.0.0" />
-        <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="3.0.0" />
-        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.16.3" />
+        <PackageReference Include="Microsoft.ML" Version="5.0.0" />
+        <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="5.0.0" />
+        <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="5.0.0" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.1" />
     </ItemGroup>
 
     <ItemGroup>

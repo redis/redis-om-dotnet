@@ -158,7 +158,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                if (ex.Message.ToLower().Contains("unknown index name"))
+                if (ex.Message.ToLower().Contains("no such index"))
                 {
                     return null;
                 }
@@ -184,7 +184,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                if (ex.Message.ToLower().Contains("unknown index name"))
+                if (ex.Message.ToLower().Contains("no such index"))
                 {
                     return null;
                 }
@@ -209,7 +209,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("Unknown Index name"))
+                if (ex.Message.Contains("no such index"))
                 {
                     return false;
                 }
@@ -234,7 +234,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("Unknown Index name"))
+                if (ex.Message.Contains("no such index"))
                 {
                     return false;
                 }
@@ -259,7 +259,7 @@ namespace Redis.OM
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("Unknown Index name"))
+                if (ex.Message.Contains("no such index"))
                 {
                     return false;
                 }
