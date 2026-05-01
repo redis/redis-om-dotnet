@@ -824,28 +824,54 @@ namespace Redis.OM.Common
         {
             var source = GetOperandString(exp.Arguments[0]);
             var prefix = GetOperandString(exp.Arguments[1]);
-            return $"({source}:{prefix}*)";
+
+            if (exp.Arguments[0].Type == typeof(string))
+            {
+                return $"({source}:{prefix}*)";
+            }
+
+            // IEnumerable<string>
+            return $"({source}:{{{prefix}*}})";
         }
 
         private static string TranslateMatchEndsWith(MethodCallExpression exp)
         {
             var source = GetOperandString(exp.Arguments[0]);
             var suffix = GetOperandString(exp.Arguments[1]);
-            return $"({source}:*{suffix})";
+
+            if (exp.Arguments[0].Type == typeof(string))
+            {
+                return $"({source}:*{suffix})";
+            }
+
+            // IEnumerable<string>
+            return $"({source}:{{*{suffix}}})";
         }
 
         private static string TranslateMatchContains(MethodCallExpression exp)
         {
             var source = GetOperandString(exp.Arguments[0]);
             var infix = GetOperandString(exp.Arguments[1]);
-            return $"({source}:*{infix}*)";
+            if (exp.Arguments[0].Type == typeof(string))
+            {
+                return $"({source}:*{infix}*)";
+            }
+
+            // IEnumerable<string>
+            return $"({source}:{{*{infix}*}})";
         }
 
         private static string TranslateMatchPattern(MethodCallExpression exp)
         {
             var source = GetOperandString(exp.Arguments[0]);
             var pattern = GetOperandString(exp.Arguments[1]);
-            return $"({source}:{pattern})";
+            if (exp.Arguments[0].Type == typeof(string))
+            {
+                return $"({source}:{pattern})";
+            }
+
+            // IEnumerable<string>
+            return $"({source}:{{{pattern}}})";
         }
 
         private static string TranslateFuzzyMatch(MethodCallExpression exp)
