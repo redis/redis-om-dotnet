@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Redis.OM.Contracts;
@@ -100,6 +101,30 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             {
                 Assert.True(age >= 0 || age == null);
             }
+        }
+
+        [Fact]
+        public void SelectNameViaNonGenericQueryProvider()
+        {
+            var marker = $"issue-507-{Guid.NewGuid():N}";
+            var collection = new RedisCollection<Person>(_connection);
+            collection.Insert(new Person { Name = marker, Age = 42 });
+
+            var selectParameter = Expression.Parameter(typeof(Person), "x");
+            var selectMethod = typeof(Queryable).GetMethods()
+                .Single(m => m.Name == nameof(Queryable.Select)
+                    && m.GetParameters().Length == 2
+                    && m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2)
+                .MakeGenericMethod(typeof(Person), typeof(string));
+            var selector = Expression.Lambda<Func<Person, string>>(
+                Expression.PropertyOrField(selectParameter, nameof(Person.Name)),
+                selectParameter);
+            var selectCall = Expression.Call(null, selectMethod, collection.Expression, Expression.Quote(selector));
+
+            var projected = (IQueryable<string>)collection.Provider.CreateQuery(selectCall);
+            var names = projected.ToArray();
+
+            Assert.Contains(marker, names);
         }
 
         [Fact]
