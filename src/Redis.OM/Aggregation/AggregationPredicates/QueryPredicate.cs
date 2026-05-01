@@ -53,6 +53,12 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 var memberExpression = binaryExpression.Left as MemberExpression;
                 if (memberExpression is null)
                 {
+                    if (binaryExpression.NodeType is ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse)
+                    {
+                        SplitBinaryExpression(binaryExpression, stack);
+                        return;
+                    }
+
                     if (binaryExpression.Left is UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression } leftUnary)
                     {
                         memberExpression = (MemberExpression)leftUnary.Operand;
@@ -85,6 +91,12 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                             var val = ExpressionParserUtilities.GetOperandString(mem);
                             stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, val));
                             break;
+                        default:
+                            var dialect = 1;
+                            var unaryValue = ExpressionParserUtilities.GetOperandStringForQueryArgs(uni, new List<object>(), ref dialect);
+                            PromoteDialect(dialect);
+                            stack.Push(BuildQueryPredicate(binaryExpression.NodeType, memberExpression, unaryValue));
+                            break;
                     }
                 }
                 else if (binaryExpression.Right is MemberExpression mem)
@@ -108,7 +120,13 @@ namespace Redis.OM.Aggregation.AggregationPredicates
             else if (expression is MethodCallExpression method)
             {
                 var dialect = 1;
-                stack.Push(ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>(), ref dialect));
+                var serialized = ExpressionParserUtilities.TranslateMethodExpressions(method, new List<object>(), ref dialect);
+                if (serialized.Contains("|") && !(serialized.StartsWith("(") && serialized.EndsWith(")")))
+                {
+                    serialized = $"({serialized})";
+                }
+
+                stack.Push(serialized);
                 PromoteDialect(dialect);
             }
             else if (expression is UnaryExpression uni)
@@ -187,13 +205,19 @@ namespace Redis.OM.Aggregation.AggregationPredicates
 
                 if (leftCall != null && rightCall != null)
                 {
-                    ValidateAndPushOperand(leftCall, stack);
+                    var leftStack = new Stack<string>();
+                    var rightStack = new Stack<string>();
+
+                    ValidateAndPushOperand(leftCall, leftStack);
+                    ValidateAndPushOperand(rightCall, rightStack);
+
+                    stack.Push(string.Join(" ", rightStack));
                     if (expression.NodeType == ExpressionType.Or || expression.NodeType == ExpressionType.OrElse)
                     {
                         stack.Push("|");
                     }
 
-                    ValidateAndPushOperand(rightCall, stack);
+                    stack.Push(string.Join(" ", leftStack));
                 }
                 else
                 {

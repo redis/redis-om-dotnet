@@ -535,6 +535,35 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.Where(query).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "( @Age:[0 0] ( @Age:[2 2] | @Age:[50 50] ) )", "WITHCURSOR", "COUNT", "10000");
         }
+
+        [Fact]
+        public void RightBinExpressionOperatorWithContainsArrayValues()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+
+            double?[] heights1 = new double?[] { 170, 171 };
+            double?[] heights2 = new double?[] { 180, 181 };
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Age == 0 && (heights1.Contains(a.RecordShell!.Height) || heights2.Contains(a.RecordShell.Height));
+
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "( @Age:[0 0] (@Height:[170 170]|@Height:[171 171]) | (@Height:[180 180]|@Height:[181 181]) )", "WITHCURSOR", "COUNT", "10000");
+        }
+
+        [Fact]
+        public void RightBinExpressionOperatorWithCapturedValues()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+
+            var age = 0;
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Age == age && (a.RecordShell!.Age == age + 2 || a.RecordShell!.Age == age + 50);
+
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "( @Age:[0 0] ( @Age:[2 2] | @Age:[50 50] ) )", "WITHCURSOR", "COUNT", "10000");
+        }
         
         [Fact]
         public void RightBinExpressionWithUniaryOperator()
