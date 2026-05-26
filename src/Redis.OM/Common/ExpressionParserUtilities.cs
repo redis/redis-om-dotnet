@@ -46,9 +46,7 @@ namespace Redis.OM.Common
                     $"@{((ConstantExpression)method.Arguments[0]).Value}",
                 MethodCallExpression method => GetOperandString(method),
                 UnaryExpression unary => GetOperandString(unary.Operand),
-                BinaryExpression binExpression => TryEvaluateBinaryExpression(binExpression, out var evaluated)
-                    ? ValueToString(evaluated!)
-                    : ParseBinaryExpression(binExpression, filterFormat),
+                BinaryExpression binExpression => ParseBinaryExpression(binExpression, filterFormat),
                 LambdaExpression lambda => GetOperandString(lambda.Body),
                 _ => string.Empty
             };
