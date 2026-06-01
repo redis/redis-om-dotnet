@@ -29,6 +29,17 @@ public class ObjectWithNullableStrings
     public AnEnum? Enum { get; set; }
 }
 
+[Document(StorageType = StorageType.Json)]
+public class ObjectWithNoMissingIndex
+{
+    [RedisIdField]
+    [Indexed]
+    public string Id { get; set; }
+
+    [Searchable(IndexEmptyAndMissing = false)]
+    public string? LastName { get; set; }
+}
+
 [Document]
 public class ObjectWithNullableStringsHash
 {

@@ -4379,6 +4379,42 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestNullCheckOnFieldWithIndexEmptyAndMissingFalseThrows()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<ObjectWithNoMissingIndex>(_substitute);
+
+            // A field declared with IndexEmptyAndMissing = false is created without INDEXMISSING, so an
+            // ismissing(...) predicate against it is rejected by RediSearch with an opaque syntax error.
+            // Surface that as an actionable exception at query-build time instead. (Issue #536)
+            var notNull = Assert.Throws<InvalidOperationException>(
+                () => collection.Where(x => x.LastName != null && x.LastName.Contains("Fal")).ToQueryString());
+            Assert.Contains("IndexEmptyAndMissing", notNull.Message);
+
+            var isNull = Assert.Throws<InvalidOperationException>(
+                () => collection.Where(x => x.LastName == null).ToQueryString());
+            Assert.Contains("IndexEmptyAndMissing", isNull.Message);
+        }
+
+        [Fact]
+        public void TestContainsOnFieldWithIndexEmptyAndMissingFalse()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<ObjectWithNoMissingIndex>(_substitute);
+
+            // A plain contains (without a null guard) must still work against such a field.
+            var queryString = collection.Where(x => x.LastName.Contains("Fal")).ToQueryString();
+
+            Assert.Equal(
+                "\"FT.SEARCH\" \"objectwithnomissingindex-idx\" \"(@LastName:Fal)\" \"LIMIT\" \"0\" \"100\"",
+                queryString);
+        }
+
+        [Fact]
         public async Task TestIsNotNull()
         {
             _substitute.ClearSubstitute();

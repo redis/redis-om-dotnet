@@ -424,6 +424,7 @@ namespace Redis.OM.Common
 
                 if (rightResolvesToNull)
                 {
+                    GuardNullQueryAgainstUnindexedMissing(binExpression.Left);
                     dialectNeeded |= 1 << 1;
                     return binExpression.NodeType switch
                     {
@@ -491,6 +492,32 @@ namespace Redis.OM.Common
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Validates that a null/missing query is only generated against a field that is actually indexed for
+        /// missing values. A field declared with <c>IndexEmptyAndMissing = false</c> is created without the
+        /// <c>INDEXMISSING</c> tag, so an <c>ismissing(...)</c> predicate against it is rejected by RediSearch with
+        /// an opaque syntax error. Surface that as an actionable exception at query-build time instead.
+        /// </summary>
+        /// <param name="left">The left-hand operand of the null comparison.</param>
+        private static void GuardNullQueryAgainstUnindexedMissing(Expression left)
+        {
+            var memberExpression = left as MemberExpression
+                                   ?? (left as UnaryExpression)?.Operand as MemberExpression;
+
+            if (memberExpression == null)
+            {
+                return;
+            }
+
+            var attribute = ExpressionParserUtilities.DetermineSearchAttribute(memberExpression);
+            if (attribute != null && !attribute.IndexEmptyAndMissing)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot query the field '{memberExpression.Member.Name}' for null/missing values because it is indexed with IndexEmptyAndMissing = false. " +
+                    "Set IndexEmptyAndMissing = true (the default) on the field and re-create the index to query for missing values, or remove the null check from your query.");
+            }
         }
 
         /// <summary>
