@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +18,7 @@ namespace Redis.OM.Searching
             var vals = val.ToArray();
             DocumentCount = vals[0];
             Documents = new Dictionary<string, IDictionary<string, string>>();
+            Scores = new Dictionary<string, double>();
             for (var i = 1; i < vals.Count();)
             {
                 var docId = (string)vals[i];
@@ -25,6 +26,11 @@ namespace Redis.OM.Searching
                 if (documentIndex >= vals.Length)
                 {
                     break;
+                }
+
+                if (documentIndex > i + 1 && TryGetScore(vals[i + 1], out var score))
+                {
+                    Scores[docId] = score;
                 }
 
                 var documentHash = new Dictionary<string, string>();
@@ -50,6 +56,12 @@ namespace Redis.OM.Searching
         public IDictionary<string, IDictionary<string, string>> Documents { get; }
 
         /// <summary>
+        /// Gets the relative internal scores of each document keyed by document id. Only populated when the
+        /// query was run with the <see cref="Query.QueryFlags.WithScores"/> flag.
+        /// </summary>
+        public IDictionary<string, double> Scores { get; }
+
+        /// <summary>
         /// gets document as a collection of the provided type.
         /// </summary>
         /// <typeparam name="T">The type.</typeparam>
@@ -68,7 +80,14 @@ namespace Redis.OM.Searching
             return dict;
         }
 
-        private static int GetDocumentIndex(RedisReply[] values, int startIndex)
+        /// <summary>
+        /// Walks forward over scalar metadata entries (e.g. the score emitted by WITHSCORES) that sit between a
+        /// document's id and its field payload, returning the index of the field payload.
+        /// </summary>
+        /// <param name="values">The flat search reply.</param>
+        /// <param name="startIndex">The index immediately after the document id.</param>
+        /// <returns>The index of the document's field payload.</returns>
+        internal static int GetDocumentIndex(RedisReply[] values, int startIndex)
         {
             while (startIndex < values.Length && values[startIndex].ToArray().Length == 1)
             {
@@ -76,6 +95,26 @@ namespace Redis.OM.Searching
             }
 
             return startIndex;
+        }
+
+        /// <summary>
+        /// Attempts to interpret a scalar metadata reply as a numeric document score.
+        /// </summary>
+        /// <param name="reply">The scalar reply sitting between the document id and its payload.</param>
+        /// <param name="score">The parsed score.</param>
+        /// <returns>Whether the reply could be interpreted as a numeric score.</returns>
+        internal static bool TryGetScore(RedisReply reply, out double score)
+        {
+            try
+            {
+                score = (double)reply;
+                return true;
+            }
+            catch (InvalidCastException)
+            {
+                score = default;
+                return false;
+            }
         }
     }
 
@@ -104,12 +143,14 @@ namespace Redis.OM.Searching
                 var @this = PrimitiveSearchResponse(val);
                 Documents = @this.Documents;
                 DocumentCount = @this.DocumentCount;
+                Scores = @this.Scores;
             }
             else if (underlyingType is { IsPrimitive: true })
             {
                 var @this = PrimitiveSearchResponse(val);
                 Documents = @this.Documents;
                 DocumentCount = @this.DocumentCount;
+                Scores = @this.Scores;
             }
             else
             {
@@ -126,13 +167,19 @@ namespace Redis.OM.Searching
 
                 DocumentCount = vals[0];
                 Documents = new Dictionary<string, T>();
+                Scores = new Dictionary<string, double>();
                 for (var i = 1; i < vals.Count();)
                 {
                     var docId = (string)vals[i];
-                    var documentIndex = GetDocumentIndex(vals, i + 1);
+                    var documentIndex = SearchResponse.GetDocumentIndex(vals, i + 1);
                     if (documentIndex >= vals.Length)
                     {
                         break;
+                    }
+
+                    if (documentIndex > i + 1 && SearchResponse.TryGetScore(vals[i + 1], out var score))
+                    {
+                        Scores[docId] = score;
                     }
 
                     var documentHash = new Dictionary<string, RedisReply>();
@@ -162,6 +209,7 @@ namespace Redis.OM.Searching
             DocumentCount = 0;
             DocumentsSkippedCount = 0;
             Documents = new Dictionary<string, T>();
+            Scores = new Dictionary<string, double>();
         }
 
         /// <summary>
@@ -179,6 +227,12 @@ namespace Redis.OM.Searching
         /// Gets the documents.
         /// </summary>
         public IDictionary<string, T> Documents { get; }
+
+        /// <summary>
+        /// Gets the relative internal scores of each document keyed by document id. Only populated when the
+        /// query was run with the <see cref="Query.QueryFlags.WithScores"/> flag.
+        /// </summary>
+        public IDictionary<string, double> Scores { get; }
 
         /// <summary>
         /// Gets a particular document by it's ID.
@@ -200,10 +254,15 @@ namespace Redis.OM.Searching
             for (var i = 1; i < arr.Count();)
             {
                 var docId = (string)arr[i];
-                var documentIndex = GetDocumentIndex(arr, i + 1);
+                var documentIndex = SearchResponse.GetDocumentIndex(arr, i + 1);
                 if (documentIndex >= arr.Length)
                 {
                     break;
+                }
+
+                if (documentIndex > i + 1 && SearchResponse.TryGetScore(arr[i + 1], out var score))
+                {
+                    response.Scores[docId] = score;
                 }
 
                 T? primitive = arr[documentIndex].ToArray().Length > 1 ? (T)Convert.ChangeType(arr[documentIndex].ToArray()[1], typeof(T)) : default;
@@ -212,16 +271,6 @@ namespace Redis.OM.Searching
             }
 
             return response;
-        }
-
-        private static int GetDocumentIndex(RedisReply[] values, int startIndex)
-        {
-            while (startIndex < values.Length && values[startIndex].ToArray().Length == 1)
-            {
-                startIndex++;
-            }
-
-            return startIndex;
         }
     }
 }
