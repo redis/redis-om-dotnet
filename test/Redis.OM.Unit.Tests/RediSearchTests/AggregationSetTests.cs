@@ -548,7 +548,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Age == 0 && (heights1.Contains(a.RecordShell!.Height) || heights2.Contains(a.RecordShell.Height));
 
             _ = collection.Where(query).ToList();
-            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "( @Age:[0 0] (@Height:[170 170]|@Height:[171 171]) | (@Height:[180 180]|@Height:[181 181]) )", "WITHCURSOR", "COUNT", "10000");
+            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "( @Age:[0 0] ( (@Height:[170 170]|@Height:[171 171]) | (@Height:[180 180]|@Height:[181 181]) ) )", "WITHCURSOR", "COUNT", "10000");
         }
 
         [Fact]
@@ -565,6 +565,23 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "( @Age:[0 0] ( @Age:[2 2] | @Age:[50 50] ) )", "WITHCURSOR", "COUNT", "10000");
         }
         
+        [Fact]
+        public void ConnectiveExpressionWithNegatedOperands()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+
+            // Both operands of the OR are UnaryExpressions (negated method calls), which are
+            // neither connective binary expressions nor simple comparisons. This previously
+            // recursed indefinitely between SplitBinaryExpression and ValidateAndPushOperand,
+            // throwing a StackOverflowException.
+            Expression<Func<AggregationResult<Person>, bool>> query = a => !a.RecordShell!.Name.Contains("Steve") || !a.RecordShell!.Name.Contains("Bob");
+
+            _ = collection.Where(query).ToList();
+            _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "( (-((@Name:Steve))) | (-((@Name:Bob))) )", "WITHCURSOR", "COUNT", "10000");
+        }
+
         [Fact]
         public void RightBinExpressionWithUniaryOperator()
         {

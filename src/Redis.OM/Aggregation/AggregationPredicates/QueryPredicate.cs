@@ -53,12 +53,6 @@ namespace Redis.OM.Aggregation.AggregationPredicates
                 var memberExpression = binaryExpression.Left as MemberExpression;
                 if (memberExpression is null)
                 {
-                    if (binaryExpression.NodeType is ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse)
-                    {
-                        SplitBinaryExpression(binaryExpression, stack);
-                        return;
-                    }
-
                     if (binaryExpression.Left is UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression } leftUnary)
                     {
                         memberExpression = (MemberExpression)leftUnary.Operand;
@@ -198,30 +192,51 @@ namespace Redis.OM.Aggregation.AggregationPredicates
 
                 ValidateAndPushOperand(expression.Left, stack);
             }
+            else if (expression.NodeType is ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse)
+            {
+                // Connective node whose operands are neither connective binary expressions
+                // (handled by the branches above) nor simple comparisons (e.g. negated booleans
+                // or method calls such as Contains). Decompose each operand on its own stack and
+                // join them, wrapping an OR group in parentheses so it stays a single unit.
+                var leftStack = new Stack<string>();
+                var rightStack = new Stack<string>();
+
+                PushConnectiveOperand(expression.Left, leftStack);
+                PushConnectiveOperand(expression.Right, rightStack);
+
+                var isOr = expression.NodeType is ExpressionType.Or or ExpressionType.OrElse;
+                if (isOr)
+                {
+                    stack.Push(")");
+                }
+
+                stack.Push(string.Join(" ", rightStack));
+                if (isOr)
+                {
+                    stack.Push("|");
+                }
+
+                stack.Push(string.Join(" ", leftStack));
+                if (isOr)
+                {
+                    stack.Push("(");
+                }
+            }
             else
             {
-                var leftCall = expression.Left as MethodCallExpression;
-                var rightCall = expression.Right as MethodCallExpression;
+                ValidateAndPushOperand(expression, stack);
+            }
 
-                if (leftCall != null && rightCall != null)
+            void PushConnectiveOperand(Expression operand, Stack<string> operandStack)
+            {
+                if (operand is BinaryExpression be
+                    && be.NodeType is ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse)
                 {
-                    var leftStack = new Stack<string>();
-                    var rightStack = new Stack<string>();
-
-                    ValidateAndPushOperand(leftCall, leftStack);
-                    ValidateAndPushOperand(rightCall, rightStack);
-
-                    stack.Push(string.Join(" ", rightStack));
-                    if (expression.NodeType == ExpressionType.Or || expression.NodeType == ExpressionType.OrElse)
-                    {
-                        stack.Push("|");
-                    }
-
-                    stack.Push(string.Join(" ", leftStack));
+                    SplitBinaryExpression(be, operandStack);
                 }
                 else
                 {
-                    ValidateAndPushOperand(expression, stack);
+                    ValidateAndPushOperand(operand, operandStack);
                 }
             }
         }
