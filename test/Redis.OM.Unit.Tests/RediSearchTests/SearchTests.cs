@@ -806,6 +806,53 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestSelectViaNonGenericQueryProvider()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            var sourceParameter = Expression.Parameter(typeof(Person), "x");
+            var selectParameter = Expression.Parameter(typeof(Person), "x");
+            var whereMethod = typeof(Queryable).GetMethods()
+                .Single(m => m.Name == nameof(Queryable.Where)
+                    && m.GetParameters().Length == 2
+                    && m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2)
+                .MakeGenericMethod(typeof(Person));
+            var selectMethod = typeof(Queryable).GetMethods()
+                .Single(m => m.Name == nameof(Queryable.Select)
+                    && m.GetParameters().Length == 2
+                    && m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2)
+                .MakeGenericMethod(typeof(Person), typeof(string));
+            var predicate = Expression.Lambda<Func<Person, bool>>(
+                Expression.Equal(
+                    Expression.PropertyOrField(sourceParameter, nameof(Person.Name)),
+                    Expression.Constant("Steve")),
+                sourceParameter);
+            var selector = Expression.Lambda<Func<Person, string>>(
+                Expression.PropertyOrField(selectParameter, nameof(Person.Name)),
+                selectParameter);
+            var whereCall = Expression.Call(null, whereMethod, collection.Expression, Expression.Quote(predicate));
+            var selectCall = Expression.Call(null, selectMethod, whereCall, Expression.Quote(selector));
+
+            var projected = collection.Provider.CreateQuery(selectCall);
+
+            Assert.IsType<RedisCollection<string>>(projected);
+            ((IQueryable<string>)projected).ToList();
+
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@Name:\"Steve\")",
+                "LIMIT",
+                "0",
+                "100",
+                "RETURN",
+                "1",
+                "Name");
+        }
+
+        [Fact]
         public void TestSelectComplexAnonType()
         {
             _substitute.ClearSubstitute();

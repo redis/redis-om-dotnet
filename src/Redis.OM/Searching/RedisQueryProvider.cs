@@ -77,18 +77,20 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         public IQueryable CreateQuery(Expression expression)
         {
-            Type elementType = expression.Type;
+            Type elementType = GetElementType(expression.Type);
             try
             {
-                return
-                   (IQueryable)Activator.CreateInstance(
-                       typeof(RedisCollection<>).MakeGenericType(elementType),
-                       this,
-                       expression,
-                       StateManager,
-                       null,
-                       _saveState,
-                       _chunkSize);
+                var rootType = expression is MethodCallExpression methodCall ? GetRootType(methodCall) : elementType;
+                var collectionType = typeof(RedisCollection<>).MakeGenericType(elementType);
+                var arguments = new object?[] { this, expression, StateManager, null, _saveState, _chunkSize };
+                var instance = Activator.CreateInstance(
+                    collectionType,
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    null,
+                    arguments,
+                    null);
+                SetRootType(instance, rootType);
+                return (IQueryable)instance!;
             }
             catch (TargetInvocationException e)
             {
@@ -106,7 +108,13 @@ namespace Redis.OM.Searching
             where TElement : notnull
         {
             var booleanExpression = expression as Expression<Func<TElement, bool>>;
-            return new RedisCollection<TElement>(this, expression, StateManager, booleanExpression, _saveState, _chunkSize);
+            var collection = new RedisCollection<TElement>(this, expression, StateManager, booleanExpression, _saveState, _chunkSize);
+            if (expression is MethodCallExpression methodCall)
+            {
+                collection.RootType = GetRootType(methodCall);
+            }
+
+            return collection;
         }
 
         /// <inheritdoc/>
@@ -284,6 +292,40 @@ namespace Redis.OM.Searching
             }
 
             throw new NotImplementedException();
+        }
+
+        private static Type GetElementType(Type type)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IQueryable<>))
+            {
+                return type.GetGenericArguments()[0];
+            }
+
+            var queryableType = type.GetInterfaces()
+                .FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IQueryable<>));
+            if (queryableType != null)
+            {
+                return queryableType.GetGenericArguments()[0];
+            }
+
+            var enumerableType = type.GetInterfaces()
+                .FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            if (enumerableType != null)
+            {
+                return enumerableType.GetGenericArguments()[0];
+            }
+
+            return type;
+        }
+
+        private static void SetRootType(object? collection, Type rootType)
+        {
+            if (collection == null)
+            {
+                return;
+            }
+
+            collection.GetType().GetProperty("RootType", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(collection, rootType);
         }
 
         private static RedisReply InvariantCultureResultParsing<T>(RedisReply value)
