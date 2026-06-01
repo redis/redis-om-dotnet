@@ -564,7 +564,21 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _ = collection.Where(query).ToList();
             _substitute.Received().Execute("FT.AGGREGATE", "person-idx", "( @Age:[0 0] ( @Age:[2 2] | @Age:[50 50] ) )", "WITHCURSOR", "COUNT", "10000");
         }
-        
+
+        [Fact]
+        public void RightBinExpressionOperatorWithFieldArithmeticThrows()
+        {
+            var collection = new RedisAggregationSet<Person>(_substitute, true, chunkSize: 10000);
+            _substitute.Execute("FT.AGGREGATE", Arg.Any<object[]>()).Returns(MockedResult);
+            _substitute.Execute("FT.CURSOR", Arg.Any<object[]>()).Returns(MockedResultCursorEnd);
+
+            // Arithmetic over an indexed field cannot be resolved to a constant query operand.
+            // This must fail loudly rather than emit invalid APPLY-style arithmetic into the query.
+            Expression<Func<AggregationResult<Person>, bool>> query = a => a.RecordShell!.Age == a.RecordShell!.Height + 2;
+
+            Assert.Throws<ArgumentException>(() => collection.Where(query).ToList());
+        }
+
         [Fact]
         public void ConnectiveExpressionWithNegatedOperands()
         {

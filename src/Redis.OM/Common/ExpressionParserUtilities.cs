@@ -90,7 +90,7 @@ namespace Redis.OM.Common
                 MethodCallExpression method => TranslateMethodStandardQuerySyntax(method, parameters, ref dialectNeeded),
                 BinaryExpression binExpression => TryEvaluateBinaryExpression(binExpression, out var evaluated)
                     ? ValueToString(evaluated!)
-                    : ParseBinaryExpression(binExpression),
+                    : throw new ArgumentException($"Could not translate the expression '{binExpression}' into a query operand. Arithmetic over indexed fields (e.g. 'x.Field + 2') is not supported inside a query predicate; only expressions that resolve to a constant value can be used."),
                 UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, parameters, ref dialectNeeded, treatEnumsAsInt, unary.NodeType == ExpressionType.Not, treatBooleanMemberAsUnary: treatBooleanMemberAsUnary),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
