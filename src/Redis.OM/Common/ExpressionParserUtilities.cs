@@ -88,6 +88,9 @@ namespace Redis.OM.Common
                 ConstantExpression constExp => ValueToString(constExp.Value),
                 MemberExpression member => GetOperandStringForMember(member, treatEnumsAsInt, negate: negate, treatBooleanMemberAsUnary: treatBooleanMemberAsUnary),
                 MethodCallExpression method => TranslateMethodStandardQuerySyntax(method, parameters, ref dialectNeeded),
+                BinaryExpression binExpression => TryEvaluateBinaryExpression(binExpression, out var evaluated)
+                    ? ValueToString(evaluated!)
+                    : throw new ArgumentException($"Could not translate the expression '{binExpression}' into a query operand. Arithmetic over indexed fields (e.g. 'x.Field + 2') is not supported inside a query predicate; only expressions that resolve to a constant value can be used."),
                 UnaryExpression unary => GetOperandStringForQueryArgs(unary.Operand, parameters, ref dialectNeeded, treatEnumsAsInt, unary.NodeType == ExpressionType.Not, treatBooleanMemberAsUnary: treatBooleanMemberAsUnary),
                 _ => throw new ArgumentException("Unrecognized Expression type")
             };
@@ -1108,6 +1111,33 @@ namespace Redis.OM.Common
             };
         }
 
+        private static bool TryEvaluateBinaryExpression(BinaryExpression expression, out object? value)
+        {
+            if (ContainsParameterExpression(expression))
+            {
+                value = null;
+                return false;
+            }
+
+            try
+            {
+                value = Expression.Lambda(expression).Compile().DynamicInvoke();
+                return true;
+            }
+            catch
+            {
+                value = null;
+                return false;
+            }
+        }
+
+        private static bool ContainsParameterExpression(Expression expression)
+        {
+            var foundParameter = false;
+            new ParameterExpressionFinder(() => foundParameter = true).Visit(expression);
+            return foundParameter;
+        }
+
         private static string TranslateVectorRange(MethodCallExpression exp, List<object> parameters)
         {
             if (exp.Arguments[0] is not MemberExpression member)
@@ -1150,6 +1180,22 @@ namespace Redis.OM.Common
             }
 
             return $"{field}:[VECTOR_RANGE ${distanceArgName} ${vectorArgName}]";
+        }
+
+        private sealed class ParameterExpressionFinder : ExpressionVisitor
+        {
+            private readonly Action _onParameter;
+
+            public ParameterExpressionFinder(Action onParameter)
+            {
+                _onParameter = onParameter;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                _onParameter();
+                return node;
+            }
         }
     }
 }
