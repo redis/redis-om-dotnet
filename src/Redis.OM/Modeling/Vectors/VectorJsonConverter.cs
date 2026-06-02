@@ -106,12 +106,12 @@ namespace Redis.OM.Modeling
                 return;
             }
 
-            if (_vectorizerAttribute is FloatVectorizerAttribute && value is Vector<double[]> floatVector)
+            if (_vectorizerAttribute is FloatVectorizerAttribute && value is Vector<float[]> floatVector)
             {
                 writer.WriteStartArray();
-                foreach (var d in floatVector.Value)
+                foreach (var f in floatVector.Value)
                 {
-                    writer.WriteNumberValue(d);
+                    writer.WriteNumberValue(f);
                 }
 
                 writer.WriteEndArray();

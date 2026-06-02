@@ -51,3 +51,11 @@ public class ToyVector
     [RedisIdField] public string Id { get; set; }
     [Indexed][DoubleVectorizer(6)]public Vector<double[]> SimpleVector { get; set; }
 }
+
+[Document(StorageType = StorageType.Json, Prefixes = new []{"FloatVec"})]
+public class ObjectWithFloatVector
+{
+    [RedisIdField] public string Id { get; set; }
+    [Indexed] public string Name { get; set; }
+    [Indexed(DistanceMetric = DistanceMetric.L2)][FloatVectorizer(2)] public Vector<float[]> Vec { get; set; }
+}
