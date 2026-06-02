@@ -282,12 +282,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 .Returns(_mockReply);
 
             var collection = new RedisAggregationSet<Person>(_substitute);
-
-            // NOTE: written as an explicit char[] rather than Split('e', 'g'). On C# 14 / .NET 10 the
-            // inline multi-arg form binds to the new params ReadOnlySpan<char> overload, which cannot
-            // appear in an expression tree (CS8640). The explicit array binds to Split(char[]) and
-            // produces the same NewArrayExpression on every target framework.
-            var res = collection.Apply(x => x.RecordShell.Name.Split(new[] { 'e', 'g' }), "Name").ToArray();
+            var res = collection.Apply(x => x.RecordShell.Name.Split('e', 'g'), "Name").ToArray();
 
             Assert.Equal("Blah", res[0]["FakeResult"]);
         }
