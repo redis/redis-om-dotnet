@@ -16,9 +16,12 @@ namespace Redis.OM
         /// <inheritdoc/>
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
+            // The span Contains comes in two overloads: Contains(ReadOnlySpan<T>, T) and
+            // Contains(ReadOnlySpan<T>, T, IEqualityComparer<T>). The trailing comparer is supplied by the
+            // compiler and is irrelevant to query translation, so both collapse to Enumerable.Contains(source, item).
             if (node.Method.Name == "Contains"
                 && node.Method.DeclaringType?.FullName == "System.MemoryExtensions"
-                && node.Arguments.Count == 2)
+                && (node.Arguments.Count == 2 || node.Arguments.Count == 3))
             {
                 var source = UnwrapSpanSource(node.Arguments[0]);
                 if (source != null)
