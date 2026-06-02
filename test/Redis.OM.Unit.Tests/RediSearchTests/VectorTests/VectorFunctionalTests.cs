@@ -474,4 +474,42 @@ public class VectorFunctionalTests
         Assert.Equal(obj.Sentence.Value, res.Sentence.Value);
         Assert.Equal(obj.Sentence.Embedding, res.Sentence.Embedding);
     }
+
+    [Fact]
+    public void FloatVectorIsIndexedAndEnumerable()
+    {
+        // Regression for #566: a Vector<float[]> + [FloatVectorizer] was serialized as an object
+        // ({"Value":...,"Vector":[...]}) instead of a flat array because the converter's type guard
+        // checked Vector<double[]>. The index points at the bare path expecting a vector, so the
+        // document failed to index (hash_indexing_failures) and every search - including the plain
+        // enumeration IRedisCollection<T> issues - came back empty even though the data was in Redis.
+        _connection.DropIndexAndAssociatedRecords(typeof(ObjectWithFloatVector));
+        _connection.CreateIndex(typeof(ObjectWithFloatVector));
+        try
+        {
+            var collection = new RedisCollection<ObjectWithFloatVector>(_connection);
+            var id = $"floatvec-{Guid.NewGuid():N}";
+            var embedding = new[] { 0.1f, 0.2f };
+            collection.Insert(new ObjectWithFloatVector
+            {
+                Id = id,
+                Name = "Hal",
+                Vec = Vector.Of(embedding),
+            });
+
+            // The document indexed cleanly - no failure swallowed at write time.
+            var info = _connection.GetIndexInfo(typeof(ObjectWithFloatVector));
+            Assert.Equal("0", info!.HashIndexingFailures);
+
+            // A plain enumeration (no predicate) returns the document, which was the reported symptom.
+            var all = collection.ToList();
+            var match = Assert.Single(all);
+            Assert.Equal(id, match.Id);
+            Assert.Equal(embedding, match.Vec.Value);
+        }
+        finally
+        {
+            _connection.DropIndexAndAssociatedRecords(typeof(ObjectWithFloatVector));
+        }
+    }
 }
