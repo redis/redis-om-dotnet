@@ -1744,5 +1744,40 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 x.Inner.ShortList.Contains((short)200)).ToListAsync();
             Assert.Single(res);
         }
+
+        [Fact]
+        public void EnumeratesThroughNonGenericIEnumerable()
+        {
+            // Regression for #566: RedisCollection's explicit IEnumerable.GetEnumerator() routed
+            // through Provider.Execute<IEnumerable>(Expression), which has no success path for
+            // enumeration and always threw NotImplementedException. Consumers that enumerate via the
+            // non-generic IEnumerable interface (e.g. Hot Chocolate handing the IQueryable to its
+            // execution pipeline) therefore failed. It must now enumerate like foreach/.ToList().
+            _connection.CreateIndex(typeof(Person));
+            var collection = new RedisCollection<Person>(_connection);
+            var tag = $"nongeneric-{Guid.NewGuid():N}";
+            collection.Insert(new Person { Name = "Enumerable", TagField = tag });
+
+            // Bare collection enumerated as a non-generic IEnumerable - previously threw here.
+            var enumerated = new List<object>();
+            foreach (var item in (System.Collections.IEnumerable)collection)
+            {
+                enumerated.Add(item);
+            }
+
+            Assert.NotEmpty(enumerated);
+            Assert.All(enumerated, x => Assert.IsType<Person>(x));
+
+            // A filtered chain (a MethodCallExpression) must also enumerate via the non-generic path.
+            var filtered = collection.Where(x => x.TagField == tag);
+            var filteredResults = new List<Person>();
+            foreach (var item in (System.Collections.IEnumerable)filtered)
+            {
+                filteredResults.Add(Assert.IsType<Person>(item));
+            }
+
+            Assert.Single(filteredResults);
+            Assert.Equal(tag, filteredResults[0].TagField);
+        }
     }
 }

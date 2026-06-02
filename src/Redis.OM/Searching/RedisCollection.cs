@@ -535,7 +535,12 @@ namespace Redis.OM.Searching
         /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return Provider.Execute<IEnumerable>(Expression).GetEnumerator();
+            // Defer to the generic enumerator. The previous implementation routed through
+            // Provider.Execute<IEnumerable>(Expression), which has no success path for
+            // enumeration (it only implements scalar terminal operators) and so always threw
+            // NotImplementedException for callers that enumerate via the non-generic IEnumerable
+            // interface (e.g. Hot Chocolate). See #566.
+            return GetEnumerator();
         }
 
         /// <inheritdoc/>
