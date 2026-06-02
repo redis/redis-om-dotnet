@@ -25,50 +25,59 @@ public class VectorFunctionalTests
     [InlineData(2)]
     public async Task KnnWithScoresPropagatesScores(int dialect)
     {
-        // Isolate from other vector tests sharing this index so KNN results are deterministic.
+        // Isolate from other vector tests sharing this index so KNN results are deterministic, and
+        // restore a clean index afterwards so the record inserted here does not leak into sibling tests.
         _connection.DropIndexAndAssociatedRecords(typeof(ObjectWithVector));
         _connection.CreateIndex(typeof(ObjectWithVector));
-        var collection = new RedisCollection<ObjectWithVector>(_connection);
-        var id = $"vecScore-{Guid.NewGuid():N}";
-        collection.Insert(new ObjectWithVector
+        try
         {
-            Id = id,
-            SimpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray()),
-            SimpleVectorizedVector = Vector.Of("FooBarBaz"),
-        });
+            var collection = new RedisCollection<ObjectWithVector>(_connection);
+            var id = $"vecScore-{Guid.NewGuid():N}";
+            collection.Insert(new ObjectWithVector
+            {
+                Id = id,
+                SimpleHnswVector = Vector.Of(Enumerable.Range(0, 10).Select(x => (double)x).ToArray()),
+                SimpleVectorizedVector = Vector.Of("FooBarBaz"),
+            });
 
-        // Offset the query vector so the nearest-neighbor distance is non-zero (proves the
-        // KnnNeighborScore field actually parsed onto the object rather than defaulting to 0).
-        var queryArray = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
-        queryArray[0] += 2;
-        var queryVector = Vector.Of(queryArray);
-        queryVector.Embed(new DoubleVectorizerAttribute(10));
+            // Offset the query vector so the nearest-neighbor distance is non-zero (proves the
+            // KnnNeighborScore field actually parsed onto the object rather than defaulting to 0).
+            var queryArray = Enumerable.Range(0, 10).Select(x => (double)x).ToArray();
+            queryArray[0] += 2;
+            var queryVector = Vector.Of(queryArray);
+            queryVector.Embed(new DoubleVectorizerAttribute(10));
 
-        // KNN requires DIALECT 2; the library promotes 1 -> 2 internally because of PARAMS, so both
-        // inputs are exercised here and must yield the same correct result.
-        var query = new RedisQuery("objectwithvector-idx")
-        {
-            QueryText = "*",
-            NearestNeighbors = new NearestNeighbors(nameof(ObjectWithVector.SimpleHnswVector), 5, queryVector.Embedding!),
-            Flags = (long)QueryFlags.WithScores,
-            Dialect = dialect,
-        };
+            // KNN requires DIALECT 2; the library promotes 1 -> 2 internally because of PARAMS, so both
+            // inputs are exercised here and must yield the same correct result.
+            var query = new RedisQuery("objectwithvector-idx")
+            {
+                QueryText = "*",
+                NearestNeighbors = new NearestNeighbors(nameof(ObjectWithVector.SimpleHnswVector), 5, queryVector.Embedding!),
+                Flags = (long)QueryFlags.WithScores,
+                Dialect = dialect,
+            };
 
-        var response = await _connection.SearchAsync<ObjectWithVector>(query);
+            var response = await _connection.SearchAsync<ObjectWithVector>(query);
 
-        // WITHSCORES relevance scores are propagated for every returned document.
-        Assert.NotEmpty(response.Documents);
-        Assert.NotEmpty(response.Scores);
-        foreach (var docId in response.Documents.Keys)
-        {
-            Assert.True(response.Scores.ContainsKey(docId), $"missing score for {docId}");
-            Assert.True(response.Scores[docId] >= 0, $"unexpected score {response.Scores[docId]} for {docId}");
+            // WITHSCORES relevance scores are propagated for every returned document.
+            Assert.NotEmpty(response.Documents);
+            Assert.NotEmpty(response.Scores);
+            foreach (var docId in response.Documents.Keys)
+            {
+                Assert.True(response.Scores.ContainsKey(docId), $"missing score for {docId}");
+                Assert.True(response.Scores[docId] >= 0, $"unexpected score {response.Scores[docId]} for {docId}");
+            }
+
+            // The KNN distance (a payload field, distinct from the WITHSCORES scalar) still parses.
+            var match = response.Documents.Values.Single(x => x.Id == id);
+            Assert.NotNull(match.VectorScores);
+            Assert.True(match.VectorScores.NearestNeighborsScore > 0, "expected a non-zero KNN distance for the offset query vector");
         }
-
-        // The KNN distance (a payload field, distinct from the WITHSCORES scalar) still parses.
-        var match = response.Documents.Values.Single(x => x.Id == id);
-        Assert.NotNull(match.VectorScores);
-        Assert.True(match.VectorScores.NearestNeighborsScore > 0, "expected a non-zero KNN distance for the offset query vector");
+        finally
+        {
+            _connection.DropIndexAndAssociatedRecords(typeof(ObjectWithVector));
+            _connection.CreateIndex(typeof(ObjectWithVector));
+        }
     }
 
     [SkipIfMissingEnvVar("REDIS_OM_HF_TOKEN")]
