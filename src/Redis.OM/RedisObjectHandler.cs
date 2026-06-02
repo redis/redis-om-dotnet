@@ -437,7 +437,12 @@ namespace Redis.OM
         private static string SendToJson(IDictionary<string, RedisReply> hash, Type t)
         {
             var properties = t.GetProperties();
-            if ((!properties.Any() || t == typeof(Ulid) || t == typeof(Ulid?)) && hash.Count == 1)
+
+            // Guid and Ulid are scalar value types that must serialize to a bare JSON string. They are
+            // listed explicitly because they expose public properties (Ulid always has; Guid does as of
+            // .NET 9/10), so the !properties.Any() shortcut no longer catches them and the object-builder
+            // below would otherwise emit an object literal that cannot be deserialized back to the value.
+            if ((!properties.Any() || t == typeof(Ulid) || t == typeof(Ulid?) || t == typeof(Guid) || t == typeof(Guid?)) && hash.Count == 1)
             {
                 return $"\"{hash.First().Value}\"";
             }
