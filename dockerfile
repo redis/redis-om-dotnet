@@ -1,14 +1,9 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0
+# Pull the .NET 7 runtime from its official image so the net7.0 test pass can run on the
+# .NET 10 SDK base without fetching/executing a remote install script.
+FROM mcr.microsoft.com/dotnet/runtime:7.0 AS dotnet7
 
-# The base image ships the .NET 10 SDK + runtime. Add the .NET 7 runtime so the existing
-# net7.0 test pass can still execute alongside the net10.0 (C# 14) pass.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
-    && chmod +x /tmp/dotnet-install.sh \
-    && /tmp/dotnet-install.sh --channel 7.0 --runtime dotnet --install-dir /usr/share/dotnet \
-    && rm /tmp/dotnet-install.sh
+FROM mcr.microsoft.com/dotnet/sdk:10.0
+COPY --from=dotnet7 /usr/share/dotnet/shared/Microsoft.NETCore.App /usr/share/dotnet/shared/Microsoft.NETCore.App
 
 WORKDIR /app
 ADD . /app
