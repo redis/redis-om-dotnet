@@ -1071,6 +1071,42 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestArrayContainsSpanOverload()
+        {
+            // On C# 14 / .NET 10 the compiler binds `x.NickNames.Contains("Steve")` to
+            // MemoryExtensions.Contains(ReadOnlySpan<string>, string) instead of Enumerable.Contains,
+            // which previously failed with "Could not parse query for Contains" (issue #553). This
+            // hand-builds that exact expression shape so the regression is guarded on every target.
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var parameter = Expression.Parameter(typeof(Person), "x");
+            var nickNames = Expression.Property(parameter, nameof(Person.NickNames));
+            var opImplicit = typeof(ReadOnlySpan<string>).GetMethod("op_Implicit", new[] { typeof(string[]) });
+            var spanArg = Expression.Call(opImplicit!, nickNames);
+            var containsMethod = typeof(MemoryExtensions)
+                .GetMethods()
+                .First(m => m.Name == "Contains"
+                    && m.GetParameters().Length == 2
+                    && m.GetParameters()[0].ParameterType.IsGenericType
+                    && m.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(ReadOnlySpan<>))
+                .MakeGenericMethod(typeof(string));
+            var body = Expression.Call(containsMethod, spanArg, Expression.Constant("Steve"));
+            var predicate = Expression.Lambda<Func<Person, bool>>(body, parameter);
+
+            var collection = new RedisCollection<Person>(_substitute, 1000);
+            _ = collection.Where(predicate).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNames:{Steve})",
+                "LIMIT",
+                "0",
+                "1000"
+            );
+        }
+
+        [Fact]
         public void TestArrayContainsNumeric()
         {
             _substitute.ClearSubstitute();

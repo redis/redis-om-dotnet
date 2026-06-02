@@ -879,6 +879,11 @@ namespace Redis.OM.Common
             string memberName;
             string literal;
             SearchFieldAttribute? searchFieldAttribute = null;
+
+            // On C# 14 / .NET 10 the compiler binds array `Contains` to MemoryExtensions.Contains(ReadOnlySpan<T>, T);
+            // normalize that back to Enumerable.Contains so the shapes below can parse it.
+            exp = (MethodCallExpression)new SpanToEnumerableVisitor().Visit(exp);
+
             if (exp.Arguments.LastOrDefault() is MemberExpression && exp.Arguments.FirstOrDefault() is MemberExpression)
             {
                 var propertyExpression = (MemberExpression)exp.Arguments.Last();
