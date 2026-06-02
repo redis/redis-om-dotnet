@@ -29,7 +29,7 @@ namespace Redis.OM
                         .First(m => m.Name == "Contains" && m.GetParameters().Length == 2)
                         .MakeGenericMethod(itemToFind.Type);
 
-                    return Expression.Call(null, enumerableContains, Visit(source), itemToFind);
+                    return Expression.Call(null, enumerableContains, Visit(source), Visit(itemToFind));
                 }
             }
 
