@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
+using Redis.OM.Searching.Query;
 using Xunit;
 
 namespace Redis.OM.Unit.Tests.RediSearchTests
@@ -66,6 +67,67 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 tasks.Add(_connection.SetAsync(person));
             }
             await Task.WhenAll(tasks);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        public async Task WithScoresPopulatesScoresHash(int dialect)
+        {
+            var query = new RedisQuery("hash-person-idx")
+            {
+                QueryText = "@Name:Steve",
+                Flags = (long)QueryFlags.WithScores,
+                Dialect = dialect,
+            };
+
+            var response = await _connection.SearchAsync<HashPerson>(query);
+
+            Assert.NotEmpty(response.Documents);
+            Assert.NotEmpty(response.Scores);
+            foreach (var docId in response.Documents.Keys)
+            {
+                Assert.True(response.Scores.ContainsKey(docId), $"missing score for {docId}");
+                Assert.True(response.Scores[docId] > 0, $"expected positive score for {docId} but got {response.Scores[docId]}");
+            }
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        public async Task WithScoresPopulatesScoresJson(int dialect)
+        {
+            var query = new RedisQuery("person-idx")
+            {
+                QueryText = "@Name:Steve",
+                Flags = (long)QueryFlags.WithScores,
+                Dialect = dialect,
+            };
+
+            var response = await _connection.SearchAsync<Person>(query);
+
+            Assert.NotEmpty(response.Documents);
+            Assert.NotEmpty(response.Scores);
+            foreach (var docId in response.Documents.Keys)
+            {
+                Assert.True(response.Scores.ContainsKey(docId), $"missing score for {docId}");
+                Assert.True(response.Scores[docId] > 0, $"expected positive score for {docId} but got {response.Scores[docId]}");
+            }
+        }
+
+        [Fact]
+        public async Task WithoutScoresLeavesScoresEmpty()
+        {
+            var query = new RedisQuery("hash-person-idx")
+            {
+                QueryText = "@Name:Steve",
+                Dialect = 2,
+            };
+
+            var response = await _connection.SearchAsync<HashPerson>(query);
+
+            Assert.NotEmpty(response.Documents);
+            Assert.Empty(response.Scores);
         }
 
         [Fact]
