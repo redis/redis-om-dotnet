@@ -313,6 +313,7 @@ namespace Redis.OM.Modeling
 
                 if (text.IndexEmptyAndMissing)
                 {
+                    ret.Add("INDEXMISSING");
                     ret.Add("INDEXEMPTY");
                 }
             }
@@ -339,20 +340,24 @@ namespace Redis.OM.Modeling
 
                     if (indexed.IndexEmptyAndMissing)
                     {
+                        ret.Add("INDEXMISSING");
                         ret.Add("INDEXEMPTY");
                     }
                 }
                 else if (searchFieldType == "VECTOR")
                 {
                     ret.AddRange(VectorSerialization(indexed, propertyInfo));
+                    if (indexed.IndexEmptyAndMissing)
+                    {
+                        ret.Add("INDEXMISSING");
+                    }
                 }
             }
 
-            // INDEXMISSING is supported on all field types, but value-type fields (NUMERIC, GEO)
-            // can only be missing when the .NET type is nullable. VECTOR maps to the Vector
-            // reference type which is always nullable, so it is never gated here.
-            var valueTypeField = searchFieldType == "NUMERIC" || searchFieldType == "GEO";
-            if (attr.IndexEmptyAndMissing && (!valueTypeField || typeNullable))
+            // NUMERIC and GEO map from value types and can only be missing when the .NET type
+            // is nullable, so only emit INDEXMISSING for them in that case. TAG, TEXT, and VECTOR
+            // emit INDEXMISSING within their own blocks above.
+            if (attr.IndexEmptyAndMissing && (searchFieldType == "NUMERIC" || searchFieldType == "GEO") && typeNullable)
             {
                 ret.Add("INDEXMISSING");
             }
