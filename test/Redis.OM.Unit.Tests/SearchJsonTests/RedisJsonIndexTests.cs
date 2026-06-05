@@ -40,6 +40,15 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
         }
 
         [Document(IndexName = "person-idx", StorageType = StorageType.Json)]
+        public class PersonWithGeoLoc
+        {
+            [Indexed]
+            public GeoLoc Location { get; set; }
+            [Indexed]
+            public GeoLoc? NullableLocation { get; set; }
+        }
+
+        [Document(IndexName = "person-idx", StorageType = StorageType.Json)]
         public class PersonWithIndexedNickNames
         {
             [Searchable(Sortable = true)]
@@ -135,6 +144,21 @@ namespace Redis.OM.Unit.Tests.SearchJsonTests
                 "$.Code", "AS", "Code", "NUMERIC", "INDEXMISSING",
                 "$.UpdatedAt", "AS", "UpdatedAt", "NUMERIC", "INDEXMISSING" };
             var indexArr = typeof(PersonWithIndexedNullableNumerics).SerializeIndex();
+
+            for (var i = 0; i < indexArr.Length; i++)
+            {
+                Assert.Equal(expected[i], indexArr[i]);
+            }
+        }
+
+        [Fact]
+        public void TestIndexSerializationGeoLoc()
+        {
+            var expected = new[] { "person-idx",
+                "ON", "Json", "PREFIX", "1", "Redis.OM.Unit.Tests.SearchJsonTests.RedisJsonIndexTests+PersonWithGeoLoc:", "SCHEMA",
+                "$.Location", "AS", "Location", "GEO",
+                "$.NullableLocation", "AS", "NullableLocation", "GEO", "INDEXMISSING" };
+            var indexArr = typeof(PersonWithGeoLoc).SerializeIndex();
 
             for (var i = 0; i < indexArr.Length; i++)
             {

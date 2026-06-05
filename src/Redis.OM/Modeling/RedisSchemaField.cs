@@ -348,7 +348,11 @@ namespace Redis.OM.Modeling
                 }
             }
 
-            if (attr.IndexEmptyAndMissing && (searchFieldType != "NUMERIC" || typeNullable))
+            // INDEXMISSING is supported on all field types, but value-type fields (NUMERIC, GEO)
+            // can only be missing when the .NET type is nullable. VECTOR maps to the Vector
+            // reference type which is always nullable, so it is never gated here.
+            var valueTypeField = searchFieldType == "NUMERIC" || searchFieldType == "GEO";
+            if (attr.IndexEmptyAndMissing && (!valueTypeField || typeNullable))
             {
                 ret.Add("INDEXMISSING");
             }
