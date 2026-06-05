@@ -36,8 +36,8 @@ public class VectorIndexCreationTests
             "SCHEMA",
             "$.Name", "AS", "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", 
             "$.Num", "AS", "Num", "NUMERIC",
-            "$.SimpleHnswVector", "AS", "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2",
-            "$.SimpleVectorizedVector.Vector", "AS","SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2"
+            "$.SimpleHnswVector", "AS", "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2", "INDEXMISSING",
+            "$.SimpleVectorizedVector.Vector", "AS","SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2", "INDEXMISSING"
         );
 
         _substitute.ClearSubstitute();
@@ -53,8 +53,8 @@ public class VectorIndexCreationTests
             "SCHEMA",
             "Name", "TAG", "SEPARATOR", "|", "INDEXMISSING", "INDEXEMPTY", 
             "Num", "NUMERIC",
-            "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2",
-            "SimpleVectorizedVector.Vector", "AS", "SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2"
+            "SimpleHnswVector", "VECTOR", "HNSW", "6", "TYPE", "FLOAT64", "DIM", "10", "DISTANCE_METRIC", "L2", "INDEXMISSING",
+            "SimpleVectorizedVector.Vector", "AS", "SimpleVectorizedVector", "VECTOR", "FLAT", "6", "TYPE", "FLOAT32", "DIM", "30", "DISTANCE_METRIC", "L2", "INDEXMISSING"
         );
     }
 

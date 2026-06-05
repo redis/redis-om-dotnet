@@ -34,6 +34,8 @@ namespace Redis.OM.Unit.Tests
             Connection.CreateIndex(typeof(ObjectWithByteArray));
             Connection.CreateIndex(typeof(ObjectWithNullableStrings));
             Connection.CreateIndex(typeof(ObjectWithNullableStringsHash));
+            Connection.CreateIndex(typeof(ObjectWithNullableNumerics));
+            Connection.CreateIndex(typeof(ObjectWithNullableNumericsHash));
             Connection.CreateIndex(typeof(ObjectWithNumericArrays));
             Connection.CreateIndex(typeof(NestedObjectWithNumericArrays));
             Connection.CreateIndex(typeof(ObjectWithNumericLists));
@@ -72,6 +74,8 @@ namespace Redis.OM.Unit.Tests
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithDateTimeOffsetJson));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithMultipleSearchableAttributes));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithByteArray));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNullableNumerics));
+            Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNullableNumericsHash));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNullableStrings));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNullableStringsHash));
             Connection.DropIndexAndAssociatedRecords(typeof(ObjectWithNumericArrays));

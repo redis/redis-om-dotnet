@@ -211,7 +211,17 @@ namespace Redis.OM.Modeling
                             attr.Add("EF_CONSTRUCTION");
                             attr.Add(a.EfConstruction);
                         }
+
+                        if (a.IndexMissing == true)
+                        {
+                            attr.Add("INDEXMISSING");
+                        }
                     }
+                }
+
+                if (a.IndexMissing == true && (a.Type == "NUMERIC" || a.Type == "GEO"))
+                {
+                    attr.Add("INDEXMISSING");
                 }
 
                 if (a.Sortable == true)

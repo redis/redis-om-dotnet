@@ -2321,7 +2321,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithDateTime:",
                 "SCHEMA",
                 "$.Timestamp", "AS", "Timestamp", "NUMERIC", "SORTABLE",
-                "$.NullableTimestamp", "AS", "NullableTimestamp", "NUMERIC"
+                "$.NullableTimestamp", "AS", "NullableTimestamp", "NUMERIC", "INDEXMISSING"
             );
 
             await _substitute.Received().ExecuteAsync("FT.CREATE",
@@ -2333,7 +2333,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "Redis.OM.Unit.Tests.RediSearchTests.ObjectWithDateTimeHash:",
                 "SCHEMA",
                 "Timestamp", "NUMERIC",
-                "NullableTimestamp", "NUMERIC"
+                "NullableTimestamp", "NUMERIC", "INDEXMISSING"
             );
         }
 
