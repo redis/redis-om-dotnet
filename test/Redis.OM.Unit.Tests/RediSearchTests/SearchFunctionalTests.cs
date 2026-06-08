@@ -1416,6 +1416,148 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(existingRecordsCount, res.Count);
         }
 
+        // Seeds a known pair of people for the Match* functional tests. Clears any existing
+        // people first so the test is independent of ordering, and the caller is expected to
+        // clear again in a finally block so it does not pollute the shared Person collection.
+        private async Task<RedisCollection<Person>> SeedMatchPeopleAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            await collection.DeleteAsync(await collection.ToListAsync());
+
+            collection.Insert(new Person { Name = "Steve Lorello", NickNames = new[] { "Steve", "Stevie" } });
+            collection.Insert(new Person { Name = "Harry Potter", NickNames = new[] { "Harry", "Hazza" } });
+
+            return collection;
+        }
+
+        private async Task ClearPeopleAsync()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            await collection.DeleteAsync(await collection.ToListAsync());
+        }
+
+        [Fact]
+        public async Task TestSearchByMatchStartsWith()
+        {
+            var collection = await SeedMatchPeopleAsync();
+            try
+            {
+                var res = await collection.Where(x => x.Name.MatchStartsWith("Ste")).ToListAsync();
+
+                Assert.Single(res);
+                Assert.Equal("Steve Lorello", res[0].Name);
+            }
+            finally
+            {
+                await ClearPeopleAsync();
+            }
+        }
+
+        [Fact]
+        public async Task TestSearchByMatchEndsWith()
+        {
+            var collection = await SeedMatchPeopleAsync();
+            try
+            {
+                var res = await collection.Where(x => x.Name.MatchEndsWith("orello")).ToListAsync();
+
+                Assert.Single(res);
+                Assert.Equal("Steve Lorello", res[0].Name);
+            }
+            finally
+            {
+                await ClearPeopleAsync();
+            }
+        }
+
+        [Fact]
+        public async Task TestSearchByMatchContains()
+        {
+            var collection = await SeedMatchPeopleAsync();
+            try
+            {
+                var res = await collection.Where(x => x.Name.MatchContains("orell")).ToListAsync();
+
+                Assert.Single(res);
+                Assert.Equal("Steve Lorello", res[0].Name);
+            }
+            finally
+            {
+                await ClearPeopleAsync();
+            }
+        }
+
+        [Fact]
+        public async Task TestSearchByMatchStartsWithStringArray()
+        {
+            var collection = await SeedMatchPeopleAsync();
+            try
+            {
+                var res = await collection.Where(x => x.NickNames.MatchStartsWith("Ste")).ToListAsync();
+
+                Assert.Single(res);
+                Assert.Equal("Steve Lorello", res[0].Name);
+            }
+            finally
+            {
+                await ClearPeopleAsync();
+            }
+        }
+
+        [Fact]
+        public async Task TestSearchByMatchEndsWithStringArray()
+        {
+            var collection = await SeedMatchPeopleAsync();
+            try
+            {
+                var res = await collection.Where(x => x.NickNames.MatchEndsWith("vie")).ToListAsync();
+
+                Assert.Single(res);
+                Assert.Equal("Steve Lorello", res[0].Name);
+            }
+            finally
+            {
+                await ClearPeopleAsync();
+            }
+        }
+
+        [Fact]
+        public async Task TestSearchByMatchContainsStringArray()
+        {
+            var collection = await SeedMatchPeopleAsync();
+            try
+            {
+                var res = await collection.Where(x => x.NickNames.MatchContains("azz")).ToListAsync();
+
+                Assert.Single(res);
+                Assert.Equal("Harry Potter", res[0].Name);
+            }
+            finally
+            {
+                await ClearPeopleAsync();
+            }
+        }
+
+        [Theory]
+        [InlineData("Ste*", 1)]
+        [InlineData("*vie", 1)]
+        [InlineData("Ha*", 1)]
+        [InlineData("Nope*", 0)]
+        public async Task TestSearchByMatchPatternStringArray(string pattern, int existingRecordsCount)
+        {
+            var collection = await SeedMatchPeopleAsync();
+            try
+            {
+                var res = await collection.Where(x => x.NickNames.MatchPattern(pattern)).ToListAsync();
+
+                Assert.Equal(existingRecordsCount, res.Count);
+            }
+            finally
+            {
+                await ClearPeopleAsync();
+            }
+        }
+
         [Fact]
         public async Task TestUpdateByteArray()
         {

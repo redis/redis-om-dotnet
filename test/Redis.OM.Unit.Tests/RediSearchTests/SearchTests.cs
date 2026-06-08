@@ -436,7 +436,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.Name.MatchStartsWith("Ste")).ToList();
-            _substitute.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@Name:Ste*)",
@@ -503,7 +503,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
-            var ddfgdf = collection.Where(x => x.Name.MatchPattern("Ste* Lo*")).ToList();
+            _ = collection.Where(x => x.Name.MatchPattern("Ste* Lo*")).ToList();
 
             _substitute.Received().Execute(
                 "FT.SEARCH",
@@ -522,7 +522,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
 
             var collection = new RedisCollection<Person>(_substitute);
             _ = collection.Where(x => x.NickNames.MatchStartsWith("Ste")).ToList();
-            _substitute.Execute(
+            _substitute.Received().Execute(
                 "FT.SEARCH",
                 "person-idx",
                 "(@NickNames:{Ste*})",
@@ -563,8 +563,6 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
                 "LIMIT",
                 "0",
                 "100");
-            _substitute.ClearSubstitute();
-            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
         }
 
         [Fact]
@@ -574,7 +572,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
 
             var collection = new RedisCollection<Person>(_substitute);
-            var ddfgdf = collection.Where(x => x.NickNames.MatchPattern("Ste* Lo*")).ToList();
+            _ = collection.Where(x => x.NickNames.MatchPattern("Ste* Lo*")).ToList();
 
             _substitute.Received().Execute(
                 "FT.SEARCH",
