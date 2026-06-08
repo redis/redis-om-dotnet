@@ -828,8 +828,8 @@ namespace Redis.OM.Common
                 return $"({source}:{prefix}*)";
             }
 
-            // IEnumerable<string>
-            return $"({source}:{{{prefix}*}})";
+            // IEnumerable<string> (tag field): escape the literal but keep the trailing wildcard.
+            return $"({source}:{{{EscapeTagField(prefix)}*}})";
         }
 
         private static string TranslateMatchEndsWith(MethodCallExpression exp)
@@ -842,8 +842,8 @@ namespace Redis.OM.Common
                 return $"({source}:*{suffix})";
             }
 
-            // IEnumerable<string>
-            return $"({source}:{{*{suffix}}})";
+            // IEnumerable<string> (tag field): escape the literal but keep the leading wildcard.
+            return $"({source}:{{*{EscapeTagField(suffix)}}})";
         }
 
         private static string TranslateMatchContains(MethodCallExpression exp)
@@ -855,8 +855,8 @@ namespace Redis.OM.Common
                 return $"({source}:*{infix}*)";
             }
 
-            // IEnumerable<string>
-            return $"({source}:{{*{infix}*}})";
+            // IEnumerable<string> (tag field): escape the literal but keep the surrounding wildcards.
+            return $"({source}:{{*{EscapeTagField(infix)}*}})";
         }
 
         private static string TranslateMatchPattern(MethodCallExpression exp)

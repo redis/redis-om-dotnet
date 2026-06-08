@@ -584,6 +584,57 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public void TestMatchStartsWithOfStringArrayEscapesTagChars()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.NickNames.MatchStartsWith("St-e@v")).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNames:{St\\-e\\@v*})",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
+        [Fact]
+        public void TestMatchEndsWithOfStringArrayEscapesTagChars()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.NickNames.MatchEndsWith("St-e@v")).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNames:{*St\\-e\\@v})",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
+        [Fact]
+        public void TestMatchContainsOfStringArrayEscapesTagChars()
+        {
+            _substitute.ClearSubstitute();
+            _substitute.Execute(Arg.Any<string>(), Arg.Any<object[]>()).Returns(_mockReply);
+
+            var collection = new RedisCollection<Person>(_substitute);
+            _ = collection.Where(x => x.NickNames.MatchContains("St-e@v")).ToList();
+            _substitute.Received().Execute(
+                "FT.SEARCH",
+                "person-idx",
+                "(@NickNames:{*St\\-e\\@v*})",
+                "LIMIT",
+                "0",
+                "100");
+        }
+
+        [Fact]
         public void TestTagContains()
         {
             _substitute.ClearSubstitute();

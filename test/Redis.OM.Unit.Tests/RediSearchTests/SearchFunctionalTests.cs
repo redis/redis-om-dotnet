@@ -1416,145 +1416,167 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.Equal(existingRecordsCount, res.Count);
         }
 
-        // Seeds a known pair of people for the Match* functional tests. Clears any existing
-        // people first so the test is independent of ordering, and the caller is expected to
-        // clear again in a finally block so it does not pollute the shared Person collection.
-        private async Task<RedisCollection<Person>> SeedMatchPeopleAsync()
+        // Inserts a known, uniquely-named pair of people for the Match* functional tests. The
+        // names and nicknames are deliberately distinct from the randomly seeded records other
+        // tests create, so the assertions are deterministic without clearing the shared
+        // collection (other tests, e.g. EnumerateAllRecords, depend on those records existing).
+        // The inserted records are returned so each test can delete just those in a finally block.
+        private Person[] InsertMatchPeople(RedisCollection<Person> collection)
         {
-            var collection = new RedisCollection<Person>(_connection);
-            await collection.DeleteAsync(await collection.ToListAsync());
-
-            collection.Insert(new Person { Name = "Steve Lorello", NickNames = new[] { "Steve", "Stevie" } });
-            collection.Insert(new Person { Name = "Harry Potter", NickNames = new[] { "Harry", "Hazza" } });
-
-            return collection;
-        }
-
-        private async Task ClearPeopleAsync()
-        {
-            var collection = new RedisCollection<Person>(_connection);
-            await collection.DeleteAsync(await collection.ToListAsync());
+            var zaphod = new Person { Name = "Zaphod Beeblebrox", NickNames = new[] { "Zaphod", "Zappy" } };
+            var ford = new Person { Name = "Ford Prefect", NickNames = new[] { "Fordo", "Prefect" } };
+            collection.Insert(zaphod);
+            collection.Insert(ford);
+            return new[] { zaphod, ford };
         }
 
         [Fact]
         public async Task TestSearchByMatchStartsWith()
         {
-            var collection = await SeedMatchPeopleAsync();
+            var collection = new RedisCollection<Person>(_connection);
+            var inserted = InsertMatchPeople(collection);
             try
             {
-                var res = await collection.Where(x => x.Name.MatchStartsWith("Ste")).ToListAsync();
+                var res = await collection.Where(x => x.Name.MatchStartsWith("Zaph")).ToListAsync();
 
                 Assert.Single(res);
-                Assert.Equal("Steve Lorello", res[0].Name);
+                Assert.Equal("Zaphod Beeblebrox", res[0].Name);
             }
             finally
             {
-                await ClearPeopleAsync();
+                await collection.DeleteAsync(inserted);
             }
         }
 
         [Fact]
         public async Task TestSearchByMatchEndsWith()
         {
-            var collection = await SeedMatchPeopleAsync();
+            var collection = new RedisCollection<Person>(_connection);
+            var inserted = InsertMatchPeople(collection);
             try
             {
-                var res = await collection.Where(x => x.Name.MatchEndsWith("orello")).ToListAsync();
+                var res = await collection.Where(x => x.Name.MatchEndsWith("brox")).ToListAsync();
 
                 Assert.Single(res);
-                Assert.Equal("Steve Lorello", res[0].Name);
+                Assert.Equal("Zaphod Beeblebrox", res[0].Name);
             }
             finally
             {
-                await ClearPeopleAsync();
+                await collection.DeleteAsync(inserted);
             }
         }
 
         [Fact]
         public async Task TestSearchByMatchContains()
         {
-            var collection = await SeedMatchPeopleAsync();
+            var collection = new RedisCollection<Person>(_connection);
+            var inserted = InsertMatchPeople(collection);
             try
             {
-                var res = await collection.Where(x => x.Name.MatchContains("orell")).ToListAsync();
+                var res = await collection.Where(x => x.Name.MatchContains("eeble")).ToListAsync();
 
                 Assert.Single(res);
-                Assert.Equal("Steve Lorello", res[0].Name);
+                Assert.Equal("Zaphod Beeblebrox", res[0].Name);
             }
             finally
             {
-                await ClearPeopleAsync();
+                await collection.DeleteAsync(inserted);
             }
         }
 
         [Fact]
         public async Task TestSearchByMatchStartsWithStringArray()
         {
-            var collection = await SeedMatchPeopleAsync();
+            var collection = new RedisCollection<Person>(_connection);
+            var inserted = InsertMatchPeople(collection);
             try
             {
-                var res = await collection.Where(x => x.NickNames.MatchStartsWith("Ste")).ToListAsync();
+                var res = await collection.Where(x => x.NickNames.MatchStartsWith("Zap")).ToListAsync();
 
                 Assert.Single(res);
-                Assert.Equal("Steve Lorello", res[0].Name);
+                Assert.Equal("Zaphod Beeblebrox", res[0].Name);
             }
             finally
             {
-                await ClearPeopleAsync();
+                await collection.DeleteAsync(inserted);
             }
         }
 
         [Fact]
         public async Task TestSearchByMatchEndsWithStringArray()
         {
-            var collection = await SeedMatchPeopleAsync();
+            var collection = new RedisCollection<Person>(_connection);
+            var inserted = InsertMatchPeople(collection);
             try
             {
-                var res = await collection.Where(x => x.NickNames.MatchEndsWith("vie")).ToListAsync();
+                var res = await collection.Where(x => x.NickNames.MatchEndsWith("ppy")).ToListAsync();
 
                 Assert.Single(res);
-                Assert.Equal("Steve Lorello", res[0].Name);
+                Assert.Equal("Zaphod Beeblebrox", res[0].Name);
             }
             finally
             {
-                await ClearPeopleAsync();
+                await collection.DeleteAsync(inserted);
             }
         }
 
         [Fact]
         public async Task TestSearchByMatchContainsStringArray()
         {
-            var collection = await SeedMatchPeopleAsync();
+            var collection = new RedisCollection<Person>(_connection);
+            var inserted = InsertMatchPeople(collection);
             try
             {
-                var res = await collection.Where(x => x.NickNames.MatchContains("azz")).ToListAsync();
+                var res = await collection.Where(x => x.NickNames.MatchContains("refec")).ToListAsync();
 
                 Assert.Single(res);
-                Assert.Equal("Harry Potter", res[0].Name);
+                Assert.Equal("Ford Prefect", res[0].Name);
             }
             finally
             {
-                await ClearPeopleAsync();
+                await collection.DeleteAsync(inserted);
             }
         }
 
         [Theory]
-        [InlineData("Ste*", 1)]
-        [InlineData("*vie", 1)]
-        [InlineData("Ha*", 1)]
+        [InlineData("Zap*", 1)]
+        [InlineData("*ppy", 1)]
+        [InlineData("Ford*", 1)]
         [InlineData("Nope*", 0)]
-        public async Task TestSearchByMatchPatternStringArray(string pattern, int existingRecordsCount)
+        public async Task TestSearchByMatchPatternStringArray(string pattern, int expectedMatchCount)
         {
-            var collection = await SeedMatchPeopleAsync();
+            var collection = new RedisCollection<Person>(_connection);
+            var inserted = InsertMatchPeople(collection);
             try
             {
                 var res = await collection.Where(x => x.NickNames.MatchPattern(pattern)).ToListAsync();
 
-                Assert.Equal(existingRecordsCount, res.Count);
+                Assert.Equal(expectedMatchCount, res.Count);
             }
             finally
             {
-                await ClearPeopleAsync();
+                await collection.DeleteAsync(inserted);
+            }
+        }
+
+        [Fact]
+        public async Task TestSearchByMatchTagSpecialCharacters()
+        {
+            var collection = new RedisCollection<Person>(_connection);
+            var peter = new Person { Name = "Peter Parker", NickNames = new[] { "Spider-Man" } };
+            collection.Insert(peter);
+            try
+            {
+                // The hyphen is a tag special character; without escaping this query would be
+                // malformed / return the wrong results rather than matching "Spider-Man".
+                var res = await collection.Where(x => x.NickNames.MatchStartsWith("Spider-M")).ToListAsync();
+
+                Assert.Single(res);
+                Assert.Equal("Peter Parker", res[0].Name);
+            }
+            finally
+            {
+                await collection.DeleteAsync(new[] { peter });
             }
         }
 
