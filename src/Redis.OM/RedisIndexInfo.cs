@@ -292,20 +292,35 @@ namespace Redis.OM
                         case "M": M = value; break;
                         case "ef_construction": EfConstruction = value; break;
                         case "WEIGHT": Weight = value; break;
-                        case "INDEXMISSING": IndexMissing = true; break;
-                        case "INDEXEMPTY": IndexEmpty = true; break;
                     }
                 }
 
-                if (responseArray.Any(x => ((string)x).Equals("NOSTEM", StringComparison.InvariantCultureIgnoreCase)))
+                // Boolean flags are emitted as trailing top-level tokens under RESP2, but grouped
+                // inside a nested "flags" array under RESP3. Flattening one level yields the leaf
+                // tokens for either layout so the flag detection below is protocol-agnostic.
+                var flagTokens = responseArray
+                    .SelectMany(x => x.ToArray())
+                    .Select(x => x.ToString(CultureInfo.InvariantCulture))
+                    .ToArray();
+
+                if (flagTokens.Any(x => x.Equals("NOSTEM", StringComparison.InvariantCultureIgnoreCase)))
                 {
                     NoStem = true;
                 }
 
-                if (responseArray.Select(x => x.ToString())
-                    .Any(x => x.Equals("SORTABLE", StringComparison.InvariantCultureIgnoreCase)))
+                if (flagTokens.Any(x => x.Equals("SORTABLE", StringComparison.InvariantCultureIgnoreCase)))
                 {
                     Sortable = true;
+                }
+
+                if (flagTokens.Any(x => x.Equals("INDEXMISSING", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    IndexMissing = true;
+                }
+
+                if (flagTokens.Any(x => x.Equals("INDEXEMPTY", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    IndexEmpty = true;
                 }
             }
 

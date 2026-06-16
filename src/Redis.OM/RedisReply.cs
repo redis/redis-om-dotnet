@@ -44,6 +44,13 @@ namespace Redis.OM
                     _values = ((RedisResult[])result!).Select(x => new RedisReply(x)).ToArray();
                     break;
             }
+
+            // When the connection negotiates RESP3, commands such as FT.SEARCH and FT.AGGREGATE
+            // reply with a map rather than the flat RESP2 array. SE.Redis collapses a map's
+            // Resp2Type to Array (the flattened, interleaved key/value pairs handled above), so the
+            // existing array-based parsing is preserved. We additionally record that the node was a
+            // map so response parsers can opt into the RESP3 shape via <see cref="IsMap"/>.
+            IsMap = result.Resp3Type == ResultType.Map;
         }
 
         /// <summary>
@@ -101,9 +108,28 @@ namespace Redis.OM
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="RedisReply"/> class representing a RESP3 map,
+        /// stored as a flattened, interleaved key/value array. Used to exercise the RESP3 parsing paths.
+        /// </summary>
+        /// <param name="values">the flattened key/value pairs.</param>
+        /// <param name="isMap">whether the reply represents a RESP3 map.</param>
+        internal RedisReply(RedisReply[] values, bool isMap)
+        {
+            _values = values;
+            IsMap = isMap;
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the result represents an error.
         /// </summary>
         public bool Error { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the reply was a RESP3 map (e.g. a RESP3 FT.SEARCH or
+        /// FT.AGGREGATE response). The underlying values are still exposed as the flattened,
+        /// interleaved key/value array via <see cref="ToArray"/>.
+        /// </summary>
+        internal bool IsMap { get; }
 
         /// <summary>
         /// implicitly converts the reply to a double.
@@ -507,6 +533,30 @@ namespace Redis.OM
             }
 
             throw new InvalidCastException();
+        }
+
+        /// <summary>
+        /// Looks up a value by key, treating this reply as a RESP3 map whose values are stored as a
+        /// flattened, interleaved key/value array.
+        /// </summary>
+        /// <param name="key">The map key to look up.</param>
+        /// <returns>The value associated with <paramref name="key"/>, or <c>null</c> if absent.</returns>
+        internal RedisReply? GetMapValueOrDefault(string key)
+        {
+            if (_values is null)
+            {
+                return null;
+            }
+
+            for (var i = 0; i + 1 < _values.Length; i += 2)
+            {
+                if ((string)_values[i] == key)
+                {
+                    return _values[i + 1];
+                }
+            }
+
+            return null;
         }
     }
 }

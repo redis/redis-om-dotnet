@@ -15,7 +15,7 @@ namespace Redis.OM.Searching
         /// <param name="val">The redis response.</param>
         public SearchResponse(RedisReply val)
         {
-            var vals = val.ToArray();
+            var vals = NormalizeReply(val);
             DocumentCount = vals[0];
             Documents = new Dictionary<string, IDictionary<string, string>>();
             Scores = new Dictionary<string, double>();
@@ -78,6 +78,44 @@ namespace Redis.OM.Searching
             }
 
             return dict;
+        }
+
+        /// <summary>
+        /// Normalizes a search reply into the flat RESP2 layout the parsers expect. RESP2 replies are
+        /// returned unchanged; a RESP3 map reply (negotiated automatically by newer StackExchange.Redis
+        /// versions) is reshaped from its <c>total_results</c>/<c>results</c> structure into the legacy
+        /// <c>[count, id, (score,) fields, ...]</c> array.
+        /// </summary>
+        /// <param name="val">The raw search reply.</param>
+        /// <returns>The reply in flat RESP2 layout.</returns>
+        internal static RedisReply[] NormalizeReply(RedisReply val)
+        {
+            if (!val.IsMap)
+            {
+                return val.ToArray();
+            }
+
+            var flattened = new List<RedisReply> { val.GetMapValueOrDefault("total_results") ?? 0L };
+            var results = val.GetMapValueOrDefault("results");
+            if (results is not null)
+            {
+                foreach (var result in results.ToArray())
+                {
+                    flattened.Add(result.GetMapValueOrDefault("id") ?? string.Empty);
+
+                    // WITHSCORES surfaces the score as a scalar map entry; the existing parser treats it
+                    // as the metadata sitting between the id and the field payload.
+                    var score = result.GetMapValueOrDefault("score");
+                    if (score is not null)
+                    {
+                        flattened.Add(score);
+                    }
+
+                    flattened.Add(result.GetMapValueOrDefault("extra_attributes") ?? new RedisReply(Array.Empty<RedisReply>()));
+                }
+            }
+
+            return flattened.ToArray();
         }
 
         /// <summary>
@@ -154,7 +192,7 @@ namespace Redis.OM.Searching
             }
             else
             {
-                var vals = val.ToArray();
+                var vals = SearchResponse.NormalizeReply(val);
                 if (vals.Length == 1)
                 {
                     var str = vals[0].ToString();
@@ -248,7 +286,7 @@ namespace Redis.OM.Searching
 
         private static SearchResponse<T> PrimitiveSearchResponse(RedisReply redisReply)
         {
-            var arr = redisReply.ToArray();
+            var arr = SearchResponse.NormalizeReply(redisReply);
             var response = new SearchResponse<T>();
             response.DocumentCount = arr[0];
             for (var i = 1; i < arr.Count();)

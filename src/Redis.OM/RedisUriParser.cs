@@ -26,6 +26,7 @@ namespace Redis.OM
             if (string.IsNullOrEmpty(uriString))
             {
                 options.EndPoints.Add("localhost:6379");
+                ParseProtocol(options, null);
                 return options;
             }
 
@@ -33,10 +34,50 @@ namespace Redis.OM
             ParseHost(options, uri);
             ParseUserInfo(options, uri);
             ParseQueryArguments(options, uri);
+            ParseProtocol(options, uri);
             ParseDefaultDatabase(options, uri);
             options.Ssl = uri.Scheme == "rediss";
             options.AbortOnConnectFail = false;
             return options;
+        }
+
+        /// <summary>
+        /// Resolves the RESP protocol to negotiate. An explicit <c>protocol</c> query argument
+        /// (<c>resp2</c>/<c>resp3</c> or <c>2</c>/<c>3</c>) takes precedence; otherwise the
+        /// <c>REDIS_OM_PROTOCOL</c> environment variable is used as a fallback default. When neither is
+        /// supplied the StackExchange.Redis default is left untouched.
+        /// </summary>
+        /// <param name="options">The configuration options to populate.</param>
+        /// <param name="uri">The parsed URI, or <c>null</c> when none was supplied.</param>
+        private static void ParseProtocol(ConfigurationOptions options, Uri? uri)
+        {
+            string? requested = null;
+            if (uri is not null && !string.IsNullOrEmpty(uri.Query))
+            {
+                requested = ParseQuery(uri.Query.Substring(1))
+                    .Where(x => x.Key.ToLower() == "protocol")
+                    .Select(x => x.Value)
+                    .FirstOrDefault();
+            }
+
+            requested ??= Environment.GetEnvironmentVariable("REDIS_OM_PROTOCOL");
+
+            if (string.IsNullOrEmpty(requested))
+            {
+                return;
+            }
+
+            switch (requested!.Trim().ToLowerInvariant())
+            {
+                case "2":
+                case "resp2":
+                    options.Protocol = RedisProtocol.Resp2;
+                    break;
+                case "3":
+                case "resp3":
+                    options.Protocol = RedisProtocol.Resp3;
+                    break;
+            }
         }
 
         private static void ParseDefaultDatabase(ConfigurationOptions options, Uri uri)

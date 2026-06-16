@@ -72,7 +72,7 @@ namespace Redis.OM.Aggregation
         /// <returns>A set of Aggregation Results.</returns>
         internal static IEnumerable<AggregationResult<T>> FromRedisResult(RedisReply res)
         {
-            var arr = res.ToArray();
+            var arr = AggregationResult.NormalizeReply(res);
             for (var i = 1; i < arr.Length; i++)
             {
                 yield return new AggregationResult<T>(arr[i]);
@@ -117,11 +117,40 @@ namespace Redis.OM.Aggregation
         /// <returns>an enumerable of results.</returns>
         public static IEnumerable<AggregationResult> FromRedisResult(RedisReply res)
         {
-            var arr = res.ToArray();
+            var arr = NormalizeReply(res);
             for (var i = 1; i < arr.Length; i++)
             {
                 yield return new AggregationResult(arr[i]);
             }
+        }
+
+        /// <summary>
+        /// Normalizes an aggregation reply into the flat RESP2 layout the parsers expect. RESP2 replies
+        /// are returned unchanged; a RESP3 map reply (negotiated automatically by newer
+        /// StackExchange.Redis versions) is reshaped from its <c>total_results</c>/<c>results</c>
+        /// structure into the legacy <c>[count, fields, ...]</c> array, where each <c>fields</c> entry is
+        /// the result's <c>extra_attributes</c> map.
+        /// </summary>
+        /// <param name="res">The raw aggregation reply.</param>
+        /// <returns>The reply in flat RESP2 layout.</returns>
+        internal static RedisReply[] NormalizeReply(RedisReply res)
+        {
+            if (!res.IsMap)
+            {
+                return res.ToArray();
+            }
+
+            var flattened = new List<RedisReply> { res.GetMapValueOrDefault("total_results") ?? 0L };
+            var results = res.GetMapValueOrDefault("results");
+            if (results is not null)
+            {
+                foreach (var result in results.ToArray())
+                {
+                    flattened.Add(result.GetMapValueOrDefault("extra_attributes") ?? new RedisReply(Array.Empty<RedisReply>()));
+                }
+            }
+
+            return flattened.ToArray();
         }
     }
 }
