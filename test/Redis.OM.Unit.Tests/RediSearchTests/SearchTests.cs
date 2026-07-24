@@ -4413,6 +4413,43 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
         }
 
         [Fact]
+        public async Task EnumerateAllWhenServerIgnoresLimitOffset()
+        {
+            // Regression for #573: some servers (e.g. the RESP3 clustered FT.SEARCH coordinator bug
+            // fixed in RediSearch#10394) ignore the LIMIT offset and return the window [0, offset+count)
+            // on every page. The enumerator must still terminate and surface each match exactly once
+            // rather than paging forever until the server rejects the offset.
+            RedisReply Doc(string id, string name) => new RedisReply[]
+            {
+                new($"Redis.OM.Unit.Tests.RediSearchTests.Person:{id}"),
+                new(new RedisReply[] { "$", $"{{\"Name\":\"{name}\",\"Age\":30,\"Height\":70.0, \"Id\":\"{id}\"}}" }),
+            };
+
+            // Offset is ignored: LIMIT 0 2 returns the first two, LIMIT 2 2 returns all four (0..3).
+            RedisReply firstReply = new RedisReply[] { new(4) }
+                .Concat(((RedisReply[])Doc("00000000000000000000000001", "Steve0")))
+                .Concat(((RedisReply[])Doc("00000000000000000000000002", "Steve1"))).ToArray();
+            RedisReply secondReply = new RedisReply[] { new(4) }
+                .Concat(((RedisReply[])Doc("00000000000000000000000001", "Steve0")))
+                .Concat(((RedisReply[])Doc("00000000000000000000000002", "Steve1")))
+                .Concat(((RedisReply[])Doc("00000000000000000000000003", "Steve2")))
+                .Concat(((RedisReply[])Doc("00000000000000000000000004", "Steve3"))).ToArray();
+
+            _substitute.ClearSubstitute();
+            _substitute.ExecuteAsync("FT.SEARCH", "person-idx", "*", "LIMIT", "0", "2").Returns(firstReply);
+            _substitute.ExecuteAsync("FT.SEARCH", "person-idx", "*", "LIMIT", "2", "2").Returns(secondReply);
+
+            var people = new List<Person>();
+            await foreach (var person in new RedisCollection<Person>(_substitute, 2))
+            {
+                people.Add(person);
+            }
+
+            Assert.Equal(new[] { "Steve0", "Steve1", "Steve2", "Steve3" }, people.Select(p => p.Name));
+            Assert.Equal(4, people.Select(p => p.Id).Distinct().Count());
+        }
+
+        [Fact]
         public void TestBasicQueryCastToIQueryable()
         {
             _substitute.ClearSubstitute();

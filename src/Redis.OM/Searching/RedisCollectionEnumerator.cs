@@ -91,14 +91,12 @@ namespace Redis.OM.Searching
                 return true;
             }
 
-            switch (_started)
+            if (ShouldStopPaging())
             {
-                case true when _limited:
-                case true when _records.Documents.Count < _query!.Limit!.Number && _records.DocumentsSkippedCount == 0:
-                    return false;
-                default:
-                    return GetNextChunk();
+                return false;
             }
+
+            return GetNextChunk();
         }
 
         /// <inheritdoc/>
@@ -110,14 +108,12 @@ namespace Redis.OM.Searching
                 return true;
             }
 
-            switch (_started)
+            if (ShouldStopPaging())
             {
-                case true when _limited:
-                case true when _records.Documents.Count < _query!.Limit!.Number && _records.DocumentsSkippedCount == 0:
-                    return false;
-                default:
-                    return await GetNextChunkAsync();
+                return false;
             }
+
+            return await GetNextChunkAsync();
         }
 
         /// <inheritdoc/>
@@ -142,6 +138,67 @@ namespace Redis.OM.Searching
             return expression.Arguments[0].Type.GenericTypeArguments[0];
         }
 
+        /// <summary>
+        /// Determines whether pagination should stop rather than fetch another chunk from the server.
+        /// </summary>
+        /// <remarks>
+        /// Alongside the normal "the server returned a short page" termination, paging also stops once a
+        /// single page has handed back as many documents as the search advertised in total
+        /// (<see cref="SearchResponse{T}.DocumentCount"/>) — at that point the whole result set is in
+        /// hand. On a well-behaved server this only ever coincides with a result set that fits in one
+        /// page (a page can never exceed the requested <c>Number</c>), so it does not change multi-page
+        /// behaviour. It does, however, terminate a server that ignores the <c>LIMIT</c> offset and
+        /// returns an ever-growing <c>[0, offset+Number)</c> window (the RESP3 clustered
+        /// <c>FT.SEARCH</c> coordinator bug fixed in RediSearch#10394), which would otherwise page until
+        /// the server rejects the offset ("LIMIT exceeds maximum of 1000000").
+        /// </remarks>
+        /// <returns>Whether to stop paging.</returns>
+        private bool ShouldStopPaging()
+        {
+            if (!_started)
+            {
+                return false;
+            }
+
+            if (_limited)
+            {
+                return true;
+            }
+
+            // Documents skipped in this chunk (e.g. keys that expired mid-search) mean the real
+            // result set is still being drained, so keep paging.
+            if (_records.DocumentsSkippedCount != 0)
+            {
+                return false;
+            }
+
+            // The server returned a short page, so there is nothing left to fetch.
+            if (_records.Documents.Count < _query!.Limit!.Number)
+            {
+                return true;
+            }
+
+            // A single page returned the whole advertised result set — we already have everything.
+            return _records.Documents.Count >= _records.DocumentCount;
+        }
+
+        /// <summary>
+        /// Determines the index within a freshly fetched chunk at which to begin surfacing documents.
+        /// </summary>
+        /// <remarks>
+        /// A well-behaved server applies the <c>LIMIT</c> offset and returns the window
+        /// <c>[offset, offset+Number)</c>, so iteration starts at the front of the chunk (0). A server
+        /// that ignores the offset returns the prefix <c>[0, offset+Number)</c> instead — detectable
+        /// because it hands back more rows than were requested — so the rows for this page begin at the
+        /// requested offset within the returned set. Starting there skips the prefix already surfaced by
+        /// earlier pages, so each match is surfaced exactly once.
+        /// </remarks>
+        /// <returns>The starting index for the current chunk.</returns>
+        private int StartIndexForChunk()
+        {
+            return _records.Documents.Count > _query!.Limit!.Number ? _query!.Limit!.Offset : 0;
+        }
+
         private bool GetNextChunk()
         {
             if (_started)
@@ -151,7 +208,7 @@ namespace Redis.OM.Searching
 
             var res = _connection.SearchRawResult(_query);
             _records = new SearchResponse<T>(res);
-            _index = 0;
+            _index = StartIndexForChunk();
             _started = true;
             ConcatenateRecords();
             return _index < _records.Documents.Count;
@@ -165,7 +222,7 @@ namespace Redis.OM.Searching
             }
 
             _records = await _connection.SearchAsync<T>(_query).ConfigureAwait(false);
-            _index = 0;
+            _index = StartIndexForChunk();
             _started = true;
             ConcatenateRecords();
             return _index < _records.Documents.Count;
