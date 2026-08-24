@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Redis.OM.Contracts;
 using Redis.OM.Modeling;
@@ -171,7 +172,42 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.False(res);
             connection.DropIndex(typeof(TestPersonClassHappyPath));
         }
-
+        [Fact]
+        public void TestCreateExpiringIndex()
+        {
+            var hostInfo = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost:6379";
+            var provider = new RedisConnectionProvider($"redis://{hostInfo}");
+            var connection = provider.Connection;
+            
+            connection.DropIndex(typeof(ObjectWithTemporary));
+            var res = connection.CreateIndex(typeof(ObjectWithTemporary));
+            Assert.True(res);
+            var infoBeforeSleep = connection.GetIndexInfo(typeof(ObjectWithTemporary));
+            Assert.NotNull(infoBeforeSleep);
+            
+            Thread.Sleep(1500);
+            var infoAfterSleep = connection.GetIndexInfo(typeof(ObjectWithTemporary));
+            Assert.Null(infoAfterSleep);
+        }
+        
+        [Fact]
+        public async Task TestCreateExpiringIndexAsync()
+        {
+            var hostInfo = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost:6379";
+            var provider = new RedisConnectionProvider($"redis://{hostInfo}");
+            var connection = provider.Connection;
+            
+            await connection.DropIndexAsync(typeof(ObjectWithTemporary));
+            var res = await connection.CreateIndexAsync(typeof(ObjectWithTemporary));
+            Assert.True(res);
+            var infoBeforeSleep = await connection.GetIndexInfoAsync(typeof(ObjectWithTemporary));
+            Assert.NotNull(infoBeforeSleep);
+            
+            Thread.Sleep(1500);
+            var infoAfterSleep = await connection.GetIndexInfoAsync(typeof(ObjectWithTemporary));
+            Assert.Null(infoAfterSleep);
+        }
+        
         [Fact]
         public void TestDropExistingIndex()
         {
