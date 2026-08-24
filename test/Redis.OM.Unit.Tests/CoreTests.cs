@@ -512,6 +512,23 @@ namespace Redis.OM.Unit.Tests
 
             await Task.WhenAll(tasks);
         }
-        
+
+        [Fact]
+        public void TestExpiringIndex()
+        {
+            var hostInfo = Environment.GetEnvironmentVariable("STANDALONE_HOST_PORT") ?? "localhost:6379";
+            var provider = new RedisConnectionProvider($"redis://{hostInfo}");
+            var connection = provider.Connection;
+            connection.DropIndex(typeof(ObjectWithTemporary));
+            
+            var res = connection.CreateIndex(typeof(ObjectWithTemporary));
+            Assert.True(res);
+            var infoBeforeSleep = connection.GetIndexInfo(typeof(ObjectWithTemporary));
+            Assert.NotNull(infoBeforeSleep);
+            
+            Thread.Sleep(1500);
+            var infoAfterSleep = connection.GetIndexInfo(typeof(ObjectWithTemporary));
+            Assert.Null(infoAfterSleep);
+        }
     }
 }
