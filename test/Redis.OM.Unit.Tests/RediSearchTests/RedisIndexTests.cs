@@ -172,6 +172,7 @@ namespace Redis.OM.Unit.Tests.RediSearchTests
             Assert.False(res);
             connection.DropIndex(typeof(TestPersonClassHappyPath));
         }
+        
         [Fact]
         public void TestCreateExpiringIndex()
         {
