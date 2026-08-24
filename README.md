@@ -620,6 +620,7 @@ This approach is particularly useful for services deployed to Azure, as it allow
 * [@kirollosonsi](https://github.com/kirollosonsi)
 * [@tgmoore](https://github.com/tgmoore)
 * [@mfaulcon](https://github.com/mfaulcon)
+* [@jeberlen](https://github.com/jeberlen)
 
 <!-- Logo -->
 [Logo]: images/logo.svg
