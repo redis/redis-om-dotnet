@@ -327,6 +327,12 @@ namespace Redis.OM.Modeling
                 args.AddRange(objAttribute.Stopwords);
             }
 
+            if (!string.IsNullOrEmpty(objAttribute.TemporaryExpirationSeconds))
+            {
+                args.Add("TEMPORARY");
+                args.Add(objAttribute.TemporaryExpirationSeconds!);
+            }
+
             args.Add("SCHEMA");
             foreach (var property in type.GetProperties())
             {
