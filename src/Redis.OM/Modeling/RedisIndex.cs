@@ -34,7 +34,7 @@ namespace Redis.OM.Modeling
             }
 
             // these are properties we cannot process because FT.INFO does not respond with them
-            var unprocessableProperties = new string[] { "EPSILON", "EF_RUNTIME", "PHONETIC", "STOPWORDS" };
+            var unprocessableProperties = new string[] { "EPSILON", "EF_RUNTIME", "PHONETIC", "STOPWORDS", "TEMPORARY" };
 
             foreach (var property in unprocessableProperties)
             {
@@ -325,6 +325,12 @@ namespace Redis.OM.Modeling
                 args.Add("STOPWORDS");
                 args.Add(objAttribute.Stopwords.Length.ToString());
                 args.AddRange(objAttribute.Stopwords);
+            }
+
+            if (!string.IsNullOrEmpty(objAttribute.TemporaryExpirationSeconds))
+            {
+                args.Add("TEMPORARY");
+                args.Add(objAttribute.TemporaryExpirationSeconds!);
             }
 
             args.Add("SCHEMA");

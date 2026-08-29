@@ -512,6 +512,5 @@ namespace Redis.OM.Unit.Tests
 
             await Task.WhenAll(tasks);
         }
-        
     }
 }

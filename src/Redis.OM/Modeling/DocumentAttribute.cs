@@ -58,6 +58,11 @@ namespace Redis.OM.Modeling
         public string[]? Stopwords { get; set; }
 
         /// <summary>
+        /// Gets or sets the expiration time, in seconds, for a temporary index.
+        /// </summary>
+        public string? TemporaryExpirationSeconds { get; set; }
+
+        /// <summary>
         /// Gets the IdGenerationStrategy.
         /// </summary>
         internal IIdGenerationStrategy IdGenerationStrategy => _idGenerationStrategies[IdGenerationStrategyName];
