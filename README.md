@@ -621,6 +621,7 @@ This approach is particularly useful for services deployed to Azure, as it allow
 * [@tgmoore](https://github.com/tgmoore)
 * [@mfaulcon](https://github.com/mfaulcon)
 * [@jeberlen](https://github.com/jeberlen)
+* [@b4284](https://github.com/b4284)
 
 <!-- Logo -->
 [Logo]: images/logo.svg

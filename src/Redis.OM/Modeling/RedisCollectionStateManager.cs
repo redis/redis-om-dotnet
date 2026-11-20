@@ -190,6 +190,23 @@ namespace Redis.OM.Modeling
             return res;
         }
 
+        /// <summary>
+        /// Appends a property/dictionary key to a JSONPath. Simple identifiers use dot notation,
+        /// anything else (whitespace, dots, quotes, etc.) uses escaped bracket notation.
+        /// </summary>
+        /// <param name="currentPath">the path so far.</param>
+        /// <param name="key">the key to append.</param>
+        /// <returns>the extended path.</returns>
+        private static string AppendJsonPathSegment(string currentPath, string key)
+        {
+            if (key.Length > 0 && !char.IsDigit(key[0]) && key.All(c => char.IsLetterOrDigit(c) || c == '_'))
+            {
+                return $"{currentPath}.{key}";
+            }
+
+            return $"{currentPath}[\"{key.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"]";
+        }
+
         private static IList<IObjectDiff> BuildJsonDifference(JObject diff, string currentPath, JToken snapshot)
         {
             var ret = new List<IObjectDiff>();
@@ -241,7 +258,7 @@ namespace Redis.OM.Modeling
             foreach (var item in diff)
             {
                 var val = item.Value as JObject;
-                ret.AddRange(BuildJsonDifference(val!, $"{currentPath}.{item.Key}", snapshot));
+                ret.AddRange(BuildJsonDifference(val!, AppendJsonPathSegment(currentPath, item.Key), snapshot));
             }
 
             return ret;
